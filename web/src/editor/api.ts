@@ -10,6 +10,7 @@ export interface CreateBoardInput {
 export interface PatchBoardInput {
   title?: string
   slug?: string
+  folder?: string
   summary?: string
 }
 

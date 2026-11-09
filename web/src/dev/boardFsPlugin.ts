@@ -27,6 +27,7 @@ interface CreateBoardBody {
 interface PatchBoardBody {
   title?: unknown
   slug?: unknown
+  folder?: unknown
   summary?: unknown
 }
 
@@ -252,7 +253,12 @@ async function patchBoard(root: string, slug: string, body: PatchBoardBody) {
   const found = await findBoardFile(root, slug)
   if (!found) throw new HttpError(404, '白板不存在')
 
-  if (body.title === undefined && body.slug === undefined && body.summary === undefined) {
+  if (
+    body.title === undefined &&
+    body.slug === undefined &&
+    body.folder === undefined &&
+    body.summary === undefined
+  ) {
     throw new HttpError(400, '没有需要修改的字段')
   }
 
@@ -280,6 +286,8 @@ async function patchBoard(root: string, slug: string, body: PatchBoardBody) {
         : null
   if (summary === null) throw new HttpError(400, 'summary 必须是字符串')
 
+  const nextFolder = body.folder === undefined ? found.folder : normalizeFolder(body.folder)
+
   if (nextSlug !== slug) {
     const conflict = await findBoardFile(root, nextSlug)
     if (conflict) throw new HttpError(409, `slug 已存在: ${nextSlug}`)
@@ -296,7 +304,7 @@ async function patchBoard(root: string, slug: string, body: PatchBoardBody) {
     },
   }
 
-  const nextFile = resolveBoardFile(root, found.folder, nextSlug)
+  const nextFile = resolveBoardFile(root, nextFolder, nextSlug)
   if (nextFile !== found.file) {
     try {
       await fs.access(nextFile)
@@ -312,7 +320,7 @@ async function patchBoard(root: string, slug: string, body: PatchBoardBody) {
     await removeEmptyParents(root, found.file)
   }
 
-  return { board, folder: found.folder }
+  return { board, folder: nextFolder }
 }
 
 async function deleteBoard(root: string, slug: string) {
