@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { Tldraw, createShapeId, type Editor, type TLShapeId } from 'tldraw'
 import type { BoardFile, BoardListItem } from '../shared/board/types'
-import { BoardTree } from '../shared/board/BoardTree'
+import { BoardTree, type BoardTreeContextTarget } from '../shared/board/BoardTree'
 import { ancestorFolderPaths, buildBoardTree } from '../shared/board/tree'
 import {
   DEFAULT_KANBAN_TEXT,
@@ -17,11 +17,19 @@ import {
 } from '../shared/shapes/types'
 import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
 import { BoardDialog, DeleteBoardDialog, type BoardFormValues } from './BoardDialog'
+import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
 import { createBoard, deleteBoard, fetchBoard, fetchBoards, patchBoard, putBoard } from './api'
 import { ShapeEditor, type EditingShape } from './ShapeEditor'
 
 type SaveState = 'saved' | 'dirty' | 'saving' | 'error'
-type BoardDialogState = { mode: 'create' } | { mode: 'rename'; board: BoardListItem }
+type BoardDialogState =
+  | { mode: 'create'; folder?: string }
+  | { mode: 'rename'; board: BoardListItem }
+interface ContextMenuState {
+  x: number
+  y: number
+  target: BoardContextTarget
+}
 
 const TREE_EXPANDED_KEY = 'superboard.tree.expanded'
 
@@ -67,6 +75,7 @@ export function EditorApp() {
   const [expandedReady, setExpandedReady] = useState(false)
   const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
 
   const editorRef = useRef<Editor | null>(null)
   const boardRef = useRef<BoardFile | null>(null)
@@ -307,6 +316,18 @@ export function EditorApp() {
     setEditorReady(true)
   }, [])
 
+  function openContextMenu(event: ReactMouseEvent<HTMLElement>, target: BoardTreeContextTarget) {
+    event.preventDefault()
+    event.stopPropagation()
+    setContextMenu({ x: event.clientX, y: event.clientY, target })
+  }
+
+  function openRootContextMenu(event: ReactMouseEvent<HTMLDivElement>) {
+    if ((event.target as HTMLElement).closest('.sb-tree-row')) return
+    event.preventDefault()
+    setContextMenu({ x: event.clientX, y: event.clientY, target: { type: 'root' } })
+  }
+
   function expandPath(path: string) {
     if (!path) return
     setExpanded((current) => {
@@ -392,6 +413,7 @@ export function EditorApp() {
     const result = await patchBoard(target.slug, {
       title: values.title,
       slug: values.slug,
+      folder: values.folder,
     })
     const list = await fetchBoards()
     setBoards(list)
@@ -622,11 +644,9 @@ export function EditorApp() {
           <aside className="sb-tree-panel">
             <div className="sb-tree-header">
               <span className="sb-tree-heading">白板目录</span>
-              <button className="sb-tree-new" type="button" onClick={() => setBoardDialog({ mode: 'create' })}>
-                + 新建
-              </button>
+              <span className="sb-tree-hint">右键操作</span>
             </div>
-            <div className="sb-tree-scroll">
+            <div className="sb-tree-scroll" onContextMenu={openRootContextMenu}>
               <BoardTree
                 nodes={treeNodes}
                 selectedSlug={board?.meta.slug}
@@ -636,30 +656,8 @@ export function EditorApp() {
                   void switchBoard(slug)
                   if (window.matchMedia('(max-width: 860px)').matches) setTreeOpen(false)
                 }}
-                actions={(node) => (
-                  <>
-                    <button
-                      className="sb-tree-action"
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        setBoardDialog({ mode: 'rename', board: node })
-                      }}
-                    >
-                      改名
-                    </button>
-                    <button
-                      className="sb-tree-action sb-tree-action-danger"
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        setPendingDelete(node)
-                      }}
-                    >
-                      删除
-                    </button>
-                  </>
-                )}
+                onContextMenu={openContextMenu}
+                emptyLabel="还没有白板，在空白处右键新建"
               />
             </div>
           </aside>
@@ -677,10 +675,7 @@ export function EditorApp() {
             <div className="sb-canvas-empty">
               <div>
                 <h2>还没有白板</h2>
-                <p>从左侧目录新建一个，或先把 .tldr.json 放进 whiteboards/。</p>
-                <button className="sb-button sb-button-primary" type="button" onClick={() => setBoardDialog({ mode: 'create' })}>
-                  + 新建白板
-                </button>
+                <p>在左侧目录空白处右键新建白板，或先把 .tldr.json 放进 whiteboards/。</p>
               </div>
             </div>
           )}
@@ -689,12 +684,32 @@ export function EditorApp() {
 
       {editing ? <ShapeEditor key={editing.id} shape={editing} onClose={() => setEditing(null)} onSave={saveEdit} /> : null}
 
+      {contextMenu ? (
+        <BoardContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          target={contextMenu.target}
+          onClose={() => setContextMenu(null)}
+          onCreate={(folder) => setBoardDialog({ mode: 'create', folder })}
+          onRename={(node) => setBoardDialog({ mode: 'rename', board: node })}
+          onDelete={(node) => setPendingDelete(node)}
+        />
+      ) : null}
+
       {boardDialog ? (
         <BoardDialog
-          key={boardDialog.mode === 'create' ? 'create' : `rename:${boardDialog.board.slug}`}
+          key={
+            boardDialog.mode === 'create'
+              ? `create:${boardDialog.folder ?? ''}`
+              : `rename:${boardDialog.board.slug}`
+          }
           mode={boardDialog.mode}
           board={boardDialog.mode === 'rename' ? boardDialog.board : undefined}
-          defaultFolder={boards.find((item) => item.slug === board?.meta.slug)?.path ?? ''}
+          defaultFolder={
+            boardDialog.mode === 'create'
+              ? boardDialog.folder ?? ''
+              : boardDialog.board.path
+          }
           onClose={() => setBoardDialog(null)}
           onSubmit={boardDialog.mode === 'create' ? handleCreate : handleRename}
         />

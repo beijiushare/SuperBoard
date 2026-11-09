@@ -1,5 +1,9 @@
-import type { ReactNode } from 'react'
-import type { BoardTreeFile, BoardTreeNode } from './types'
+import type { MouseEvent } from 'react'
+import type { BoardTreeFile, BoardTreeFolder, BoardTreeNode } from './types'
+
+export type BoardTreeContextTarget =
+  | { type: 'file'; node: BoardTreeFile }
+  | { type: 'folder'; node: BoardTreeFolder }
 
 function ChevronIcon({ open }: { open: boolean }) {
   return (
@@ -44,7 +48,7 @@ interface BoardTreeProps {
   expanded: Set<string>
   onToggle: (path: string) => void
   onSelect: (slug: string) => void
-  actions?: (node: BoardTreeFile) => ReactNode
+  onContextMenu?: (event: MouseEvent<HTMLElement>, target: BoardTreeContextTarget) => void
   emptyLabel?: string
 }
 
@@ -55,7 +59,7 @@ function TreeRow({
   expanded,
   onToggle,
   onSelect,
-  actions,
+  onContextMenu,
 }: {
   node: BoardTreeNode
   depth: number
@@ -63,7 +67,7 @@ function TreeRow({
   expanded: Set<string>
   onToggle: (path: string) => void
   onSelect: (slug: string) => void
-  actions?: (node: BoardTreeFile) => ReactNode
+  onContextMenu?: (event: MouseEvent<HTMLElement>, target: BoardTreeContextTarget) => void
 }) {
   if (node.type === 'folder') {
     const open = expanded.has(node.path)
@@ -74,6 +78,11 @@ function TreeRow({
           className="sb-tree-row sb-tree-folder"
           style={{ paddingLeft: 8 + depth * 14 }}
           onClick={() => onToggle(node.path)}
+          onContextMenu={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            onContextMenu?.(event, { type: 'folder', node })
+          }}
         >
           <span className="sb-tree-chevron">
             <ChevronIcon open={open} />
@@ -94,7 +103,7 @@ function TreeRow({
                 expanded={expanded}
                 onToggle={onToggle}
                 onSelect={onSelect}
-                actions={actions}
+                onContextMenu={onContextMenu}
               />
             ))}
           </div>
@@ -105,7 +114,16 @@ function TreeRow({
 
   const selected = node.slug === selectedSlug
   return (
-    <div className={`sb-tree-file-row${selected ? ' is-selected' : ''}`} role="treeitem" aria-selected={selected}>
+    <div
+      className={`sb-tree-file-row${selected ? ' is-selected' : ''}`}
+      role="treeitem"
+      aria-selected={selected}
+      onContextMenu={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onContextMenu?.(event, { type: 'file', node })
+      }}
+    >
       <button
         type="button"
         className="sb-tree-row sb-tree-file"
@@ -119,7 +137,6 @@ function TreeRow({
         </span>
         <span className="sb-tree-label">{node.name}</span>
       </button>
-      {actions ? <div className="sb-tree-actions">{actions(node)}</div> : null}
     </div>
   )
 }
@@ -130,7 +147,7 @@ export function BoardTree({
   expanded,
   onToggle,
   onSelect,
-  actions,
+  onContextMenu,
   emptyLabel = '还没有白板',
 }: BoardTreeProps) {
   if (nodes.length === 0) {
@@ -148,7 +165,7 @@ export function BoardTree({
           expanded={expanded}
           onToggle={onToggle}
           onSelect={onSelect}
-          actions={actions}
+          onContextMenu={onContextMenu}
         />
       ))}
     </div>

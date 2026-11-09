@@ -18,7 +18,7 @@ interface BoardDialogProps {
 export function BoardDialog({ mode, board, defaultFolder = '', onClose, onSubmit }: BoardDialogProps) {
   const [title, setTitle] = useState(board?.title ?? '')
   const [slug, setSlug] = useState(board?.slug ?? '')
-  const [folder, setFolder] = useState(defaultFolder)
+  const [folder, setFolder] = useState(board?.path ?? defaultFolder)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -55,7 +55,7 @@ export function BoardDialog({ mode, board, defaultFolder = '', onClose, onSubmit
         onSubmit={(event) => void handleSubmit(event)}
       >
         <div className="sb-dialog-header">
-          <h2 id="sb-board-dialog-title">{mode === 'create' ? '新建白板' : '重命名白板'}</h2>
+          <h2 id="sb-board-dialog-title">{mode === 'create' ? '新建白板' : '重命名 / 移动白板'}</h2>
           <button className="sb-icon-button" type="button" onClick={onClose} disabled={busy} aria-label="关闭">
             ×
           </button>
@@ -75,7 +75,7 @@ export function BoardDialog({ mode, board, defaultFolder = '', onClose, onSubmit
           </label>
 
           <label className="sb-field">
-            <span>Slug</span>
+            <span>文件名（slug）</span>
             <input
               value={slug}
               onChange={(event) => setSlug(event.target.value)}
@@ -85,25 +85,23 @@ export function BoardDialog({ mode, board, defaultFolder = '', onClose, onSubmit
               required
               disabled={busy}
             />
-            <small>文件路由标识，只允许小写字母、数字和连字符。</small>
+            <small>文件名为 {slug.trim() || '…'}.tldr.json，只允许小写字母、数字和连字符。</small>
           </label>
 
-          {mode === 'create' ? (
-            <label className="sb-field">
-              <span>文件夹</span>
-              <input
-                value={folder}
-                onChange={(event) => setFolder(event.target.value)}
-                placeholder="例如：notes/2026，留空表示根目录"
-                disabled={busy}
-              />
-              <small>使用真实目录，可填写多级路径。</small>
-            </label>
-          ) : (
-            <p className="sb-dialog-hint">
-              当前路径：<code>{board?.path || '根目录'}</code>
-            </p>
-          )}
+          <label className="sb-field">
+            <span>文件夹路径</span>
+            <input
+              value={folder}
+              onChange={(event) => setFolder(event.target.value)}
+              placeholder="例如：notes/2026，留空表示根目录"
+              disabled={busy}
+            />
+            <small>
+              {mode === 'create'
+                ? '使用真实目录，可填写多级路径。'
+                : '修改路径会把文件移动到新文件夹，留空表示根目录。'}
+            </small>
+          </label>
 
           {error ? <p className="sb-dialog-error">{error}</p> : null}
         </div>
