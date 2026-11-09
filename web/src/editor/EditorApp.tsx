@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Tldraw, createShapeId, type Editor, type TLShapeId } from 'tldraw'
 import type { BoardFile, BoardListItem } from '../shared/board/types'
+import { BoardTree } from '../shared/board/BoardTree'
+import { ancestorFolderPaths, buildBoardTree } from '../shared/board/tree'
 import {
   DEFAULT_KANBAN_TEXT,
   DEFAULT_MARKDOWN_TEXT,
@@ -14,10 +16,34 @@ import {
   type SbPeleShape,
 } from '../shared/shapes/types'
 import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
-import { fetchBoard, fetchBoards, putBoard } from './api'
+import { BoardDialog, DeleteBoardDialog, type BoardFormValues } from './BoardDialog'
+import { createBoard, deleteBoard, fetchBoard, fetchBoards, patchBoard, putBoard } from './api'
 import { ShapeEditor, type EditingShape } from './ShapeEditor'
 
 type SaveState = 'saved' | 'dirty' | 'saving' | 'error'
+type BoardDialogState = { mode: 'create' } | { mode: 'rename'; board: BoardListItem }
+
+const TREE_EXPANDED_KEY = 'superboard.tree.expanded'
+
+function loadExpandedFolders(): Set<string> | null {
+  try {
+    const raw = window.localStorage.getItem(TREE_EXPANDED_KEY)
+    if (raw === null) return null
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return null
+    return new Set(parsed.filter((value): value is string => typeof value === 'string'))
+  } catch {
+    return null
+  }
+}
+
+function updateBoardUrl(slug: string | null) {
+  const params = new URLSearchParams(window.location.search)
+  if (slug) params.set('board', slug)
+  else params.delete('board')
+  const query = params.toString()
+  window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`)
+}
 
 const STATUS_LABEL: Record<SaveState, string> = {
   saved: '已保存',
@@ -35,6 +61,12 @@ export function EditorApp() {
   const [saveState, setSaveState] = useState<SaveState>('saved')
   const [saveError, setSaveError] = useState('')
   const [editing, setEditing] = useState<EditingShape | null>(null)
+  const [treeMode, setTreeMode] = useState(() => new URLSearchParams(window.location.search).has('tree'))
+  const [treeOpen, setTreeOpen] = useState(true)
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [expandedReady, setExpandedReady] = useState(false)
+  const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
 
   const editorRef = useRef<Editor | null>(null)
   const boardRef = useRef<BoardFile | null>(null)
@@ -46,6 +78,32 @@ export function EditorApp() {
   useEffect(() => {
     boardRef.current = board
   }, [board])
+
+  const treeNodes = useMemo(() => buildBoardTree(boards), [boards])
+
+  useEffect(() => {
+    if (expandedReady || boards.length === 0) return
+    const saved = loadExpandedFolders()
+    if (saved) {
+      setExpanded(saved)
+    } else {
+      const next = new Set<string>()
+      for (const item of boards) {
+        for (const path of ancestorFolderPaths(item.path)) next.add(path)
+      }
+      setExpanded(next)
+    }
+    setExpandedReady(true)
+  }, [boards, expandedReady])
+
+  useEffect(() => {
+    if (!expandedReady) return
+    try {
+      window.localStorage.setItem(TREE_EXPANDED_KEY, JSON.stringify([...expanded]))
+    } catch {
+      // localStorage may be unavailable in private mode
+    }
+  }, [expanded, expandedReady])
 
   const saveNow = useCallback(async () => {
     if (timerRef.current !== null) {
@@ -133,17 +191,24 @@ export function EditorApp() {
         if (cancelled) return
         setBoards(list)
 
-        const requested = new URLSearchParams(window.location.search).get('board')
+        const params = new URLSearchParams(window.location.search)
+        const tree = params.has('tree')
+        setTreeMode(tree)
+        const requested = params.get('board')
         const slug = list.find((item) => item.slug === requested)?.slug ?? list[0]?.slug
         if (!slug) {
-          throw new Error('还没有白板。先在 whiteboards/ 下创建 .tldr.json，或运行 npm run seed。')
+          if (!tree) {
+            throw new Error('还没有白板。先在 whiteboards/ 下创建 .tldr.json，或运行 npm run seed。')
+          }
+          updateBoardUrl(null)
+          return
         }
 
         const loaded = await fetchBoard(slug)
         if (cancelled) return
         boardRef.current = loaded
         setBoard(loaded)
-        const params = new URLSearchParams(window.location.search)
+        if (tree && !params.get('tree')) params.set('tree', '1')
         params.set('board', slug)
         window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`)
       } catch (error) {
@@ -242,9 +307,50 @@ export function EditorApp() {
     setEditorReady(true)
   }, [])
 
+  function expandPath(path: string) {
+    if (!path) return
+    setExpanded((current) => {
+      const next = new Set(current)
+      for (const item of ancestorFolderPaths(path)) next.add(item)
+      return next
+    })
+  }
+
+  function toggleFolder(path: string) {
+    setExpanded((current) => {
+      const next = new Set(current)
+      if (next.has(path)) next.delete(path)
+      else next.add(path)
+      return next
+    })
+  }
+
+  function enableTreeMode() {
+    if (treeMode) {
+      setTreeOpen((open) => !open)
+      return
+    }
+    const params = new URLSearchParams(window.location.search)
+    params.set('tree', '1')
+    if (boardRef.current) params.set('board', boardRef.current.meta.slug)
+    window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`)
+    setTreeMode(true)
+    setTreeOpen(true)
+  }
+
+  async function flushCurrentBoard() {
+    if (!dirtyRef.current) return
+    await saveNowRef.current()
+    if (dirtyRef.current) {
+      throw new Error('当前白板保存失败，请先处理保存错误')
+    }
+  }
+
   async function switchBoard(slug: string) {
     if (!slug || slug === boardRef.current?.meta.slug) return
     if (dirtyRef.current) await saveNowRef.current()
+    const target = boards.find((item) => item.slug === slug)
+    if (target) expandPath(target.path)
 
     setEditorReady(false)
     setEditing(null)
@@ -253,12 +359,83 @@ export function EditorApp() {
       const next = await fetchBoard(slug)
       boardRef.current = next
       setBoard(next)
-      const params = new URLSearchParams(window.location.search)
-      params.set('board', slug)
-      window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`)
+      updateBoardUrl(slug)
     } catch (error) {
       setSaveState('error')
       setSaveError(error instanceof Error ? error.message : String(error))
+    }
+  }
+
+  async function handleCreate(values: BoardFormValues) {
+    await flushCurrentBoard()
+    const created = await createBoard({
+      title: values.title,
+      slug: values.slug,
+      folder: values.folder || undefined,
+    })
+    const list = await fetchBoards()
+    setBoards(list)
+    expandPath(created.path)
+    setEditorReady(false)
+    setEditing(null)
+    boardRef.current = created.board
+    setBoard(created.board)
+    updateBoardUrl(created.board.meta.slug)
+  }
+
+  async function handleRename(values: BoardFormValues) {
+    if (!boardDialog || boardDialog.mode !== 'rename') return
+    const target = boardDialog.board
+    const isCurrent = target.slug === boardRef.current?.meta.slug
+    if (isCurrent) await flushCurrentBoard()
+
+    const result = await patchBoard(target.slug, {
+      title: values.title,
+      slug: values.slug,
+    })
+    const list = await fetchBoards()
+    setBoards(list)
+    expandPath(result.path)
+
+    if (isCurrent) {
+      if (result.board.meta.slug !== target.slug) setEditorReady(false)
+      boardRef.current = result.board
+      setBoard(result.board)
+      updateBoardUrl(result.board.meta.slug)
+    }
+  }
+
+  async function handleDelete(slug: string) {
+    const isCurrent = slug === boardRef.current?.meta.slug
+    if (isCurrent) {
+      if (timerRef.current !== null) {
+        window.clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
+      dirtyRef.current = false
+    }
+
+    await deleteBoard(slug)
+    const list = await fetchBoards()
+    setBoards(list)
+
+    if (!isCurrent) return
+
+    setEditing(null)
+    setEditorReady(false)
+    setSaveState('saved')
+    setSaveError('')
+
+    const nextItem = list[0]
+    if (nextItem) {
+      const next = await fetchBoard(nextItem.slug)
+      boardRef.current = next
+      setBoard(next)
+      updateBoardUrl(next.meta.slug)
+    } else {
+      boardRef.current = null
+      setBoard(null)
+      updateBoardUrl(null)
     }
   }
 
@@ -369,7 +546,7 @@ export function EditorApp() {
     )
   }
 
-  if (!board) {
+  if (!board && !treeMode) {
     return <div className="sb-screen-message">没有可编辑的白板。</div>
   }
 
@@ -383,27 +560,45 @@ export function EditorApp() {
 
         <div className="sb-toolbar-divider" />
 
-        <label className="sb-board-select">
-          <span>白板</span>
-          <select value={board.meta.slug} onChange={(event) => void switchBoard(event.target.value)}>
-            {boards.map((item) => (
-              <option key={item.slug} value={item.slug}>
-                {item.title}
-              </option>
-            ))}
-          </select>
-        </label>
+        <button
+          className="sb-button sb-button-ghost sb-tree-toggle"
+          type="button"
+          onClick={enableTreeMode}
+          aria-expanded={treeMode && treeOpen}
+          title={treeMode ? (treeOpen ? '收起目录' : '展开目录') : '打开目录视图'}
+        >
+          {treeMode && treeOpen ? '收起目录' : '目录'}
+        </button>
+
+        <div className="sb-toolbar-divider" />
+
+        {treeMode ? (
+          <span className="sb-current-board" title={board ? `${board.meta.title} (${board.meta.slug})` : undefined}>
+            {board?.meta.title ?? '未选择白板'}
+          </span>
+        ) : (
+          <label className="sb-board-select">
+            <span>白板</span>
+            <select value={board?.meta.slug ?? ''} onChange={(event) => void switchBoard(event.target.value)}>
+              {boards.map((item) => (
+                <option key={item.slug} value={item.slug}>
+                  {item.title}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         <div className="sb-toolbar-divider" />
 
         <div className="sb-add-group">
-          <button className="sb-button" type="button" onClick={() => addShape(SB_MARKDOWN_TYPE)}>
+          <button className="sb-button" type="button" onClick={() => addShape(SB_MARKDOWN_TYPE)} disabled={!board}>
             + Markdown
           </button>
-          <button className="sb-button" type="button" onClick={() => addShape(SB_KANBAN_TYPE)}>
+          <button className="sb-button" type="button" onClick={() => addShape(SB_KANBAN_TYPE)} disabled={!board}>
             + 看板
           </button>
-          <button className="sb-button" type="button" onClick={() => addShape(SB_PELE_TYPE)}>
+          <button className="sb-button" type="button" onClick={() => addShape(SB_PELE_TYPE)} disabled={!board}>
             + 图表
           </button>
         </div>
@@ -415,22 +610,103 @@ export function EditorApp() {
           type="button"
           onClick={() => void saveNow()}
           title={saveError || '点击立即保存'}
+          disabled={!board}
         >
           <span className="sb-save-dot" />
           {STATUS_LABEL[saveState]}
         </button>
       </header>
 
-      <main className="sb-canvas">
-        <Tldraw
-          key={board.meta.slug}
-          shapeUtils={superboardShapeUtils}
-          licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
-          onMount={handleMount}
-        />
-      </main>
+      <div className="sb-workspace">
+        {treeMode && treeOpen ? (
+          <aside className="sb-tree-panel">
+            <div className="sb-tree-header">
+              <span className="sb-tree-heading">白板目录</span>
+              <button className="sb-tree-new" type="button" onClick={() => setBoardDialog({ mode: 'create' })}>
+                + 新建
+              </button>
+            </div>
+            <div className="sb-tree-scroll">
+              <BoardTree
+                nodes={treeNodes}
+                selectedSlug={board?.meta.slug}
+                expanded={expanded}
+                onToggle={toggleFolder}
+                onSelect={(slug) => {
+                  void switchBoard(slug)
+                  if (window.matchMedia('(max-width: 860px)').matches) setTreeOpen(false)
+                }}
+                actions={(node) => (
+                  <>
+                    <button
+                      className="sb-tree-action"
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        setBoardDialog({ mode: 'rename', board: node })
+                      }}
+                    >
+                      改名
+                    </button>
+                    <button
+                      className="sb-tree-action sb-tree-action-danger"
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        setPendingDelete(node)
+                      }}
+                    >
+                      删除
+                    </button>
+                  </>
+                )}
+              />
+            </div>
+          </aside>
+        ) : null}
+
+        <main className="sb-canvas">
+          {board ? (
+            <Tldraw
+              key={board.meta.slug}
+              shapeUtils={superboardShapeUtils}
+              licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
+              onMount={handleMount}
+            />
+          ) : (
+            <div className="sb-canvas-empty">
+              <div>
+                <h2>还没有白板</h2>
+                <p>从左侧目录新建一个，或先把 .tldr.json 放进 whiteboards/。</p>
+                <button className="sb-button sb-button-primary" type="button" onClick={() => setBoardDialog({ mode: 'create' })}>
+                  + 新建白板
+                </button>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
 
       {editing ? <ShapeEditor key={editing.id} shape={editing} onClose={() => setEditing(null)} onSave={saveEdit} /> : null}
+
+      {boardDialog ? (
+        <BoardDialog
+          key={boardDialog.mode === 'create' ? 'create' : `rename:${boardDialog.board.slug}`}
+          mode={boardDialog.mode}
+          board={boardDialog.mode === 'rename' ? boardDialog.board : undefined}
+          defaultFolder={boards.find((item) => item.slug === board?.meta.slug)?.path ?? ''}
+          onClose={() => setBoardDialog(null)}
+          onSubmit={boardDialog.mode === 'create' ? handleCreate : handleRename}
+        />
+      ) : null}
+
+      {pendingDelete ? (
+        <DeleteBoardDialog
+          board={pendingDelete}
+          onClose={() => setPendingDelete(null)}
+          onConfirm={handleDelete}
+        />
+      ) : null}
     </div>
   )
 }

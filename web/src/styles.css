@@ -210,10 +210,226 @@ textarea {
   }
 }
 
+.sb-workspace {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
 .sb-canvas {
   position: relative;
   flex: 1;
   min-height: 0;
+}
+
+.sb-canvas-empty {
+  display: grid;
+  height: 100%;
+  place-content: center;
+  padding: 32px;
+  color: #6f6d66;
+  text-align: center;
+}
+
+.sb-canvas-empty h2 {
+  margin: 0 0 8px;
+  color: #1f1e1c;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.sb-canvas-empty p {
+  margin: 0 0 18px;
+  font-size: 13px;
+}
+
+.sb-tree-panel {
+  display: flex;
+  width: 264px;
+  min-height: 0;
+  flex: 0 0 264px;
+  flex-direction: column;
+  border-right: 1px solid #dedbd2;
+  background: #fbfaf6;
+}
+
+.sb-tree-header {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px 7px 14px;
+  border-bottom: 1px solid #ebe7dd;
+}
+
+.sb-tree-heading {
+  color: #6f6d66;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.sb-tree-new {
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid #dedbd2;
+  border-radius: 7px;
+  background: #fffdf8;
+  color: #3b3933;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sb-tree-new:hover {
+  border-color: #b9b5a9;
+  background: #f6f3eb;
+}
+
+.sb-tree-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 6px;
+  overscroll-behavior: contain;
+}
+
+.sb-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sb-tree-row {
+  display: flex;
+  width: 100%;
+  height: 30px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #3b3933;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sb-tree-row:hover {
+  background: #f1eee6;
+}
+
+.sb-tree-chevron {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  place-items: center;
+  color: #8b877d;
+}
+
+.sb-tree-icon {
+  display: grid;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  place-items: center;
+  color: #8b877d;
+}
+
+.sb-tree-folder {
+  font-weight: 600;
+}
+
+.sb-tree-folder .sb-tree-icon {
+  color: #b08a3c;
+}
+
+.sb-tree-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-tree-file-row {
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+}
+
+.sb-tree-file-row.is-selected {
+  background: #e9e4d8;
+}
+
+.sb-tree-file-row.is-selected .sb-tree-row {
+  color: #1f1e1c;
+}
+
+.sb-tree-file-row .sb-tree-row {
+  min-width: 0;
+  flex: 1;
+}
+
+.sb-tree-actions {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  padding-right: 4px;
+  background: inherit;
+}
+
+.sb-tree-file-row:hover .sb-tree-actions,
+.sb-tree-file-row:focus-within .sb-tree-actions {
+  display: flex;
+}
+
+.sb-tree-action {
+  height: 22px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #8b877d;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.sb-tree-action:hover {
+  background: #ded9cc;
+  color: #3b3933;
+}
+
+.sb-tree-action-danger:hover {
+  background: #f3dcd7;
+  color: #a53d30;
+}
+
+.sb-tree-empty {
+  margin: 0;
+  padding: 18px 12px;
+  color: #8b877d;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.sb-current-board {
+  max-width: 280px;
+  overflow: hidden;
+  color: #3b3933;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-button:disabled,
+.sb-save-status:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .sb-screen-message {
@@ -809,6 +1025,129 @@ textarea {
   gap: 8px;
 }
 
+.sb-dialog {
+  display: flex;
+  width: min(440px, 100%);
+  max-height: calc(100dvh - 48px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #d8d4c9;
+  border-radius: 14px;
+  background: #fffdf8;
+  box-shadow:
+    0 2px 8px rgb(20 18 10 / 12%),
+    0 30px 70px rgb(20 18 10 / 22%);
+}
+
+.sb-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid #dedbd2;
+}
+
+.sb-dialog-header h2 {
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.sb-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: auto;
+  padding: 16px 18px;
+}
+
+.sb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #55524c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sb-field input {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #d8d4c9;
+  border-radius: 8px;
+  outline: none;
+  background: #fffdf8;
+  color: #1f1e1c;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.sb-field input:focus {
+  border-color: #8f8a7d;
+  box-shadow: 0 0 0 3px rgb(100 95 80 / 10%);
+}
+
+.sb-field small {
+  color: #8b877d;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.sb-dialog-hint {
+  margin: 0;
+  color: #8b877d;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.sb-dialog-copy {
+  margin: 0;
+  color: #3b3933;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.sb-dialog-copy code,
+.sb-dialog-hint code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #f1efe8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.92em;
+}
+
+.sb-dialog-error {
+  margin: 0;
+  padding: 9px 10px;
+  border: 1px solid #e4b9b3;
+  border-radius: 8px;
+  background: #fff8f6;
+  color: #a53d30;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.sb-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid #dedbd2;
+}
+
+.sb-button-danger {
+  border-color: #b84a3c;
+  background: #b84a3c;
+  color: #fffdf8;
+}
+
+.sb-button-danger:hover {
+  border-color: #8f3328;
+  background: #8f3328;
+}
+
 /* Viewer */
 
 .sb-viewer {
@@ -864,6 +1203,20 @@ textarea {
 
   .sb-board-select span {
     display: none;
+  }
+
+  .sb-tree-panel {
+    position: absolute;
+    z-index: 300;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(280px, 85vw);
+    box-shadow: 12px 0 36px rgb(35 31 20 / 16%);
+  }
+
+  .sb-current-board {
+    max-width: 160px;
   }
 
   .sb-toolbar-spacer {
