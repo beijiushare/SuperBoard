@@ -22,6 +22,25 @@ export interface BoardListItem {
   summary?: string
   order?: number
   updatedAt?: string
+  path: string
+}
+
+export interface BoardTreeFile extends BoardListItem {
+  type: 'file'
+  name: string
+}
+
+export interface BoardTreeFolder {
+  type: 'folder'
+  name: string
+  path: string
+  children: BoardTreeNode[]
+}
+
+export type BoardTreeNode = BoardTreeFile | BoardTreeFolder
+
+export interface BoardsResponse {
+  boards: BoardListItem[]
 }
 
 export const BOARD_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]*$/

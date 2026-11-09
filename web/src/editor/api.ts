@@ -1,5 +1,18 @@
 import type { BoardFile, BoardListItem, BoardMeta } from '../shared/board/types'
 
+export interface CreateBoardInput {
+  title: string
+  slug: string
+  folder?: string
+  summary?: string
+}
+
+export interface PatchBoardInput {
+  title?: string
+  slug?: string
+  summary?: string
+}
+
 async function readJson<T>(response: Response): Promise<T> {
   const text = await response.text()
   let payload: unknown
@@ -37,6 +50,7 @@ export interface SaveBoardResult {
   ok: boolean
   hash: string
   meta: BoardMeta
+  path: string
 }
 
 export async function putBoard(slug: string, board: BoardFile): Promise<SaveBoardResult> {
@@ -49,4 +63,39 @@ export async function putBoard(slug: string, board: BoardFile): Promise<SaveBoar
     body: JSON.stringify(board),
   })
   return readJson<SaveBoardResult>(response)
+}
+
+export async function createBoard(input: CreateBoardInput): Promise<{ board: BoardFile; path: string }> {
+  const response = await fetch('/__boards', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(input),
+  })
+  return readJson<{ board: BoardFile; path: string }>(response)
+}
+
+export async function patchBoard(
+  slug: string,
+  input: PatchBoardInput,
+): Promise<{ board: BoardFile; path: string }> {
+  const response = await fetch(`/__boards/${encodeURIComponent(slug)}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(input),
+  })
+  return readJson<{ board: BoardFile; path: string }>(response)
+}
+
+export async function deleteBoard(slug: string): Promise<void> {
+  const response = await fetch(`/__boards/${encodeURIComponent(slug)}`, {
+    method: 'DELETE',
+    headers: { Accept: 'application/json' },
+  })
+  await readJson<{ ok: boolean }>(response)
 }
