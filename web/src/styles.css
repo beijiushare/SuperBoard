@@ -271,6 +271,16 @@ textarea {
   letter-spacing: 0.04em;
 }
 
+.sb-tree-count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #ebe8df;
+  color: #8b877d;
+  font-size: 10px;
+  text-align: center;
+}
+
 .sb-tree-new {
   height: 26px;
   padding: 0 8px;

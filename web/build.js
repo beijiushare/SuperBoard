@@ -59,36 +59,52 @@ function validateBoard(board, file) {
 }
 
 async function readBoards() {
-  let entries = []
-  try {
-    entries = await fs.readdir(boardsDir, { withFileTypes: true })
-  } catch {
-    return []
+  const files = []
+
+  async function visit(dir, folder) {
+    let entries
+    try {
+      entries = await fs.readdir(dir, { withFileTypes: true })
+    } catch {
+      return
+    }
+
+    for (const entry of entries) {
+      if (entry.name.startsWith('.')) continue
+      const fullPath = path.join(dir, entry.name)
+      if (entry.isDirectory()) {
+        await visit(fullPath, folder ? `${folder}/${entry.name}` : entry.name)
+        continue
+      }
+      if (entry.isFile() && entry.name.endsWith('.tldr.json')) {
+        files.push({
+          file: fullPath,
+          folder,
+          relative: path.relative(boardsDir, fullPath).split(path.sep).join('/'),
+        })
+      }
+    }
   }
 
-  const files = entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.tldr.json'))
-    .map((entry) => entry.name)
-    .sort()
+  await visit(boardsDir, '')
 
   const boards = []
   const seenSlugs = new Map()
 
-  for (const file of files) {
-    const fullPath = path.join(boardsDir, file)
-    const raw = await fs.readFile(fullPath, 'utf8')
+  for (const item of files.sort((a, b) => a.relative.localeCompare(b.relative, 'en'))) {
+    const raw = await fs.readFile(item.file, 'utf8')
     let board
     try {
       board = JSON.parse(raw)
     } catch (error) {
-      throw new Error(`${file}: JSON 解析失败: ${error.message}`)
+      throw new Error(`${item.relative}: JSON 解析失败: ${error.message}`)
     }
-    validateBoard(board, file)
+    validateBoard(board, item.relative)
     if (seenSlugs.has(board.meta.slug)) {
-      throw new Error(`slug 重复: ${board.meta.slug}（${seenSlugs.get(board.meta.slug)} 和 ${file}）`)
+      throw new Error(`slug 重复: ${board.meta.slug}（${seenSlugs.get(board.meta.slug)} 和 ${item.relative}）`)
     }
-    seenSlugs.set(board.meta.slug, file)
-    boards.push({ file, board })
+    seenSlugs.set(board.meta.slug, item.relative)
+    boards.push({ ...item, board })
   }
 
   return boards.sort((a, b) => {
@@ -123,6 +139,11 @@ function renderIndex(boards) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
 <title>${siteName}</title>
+<script>
+if (new URLSearchParams(location.search).has('tree')) {
+  location.replace('${base}tree.html' + location.search);
+}
+</script>
 <style>
 :root { color-scheme: light; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
 * { box-sizing: border-box; }
@@ -131,6 +152,8 @@ main { width: min(980px, calc(100% - 40px)); margin: 0 auto; padding: 72px 0; }
 header { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 32px; }
 h1 { margin: 0; font-size: clamp(32px, 6vw, 56px); line-height: 1; letter-spacing: -0.04em; }
 header p { margin: 0; color: #6f6d66; font-size: 14px; }
+header a { color: #205ea6; text-decoration: none; }
+header a:hover { text-decoration: underline; text-underline-offset: 2px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
 .card { display: block; padding: 22px; border: 1px solid #dedbd2; border-radius: 16px; background: #fffdf8; color: inherit; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
 .card:hover { transform: translateY(-2px); border-color: #b9b5a9; box-shadow: 0 12px 30px rgba(50, 45, 30, .08); }
@@ -146,7 +169,7 @@ footer { margin-top: 48px; font-size: 12px; color: #969187; }
 </head>
 <body>
 <main>
-<header><div><h1>${siteName}</h1><p>个人白板集合 · 只读分享</p></div><p>${boards.length} 个白板</p></header>
+<header><div><h1>${siteName}</h1><p>个人白板集合 · 只读分享</p></div><p><a href="${base}tree.html">目录视图</a> · ${boards.length} 个白板</p></header>
 <section class="grid">${body}</section>
 <footer>由 SuperBoard 生成 · 内容来自 Git 仓库</footer>
 </main>
@@ -179,6 +202,28 @@ function renderBoardPage(board, entry, cssFiles, template) {
     .replace('__ENTRY__', () => `${base}${escapeHtml(entry.file)}`)
 }
 
+function renderTreePage(boards, entry, cssFiles, template) {
+  const treeBoards = boards
+    .filter(({ board }) => !board.meta.draft)
+    .map(({ folder, board }) => ({
+      slug: board.meta.slug,
+      title: board.meta.title,
+      summary: board.meta.summary,
+      order: board.meta.order,
+      updatedAt: board.meta.updatedAt,
+      path: folder,
+    }))
+  const data = `window.__SUPERBOARD__ = ${escapeJsonForHtml({ mode: 'tree', boards: treeBoards, base })};`
+  const css = cssFiles
+    .map((file) => `<link rel="stylesheet" href="${base}${escapeHtml(file)}">`)
+    .join('\n    ')
+  return template
+    .replaceAll('__TITLE__', () => escapeHtml('白板目录 · SuperBoard'))
+    .replace('__CSS__', () => css)
+    .replace('__DATA__', () => `<script>${data}</script>`)
+    .replace('__ENTRY__', () => `${base}${escapeHtml(entry.file)}`)
+}
+
 function renderAliasPage(target) {
   const href = `${base}boards/${target}.html`
   return `<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0; url=${href}"><title>跳转中</title></head><body><p>正在跳转到 <a href="${href}">${escapeHtml(target)}</a>…</p></body></html>`
@@ -203,6 +248,7 @@ async function main() {
   await fs.mkdir(path.join(distDir, 'boards'), { recursive: true })
   await fs.writeFile(path.join(distDir, '.nojekyll'), '')
   await fs.writeFile(path.join(distDir, 'index.html'), renderIndex(boards))
+  await fs.writeFile(path.join(distDir, 'tree.html'), renderTreePage(boards, entry, [...cssFiles], template))
 
   const generated = new Set()
 
@@ -210,6 +256,11 @@ async function main() {
     const page = renderBoardPage(board, entry, [...cssFiles], template)
     const file = path.join(distDir, 'boards', `${board.meta.slug}.html`)
     await fs.writeFile(file, page)
+    await fs.writeFile(
+      path.join(distDir, 'boards', `${board.meta.slug}.json`),
+      `${JSON.stringify(board)}\n`,
+      'utf8',
+    )
     generated.add(board.meta.slug)
 
     for (const alias of board.meta.aliases || []) {

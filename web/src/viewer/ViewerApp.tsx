@@ -1,20 +1,11 @@
 import { Tldraw, type Editor } from 'tldraw'
-import type { BoardFile } from '../shared/board/types'
+import { isTreePageData } from '../shared/board/page'
 import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
-
-declare global {
-  interface Window {
-    __SUPERBOARD__?: {
-      board: BoardFile
-      base: string
-    }
-  }
-}
 
 export function ViewerApp() {
   const data = window.__SUPERBOARD__
 
-  if (!data?.board) {
+  if (!data || isTreePageData(data)) {
     return (
       <div className="sb-screen-message">
         <h1>没有找到白板数据</h1>
