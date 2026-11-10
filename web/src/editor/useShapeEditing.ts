@@ -100,7 +100,7 @@ export function useShapeEditing({ editorRef }: UseShapeEditingOptions) {
             type,
             x: position.x,
             y: position.y,
-            props: { ...DEFAULT_SB_BLOCK_STYLE, w: 460, h: 340, text },
+            props: { ...DEFAULT_SB_BLOCK_STYLE, w: 460, h: 340, baseH: 340, text },
           })
         } else {
           const code = typeof patch.code === 'string' ? patch.code : DEFAULT_PELE_CODE

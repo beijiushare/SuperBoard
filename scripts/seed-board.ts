@@ -144,12 +144,14 @@ async function main() {
       ...DEFAULT_SB_BLOCK_STYLE,
       w: 520,
       h: 430,
+      baseH: 430,
       text: intro,
     }),
     shape(SB_MARKDOWN_TYPE, 'guide', 560, 0, 'a2', {
       ...DEFAULT_SB_BLOCK_STYLE,
       w: 470,
       h: 430,
+      baseH: 430,
       text: editingGuide,
     }),
     shape(SB_PELE_TYPE, 'kanban', 0, 470, 'a3', {
@@ -177,6 +179,7 @@ async function main() {
       ...DEFAULT_SB_BLOCK_STYLE,
       w: 440,
       h: 300,
+      baseH: 300,
       text: DEFAULT_MARKDOWN_TEXT,
     }),
   ])

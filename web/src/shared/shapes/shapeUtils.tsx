@@ -1,4 +1,4 @@
-import { useRef, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import { BaseBoxShapeUtil, HTMLContainer, Rectangle2d, useEditor, useValue } from 'tldraw'
 import { MarkdownView } from '../markdown/MarkdownView'
 import { PeleView } from '../pele/PeleView'
@@ -102,11 +102,13 @@ interface SbShapeContainerProps {
   shape: SuperboardShape
   baseWidth: number
   baseHeight: number
+  onGrow?: (baseHeight: number) => void
   children: ReactNode
 }
 
-function SbShapeContainer({ shape, baseWidth, baseHeight, children }: SbShapeContainerProps) {
+function SbShapeContainer({ shape, baseWidth, baseHeight, onGrow, children }: SbShapeContainerProps) {
   const editor = useEditor()
+  const contentRef = useRef<HTMLDivElement>(null)
   const colors = useValue(
     'superboard block colors',
     () => {
@@ -116,6 +118,14 @@ function SbShapeContainer({ shape, baseWidth, baseHeight, children }: SbShapeCon
     [editor],
   )
   const lastDownRef = useRef<{ time: number; x: number; y: number } | null>(null)
+
+  useLayoutEffect(() => {
+    if (!onGrow || editor.getInstanceState().isReadonly) return
+    const scroller = contentRef.current?.querySelector<HTMLElement>('.sb-card-scroll')
+    if (!scroller) return
+    const nextHeight = Math.ceil(scroller.scrollHeight)
+    if (nextHeight > baseHeight + 1) onGrow(nextHeight)
+  }, [baseHeight, editor, onGrow, shape.id, shape.props])
 
   function onPointerDownCapture(event: ReactPointerEvent) {
     if (editor.getInstanceState().isReadonly) return
@@ -159,6 +169,7 @@ function SbShapeContainer({ shape, baseWidth, baseHeight, children }: SbShapeCon
       onDoubleClick={onDoubleClick}
     >
       <div
+        ref={contentRef}
         className="sb-block-scale"
         style={{
           width: baseWidth,
@@ -178,7 +189,7 @@ export class SbMarkdownShapeUtil extends BaseBoxShapeUtil<SbMarkdownShape> {
   static override migrations = sbMarkdownMigrations
 
   getDefaultProps(): SbMarkdownShape['props'] {
-    return { ...DEFAULT_SB_BLOCK_STYLE, w: 460, h: 340, text: DEFAULT_MARKDOWN_TEXT }
+    return { ...DEFAULT_SB_BLOCK_STYLE, w: 460, h: 340, baseH: 340, text: DEFAULT_MARKDOWN_TEXT }
   }
 
   override isAspectRatioLocked() {
@@ -190,8 +201,21 @@ export class SbMarkdownShapeUtil extends BaseBoxShapeUtil<SbMarkdownShape> {
   }
 
   component(shape: SbMarkdownShape) {
+    const editor = this.editor
     return (
-      <SbShapeContainer shape={shape} baseWidth={460} baseHeight={340}>
+      <SbShapeContainer
+        shape={shape}
+        baseWidth={460}
+        baseHeight={shape.props.baseH}
+        onGrow={(baseH) => {
+          const scale = shape.props.w / 460
+          editor.updateShape<SbMarkdownShape>({
+            id: shape.id,
+            type: SB_MARKDOWN_TYPE,
+            props: { ...shape.props, baseH, h: baseH * scale },
+          })
+        }}
+      >
         <div className="sb-card sb-card-markdown">
           <div className="sb-card-scroll">
             <MarkdownView source={shape.props.text} />
