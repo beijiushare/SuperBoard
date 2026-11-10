@@ -18,7 +18,7 @@ import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
 import { superboardEditorComponents, SuperboardStylePanel } from './style-panel'
 import { SuperboardContextMenu } from './context-menu'
 import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
-import { BoardDialog, DeleteBoardDialog, DeleteFolderDialog, RenameFolderDialog, type BoardFormValues } from './dialogs'
+import { BoardDialog, DeleteBoardDialog, DeleteFolderDialog, DeployDialog, RenameFolderDialog, type BoardFormValues } from './dialogs'
 import { ShapeEditor } from './shape-editor'
 import { SAVE_STATUS_LABEL, useAutoSave } from './useAutoSave'
 import { useShapeEditing } from './useShapeEditing'
@@ -67,6 +67,7 @@ export function EditorApp() {
   const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
   const [pendingDeleteFolder, setPendingDeleteFolder] = useState<BoardTreeFolder | null>(null)
+  const [deployDialogOpen, setDeployDialogOpen] = useState(false)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
 
   const editorRef = useRef<Editor | null>(null)
@@ -464,12 +465,10 @@ export function EditorApp() {
         </button>
         <button
           type="button"
-          className="sb-rail-button sb-rail-deploy"
+          className="sb-rail-button"
           data-tooltip="提交并推送"
           aria-label="提交并推送"
-          onClick={() => {
-            void fetch('/__deploy', { method: 'POST' }).catch(() => {})
-          }}
+          onClick={() => setDeployDialogOpen(true)}
         >
           <UseAnimations animation={uploadCloud} size={32} />
         </button>
@@ -572,6 +571,16 @@ export function EditorApp() {
           scope={scope}
           onClose={() => setPendingDeleteFolder(null)}
           onConfirm={handleDeleteFolder}
+        />
+      ) : null}
+
+      {deployDialogOpen ? (
+        <DeployDialog
+          onClose={() => setDeployDialogOpen(false)}
+          onConfirm={() => {
+            setDeployDialogOpen(false)
+            void fetch('/__deploy', { method: 'POST' }).catch(() => {})
+          }}
         />
       ) : null}
     </div>
