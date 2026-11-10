@@ -194,6 +194,13 @@
   margin: 0.85em 0;
   overflow-x: auto;
   overflow-y: hidden;
+  text-align: center;
+}
+
+.sb-math-display .sb-math-rendered {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
 }
 
 .sb-math-pending {
