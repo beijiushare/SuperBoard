@@ -263,6 +263,7 @@ export function EditorApp() {
       editor.select(shape.id)
       setEditing({
         id: shape.id,
+        mode: 'edit',
         type: shape.type,
         props: shape.props as unknown as Record<string, unknown>,
       })
@@ -531,6 +532,7 @@ export function EditorApp() {
     if (shape) {
       setEditing({
         id: shape.id,
+        mode: 'create',
         type,
         props: shape.props as unknown as Record<string, unknown>,
       })

@@ -5,13 +5,16 @@ import { MarkdownView } from '../shared/markdown/MarkdownView'
 import { PeleView } from '../shared/pele/PeleView'
 import {
   PELE_DIAGRAM_OPTIONS,
+  PELE_EXAMPLES,
   SB_KANBAN_TYPE,
   SB_MARKDOWN_TYPE,
   SB_PELE_TYPE,
+  type PeleDiagram,
 } from '../shared/shapes/types'
 
 export interface EditingShape {
   id: TLShapeId
+  mode: 'create' | 'edit'
   type: typeof SB_MARKDOWN_TYPE | typeof SB_KANBAN_TYPE | typeof SB_PELE_TYPE
   props: Record<string, unknown>
 }
@@ -62,6 +65,13 @@ export function ShapeEditor({ shape, onClose, onSave }: ShapeEditorProps) {
   }
 
   const isPele = shape.type === SB_PELE_TYPE
+  const isNewPele = isPele && shape.mode === 'create'
+
+  function selectDiagram(value: string) {
+    setDiagram(value)
+    const example = PELE_EXAMPLES[value as PeleDiagram]
+    if (example) setCode(example)
+  }
 
   return (
     <div className="sb-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
@@ -69,7 +79,13 @@ export function ShapeEditor({ shape, onClose, onSave }: ShapeEditorProps) {
         <header className="sb-modal-header">
           <div>
             <h2>{TITLES[shape.type]}</h2>
-            <p>{isPele ? '编辑 Mermaid 源码，右侧实时预览' : '编辑源码，右侧使用与画布相同的渲染器'}</p>
+            <p>
+              {isNewPele
+                ? '选择图表类型会载入对应示例，可继续修改源码'
+                : isPele
+                  ? '编辑 Mermaid 源码，右侧实时预览'
+                  : '编辑源码，右侧使用与画布相同的渲染器'}
+            </p>
           </div>
           <button className="sb-icon-button" type="button" onClick={onClose} aria-label="关闭">
             ×
@@ -78,11 +94,11 @@ export function ShapeEditor({ shape, onClose, onSave }: ShapeEditorProps) {
 
         <div className="sb-modal-body">
           <div className="sb-editor-pane">
-            {isPele ? (
+            {isNewPele ? (
               <div className="sb-pele-toolbar">
                 <label>
                   图表类型
-                  <select value={diagram} onChange={(event) => setDiagram(event.target.value)}>
+                  <select value={diagram} onChange={(event) => selectDiagram(event.target.value)}>
                     {PELE_DIAGRAM_OPTIONS.map(([value, label]) => (
                       <option key={value} value={value}>
                         {label}
