@@ -14,38 +14,6 @@ interface BoardContextMenuProps {
   onDelete: (board: BoardTreeFile) => void
 }
 
-function PlusIcon() {
-  return (
-    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-      <path d="M8 3.2v9.6M3.2 8h9.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function PencilIcon() {
-  return (
-    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-      <path
-        d="m3 11.2-.6 2.9 2.9-.6 7.1-7.1-2.3-2.3-7.1 7.1Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
-      <path d="m9.2 3.4 2.3 2.3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function TrashIcon() {
-  return (
-    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-      <path d="M3.4 4.6h9.2M6.2 4.6V2.8h3.6v1.8M4.5 4.6l.5 8.6h6l.5-8.6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M6.7 7.2v3.7M9.3 7.2v3.7" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-    </svg>
-  )
-}
-
 export function BoardContextMenu({
   x,
   y,
@@ -145,22 +113,16 @@ export function BoardContextMenu({
               role="menuitem"
               onClick={() => run(() => onRename(target.node))}
             >
-              <span className="sb-context-menu-icon">
-                <PencilIcon />
-              </span>
-              <span className="sb-context-menu-label">重命名 / 移动…</span>
+              <span className="sb-context-menu-label">重命名…</span>
             </button>
           </div>
           <div className="sb-context-menu-group">
             <button
-              className="sb-context-menu-item sb-context-menu-item-danger"
+              className="sb-context-menu-item"
               type="button"
               role="menuitem"
               onClick={() => run(() => onDelete(target.node))}
             >
-              <span className="sb-context-menu-icon">
-                <TrashIcon />
-              </span>
               <span className="sb-context-menu-label">删除…</span>
             </button>
           </div>
@@ -174,9 +136,6 @@ export function BoardContextMenu({
             onClick={() => run(() => onCreate(folder))}
             title={folder ? `在 ${folder} 中新建白板` : '在根目录新建白板'}
           >
-            <span className="sb-context-menu-icon">
-              <PlusIcon />
-            </span>
             <span className="sb-context-menu-label">{target.type === 'folder' ? '在此新建白板…' : '新建白板…'}</span>
           </button>
         </div>

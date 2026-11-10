@@ -383,7 +383,7 @@ textarea {
 .sb-context-menu {
   position: fixed;
   z-index: 9000;
-  min-width: 184px;
+  min-width: 144px;
   overflow: hidden;
   border-radius: 9px;
   outline: none;
@@ -410,7 +410,6 @@ textarea {
   width: 100%;
   height: 40px;
   align-items: center;
-  gap: 8px;
   padding: 0 12px;
   border: 0;
   background: transparent;
@@ -439,29 +438,12 @@ textarea {
   outline: none;
 }
 
-.sb-context-menu-icon {
-  display: grid;
-  width: 16px;
-  height: 16px;
-  flex: 0 0 16px;
-  place-items: center;
-  color: hsl(204 4% 45%);
-}
-
 .sb-context-menu-label {
   min-width: 0;
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.sb-context-menu-item-danger {
-  color: hsl(0 90% 43%);
-}
-
-.sb-context-menu-item-danger .sb-context-menu-icon {
-  color: inherit;
 }
 
 .sb-current-board {
