@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import type { TLShapeId } from 'tldraw'
-import { KanbanView } from '../shared/kanban/KanbanView'
 import { MarkdownView } from '../shared/markdown/MarkdownView'
 import { PELE_EXAMPLE_GROUPS, type PeleExample, type PeleExampleGroup } from '../shared/pele/examples'
 import { PeleView } from '../shared/pele/PeleView'
-import { SB_KANBAN_TYPE, SB_MARKDOWN_TYPE, SB_PELE_TYPE } from '../shared/shapes/types'
+import { SB_MARKDOWN_TYPE, SB_PELE_TYPE } from '../shared/shapes/types'
 
 export type EditingShape = {
   id: TLShapeId
-  type: typeof SB_MARKDOWN_TYPE | typeof SB_KANBAN_TYPE | typeof SB_PELE_TYPE
+  type: typeof SB_MARKDOWN_TYPE | typeof SB_PELE_TYPE
   props: Record<string, unknown>
 } & (
   | { mode: 'create'; position: { x: number; y: number } }
@@ -25,7 +24,6 @@ type PeleStep = 'types' | 'examples' | 'editor'
 
 const SHAPE_NAMES = {
   [SB_MARKDOWN_TYPE]: 'Markdown',
-  [SB_KANBAN_TYPE]: '看板',
   [SB_PELE_TYPE]: '图表',
 } as const
 
@@ -245,7 +243,6 @@ export function ShapeEditor({ shape, onClose, onSave }: ShapeEditorProps) {
 
             <div className={`sb-preview-pane${isPele ? ' sb-preview-pane-pele' : ''}`}>
               {shape.type === SB_MARKDOWN_TYPE ? <MarkdownView source={text} /> : null}
-              {shape.type === SB_KANBAN_TYPE ? <KanbanView source={text} /> : null}
               {isPele ? (
                 <div
                   className="sb-card sb-card-pele sb-preview-card"

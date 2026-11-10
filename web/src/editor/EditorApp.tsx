@@ -2,21 +2,20 @@ import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as R
 import { Tldraw, createShapeId, type Editor, type TLShapeId } from 'tldraw'
 import type { BoardFile, BoardListItem, BoardTreeFolder } from '../shared/board/types'
 import { BoardTree, type BoardTreeContextTarget } from '../shared/board/BoardTree'
-import { superboardCanvasComponents } from '../shared/canvas/CanvasBackground'
 import { ancestorFolderPaths, buildBoardTree } from '../shared/board/tree'
 import {
-  DEFAULT_KANBAN_TEXT,
   DEFAULT_MARKDOWN_TEXT,
   DEFAULT_PELE_CODE,
-  SB_KANBAN_TYPE,
+  DEFAULT_SB_BLOCK_STYLE,
+  DEFAULT_SB_PELE_STYLE,
   SB_MARKDOWN_TYPE,
   SB_PELE_TYPE,
   SUPERBOARD_EDIT_EVENT,
-  type SbKanbanShape,
   type SbMarkdownShape,
   type SbPeleShape,
 } from '../shared/shapes/types'
 import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
+import { superboardEditorComponents } from './BlockStylePanel'
 import { BoardDialog, DeleteBoardDialog, RenameFolderDialog, type BoardFormValues } from './BoardDialog'
 import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
 import { createBoard, deleteBoard, fetchBoard, fetchBoards, patchBoard, putBoard, renameFolder } from './api'
@@ -258,7 +257,7 @@ export function EditorApp() {
       if (!editor || !detail?.shapeId) return
       const shape = editor.getShape(detail.shapeId as TLShapeId)
       if (!shape) return
-      if (shape.type !== SB_MARKDOWN_TYPE && shape.type !== SB_KANBAN_TYPE && shape.type !== SB_PELE_TYPE) {
+      if (shape.type !== SB_MARKDOWN_TYPE && shape.type !== SB_PELE_TYPE) {
         return
       }
       editor.select(shape.id)
@@ -487,7 +486,7 @@ export function EditorApp() {
     }
   }
 
-  function addShape(type: typeof SB_MARKDOWN_TYPE | typeof SB_KANBAN_TYPE | typeof SB_PELE_TYPE) {
+  function addShape(type: typeof SB_MARKDOWN_TYPE | typeof SB_PELE_TYPE) {
     const editor = editorRef.current
     if (!editor) return
 
@@ -505,15 +504,17 @@ export function EditorApp() {
     if (type === SB_MARKDOWN_TYPE) {
       width = 460
       height = 340
-      props = { w: width, h: height, text: DEFAULT_MARKDOWN_TEXT }
-    } else if (type === SB_KANBAN_TYPE) {
-      width = 780
-      height = 420
-      props = { w: width, h: height, text: DEFAULT_KANBAN_TEXT }
+      props = { ...DEFAULT_SB_BLOCK_STYLE, w: width, h: height, text: DEFAULT_MARKDOWN_TEXT }
     } else {
       width = 580
       height = 380
-      props = { w: width, h: height, code: DEFAULT_PELE_CODE, diagram: 'flowchart' }
+      props = {
+        ...DEFAULT_SB_PELE_STYLE,
+        w: width,
+        h: height,
+        code: DEFAULT_PELE_CODE,
+        diagram: 'flowchart',
+      }
     }
 
     setEditing({
@@ -539,16 +540,7 @@ export function EditorApp() {
           type,
           x: position.x,
           y: position.y,
-          props: { w: 460, h: 340, text },
-        })
-      } else if (type === SB_KANBAN_TYPE) {
-        const text = typeof patch.text === 'string' ? patch.text : DEFAULT_KANBAN_TEXT
-        editor.createShape<SbKanbanShape>({
-          id,
-          type,
-          x: position.x,
-          y: position.y,
-          props: { w: 780, h: 420, text },
+          props: { ...DEFAULT_SB_BLOCK_STYLE, w: 460, h: 340, text },
         })
       } else {
         const code = typeof patch.code === 'string' ? patch.code : DEFAULT_PELE_CODE
@@ -558,7 +550,7 @@ export function EditorApp() {
           type,
           x: position.x,
           y: position.y,
-          props: { w: 580, h: 380, code, diagram },
+          props: { ...DEFAULT_SB_PELE_STYLE, w: 580, h: 380, code, diagram },
         })
       }
 
@@ -574,16 +566,6 @@ export function EditorApp() {
         editor.updateShape<SbMarkdownShape>({
           id: shape.id,
           type: SB_MARKDOWN_TYPE,
-          props: { ...shape.props, text },
-        })
-      }
-    } else if (current.type === SB_KANBAN_TYPE) {
-      const shape = editor.getShape<SbKanbanShape>(current.id)
-      const text = typeof patch.text === 'string' ? patch.text : ''
-      if (shape) {
-        editor.updateShape<SbKanbanShape>({
-          id: shape.id,
-          type: SB_KANBAN_TYPE,
           props: { ...shape.props, text },
         })
       }
@@ -666,9 +648,6 @@ export function EditorApp() {
           <button className="sb-button" type="button" onClick={() => addShape(SB_MARKDOWN_TYPE)} disabled={!board}>
             + Markdown
           </button>
-          <button className="sb-button" type="button" onClick={() => addShape(SB_KANBAN_TYPE)} disabled={!board}>
-            + 看板
-          </button>
           <button className="sb-button" type="button" onClick={() => addShape(SB_PELE_TYPE)} disabled={!board}>
             + 图表
           </button>
@@ -717,7 +696,7 @@ export function EditorApp() {
             <Tldraw
               key={board.meta.slug}
               shapeUtils={superboardShapeUtils}
-              components={superboardCanvasComponents}
+              components={superboardEditorComponents}
               licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
               onMount={handleMount}
             />

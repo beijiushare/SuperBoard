@@ -1,22 +1,23 @@
 import { useRef, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
-import { BaseBoxShapeUtil, HTMLContainer, Rectangle2d, useEditor } from 'tldraw'
-import { KanbanView } from '../kanban/KanbanView'
+import { BaseBoxShapeUtil, HTMLContainer, Rectangle2d, useEditor, useValue } from 'tldraw'
 import { MarkdownView } from '../markdown/MarkdownView'
 import { PeleView } from '../pele/PeleView'
+import { getSbBlockStyle } from './blockStyles'
 import {
-  DEFAULT_KANBAN_TEXT,
   DEFAULT_MARKDOWN_TEXT,
   DEFAULT_PELE_CODE,
-  SB_KANBAN_TYPE,
+  DEFAULT_SB_BLOCK_STYLE,
+  DEFAULT_SB_PELE_STYLE,
   SB_MARKDOWN_TYPE,
   SB_PELE_TYPE,
   SUPERBOARD_EDIT_EVENT,
-  sbKanbanProps,
+  sbMarkdownMigrations,
   sbMarkdownProps,
+  sbPeleMigrations,
   sbPeleProps,
-  type SbKanbanShape,
   type SbMarkdownShape,
   type SbPeleShape,
+  type SuperboardShape,
 } from './types'
 
 function requestEdit(editor: { getInstanceState: () => { isReadonly: boolean } }, shapeId: string) {
@@ -25,14 +26,20 @@ function requestEdit(editor: { getInstanceState: () => { isReadonly: boolean } }
 }
 
 interface SbShapeContainerProps {
-  shapeId: string
-  width: number
-  height: number
+  shape: SuperboardShape
   children: ReactNode
 }
 
-function SbShapeContainer({ shapeId, width, height, children }: SbShapeContainerProps) {
+function SbShapeContainer({ shape, children }: SbShapeContainerProps) {
   const editor = useEditor()
+  const colors = useValue(
+    'superboard block colors',
+    () => {
+      const theme = editor.getCurrentTheme()
+      return theme.colors[editor.getColorMode()]
+    },
+    [editor],
+  )
   const lastDownRef = useRef<{ time: number; x: number; y: number } | null>(null)
 
   function onPointerDownCapture(event: ReactPointerEvent) {
@@ -53,18 +60,22 @@ function SbShapeContainer({ shapeId, width, height, children }: SbShapeContainer
     lastDownRef.current = null
     event.preventDefault()
     event.stopPropagation()
-    requestEdit(editor, shapeId)
+    requestEdit(editor, shape.id)
   }
 
   function onDoubleClick(event: ReactMouseEvent) {
     event.stopPropagation()
-    requestEdit(editor, shapeId)
+    requestEdit(editor, shape.id)
   }
 
   return (
     <HTMLContainer
       className="sb-shape-container"
-      style={{ width, height }}
+      style={{
+        ...getSbBlockStyle(colors, shape.props),
+        width: shape.props.w,
+        height: shape.props.h,
+      }}
       onPointerDownCapture={onPointerDownCapture}
       onDoubleClick={onDoubleClick}
     >
@@ -76,9 +87,10 @@ function SbShapeContainer({ shapeId, width, height, children }: SbShapeContainer
 export class SbMarkdownShapeUtil extends BaseBoxShapeUtil<SbMarkdownShape> {
   static override type = SB_MARKDOWN_TYPE
   static override props = sbMarkdownProps
+  static override migrations = sbMarkdownMigrations
 
   getDefaultProps(): SbMarkdownShape['props'] {
-    return { w: 460, h: 340, text: DEFAULT_MARKDOWN_TEXT }
+    return { ...DEFAULT_SB_BLOCK_STYLE, w: 460, h: 340, text: DEFAULT_MARKDOWN_TEXT }
   }
 
   getGeometry(shape: SbMarkdownShape) {
@@ -87,7 +99,7 @@ export class SbMarkdownShapeUtil extends BaseBoxShapeUtil<SbMarkdownShape> {
 
   component(shape: SbMarkdownShape) {
     return (
-      <SbShapeContainer shapeId={shape.id} width={shape.props.w} height={shape.props.h}>
+      <SbShapeContainer shape={shape}>
         <div className="sb-card sb-card-markdown">
           <div className="sb-card-scroll">
             <MarkdownView source={shape.props.text} />
@@ -108,45 +120,19 @@ export class SbMarkdownShapeUtil extends BaseBoxShapeUtil<SbMarkdownShape> {
   }
 }
 
-export class SbKanbanShapeUtil extends BaseBoxShapeUtil<SbKanbanShape> {
-  static override type = SB_KANBAN_TYPE
-  static override props = sbKanbanProps
-
-  getDefaultProps(): SbKanbanShape['props'] {
-    return { w: 780, h: 420, text: DEFAULT_KANBAN_TEXT }
-  }
-
-  getGeometry(shape: SbKanbanShape) {
-    return new Rectangle2d({ width: shape.props.w, height: shape.props.h, isFilled: true })
-  }
-
-  component(shape: SbKanbanShape) {
-    return (
-      <SbShapeContainer shapeId={shape.id} width={shape.props.w} height={shape.props.h}>
-        <div className="sb-card sb-card-kanban">
-          <KanbanView source={shape.props.text} />
-        </div>
-      </SbShapeContainer>
-    )
-  }
-
-  getIndicatorPath(shape: SbKanbanShape) {
-    const path = new Path2D()
-    path.rect(0, 0, shape.props.w, shape.props.h)
-    return path
-  }
-
-  override onDoubleClick(shape: SbKanbanShape) {
-    requestEdit(this.editor, shape.id)
-  }
-}
-
 export class SbPeleShapeUtil extends BaseBoxShapeUtil<SbPeleShape> {
   static override type = SB_PELE_TYPE
   static override props = sbPeleProps
+  static override migrations = sbPeleMigrations
 
   getDefaultProps(): SbPeleShape['props'] {
-    return { w: 580, h: 380, code: DEFAULT_PELE_CODE, diagram: 'flowchart' }
+    return {
+      ...DEFAULT_SB_PELE_STYLE,
+      w: 580,
+      h: 380,
+      code: DEFAULT_PELE_CODE,
+      diagram: 'flowchart',
+    }
   }
 
   getGeometry(shape: SbPeleShape) {
@@ -155,7 +141,7 @@ export class SbPeleShapeUtil extends BaseBoxShapeUtil<SbPeleShape> {
 
   component(shape: SbPeleShape) {
     return (
-      <SbShapeContainer shapeId={shape.id} width={shape.props.w} height={shape.props.h}>
+      <SbShapeContainer shape={shape}>
         <div className="sb-card sb-card-pele">
           <PeleView code={shape.props.code} />
         </div>
@@ -174,4 +160,4 @@ export class SbPeleShapeUtil extends BaseBoxShapeUtil<SbPeleShape> {
   }
 }
 
-export const superboardShapeUtils = [SbMarkdownShapeUtil, SbKanbanShapeUtil, SbPeleShapeUtil]
+export const superboardShapeUtils = [SbMarkdownShapeUtil, SbPeleShapeUtil]

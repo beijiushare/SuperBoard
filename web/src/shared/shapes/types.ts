@@ -1,24 +1,82 @@
-import { T, type TLBaseShape } from 'tldraw'
+import { StyleProp, T, createShapePropsMigrationSequence, type TLBaseShape } from 'tldraw'
+import {
+  SB_BLOCK_BORDER_STYLE_VALUES,
+  SB_BLOCK_BORDER_WIDTH_VALUES,
+  SB_BLOCK_COLOR_VALUES,
+  type SbBlockStyleValues,
+} from './blockStyles'
 
 export const SB_MARKDOWN_TYPE = 'sb-markdown'
-export const SB_KANBAN_TYPE = 'sb-kanban'
 export const SB_PELE_TYPE = 'sb-pele'
+export const SUPERBOARD_SHAPE_TYPES = [SB_MARKDOWN_TYPE, SB_PELE_TYPE] as const
+export type SuperboardShapeType = (typeof SUPERBOARD_SHAPE_TYPES)[number]
 
 export const SUPERBOARD_EDIT_EVENT = 'superboard:edit-shape'
 
-export interface SbMarkdownProps {
+export function isSuperboardShapeType(type: string): type is SuperboardShapeType {
+  return (SUPERBOARD_SHAPE_TYPES as readonly string[]).includes(type)
+}
+
+export const sbBlockBackgroundColorStyle = StyleProp.defineEnum('superboard:blockBackgroundColor', {
+  defaultValue: 'white',
+  values: SB_BLOCK_COLOR_VALUES,
+})
+
+export const sbBlockBackgroundOpacityStyle = StyleProp.define('superboard:blockBackgroundOpacity', {
+  defaultValue: 100,
+  type: T.number,
+})
+
+export const sbBlockBorderColorStyle = StyleProp.defineEnum('superboard:blockBorderColor', {
+  defaultValue: 'grey',
+  values: SB_BLOCK_COLOR_VALUES,
+})
+
+export const sbBlockBorderOpacityStyle = StyleProp.define('superboard:blockBorderOpacity', {
+  defaultValue: 35,
+  type: T.number,
+})
+
+export const sbBlockBorderWidthStyle = StyleProp.defineEnum('superboard:blockBorderWidth', {
+  defaultValue: 'thin',
+  values: SB_BLOCK_BORDER_WIDTH_VALUES,
+})
+
+export const sbBlockBorderStyleStyle = StyleProp.defineEnum('superboard:blockBorderStyle', {
+  defaultValue: 'solid',
+  values: SB_BLOCK_BORDER_STYLE_VALUES,
+})
+
+export const sbBlockStyleProps = {
+  backgroundColor: sbBlockBackgroundColorStyle,
+  backgroundOpacity: sbBlockBackgroundOpacityStyle,
+  borderColor: sbBlockBorderColorStyle,
+  borderOpacity: sbBlockBorderOpacityStyle,
+  borderWidth: sbBlockBorderWidthStyle,
+  borderStyle: sbBlockBorderStyleStyle,
+}
+
+export const DEFAULT_SB_BLOCK_STYLE = {
+  backgroundColor: 'white',
+  backgroundOpacity: 100,
+  borderColor: 'grey',
+  borderOpacity: 35,
+  borderWidth: 'thin',
+  borderStyle: 'solid',
+} satisfies SbBlockStyleValues
+
+export const DEFAULT_SB_PELE_STYLE = {
+  ...DEFAULT_SB_BLOCK_STYLE,
+  backgroundColor: 'paper',
+} satisfies SbBlockStyleValues
+
+export interface SbMarkdownProps extends SbBlockStyleValues {
   w: number
   h: number
   text: string
 }
 
-export interface SbKanbanProps {
-  w: number
-  h: number
-  text: string
-}
-
-export interface SbPeleProps {
+export interface SbPeleProps extends SbBlockStyleValues {
   w: number
   h: number
   code: string
@@ -28,39 +86,62 @@ export interface SbPeleProps {
 declare module 'tldraw' {
   interface TLGlobalShapePropsMap {
     'sb-markdown': SbMarkdownProps
-    'sb-kanban': SbKanbanProps
     'sb-pele': SbPeleProps
   }
 }
 
 export type SbMarkdownShape = TLBaseShape<'sb-markdown', SbMarkdownProps>
-export type SbKanbanShape = TLBaseShape<'sb-kanban', SbKanbanProps>
 export type SbPeleShape = TLBaseShape<'sb-pele', SbPeleProps>
-export type SuperboardShape = SbMarkdownShape | SbKanbanShape | SbPeleShape
+export type SuperboardShape = SbMarkdownShape | SbPeleShape
 
 export const sbMarkdownProps = {
-  w: T.number,
-  h: T.number,
-  text: T.string,
-}
-
-export const sbKanbanProps = {
+  ...sbBlockStyleProps,
   w: T.number,
   h: T.number,
   text: T.string,
 }
 
 export const sbPeleProps = {
+  ...sbBlockStyleProps,
   w: T.number,
   h: T.number,
   code: T.string,
   diagram: T.string,
 }
 
+function addBlockStyleDefaults(props: Record<string, unknown>, defaults: SbBlockStyleValues) {
+  props.backgroundColor ??= defaults.backgroundColor
+  props.backgroundOpacity ??= defaults.backgroundOpacity
+  props.borderColor ??= defaults.borderColor
+  props.borderOpacity ??= defaults.borderOpacity
+  props.borderWidth ??= defaults.borderWidth
+  props.borderStyle ??= defaults.borderStyle
+  return props
+}
+
+export const sbMarkdownMigrations = createShapePropsMigrationSequence({
+  sequence: [
+    {
+      id: 'com.tldraw.shape.sb-markdown/1',
+      up: (props) => addBlockStyleDefaults(props, DEFAULT_SB_BLOCK_STYLE),
+      down: 'retired',
+    },
+  ],
+})
+
+export const sbPeleMigrations = createShapePropsMigrationSequence({
+  sequence: [
+    {
+      id: 'com.tldraw.shape.sb-pele/1',
+      up: (props) => addBlockStyleDefaults(props, DEFAULT_SB_PELE_STYLE),
+      down: 'retired',
+    },
+  ],
+})
+
 export const sbShapeSchemas = {
-  [SB_MARKDOWN_TYPE]: { props: sbMarkdownProps },
-  [SB_KANBAN_TYPE]: { props: sbKanbanProps },
-  [SB_PELE_TYPE]: { props: sbPeleProps },
+  [SB_MARKDOWN_TYPE]: { props: sbMarkdownProps, migrations: sbMarkdownMigrations },
+  [SB_PELE_TYPE]: { props: sbPeleProps, migrations: sbPeleMigrations },
 }
 
 export const DEFAULT_MARKDOWN_TEXT = `# 新卡片
@@ -72,17 +153,6 @@ export const DEFAULT_MARKDOWN_TEXT = `# 新卡片
 $$
 sum_(i=1)^n i = (n(n+1))/2
 $$
-`
-
-export const DEFAULT_KANBAN_TEXT = `## 待办
-- 梳理本周目标
-- 收集资料
-
-## 进行中
-- 制作第一版白板
-
-## 完成
-- 创建 SuperBoard
 `
 
 export const DEFAULT_PELE_CODE = `flowchart TD

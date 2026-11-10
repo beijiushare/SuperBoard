@@ -13,10 +13,10 @@ import {
   type TLRecord,
 } from 'tldraw'
 import {
-  DEFAULT_KANBAN_TEXT,
   DEFAULT_MARKDOWN_TEXT,
   DEFAULT_PELE_CODE,
-  SB_KANBAN_TYPE,
+  DEFAULT_SB_BLOCK_STYLE,
+  DEFAULT_SB_PELE_STYLE,
   SB_MARKDOWN_TYPE,
   SB_PELE_TYPE,
   sbShapeSchemas,
@@ -32,7 +32,7 @@ const intro = `# SuperBoard
 
 - 本地编辑，自动保存到 \`whiteboards/*.tldr.json\`
 - 提交到 Git 后自动部署为只读分享站
-- “+” 按钮可添加 Markdown、看板和图表卡片
+- “+” 按钮可添加 Markdown 和图表卡片
 - 双击卡片即可编辑
 
 ## AsciiMath
@@ -49,7 +49,6 @@ $$
 | --- | --- |
 | Markdown | 已支持 |
 | AsciiMath | 已支持 |
-| 看板 | 只读渲染 |
 | 图表 | Pelé / Mermaid |
 
 \`\`\`ts
@@ -69,27 +68,24 @@ const editingGuide = `## 编辑方式
 
 - Markdown 支持 GFM 表格、任务列表、代码高亮
 - 数学统一使用 AsciiMath：\`$...$\` 和 \`$$...$$\`
-- 看板使用二级标题分列，列表项作为卡片
 - 图表卡片保存 Mermaid 源码
 
 > 预览页和编辑器使用同一套渲染器，所见即所得。
 `
 
-const kanban = `## 灵感
-- 把零散笔记放进白板
-- 记录待读文章
-
-## 进行中
-- 搭建 SuperBoard 示例
-- 验证 Markdown / AsciiMath
-
-## 已完成
-- 本地读取与保存
-- 静态站构建流程
-
-## 稍后
-- 申请 tldraw Hobby license
-- 配置 GitHub Pages
+const kanban = `kanban
+  灵感
+    把零散笔记放进白板
+    记录待读文章
+  进行中
+    [搭建 SuperBoard 示例]
+    [验证 Markdown / AsciiMath]
+  已完成
+    本地读取与保存
+    静态站构建流程
+  稍后
+    [申请 tldraw Hobby license]
+    [配置 GitHub Pages]
 `
 
 const flow = `flowchart LR
@@ -144,22 +140,41 @@ async function main() {
   store.put([PageRecordType.create({ id: pageId, name: '示例白板', index: 'a1' as IndexKey })])
 
   store.put([
-    shape(SB_MARKDOWN_TYPE, 'intro', 0, 0, 'a1', { w: 520, h: 430, text: intro }),
-    shape(SB_MARKDOWN_TYPE, 'guide', 560, 0, 'a2', { w: 470, h: 430, text: editingGuide }),
-    shape(SB_KANBAN_TYPE, 'kanban', 0, 470, 'a3', { w: 780, h: 430, text: kanban || DEFAULT_KANBAN_TEXT }),
+    shape(SB_MARKDOWN_TYPE, 'intro', 0, 0, 'a1', {
+      ...DEFAULT_SB_BLOCK_STYLE,
+      w: 520,
+      h: 430,
+      text: intro,
+    }),
+    shape(SB_MARKDOWN_TYPE, 'guide', 560, 0, 'a2', {
+      ...DEFAULT_SB_BLOCK_STYLE,
+      w: 470,
+      h: 430,
+      text: editingGuide,
+    }),
+    shape(SB_PELE_TYPE, 'kanban', 0, 470, 'a3', {
+      ...DEFAULT_SB_PELE_STYLE,
+      w: 780,
+      h: 430,
+      code: kanban,
+      diagram: 'kanban',
+    }),
     shape(SB_PELE_TYPE, 'flow', 820, 470, 'a4', {
+      ...DEFAULT_SB_PELE_STYLE,
       w: 570,
       h: 430,
       code: flow || DEFAULT_PELE_CODE,
       diagram: 'flowchart',
     }),
     shape(SB_PELE_TYPE, 'sequence', 0, 940, 'a5', {
+      ...DEFAULT_SB_PELE_STYLE,
       w: 700,
       h: 410,
       code: sequence,
       diagram: 'sequence',
     }),
     shape(SB_MARKDOWN_TYPE, 'blank', 740, 940, 'a6', {
+      ...DEFAULT_SB_BLOCK_STYLE,
       w: 440,
       h: 300,
       text: DEFAULT_MARKDOWN_TEXT,
@@ -172,7 +187,7 @@ async function main() {
     meta: {
       title: 'SuperBoard 示例',
       slug: 'superboard-demo',
-      summary: 'Markdown、AsciiMath、看板与图表卡片的演示白板。',
+      summary: 'Markdown、AsciiMath 与图表卡片的演示白板。',
       order: 0,
       updatedAt: new Date().toISOString(),
     },
