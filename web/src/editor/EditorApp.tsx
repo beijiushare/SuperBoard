@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
-import { Tldraw, type Editor } from 'tldraw'
+import { Tldraw, type Editor, type TLUiContextMenuProps } from 'tldraw'
 import type { BoardFile, BoardListItem, BoardTreeFolder } from '../shared/board/types'
 import { BoardTreePanel } from '../shared/board/BoardTreePanel'
 import type { BoardTreeContextTarget } from '../shared/board/BoardTree'
@@ -8,6 +8,7 @@ import { useTreeExpansion } from '../shared/board/useTreeExpansion'
 import { SB_MARKDOWN_TYPE, SB_PELE_TYPE } from '../shared/shapes/types'
 import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
 import { superboardEditorComponents } from './style-panel'
+import { SuperboardContextMenu } from './context-menu'
 import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
 import { BoardToolbar } from './BoardToolbar'
 import { BoardDialog, DeleteBoardDialog, RenameFolderDialog, type BoardFormValues } from './dialogs'
@@ -67,6 +68,20 @@ export function EditorApp() {
     flush,
   } = useAutoSave({ editorRef, boardRef, setBoard, setBoards })
   const { editing, setEditing, addShape, saveEdit } = useShapeEditing({ editorRef })
+
+  const editorComponents = useMemo(
+    () => ({
+      ...superboardEditorComponents,
+      ContextMenu: (props: TLUiContextMenuProps) => (
+        <SuperboardContextMenu
+          {...props}
+          onAddMarkdown={() => addShape(SB_MARKDOWN_TYPE)}
+          onAddPele={() => addShape(SB_PELE_TYPE)}
+        />
+      ),
+    }),
+    [addShape],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -322,7 +337,7 @@ export function EditorApp() {
             <Tldraw
               key={board.meta.slug}
               shapeUtils={superboardShapeUtils}
-              components={superboardEditorComponents}
+              components={editorComponents}
               licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
               onMount={handleMount}
             />
