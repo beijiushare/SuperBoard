@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { Tldraw, type Editor, type TLUiContextMenuProps } from 'tldraw'
+import UseAnimations from 'react-useanimations'
+import checkCircle from 'react-useanimations/lib/checkCircle'
+import sidebar from 'react-useanimations/lib/sidebar'
 import type { BoardFile, BoardListItem, BoardTreeFolder } from '../shared/board/types'
 import { BoardTreePanel } from '../shared/board/BoardTreePanel'
 import type { BoardTreeContextTarget } from '../shared/board/BoardTree'
@@ -10,10 +13,9 @@ import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
 import { superboardEditorComponents } from './style-panel'
 import { SuperboardContextMenu } from './context-menu'
 import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
-import { BoardToolbar } from './BoardToolbar'
 import { BoardDialog, DeleteBoardDialog, RenameFolderDialog, type BoardFormValues } from './dialogs'
 import { ShapeEditor } from './shape-editor'
-import { useAutoSave } from './useAutoSave'
+import { SAVE_STATUS_LABEL, useAutoSave } from './useAutoSave'
 import { useShapeEditing } from './useShapeEditing'
 import { createBoard, deleteBoard, fetchBoard, fetchBoards, patchBoard, renameFolder } from './api'
 
@@ -298,26 +300,48 @@ export function EditorApp() {
     return <div className="sb-screen-message">没有可编辑的白板。</div>
   }
 
+  const sidebarLabel = treeMode && treeOpen ? '收起目录' : '展开目录'
+  const saveLabel =
+    saveState === 'error'
+      ? saveError || SAVE_STATUS_LABEL.error
+      : saveState === 'dirty'
+        ? '点击保存'
+        : SAVE_STATUS_LABEL[saveState]
+
   return (
-    <div className="sb-app">
-      <BoardToolbar
-        board={board}
-        boards={boards}
-        treeMode={treeMode}
-        treeOpen={treeOpen}
-        saveState={saveState}
-        saveError={saveError}
-        onToggleTree={enableTreeMode}
-        onSwitchBoard={(slug) => void switchBoard(slug)}
-        onAddMarkdown={() => addShape(SB_MARKDOWN_TYPE)}
-        onAddPele={() => addShape(SB_PELE_TYPE)}
-        onSaveNow={() => void saveNow()}
-      />
+    <div className="sb-app sb-app-editor">
+      <aside className="sb-rail" aria-label="编辑器操作">
+        <button
+          type="button"
+          className="sb-rail-button"
+          data-tooltip={sidebarLabel}
+          aria-label={sidebarLabel}
+          onClick={enableTreeMode}
+        >
+          <UseAnimations
+            animation={sidebar}
+            size={32}
+            interaction="click-toggle"
+            active={treeMode && treeOpen}
+          />
+        </button>
+        <button
+          type="button"
+          className={`sb-rail-button sb-rail-save is-${saveState}`}
+          data-tooltip={saveLabel}
+          aria-label={saveLabel}
+          disabled={!board}
+          onClick={() => void saveNow()}
+        >
+          <UseAnimations animation={checkCircle} size={32} />
+        </button>
+      </aside>
 
       <div className="sb-workspace">
         {treeMode && treeOpen ? (
           <BoardTreePanel
             nodes={treeNodes}
+            title="SuperBoard"
             selectedSlug={board?.meta.slug}
             expanded={expanded}
             onToggle={toggleFolder}
@@ -327,7 +351,6 @@ export function EditorApp() {
             }}
             onContextMenu={openContextMenu}
             onRootContextMenu={openRootContextMenu}
-            headerMeta={<span className="sb-tree-hint">右键操作</span>}
             emptyLabel="还没有白板，在空白处右键新建"
           />
         ) : null}

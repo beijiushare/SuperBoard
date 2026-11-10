@@ -4,6 +4,7 @@ import type { BoardTreeNode } from './types'
 
 interface BoardTreePanelProps {
   nodes: BoardTreeNode[]
+  title?: string
   selectedSlug?: string
   expanded: Set<string>
   onToggle: (path: string) => void
@@ -16,6 +17,7 @@ interface BoardTreePanelProps {
 
 export function BoardTreePanel({
   nodes,
+  title = '白板目录',
   selectedSlug,
   expanded,
   onToggle,
@@ -28,7 +30,7 @@ export function BoardTreePanel({
   return (
     <aside className="sb-tree-panel">
       <div className="sb-tree-header">
-        <span className="sb-tree-heading">白板目录</span>
+        <span className="sb-tree-heading">{title}</span>
         {headerMeta}
       </div>
       <div className="sb-tree-scroll" onContextMenu={onRootContextMenu}>

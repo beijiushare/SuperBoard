@@ -6,6 +6,110 @@
   overflow: hidden;
 }
 
+.sb-app-editor {
+  flex-direction: row;
+}
+
+.sb-rail {
+  z-index: 200;
+  display: flex;
+  width: 56px;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0;
+  border-right: 1px solid #dedbd2;
+  background: #fbfaf6;
+}
+
+.sb-rail-button {
+  position: relative;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #4f4d47;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.sb-rail-button:hover {
+  background: #f1eee5;
+}
+
+.sb-rail-button:not(.sb-rail-save):hover {
+  color: #1f1e1c;
+}
+
+.sb-rail-button:focus-visible {
+  outline: 2px solid #22211f;
+  outline-offset: 2px;
+}
+
+.sb-rail-button:disabled {
+  color: #b8b4a9;
+  cursor: default;
+}
+
+.sb-rail-button:disabled:hover {
+  background: transparent;
+}
+
+.sb-rail-button[data-tooltip]::after {
+  position: absolute;
+  z-index: 300;
+  top: 50%;
+  left: calc(100% + 10px);
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: #22211f;
+  color: #fffdf8;
+  content: attr(data-tooltip);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-4px, -50%);
+  transition:
+    opacity 0.12s ease,
+    transform 0.12s ease;
+}
+
+.sb-rail-button:hover::after,
+.sb-rail-button:focus-visible::after {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+.sb-rail-save.is-saved {
+  color: #3f8f4f;
+}
+
+.sb-rail-save.is-dirty {
+  color: #c28a25;
+}
+
+.sb-rail-save.is-saving {
+  color: #3f72b8;
+}
+
+.sb-rail-save.is-error {
+  color: #c24b3b;
+}
+
+.sb-app-editor .sb-workspace {
+  flex: 1;
+  min-width: 0;
+}
+
 .sb-toolbar {
   z-index: 100;
   display: flex;
@@ -70,11 +174,6 @@
   cursor: pointer;
 }
 
-.sb-add-group {
-  display: flex;
-  gap: 6px;
-}
-
 .sb-toolbar-spacer {
   flex: 1;
 }
@@ -127,56 +226,6 @@
 .sb-button-ghost:hover {
   border-color: #dedbd2;
   background: #f6f3eb;
-}
-
-.sb-save-status {
-  display: inline-flex;
-  height: 32px;
-  align-items: center;
-  gap: 7px;
-  padding: 0 11px;
-  border: 1px solid #dedbd2;
-  border-radius: 999px;
-  background: #fffdf8;
-  color: #6f6d66;
-  font-size: 12px;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.sb-save-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #8b877d;
-}
-
-.sb-save-saved .sb-save-dot {
-  background: #3f8f4f;
-}
-
-.sb-save-dirty .sb-save-dot {
-  background: #c28a25;
-}
-
-.sb-save-saving .sb-save-dot {
-  background: #3f72b8;
-  animation: sb-pulse 0.9s ease-in-out infinite;
-}
-
-.sb-save-error {
-  border-color: #e4b9b3;
-  color: #a53d30;
-}
-
-.sb-save-error .sb-save-dot {
-  background: #c24b3b;
-}
-
-@keyframes sb-pulse {
-  50% {
-    opacity: 0.3;
-  }
 }
 
 .sb-workspace {

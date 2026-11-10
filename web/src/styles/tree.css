@@ -35,12 +35,6 @@
   text-align: center;
 }
 
-.sb-tree-hint {
-  color: #a09b90;
-  font-size: 10px;
-  font-weight: 500;
-}
-
 .sb-tree-scroll {
   flex: 1;
   min-height: 0;
@@ -210,8 +204,7 @@
   white-space: nowrap;
 }
 
-.sb-button:disabled,
-.sb-save-status:disabled {
+.sb-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
   transform: none;
