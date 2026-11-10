@@ -42,7 +42,7 @@ npm run dev
 
 ### 预览必须通过 HTTP
 
-不要直接双击 `dist/` 里的 HTML 用 `file://` 打开。产物使用 ES Module，且资源路径是 `/superboard/assets/...`，`file://` 下会触发 CORS 和 404。
+不要直接双击 `dist/` 里的 HTML 用 `file://` 打开。产物使用 ES Module，且资源路径是 `/SuperBoard/assets/...`，`file://` 下会触发 CORS 和 404。
 
 本地预览：
 
@@ -51,7 +51,7 @@ npm run build:site
 npm run preview:site
 ```
 
-然后访问 `http://localhost:4173/superboard/`，单页地址为 `http://localhost:4173/superboard/boards/<slug>.html`。
+然后访问 `http://localhost:4173/SuperBoard/`，单页地址为 `http://localhost:4173/SuperBoard/boards/<slug>.html`。
 
 ## 目录结构
 
@@ -108,7 +108,7 @@ Markdown 使用标准 Markdown/GFM 语法；公式使用行内 `$...$`、块级 
 
 | 变量 | 说明 |
 | --- | --- |
-| `BASE_PATH` | 站点路径，默认 `/superboard/` |
+| `BASE_PATH` | 站点路径，默认 `/SuperBoard/` |
 | `SUPERBOARD_CNAME` | 生成 `CNAME`，可选 |
 | `VITE_TLDRAW_LICENSE_KEY` | tldraw 生产授权 key，可选 |
 

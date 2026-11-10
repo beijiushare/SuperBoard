@@ -3,8 +3,15 @@ import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import { boardFsPlugin } from './web/src/dev/boardFs'
 
+function siteBase(value: string) {
+  let result = value.trim() || '/SuperBoard/'
+  if (!result.startsWith('/')) result = `/${result}`
+  if (!result.endsWith('/')) result = `${result}/`
+  return result
+}
+
 export default defineConfig(({ command, isPreview }) => ({
-  base: command === 'build' || isPreview ? '/superboard/' : '/',
+  base: command === 'build' || isPreview ? siteBase(process.env.BASE_PATH || '') : '/',
   plugins: [react(), boardFsPlugin()],
   optimizeDeps: {
     entries: ['index.html'],

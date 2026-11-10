@@ -7,7 +7,7 @@ const boardsDir = path.join(root, 'whiteboards')
 const manifestPath = path.join(distDir, '.vite', 'manifest.json')
 const templatePath = path.join(root, 'web', 'template.html')
 
-const base = normalizeBase(process.env.BASE_PATH || '/superboard/')
+const base = normalizeBase(process.env.BASE_PATH || '/SuperBoard/')
 const siteName = 'SuperBoard'
 
 function normalizeBase(value) {
