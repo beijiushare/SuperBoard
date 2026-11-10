@@ -1365,6 +1365,7 @@ textarea {
 
 .sb-block-color,
 .sb-block-choice {
+  position: relative;
   display: grid;
   width: 36px;
   height: 36px;
@@ -1377,16 +1378,36 @@ textarea {
   cursor: pointer;
 }
 
-.sb-block-color:hover,
-.sb-block-color.is-active,
-.sb-block-choice:hover,
-.sb-block-choice.is-active {
+.sb-block-color::after,
+.sb-block-choice::after {
+  position: absolute;
+  border-radius: 8px;
   background: var(--tl-color-muted-2, #f0efed);
+  content: '';
+  inset: 4px;
+  opacity: 0;
+}
+
+.sb-block-color:hover::after,
+.sb-block-choice:hover::after {
+  opacity: 1;
+}
+
+.sb-block-color.is-active::after,
+.sb-block-choice.is-active::after {
+  background: var(--tl-color-hint, #ebeae8);
+  opacity: 1;
+}
+
+.sb-block-color > *,
+.sb-block-choice > * {
+  position: relative;
+  z-index: 1;
 }
 
 .sb-block-color > span {
-  width: 26px;
-  height: 26px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--sb-block-swatch);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tl-color-text-1, #1f1e1c) 14%, transparent);
