@@ -346,7 +346,7 @@ export function EditorApp() {
           aria-pressed={stylePanelOpen}
           onClick={() => setStylePanelOpen((open) => !open)}
         >
-          <UseAnimations animation={aperture} size={32} />
+          <UseAnimations animation={aperture} size={32} interaction="click-replay" />
         </button>
       </aside>
 
