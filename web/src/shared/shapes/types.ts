@@ -94,6 +94,14 @@ export interface SbMediaProps {
   url: string
   kind: SbMediaKind
   crop: SbMediaCrop
+  cropX: number
+  cropY: number
+  cropW: number
+  cropH: number
+  cropCx: number
+  cropCy: number
+  cropRadius: number
+  cropCorner: number
 }
 
 declare module 'tldraw' {
@@ -130,6 +138,14 @@ export const sbMediaProps = {
   url: T.string,
   kind: T.literalEnum('image', 'video', 'iframe'),
   crop: T.literalEnum('rect', 'rounded', 'circle'),
+  cropX: T.number,
+  cropY: T.number,
+  cropW: T.number,
+  cropH: T.number,
+  cropCx: T.number,
+  cropCy: T.number,
+  cropRadius: T.number,
+  cropCorner: T.number,
 }
 
 export const sbMediaMigrations = createShapePropsMigrationSequence({
@@ -138,6 +154,21 @@ export const sbMediaMigrations = createShapePropsMigrationSequence({
       id: 'com.tldraw.shape.sb-media/1',
       up: (props) => {
         props.crop ??= 'rounded'
+        return props
+      },
+      down: 'retired',
+    },
+    {
+      id: 'com.tldraw.shape.sb-media/2',
+      up: (props) => {
+        props.cropX ??= 0
+        props.cropY ??= 0
+        props.cropW ??= 100
+        props.cropH ??= 100
+        props.cropCx ??= 50
+        props.cropCy ??= 50
+        props.cropRadius ??= 50
+        props.cropCorner ??= 8
         return props
       },
       down: 'retired',

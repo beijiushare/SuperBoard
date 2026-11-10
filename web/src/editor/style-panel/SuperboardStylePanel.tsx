@@ -8,6 +8,7 @@ import {
 import { superboardCanvasComponents } from '../../shared/canvas/CanvasBackground'
 import {
   isSuperboardShapeType,
+  SB_MEDIA_TYPE,
   sbBlockBackgroundColorStyle,
   sbBlockBackgroundOpacityStyle,
   sbBlockBorderColorStyle,
@@ -15,6 +16,7 @@ import {
 } from '../../shared/shapes/types'
 import { BlockColorPicker } from './BlockColorPicker'
 import { BorderStylePicker, BorderWidthPicker } from './BorderPickers'
+import { MediaCropPanel } from './MediaCropPanel'
 import { OpacitySlider } from './OpacitySlider'
 
 function SuperboardBlockStylePanel() {
@@ -41,10 +43,16 @@ export function SuperboardStylePanel(props: TLUiStylePanelProps) {
     () => editor.getSelectedShapes().some((shape) => isSuperboardShapeType(shape.type)),
     [editor],
   )
+  const hasMediaShape = useValue(
+    'superboard media style panel selection',
+    () => editor.getSelectedShapes().some((shape) => shape.type === SB_MEDIA_TYPE),
+    [editor],
+  )
 
   return (
     <DefaultStylePanel {...props}>
       {hasCustomShape ? <SuperboardBlockStylePanel /> : undefined}
+      {hasMediaShape ? <MediaCropPanel /> : undefined}
     </DefaultStylePanel>
   )
 }
