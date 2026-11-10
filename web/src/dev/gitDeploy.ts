@@ -1,7 +1,5 @@
 import { spawn } from 'node:child_process'
-import fs from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import os from 'node:os'
 import path from 'node:path'
 import type { Plugin } from 'vite'
 
@@ -37,18 +35,7 @@ async function commitAndPush(root: string) {
 }
 
 function openWindowsTerminal(root: string) {
-  const scriptPath = path.join(os.tmpdir(), `superboard-deploy-${process.pid}-${Date.now()}.cmd`)
-  const cwd = root.replaceAll('/', '\\')
-  const script = [
-    '@echo off',
-    `cd /d "${cwd}"`,
-    'git add -A',
-    'git commit -m "chore: update boards"',
-    'git push',
-    '',
-  ].join('\r\n')
-  fs.writeFileSync(scriptPath, script, 'utf8')
-
+  const scriptPath = path.join(root, 'scripts', 'deploy.cmd')
   const child = spawn('cmd.exe', ['/c', 'start', 'SuperBoard Deploy', 'cmd.exe', '/k', scriptPath], {
     cwd: root,
     detached: true,
