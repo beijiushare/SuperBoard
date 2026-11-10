@@ -1352,6 +1352,11 @@ textarea {
 
 /* Block style panel */
 
+.sb-canvas .tlui-style-panel {
+  width: 240px;
+  max-width: 240px;
+}
+
 .sb-block-style-picker {
   display: flex;
   flex-direction: column;
