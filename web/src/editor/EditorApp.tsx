@@ -338,10 +338,11 @@ export function EditorApp() {
       </aside>
 
       <div className="sb-workspace">
-        {treeMode && treeOpen ? (
+        {treeMode ? (
           <BoardTreePanel
             nodes={treeNodes}
             title="SuperBoard"
+            collapsed={!treeOpen}
             selectedSlug={board?.meta.slug}
             expanded={expanded}
             onToggle={toggleFolder}

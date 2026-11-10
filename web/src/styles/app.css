@@ -13,7 +13,7 @@
 .sb-rail {
   z-index: 200;
   display: flex;
-  width: 56px;
+  width: 48px;
   flex-shrink: 0;
   flex-direction: column;
   align-items: center;
@@ -26,8 +26,8 @@
 .sb-rail-button {
   position: relative;
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   place-items: center;
   padding: 0;
   border: 0;
@@ -87,10 +87,6 @@
 .sb-rail-button:focus-visible::after {
   opacity: 1;
   transform: translate(0, -50%);
-}
-
-.sb-rail-save.is-saved {
-  color: #3f8f4f;
 }
 
 .sb-rail-save.is-dirty {

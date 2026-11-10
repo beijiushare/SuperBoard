@@ -5,6 +5,7 @@ import type { BoardTreeNode } from './types'
 interface BoardTreePanelProps {
   nodes: BoardTreeNode[]
   title?: string
+  collapsed?: boolean
   selectedSlug?: string
   expanded: Set<string>
   onToggle: (path: string) => void
@@ -18,6 +19,7 @@ interface BoardTreePanelProps {
 export function BoardTreePanel({
   nodes,
   title = '白板目录',
+  collapsed = false,
   selectedSlug,
   expanded,
   onToggle,
@@ -28,7 +30,7 @@ export function BoardTreePanel({
   emptyLabel,
 }: BoardTreePanelProps) {
   return (
-    <aside className="sb-tree-panel">
+    <aside className={`sb-tree-panel${collapsed ? ' is-collapsed' : ''}`}>
       <div className="sb-tree-header">
         <span className="sb-tree-heading">{title}</span>
         {headerMeta}

@@ -6,6 +6,21 @@
   flex-direction: column;
   border-right: 1px solid #dedbd2;
   background: #fbfaf6;
+  transition:
+    margin-left 280ms cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 200ms ease,
+    visibility 0s linear 0s;
+}
+
+.sb-tree-panel.is-collapsed {
+  margin-left: -264px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    margin-left 280ms cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 200ms ease,
+    visibility 0s linear 280ms;
 }
 
 .sb-tree-header {
