@@ -68,6 +68,8 @@ export function ShapeEditor({ shape, onClose, onSave }: ShapeEditorProps) {
 
   const isPele = shape.type === SB_PELE_TYPE
   const isNewPele = isPele && shape.mode === 'create'
+  const previewWidth = typeof shape.props.w === 'number' ? shape.props.w : 580
+  const previewHeight = typeof shape.props.h === 'number' ? shape.props.h : 380
 
   function selectDiagram(value: string) {
     setDiagram(value)
@@ -120,10 +122,17 @@ export function ShapeEditor({ shape, onClose, onSave }: ShapeEditorProps) {
             />
           </div>
 
-          <div className="sb-preview-pane">
+          <div className={`sb-preview-pane${isPele ? ' sb-preview-pane-pele' : ''}`}>
             {shape.type === SB_MARKDOWN_TYPE ? <MarkdownView source={text} /> : null}
             {shape.type === SB_KANBAN_TYPE ? <KanbanView source={text} /> : null}
-            {isPele ? <PeleView code={code} /> : null}
+            {isPele ? (
+              <div
+                className="sb-card sb-card-pele sb-preview-card"
+                style={{ width: previewWidth, height: previewHeight }}
+              >
+                <PeleView code={code} />
+              </div>
+            ) : null}
           </div>
         </div>
 

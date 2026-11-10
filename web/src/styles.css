@@ -840,17 +840,41 @@ textarea {
 
 /* Pele */
 
+.sb-card-pele,
+.pele {
+  --pele-bg: #1c1b1a;
+  --pele-fg: #cecdc3;
+  --pele-fg-on-light: #1f1f1f;
+  --pele-fg-on-dark: #ffffff;
+  --pele-muted: #878580;
+  --pele-line: #cecdc3;
+  --pele-surface: #282726;
+  --pele-surface-alt: #343331;
+  --pele-border: #403e3c;
+  --pele-accent: #4385be;
+  --pele-critical: #d14d41;
+  --pele-error: #e45756;
+  --pele-font: -apple-system, BlinkMacSystemFont, 'Inter Variable', Inter, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --pele-font-mono: ui-monospace, SFMono-Regular, 'Cascadia Code', 'IBM Plex Mono', 'Roboto Mono',
+    'DejaVu Sans Mono', 'Liberation Mono', Menlo, Monaco, Consolas, 'Source Code Pro', monospace;
+  --pele-title-weight: bold;
+  --pele-heading-weight: bold;
+  --pele-bold-weight: bold;
+  --pele-radius: 6px;
+  --pele-series-1: #d14d41;
+  --pele-series-2: #da702c;
+  --pele-series-3: #d0a215;
+  --pele-series-4: #879a39;
+  --pele-series-5: #3aa99f;
+  --pele-series-6: #4385be;
+  --pele-series-7: #8b7ec8;
+  --pele-series-8: #ce5d97;
+}
+
 .sb-card-pele {
-  --pele-bg: var(--tl-color-panel, #fffdf8);
-  --pele-fg: var(--tl-color-text, #1f1e1c);
-  --pele-muted: var(--tl-color-text-3, #6f6d66);
-  --pele-line: var(--tl-color-text, #1f1e1c);
-  --pele-surface: var(--tl-color-low, #f1efe8);
-  --pele-surface-alt: var(--tl-color-low, #ebe8df);
-  --pele-border: var(--tl-color-low-border, #dedbd2);
-  --pele-accent: #205ea6;
-  --pele-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  --pele-radius: 5px;
+  border-color: var(--pele-border);
+  background: var(--pele-bg);
+  color: var(--pele-fg);
 }
 
 .sb-pele {
@@ -858,7 +882,22 @@ textarea {
   height: 100%;
   overflow: auto;
   padding: 16px;
+  color: var(--pele-fg);
   overscroll-behavior: contain;
+}
+
+.sb-preview-pane-pele {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #fcfcfc;
+}
+
+.sb-preview-card {
+  flex: none;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .sb-pele-svg {
@@ -878,18 +917,18 @@ textarea {
   display: grid;
   min-height: 120px;
   place-items: center;
-  color: var(--tl-color-text-3, #8b877d);
+  color: var(--pele-muted);
   font-size: 12px;
 }
 
 .sb-pele-error {
   display: block;
   padding: 12px;
-  border: 1px solid #e4b9b3;
+  border: 1px solid #5a3531;
   border-radius: 8px;
-  background: #fff8f6;
-  color: #a53d30;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  background: #2a1d1c;
+  color: var(--pele-error);
+  font-family: var(--pele-font-mono);
   white-space: pre-wrap;
   text-align: left;
 }
@@ -910,7 +949,7 @@ textarea {
 
 .sb-modal {
   display: flex;
-  width: min(1180px, 100%);
+  width: min(1260px, 100%);
   height: min(760px, calc(100dvh - 48px));
   flex-direction: column;
   overflow: hidden;
