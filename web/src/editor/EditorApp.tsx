@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { Tldraw, createShapeId, type Editor, type TLShapeId } from 'tldraw'
 import type { BoardFile, BoardListItem, BoardTreeFolder } from '../shared/board/types'
-import { BoardTree, type BoardTreeContextTarget } from '../shared/board/BoardTree'
-import { ancestorFolderPaths, buildBoardTree } from '../shared/board/tree'
+import { BoardTreePanel } from '../shared/board/BoardTreePanel'
+import type { BoardTreeContextTarget } from '../shared/board/BoardTree'
+import { buildBoardTree } from '../shared/board/tree'
+import { useTreeExpansion } from '../shared/board/useTreeExpansion'
 import {
   DEFAULT_MARKDOWN_TEXT,
   DEFAULT_PELE_CODE,
@@ -31,20 +33,6 @@ interface ContextMenuState {
   target: BoardContextTarget
 }
 
-const TREE_EXPANDED_KEY = 'superboard.tree.expanded'
-
-function loadExpandedFolders(): Set<string> | null {
-  try {
-    const raw = window.localStorage.getItem(TREE_EXPANDED_KEY)
-    if (raw === null) return null
-    const parsed: unknown = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return null
-    return new Set(parsed.filter((value): value is string => typeof value === 'string'))
-  } catch {
-    return null
-  }
-}
-
 function updateBoardUrl(slug: string | null) {
   const params = new URLSearchParams(window.location.search)
   if (slug) params.set('board', slug)
@@ -71,8 +59,6 @@ export function EditorApp() {
   const [editing, setEditing] = useState<EditingShape | null>(null)
   const [treeMode, setTreeMode] = useState(() => new URLSearchParams(window.location.search).has('tree'))
   const [treeOpen, setTreeOpen] = useState(true)
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
-  const [expandedReady, setExpandedReady] = useState(false)
   const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
   const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
@@ -90,30 +76,7 @@ export function EditorApp() {
   }, [board])
 
   const treeNodes = useMemo(() => buildBoardTree(boards), [boards])
-
-  useEffect(() => {
-    if (expandedReady || boards.length === 0) return
-    const saved = loadExpandedFolders()
-    if (saved) {
-      setExpanded(saved)
-    } else {
-      const next = new Set<string>()
-      for (const item of boards) {
-        for (const path of ancestorFolderPaths(item.path)) next.add(path)
-      }
-      setExpanded(next)
-    }
-    setExpandedReady(true)
-  }, [boards, expandedReady])
-
-  useEffect(() => {
-    if (!expandedReady) return
-    try {
-      window.localStorage.setItem(TREE_EXPANDED_KEY, JSON.stringify([...expanded]))
-    } catch {
-      // localStorage may be unavailable in private mode
-    }
-  }, [expanded, expandedReady])
+  const { expanded, toggleFolder, expandPath, renameExpandedPath } = useTreeExpansion(boards)
 
   const saveNow = useCallback(async () => {
     if (timerRef.current !== null) {
@@ -328,38 +291,6 @@ export function EditorApp() {
     if ((event.target as HTMLElement).closest('.sb-tree-row')) return
     event.preventDefault()
     setContextMenu({ x: event.clientX, y: event.clientY, target: { type: 'root' } })
-  }
-
-  function expandPath(path: string) {
-    if (!path) return
-    setExpanded((current) => {
-      const next = new Set(current)
-      for (const item of ancestorFolderPaths(path)) next.add(item)
-      return next
-    })
-  }
-
-  function toggleFolder(path: string) {
-    setExpanded((current) => {
-      const next = new Set(current)
-      if (next.has(path)) next.delete(path)
-      else next.add(path)
-      return next
-    })
-  }
-
-  function renameExpandedPath(from: string, to: string) {
-    if (from === to) return
-    setExpanded((current) => {
-      const next = new Set<string>()
-      const prefix = `${from}/`
-      for (const path of current) {
-        if (path === from) next.add(to)
-        else if (path.startsWith(prefix)) next.add(`${to}${path.slice(from.length)}`)
-        else next.add(path)
-      }
-      return next
-    })
   }
 
   function enableTreeMode() {
@@ -669,26 +600,20 @@ export function EditorApp() {
 
       <div className="sb-workspace">
         {treeMode && treeOpen ? (
-          <aside className="sb-tree-panel">
-            <div className="sb-tree-header">
-              <span className="sb-tree-heading">白板目录</span>
-              <span className="sb-tree-hint">右键操作</span>
-            </div>
-            <div className="sb-tree-scroll" onContextMenu={openRootContextMenu}>
-              <BoardTree
-                nodes={treeNodes}
-                selectedSlug={board?.meta.slug}
-                expanded={expanded}
-                onToggle={toggleFolder}
-                onSelect={(slug) => {
-                  void switchBoard(slug)
-                  if (window.matchMedia('(max-width: 860px)').matches) setTreeOpen(false)
-                }}
-                onContextMenu={openContextMenu}
-                emptyLabel="还没有白板，在空白处右键新建"
-              />
-            </div>
-          </aside>
+          <BoardTreePanel
+            nodes={treeNodes}
+            selectedSlug={board?.meta.slug}
+            expanded={expanded}
+            onToggle={toggleFolder}
+            onSelect={(slug) => {
+              void switchBoard(slug)
+              if (window.matchMedia('(max-width: 860px)').matches) setTreeOpen(false)
+            }}
+            onContextMenu={openContextMenu}
+            onRootContextMenu={openRootContextMenu}
+            headerMeta={<span className="sb-tree-hint">右键操作</span>}
+            emptyLabel="还没有白板，在空白处右键新建"
+          />
         ) : null}
 
         <main className="sb-canvas">

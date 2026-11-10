@@ -1,24 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Tldraw, type Editor } from 'tldraw'
-import { BoardTree } from '../shared/board/BoardTree'
+import { BoardTreePanel } from '../shared/board/BoardTreePanel'
 import { isTreePageData } from '../shared/board/page'
-import { ancestorFolderPaths, buildBoardTree } from '../shared/board/tree'
+import { buildBoardTree } from '../shared/board/tree'
 import type { BoardFile, BoardListItem } from '../shared/board/types'
+import { useTreeExpansion } from '../shared/board/useTreeExpansion'
 import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
-
-const TREE_EXPANDED_KEY = 'superboard.tree.expanded'
-
-function loadExpandedFolders(): Set<string> | null {
-  try {
-    const raw = window.localStorage.getItem(TREE_EXPANDED_KEY)
-    if (raw === null) return null
-    const parsed: unknown = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return null
-    return new Set(parsed.filter((value): value is string => typeof value === 'string'))
-  } catch {
-    return null
-  }
-}
 
 export function TreeViewerApp() {
   const data = window.__SUPERBOARD__
@@ -43,34 +30,9 @@ function TreeViewer({ boards, base }: { boards: BoardListItem[]; base: string })
   const [loading, setLoading] = useState(Boolean(initialSlug))
   const [error, setError] = useState('')
   const [treeOpen, setTreeOpen] = useState(true)
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
-  const [expandedReady, setExpandedReady] = useState(false)
+  const { expanded, toggleFolder } = useTreeExpansion(boards)
 
   const treeNodes = useMemo(() => buildBoardTree(boards), [boards])
-
-  useEffect(() => {
-    if (expandedReady) return
-    const saved = loadExpandedFolders()
-    if (saved) {
-      setExpanded(saved)
-    } else {
-      const next = new Set<string>()
-      for (const item of boards) {
-        for (const path of ancestorFolderPaths(item.path)) next.add(path)
-      }
-      setExpanded(next)
-    }
-    setExpandedReady(true)
-  }, [boards, expandedReady])
-
-  useEffect(() => {
-    if (!expandedReady) return
-    try {
-      window.localStorage.setItem(TREE_EXPANDED_KEY, JSON.stringify([...expanded]))
-    } catch {
-      // localStorage may be unavailable in private mode
-    }
-  }, [expanded, expandedReady])
 
   useEffect(() => {
     if (!selected) {
@@ -114,15 +76,6 @@ function TreeViewer({ boards, base }: { boards: BoardListItem[]; base: string })
     if (window.matchMedia('(max-width: 860px)').matches) setTreeOpen(false)
   }
 
-  function toggleFolder(path: string) {
-    setExpanded((current) => {
-      const next = new Set(current)
-      if (next.has(path)) next.delete(path)
-      else next.add(path)
-      return next
-    })
-  }
-
   return (
     <div className="sb-app">
       <header className="sb-toolbar">
@@ -156,22 +109,15 @@ function TreeViewer({ boards, base }: { boards: BoardListItem[]; base: string })
 
       <div className="sb-workspace">
         {treeOpen ? (
-          <aside className="sb-tree-panel">
-            <div className="sb-tree-header">
-              <span className="sb-tree-heading">白板目录</span>
-              <span className="sb-tree-count">{boards.length}</span>
-            </div>
-            <div className="sb-tree-scroll">
-              <BoardTree
-                nodes={treeNodes}
-                selectedSlug={selected}
-                expanded={expanded}
-                onToggle={toggleFolder}
-                onSelect={selectBoard}
-                emptyLabel="还没有白板"
-              />
-            </div>
-          </aside>
+          <BoardTreePanel
+            nodes={treeNodes}
+            selectedSlug={selected}
+            expanded={expanded}
+            onToggle={toggleFolder}
+            onSelect={selectBoard}
+            headerMeta={<span className="sb-tree-count">{boards.length}</span>}
+            emptyLabel="还没有白板"
+          />
         ) : null}
 
         <main className="sb-canvas">
