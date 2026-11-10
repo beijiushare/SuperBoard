@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import { boardFsPlugin } from './web/src/dev/boardFs'
+import { gitDeployPlugin } from './web/src/dev/gitDeploy'
 
 function siteBase(value: string) {
   let result = value.trim() || '/SuperBoard/'
@@ -12,7 +13,7 @@ function siteBase(value: string) {
 
 export default defineConfig(({ command, isPreview }) => ({
   base: command === 'build' || isPreview ? siteBase(process.env.BASE_PATH || '') : '/',
-  plugins: [react(), boardFsPlugin()],
+  plugins: [react(), boardFsPlugin(), gitDeployPlugin()],
   optimizeDeps: {
     entries: ['index.html'],
   },

@@ -6,6 +6,7 @@ import checkCircle from 'react-useanimations/lib/checkCircle'
 import command from 'react-useanimations/lib/command'
 import gitBranch from 'react-useanimations/lib/gitBranch'
 import sidebar from 'react-useanimations/lib/sidebar'
+import uploadCloud from 'react-useanimations/lib/uploadCloud'
 import type { BoardFile, BoardListItem, BoardScope, BoardTreeFolder } from '../shared/board/types'
 import { isBoardScope } from '../shared/board/types'
 import { BoardTreePanel } from '../shared/board/BoardTreePanel'
@@ -460,6 +461,17 @@ export function EditorApp() {
           onClick={() => setMenuPanelOpen((open) => !open)}
         >
           <UseAnimations animation={command} size={32} interaction="click-replay" />
+        </button>
+        <button
+          type="button"
+          className="sb-rail-button sb-rail-deploy"
+          data-tooltip="提交并推送"
+          aria-label="提交并推送"
+          onClick={() => {
+            void fetch('/__deploy', { method: 'POST' }).catch(() => {})
+          }}
+        >
+          <UseAnimations animation={uploadCloud} size={32} />
         </button>
       </aside>
 
