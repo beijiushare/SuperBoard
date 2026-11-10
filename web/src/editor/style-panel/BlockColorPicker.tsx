@@ -27,10 +27,11 @@ export function BlockColorPicker({ title, style }: { title: string; style: Style
         {SB_BLOCK_COLOR_VALUES.map((color) => {
           const active = current?.type === 'shared' && current.value === color
           const label = SB_BLOCK_COLOR_LABELS[color]
+          const light = color === 'white' || color === 'paper'
           return (
             <button
               key={color}
-              className={`sb-block-color${active ? ' is-active' : ''}`}
+              className={`sb-block-color${active ? ' is-active' : ''}${light ? ' is-light' : ''}`}
               type="button"
               title={label}
               aria-label={`${title}：${label}`}

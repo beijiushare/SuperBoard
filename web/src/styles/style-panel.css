@@ -60,6 +60,10 @@
   background: var(--sb-block-swatch);
 }
 
+.sb-block-color.is-light > span {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tl-color-text-1, #1f1e1c) 10%, transparent);
+}
+
 .sb-block-color:focus-visible,
 .sb-block-choice:focus-visible {
   outline: 2px solid var(--tl-color-selection-primary, #2f80ed);
