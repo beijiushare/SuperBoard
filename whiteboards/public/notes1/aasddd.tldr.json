@@ -3,7 +3,7 @@
   "meta": {
     "title": "ssss",
     "slug": "aasddd",
-    "updatedAt": "2026-11-10T20:41:25.962Z"
+    "updatedAt": "2026-11-10T20:46:25.930Z"
   },
   "document": {
     "store": {
@@ -78,9 +78,51 @@
         "index": "a17Dz",
         "typeName": "shape"
       },
+      "shape:goIi767C0BAXBpWn85oSb": {
+        "x": 684.2774451540494,
+        "y": 1134.2987244556696,
+        "rotation": 0,
+        "isLocked": false,
+        "opacity": 1,
+        "meta": {},
+        "id": "shape:goIi767C0BAXBpWn85oSb",
+        "type": "text",
+        "props": {
+          "color": "black",
+          "size": "m",
+          "w": 315.2109375,
+          "font": "draw",
+          "textAlign": "start",
+          "autoSize": true,
+          "scale": 1.4764460475614953,
+          "richText": {
+            "type": "doc",
+            "attrs": {
+              "dir": "auto"
+            },
+            "content": [
+              {
+                "type": "paragraph",
+                "attrs": {
+                  "dir": "auto"
+                },
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "sadddddddddddddddddd"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "parentId": "page:page",
+        "index": "aA9lf",
+        "typeName": "shape"
+      },
       "shape:m4QlX-6PmkWOT09CoKhw8": {
-        "x": 1010.5782202807392,
-        "y": 682.1539352582722,
+        "x": 1051.388952435501,
+        "y": 741.213994810541,
         "rotation": 0,
         "isLocked": false,
         "opacity": 1,
@@ -94,8 +136,8 @@
           "borderOpacity": 35,
           "borderWidth": "thin",
           "borderStyle": "solid",
-          "w": 460,
-          "h": 340,
+          "w": 384.6156475858265,
+          "h": 240.89922210721,
           "text": "# 新卡片\n\n这里支持 **Markdown**、表格、代码块和 AsciiMath等。\n\n行内公式：$a^2 + b^2 = c^2$\n\n$$\nsum_(i=1)^n i = (n(n+1))/2\n$$\n"
         },
         "parentId": "page:page",
