@@ -2,15 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import type { TLShapeId } from 'tldraw'
 import { KanbanView } from '../shared/kanban/KanbanView'
 import { MarkdownView } from '../shared/markdown/MarkdownView'
+import { PELE_EXAMPLE_GROUPS, type PeleExample, type PeleExampleGroup } from '../shared/pele/examples'
 import { PeleView } from '../shared/pele/PeleView'
-import {
-  PELE_DIAGRAM_OPTIONS,
-  PELE_EXAMPLES,
-  SB_KANBAN_TYPE,
-  SB_MARKDOWN_TYPE,
-  SB_PELE_TYPE,
-  type PeleDiagram,
-} from '../shared/shapes/types'
+import { SB_KANBAN_TYPE, SB_MARKDOWN_TYPE, SB_PELE_TYPE } from '../shared/shapes/types'
 
 export type EditingShape = {
   id: TLShapeId
@@ -27,21 +21,124 @@ interface ShapeEditorProps {
   onSave: (patch: Record<string, unknown>) => void
 }
 
-const TITLES = {
-  [SB_MARKDOWN_TYPE]: '编辑 Markdown',
-  [SB_KANBAN_TYPE]: '编辑看板',
-  [SB_PELE_TYPE]: '编辑图表',
+type PeleStep = 'types' | 'examples' | 'editor'
+
+const SHAPE_NAMES = {
+  [SB_MARKDOWN_TYPE]: 'Markdown',
+  [SB_KANBAN_TYPE]: '看板',
+  [SB_PELE_TYPE]: '图表',
 } as const
 
+function LazyPelePreview({ code }: { code: string }) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true)
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return
+        setVisible(true)
+        observer.disconnect()
+      },
+      { rootMargin: '320px' },
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={ref} className="sb-example-preview sb-pele-theme" aria-busy={!visible}>
+      {visible ? <PeleView code={code} /> : null}
+    </div>
+  )
+}
+
+function PeleTypeGallery({ onSelect }: { onSelect: (group: PeleExampleGroup) => void }) {
+  return (
+    <div className="sb-gallery-body">
+      <div className="sb-gallery-grid">
+        {PELE_EXAMPLE_GROUPS.map((group) => {
+          const example = group.examples[group.representativeIndex] ?? group.examples[0]
+          return (
+            <button key={group.type} className="sb-type-card" type="button" onClick={() => onSelect(group)}>
+              <LazyPelePreview code={example.source} />
+              <span className="sb-type-card-meta">
+                <span className="sb-type-card-title">
+                  {group.label}
+                  <span className="sb-type-card-en">（{group.title}）</span>
+                </span>
+                <span className="sb-type-card-sub">
+                  {group.examples.length} 个官方示例
+                  {group.beta ? ' · Beta' : ''}
+                </span>
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function PeleExampleGallery({
+  group,
+  onBack,
+  onSelect,
+}: {
+  group: PeleExampleGroup
+  onBack: () => void
+  onSelect: (example: PeleExample) => void
+}) {
+  return (
+    <div className="sb-gallery-body">
+      <div className="sb-gallery-toolbar">
+        <button className="sb-button sb-button-ghost" type="button" onClick={onBack}>
+          ← 全部图表类型
+        </button>
+        <span className="sb-gallery-count">
+          {group.label}（{group.title}） · {group.examples.length} 个官方示例
+        </span>
+      </div>
+      <div className="sb-example-grid">
+        {group.examples.map((example, index) => (
+          <button
+            key={`${group.type}-${index}`}
+            className="sb-example-card"
+            type="button"
+            onClick={() => onSelect(example)}
+          >
+            <LazyPelePreview code={example.source} />
+            <span className="sb-example-card-meta">
+              <span className="sb-example-card-label">{example.label}</span>
+              <span className="sb-example-card-action">使用此示例</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function ShapeEditor({ shape, onClose, onSave }: ShapeEditorProps) {
+  const isPele = shape.type === SB_PELE_TYPE
+  const isNew = shape.mode === 'create'
+  const [peleStep, setPeleStep] = useState<PeleStep>(isPele && isNew ? 'types' : 'editor')
+  const [activeGroup, setActiveGroup] = useState<PeleExampleGroup | null>(null)
   const [text, setText] = useState(String(shape.props.text ?? ''))
   const [code, setCode] = useState(String(shape.props.code ?? ''))
   const [diagram, setDiagram] = useState(String(shape.props.diagram ?? 'flowchart'))
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
-    textareaRef.current?.focus()
-  }, [])
+    if (peleStep === 'editor') textareaRef.current?.focus()
+  }, [peleStep])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -59,92 +156,133 @@ export function ShapeEditor({ shape, onClose, onSave }: ShapeEditorProps) {
   })
 
   function save() {
-    if (shape.type === SB_PELE_TYPE) {
+    if (isPele && peleStep !== 'editor') return
+    if (isPele) {
       onSave({ code, diagram })
     } else {
       onSave({ text })
     }
   }
 
-  const isPele = shape.type === SB_PELE_TYPE
-  const isNewPele = isPele && shape.mode === 'create'
+  function selectType(group: PeleExampleGroup) {
+    setActiveGroup(group)
+    setPeleStep('examples')
+  }
+
+  function selectExample(example: PeleExample) {
+    if (activeGroup) setDiagram(activeGroup.type)
+    setCode(example.source)
+    setPeleStep('editor')
+  }
+
+  const title =
+    isPele && isNew
+      ? peleStep === 'types'
+        ? '新建图表'
+        : peleStep === 'examples' && activeGroup
+          ? `${activeGroup.label}（${activeGroup.title}）`
+          : '编辑图表'
+      : `${isNew ? '新建' : '编辑'} ${SHAPE_NAMES[shape.type]}`
+
+  const description =
+    isPele && isNew
+      ? peleStep === 'types'
+        ? `从 ${PELE_EXAMPLE_GROUPS.length} 种 Pele 官方图表中选择一种`
+        : peleStep === 'examples' && activeGroup
+          ? '选择一个官方示例进入编辑'
+          : '编辑 Mermaid 源码，右侧实时预览'
+      : isPele
+        ? '编辑 Mermaid 源码，右侧实时预览'
+        : '编辑源码，右侧使用与画布相同的渲染器'
+
   const previewWidth = typeof shape.props.w === 'number' ? shape.props.w : 580
   const previewHeight = typeof shape.props.h === 'number' ? shape.props.h : 380
-
-  function selectDiagram(value: string) {
-    setDiagram(value)
-    const example = PELE_EXAMPLES[value as PeleDiagram]
-    if (example) setCode(example)
-  }
+  const showGallery = isPele && peleStep !== 'editor'
 
   return (
     <div className="sb-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className="sb-modal" role="dialog" aria-modal="true" aria-label={TITLES[shape.type]}>
+      <section
+        className={`sb-modal${showGallery ? ' sb-modal-gallery' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
         <header className="sb-modal-header">
           <div>
-            <h2>{TITLES[shape.type]}</h2>
-            <p>
-              {isNewPele
-                ? '选择图表类型会载入对应示例，可继续修改源码'
-                : isPele
-                  ? '编辑 Mermaid 源码，右侧实时预览'
-                  : '编辑源码，右侧使用与画布相同的渲染器'}
-            </p>
+            <h2>{title}</h2>
+            <p>{description}</p>
           </div>
           <button className="sb-icon-button" type="button" onClick={onClose} aria-label="关闭">
             ×
           </button>
         </header>
 
-        <div className="sb-modal-body">
-          <div className="sb-editor-pane">
-            {isNewPele ? (
-              <div className="sb-pele-toolbar">
-                <label>
-                  图表类型
-                  <select value={diagram} onChange={(event) => selectDiagram(event.target.value)}>
-                    {PELE_DIAGRAM_OPTIONS.map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            ) : null}
-            <textarea
-              ref={textareaRef}
-              className="sb-source-input"
-              value={isPele ? code : text}
-              onChange={(event) => (isPele ? setCode(event.target.value) : setText(event.target.value))}
-              spellCheck={false}
-              placeholder={isPele ? '输入 Mermaid 图表源码' : '输入内容'}
-            />
-          </div>
+        {isPele && peleStep === 'types' ? <PeleTypeGallery onSelect={selectType} /> : null}
 
-          <div className={`sb-preview-pane${isPele ? ' sb-preview-pane-pele' : ''}`}>
-            {shape.type === SB_MARKDOWN_TYPE ? <MarkdownView source={text} /> : null}
-            {shape.type === SB_KANBAN_TYPE ? <KanbanView source={text} /> : null}
-            {isPele ? (
-              <div
-                className="sb-card sb-card-pele sb-preview-card"
-                style={{ width: previewWidth, height: previewHeight }}
-              >
-                <PeleView code={code} />
-              </div>
-            ) : null}
+        {isPele && peleStep === 'examples' && activeGroup ? (
+          <PeleExampleGallery
+            group={activeGroup}
+            onBack={() => {
+              setActiveGroup(null)
+              setPeleStep('types')
+            }}
+            onSelect={selectExample}
+          />
+        ) : null}
+
+        {!showGallery ? (
+          <div className="sb-modal-body">
+            <div className="sb-editor-pane">
+              <textarea
+                ref={textareaRef}
+                className="sb-source-input"
+                value={isPele ? code : text}
+                onChange={(event) => (isPele ? setCode(event.target.value) : setText(event.target.value))}
+                spellCheck={false}
+                placeholder={isPele ? '输入 Mermaid 图表源码' : '输入内容'}
+              />
+            </div>
+
+            <div className={`sb-preview-pane${isPele ? ' sb-preview-pane-pele' : ''}`}>
+              {shape.type === SB_MARKDOWN_TYPE ? <MarkdownView source={text} /> : null}
+              {shape.type === SB_KANBAN_TYPE ? <KanbanView source={text} /> : null}
+              {isPele ? (
+                <div
+                  className="sb-card sb-card-pele sb-preview-card"
+                  style={{ width: previewWidth, height: previewHeight }}
+                >
+                  <PeleView code={code} />
+                </div>
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         <footer className="sb-modal-footer">
-          <span className="sb-shortcut">Esc 关闭 · Ctrl/⌘ + Enter 保存</span>
+          {isPele && isNew ? (
+            peleStep === 'editor' ? (
+              <button className="sb-button sb-button-ghost" type="button" onClick={() => setPeleStep('examples')}>
+                ← 返回示例
+              </button>
+            ) : (
+              <span className="sb-shortcut">
+                {peleStep === 'types'
+                  ? '选择类型后浏览该类型的全部官方示例'
+                  : `${activeGroup?.examples.length ?? 0} 个示例，点选后进入编辑`}
+              </span>
+            )
+          ) : (
+            <span className="sb-shortcut">Esc 关闭 · Ctrl/⌘ + Enter 保存</span>
+          )}
           <div className="sb-modal-actions">
             <button className="sb-button sb-button-ghost" type="button" onClick={onClose}>
               取消
             </button>
-            <button className="sb-button sb-button-primary" type="button" onClick={save}>
-              保存
-            </button>
+            {!showGallery ? (
+              <button className="sb-button sb-button-primary" type="button" onClick={save}>
+                保存
+              </button>
+            ) : null}
           </div>
         </footer>
       </section>
