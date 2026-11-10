@@ -90,7 +90,7 @@ whiteboards/
 - 最左侧竖向操作栏：目录开关、公开/私有切换、保存、样式面板开关、顶部操作栏开关、提交推送
 - 目录标题同步显示 `SuperBoard-public` / `SuperBoard-private`
 - tldraw 顶部操作栏默认隐藏，通过 `command` 按钮显示
-- 操作栏最后是 `uploadCloud` 提交按钮：确认后在 dev 环境执行 `git add -A`、`git commit`、`git push`，随后由 GitHub Actions 自动部署
+- 操作栏最后是 `uploadCloud` 提交按钮：确认后在 Windows 打开新终端窗口，执行 `git add -A`、`git commit`、`git push`，随后由 GitHub Actions 自动部署
 - 目录树支持文件夹、右键新建/重命名/删除文件夹、删除白板
 - 画布右键可添加 Markdown 块和图表块
 - 左键双击块进入编辑，右键不会触发

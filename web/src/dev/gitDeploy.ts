@@ -1,5 +1,8 @@
 import { spawn } from 'node:child_process'
+import fs from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import os from 'node:os'
+import path from 'node:path'
 import type { Plugin } from 'vite'
 
 function isLoopback(req: IncomingMessage) {
@@ -33,9 +36,37 @@ async function commitAndPush(root: string) {
   await runGit(root, ['push'])
 }
 
-export function gitDeployPlugin(): Plugin {
-  let running = false
+function openWindowsTerminal(root: string) {
+  const scriptPath = path.join(os.tmpdir(), `superboard-deploy-${process.pid}-${Date.now()}.cmd`)
+  const script = [
+    '@echo off',
+    `cd /d "${root}"`,
+    'git add -A',
+    'git commit -m "chore: update boards"',
+    'git push',
+    '',
+  ].join('\r\n')
+  fs.writeFileSync(scriptPath, script, 'utf8')
 
+  const child = spawn('cmd.exe', ['/c', 'start', 'SuperBoard Deploy', 'cmd.exe', '/k', scriptPath], {
+    cwd: root,
+    detached: true,
+    stdio: 'ignore',
+    windowsHide: false,
+    shell: false,
+  })
+  child.unref()
+}
+
+function deploy(root: string) {
+  if (process.platform === 'win32') {
+    openWindowsTerminal(root)
+    return
+  }
+  void commitAndPush(root)
+}
+
+export function gitDeployPlugin(): Plugin {
   return {
     name: 'superboard-git-deploy',
     apply: 'serve',
@@ -60,12 +91,7 @@ export function gitDeployPlugin(): Plugin {
 
         res.statusCode = 202
         res.end()
-
-        if (running) return
-        running = true
-        void commitAndPush(server.config.root).finally(() => {
-          running = false
-        })
+        deploy(server.config.root)
       })
     },
   }
