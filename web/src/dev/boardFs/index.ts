@@ -1,0 +1,1 @@
+export { boardFsPlugin } from './plugin'

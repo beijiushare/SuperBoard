@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
-import { boardFsPlugin } from './web/src/dev/boardFsPlugin'
+import { boardFsPlugin } from './web/src/dev/boardFs'
 
 export default defineConfig(({ command, isPreview }) => ({
   base: command === 'build' || isPreview ? '/superboard/' : '/',
