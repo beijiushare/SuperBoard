@@ -80,6 +80,7 @@
   padding: 18px 20px 24px;
   background: #f6f5f1;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .sb-gallery-toolbar {
@@ -211,6 +212,7 @@
 .sb-example-card-label {
   display: -webkit-box;
   overflow: hidden;
+  min-height: 2.9em;
   color: #55524c;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
   font-size: 11px;
