@@ -12,12 +12,14 @@ import {
   type PeleDiagram,
 } from '../shared/shapes/types'
 
-export interface EditingShape {
+export type EditingShape = {
   id: TLShapeId
-  mode: 'create' | 'edit'
   type: typeof SB_MARKDOWN_TYPE | typeof SB_KANBAN_TYPE | typeof SB_PELE_TYPE
   props: Record<string, unknown>
-}
+} & (
+  | { mode: 'create'; position: { x: number; y: number } }
+  | { mode: 'edit' }
+)
 
 interface ShapeEditorProps {
   shape: EditingShape

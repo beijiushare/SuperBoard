@@ -497,52 +497,74 @@ export function EditorApp() {
       y: bounds.y + bounds.h / 2,
     })
     const offset = (editor.getCurrentPageShapes().length % 6) * 24
+    let props: Record<string, unknown>
+    let width: number
+    let height: number
 
     if (type === SB_MARKDOWN_TYPE) {
-      const props = { w: 460, h: 340, text: DEFAULT_MARKDOWN_TEXT }
-      editor.createShape<SbMarkdownShape>({
-        id,
-        type,
-        x: center.x - props.w / 2 + offset,
-        y: center.y - props.h / 2 + offset,
-        props,
-      })
+      width = 460
+      height = 340
+      props = { w: width, h: height, text: DEFAULT_MARKDOWN_TEXT }
     } else if (type === SB_KANBAN_TYPE) {
-      const props = { w: 780, h: 420, text: DEFAULT_KANBAN_TEXT }
-      editor.createShape<SbKanbanShape>({
-        id,
-        type,
-        x: center.x - props.w / 2 + offset,
-        y: center.y - props.h / 2 + offset,
-        props,
-      })
+      width = 780
+      height = 420
+      props = { w: width, h: height, text: DEFAULT_KANBAN_TEXT }
     } else {
-      const props = { w: 580, h: 380, code: DEFAULT_PELE_CODE, diagram: 'flowchart' }
-      editor.createShape<SbPeleShape>({
-        id,
-        type,
-        x: center.x - props.w / 2 + offset,
-        y: center.y - props.h / 2 + offset,
-        props,
-      })
+      width = 580
+      height = 380
+      props = { w: width, h: height, code: DEFAULT_PELE_CODE, diagram: 'flowchart' }
     }
 
-    editor.select(id)
-    const shape = editor.getShape(id)
-    if (shape) {
-      setEditing({
-        id: shape.id,
-        mode: 'create',
-        type,
-        props: shape.props as unknown as Record<string, unknown>,
-      })
-    }
+    setEditing({
+      id,
+      mode: 'create',
+      type,
+      props,
+      position: { x: center.x - width / 2 + offset, y: center.y - height / 2 + offset },
+    })
   }
 
   function saveEdit(patch: Record<string, unknown>) {
     const editor = editorRef.current
     const current = editing
     if (!editor || !current) return
+
+    if (current.mode === 'create') {
+      const { id, type, position } = current
+      if (type === SB_MARKDOWN_TYPE) {
+        const text = typeof patch.text === 'string' ? patch.text : DEFAULT_MARKDOWN_TEXT
+        editor.createShape<SbMarkdownShape>({
+          id,
+          type,
+          x: position.x,
+          y: position.y,
+          props: { w: 460, h: 340, text },
+        })
+      } else if (type === SB_KANBAN_TYPE) {
+        const text = typeof patch.text === 'string' ? patch.text : DEFAULT_KANBAN_TEXT
+        editor.createShape<SbKanbanShape>({
+          id,
+          type,
+          x: position.x,
+          y: position.y,
+          props: { w: 780, h: 420, text },
+        })
+      } else {
+        const code = typeof patch.code === 'string' ? patch.code : DEFAULT_PELE_CODE
+        const diagram = typeof patch.diagram === 'string' ? patch.diagram : 'flowchart'
+        editor.createShape<SbPeleShape>({
+          id,
+          type,
+          x: position.x,
+          y: position.y,
+          props: { w: 580, h: 380, code, diagram },
+        })
+      }
+
+      editor.select(id)
+      setEditing(null)
+      return
+    }
 
     if (current.type === SB_MARKDOWN_TYPE) {
       const shape = editor.getShape<SbMarkdownShape>(current.id)
