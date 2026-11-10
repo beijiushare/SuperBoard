@@ -61,7 +61,7 @@ export function useShapeEditing({ editorRef }: UseShapeEditingOptions) {
       if (type === SB_MARKDOWN_TYPE) {
         width = 460
         height = 340
-        props = { ...DEFAULT_SB_BLOCK_STYLE, w: width, h: height, text: DEFAULT_MARKDOWN_TEXT }
+        props = { ...DEFAULT_SB_BLOCK_STYLE, w: width, h: height, baseH: height, text: DEFAULT_MARKDOWN_TEXT }
       } else {
         width = 580
         height = 380
@@ -69,6 +69,7 @@ export function useShapeEditing({ editorRef }: UseShapeEditingOptions) {
           ...DEFAULT_SB_PELE_STYLE,
           w: width,
           h: height,
+          baseH: height,
           code: DEFAULT_PELE_CODE,
           diagram: 'flowchart',
         }
@@ -110,7 +111,7 @@ export function useShapeEditing({ editorRef }: UseShapeEditingOptions) {
             type,
             x: position.x,
             y: position.y,
-            props: { ...DEFAULT_SB_PELE_STYLE, w: 580, h: 380, code, diagram },
+            props: { ...DEFAULT_SB_PELE_STYLE, w: 580, h: 380, baseH: 380, code, diagram },
           })
         }
 

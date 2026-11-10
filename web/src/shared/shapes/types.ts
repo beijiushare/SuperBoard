@@ -82,6 +82,7 @@ export interface SbMarkdownProps extends SbBlockStyleValues {
 export interface SbPeleProps extends SbBlockStyleValues {
   w: number
   h: number
+  baseH: number
   code: string
   diagram: string
 }
@@ -130,6 +131,7 @@ export const sbPeleProps = {
   ...sbBlockStyleProps,
   w: T.number,
   h: T.number,
+  baseH: T.number,
   code: T.string,
   diagram: T.string,
 }
@@ -211,6 +213,14 @@ export const sbPeleMigrations = createShapePropsMigrationSequence({
     {
       id: 'com.tldraw.shape.sb-pele/1',
       up: (props) => addBlockStyleDefaults(props, DEFAULT_SB_PELE_STYLE),
+      down: 'retired',
+    },
+    {
+      id: 'com.tldraw.shape.sb-pele/2',
+      up: (props) => {
+        props.baseH ??= typeof props.h === 'number' ? props.h : 380
+        return props
+      },
       down: 'retired',
     },
   ],

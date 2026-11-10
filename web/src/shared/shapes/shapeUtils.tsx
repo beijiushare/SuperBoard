@@ -102,11 +102,19 @@ interface SbShapeContainerProps {
   shape: SuperboardShape
   baseWidth: number
   baseHeight: number
+  measureSelector: string
   onGrow?: (baseHeight: number) => void
   children: ReactNode
 }
 
-function SbShapeContainer({ shape, baseWidth, baseHeight, onGrow, children }: SbShapeContainerProps) {
+function SbShapeContainer({
+  shape,
+  baseWidth,
+  baseHeight,
+  measureSelector,
+  onGrow,
+  children,
+}: SbShapeContainerProps) {
   const editor = useEditor()
   const contentRef = useRef<HTMLDivElement>(null)
   const colors = useValue(
@@ -120,12 +128,22 @@ function SbShapeContainer({ shape, baseWidth, baseHeight, onGrow, children }: Sb
   const lastDownRef = useRef<{ time: number; x: number; y: number } | null>(null)
 
   useLayoutEffect(() => {
-    if (!onGrow || editor.getInstanceState().isReadonly) return
-    const scroller = contentRef.current?.querySelector<HTMLElement>('.sb-card-scroll')
+    if (!onGrow) return
+    const scroller = contentRef.current?.querySelector<HTMLElement>(measureSelector)
     if (!scroller) return
-    const nextHeight = Math.ceil(scroller.scrollHeight)
-    if (nextHeight > baseHeight + 1) onGrow(nextHeight)
-  }, [baseHeight, editor, onGrow, shape.id, shape.props])
+
+    const measure = () => {
+      const overflow = scroller.scrollHeight - scroller.clientHeight
+      if (overflow <= 1) return
+      onGrow(Math.ceil(scroller.scrollHeight + 4))
+    }
+
+    measure()
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(measure)
+    observer.observe(scroller)
+    return () => observer.disconnect()
+  }, [baseHeight, measureSelector, onGrow])
 
   function onPointerDownCapture(event: ReactPointerEvent) {
     if (editor.getInstanceState().isReadonly) return
@@ -207,13 +225,19 @@ export class SbMarkdownShapeUtil extends BaseBoxShapeUtil<SbMarkdownShape> {
         shape={shape}
         baseWidth={460}
         baseHeight={shape.props.baseH}
+        measureSelector=".sb-card-scroll"
         onGrow={(baseH) => {
           const scale = shape.props.w / 460
-          editor.updateShape<SbMarkdownShape>({
-            id: shape.id,
-            type: SB_MARKDOWN_TYPE,
-            props: { ...shape.props, baseH, h: baseH * scale },
-          })
+          const props = { ...shape.props, baseH, h: baseH * scale }
+          if (editor.getIsReadonly()) {
+            editor.store.put([{ ...shape, props }])
+          } else {
+            editor.updateShape<SbMarkdownShape>({
+              id: shape.id,
+              type: SB_MARKDOWN_TYPE,
+              props,
+            })
+          }
         }}
       >
         <div className="sb-card sb-card-markdown">
@@ -246,6 +270,7 @@ export class SbPeleShapeUtil extends BaseBoxShapeUtil<SbPeleShape> {
       ...DEFAULT_SB_PELE_STYLE,
       w: 580,
       h: 380,
+      baseH: 380,
       code: DEFAULT_PELE_CODE,
       diagram: 'flowchart',
     }
@@ -260,8 +285,27 @@ export class SbPeleShapeUtil extends BaseBoxShapeUtil<SbPeleShape> {
   }
 
   component(shape: SbPeleShape) {
+    const editor = this.editor
     return (
-      <SbShapeContainer shape={shape} baseWidth={580} baseHeight={380}>
+      <SbShapeContainer
+        shape={shape}
+        baseWidth={580}
+        baseHeight={shape.props.baseH}
+        measureSelector=".sb-pele"
+        onGrow={(baseH) => {
+          const scale = shape.props.w / 580
+          const props = { ...shape.props, baseH, h: baseH * scale }
+          if (editor.getIsReadonly()) {
+            editor.store.put([{ ...shape, props }])
+          } else {
+            editor.updateShape<SbPeleShape>({
+              id: shape.id,
+              type: SB_PELE_TYPE,
+              props,
+            })
+          }
+        }}
+      >
         <div className="sb-card sb-card-pele">
           <PeleView code={shape.props.code} />
         </div>
