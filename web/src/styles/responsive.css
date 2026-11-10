@@ -1,0 +1,71 @@
+@media (max-width: 860px) {
+  .sb-toolbar {
+    overflow-x: auto;
+  }
+
+  .sb-board-select span {
+    display: none;
+  }
+
+  .sb-tree-panel {
+    position: absolute;
+    z-index: 300;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(280px, 85vw);
+    box-shadow: 12px 0 36px rgb(35 31 20 / 16%);
+  }
+
+  .sb-current-board {
+    max-width: 160px;
+  }
+
+  .sb-toolbar-spacer {
+    min-width: 8px;
+  }
+
+  .sb-modal-backdrop {
+    padding: 0;
+  }
+
+  .sb-modal {
+    width: 100%;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .sb-gallery-body {
+    padding: 12px;
+  }
+
+  .sb-gallery-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sb-gallery-grid,
+  .sb-example-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sb-example-card .sb-example-preview {
+    height: 180px;
+    flex-basis: 180px;
+  }
+
+  .sb-modal-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(200px, 40%);
+  }
+
+  .sb-editor-pane {
+    border-right: 0;
+    border-bottom: 1px solid #dedbd2;
+  }
+
+  .sb-shortcut {
+    display: none;
+  }
+}

@@ -1,0 +1,257 @@
+.sb-tree-panel {
+  display: flex;
+  width: 264px;
+  min-height: 0;
+  flex: 0 0 264px;
+  flex-direction: column;
+  border-right: 1px solid #dedbd2;
+  background: #fbfaf6;
+}
+
+.sb-tree-header {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px 7px 14px;
+  border-bottom: 1px solid #ebe7dd;
+}
+
+.sb-tree-heading {
+  color: #6f6d66;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.sb-tree-count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #ebe8df;
+  color: #8b877d;
+  font-size: 10px;
+  text-align: center;
+}
+
+.sb-tree-hint {
+  color: #a09b90;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.sb-tree-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 6px;
+  overscroll-behavior: contain;
+}
+
+.sb-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sb-tree-row {
+  display: flex;
+  width: 100%;
+  height: 30px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #3b3933;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sb-tree-row:hover {
+  background: #f1eee6;
+}
+
+.sb-tree-chevron {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  place-items: center;
+  color: #8b877d;
+}
+
+.sb-tree-icon {
+  display: grid;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  place-items: center;
+  color: #8b877d;
+}
+
+.sb-tree-folder {
+  font-weight: 600;
+}
+
+.sb-tree-folder .sb-tree-icon {
+  color: #b08a3c;
+}
+
+.sb-tree-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-tree-file-row {
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+}
+
+.sb-tree-file-row.is-selected {
+  background: #e9e4d8;
+}
+
+.sb-tree-file-row.is-selected .sb-tree-row {
+  color: #1f1e1c;
+}
+
+.sb-tree-file-row .sb-tree-row {
+  min-width: 0;
+  flex: 1;
+}
+
+.sb-tree-empty {
+  margin: 0;
+  padding: 18px 12px;
+  color: #8b877d;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.sb-context-menu {
+  position: fixed;
+  z-index: 9000;
+  min-width: 144px;
+  overflow: hidden;
+  border-radius: 9px;
+  outline: none;
+  background: hsl(0 0% 99%);
+  box-shadow:
+    0 1px 2px hsl(0 0% 0% / 28%),
+    0 2px 6px hsl(0 0% 0% / 14%),
+    inset 0 0 0 1px hsl(0 0% 100%);
+  color: hsl(0 0% 11%);
+  user-select: none;
+}
+
+.sb-context-menu-group {
+  border-bottom: 1px solid hsl(0 0% 91%);
+}
+
+.sb-context-menu-group:last-child {
+  border-bottom: none;
+}
+
+.sb-context-menu-item {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 40px;
+  align-items: center;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sb-context-menu-item::after {
+  position: absolute;
+  inset: 4px;
+  border-radius: 6px;
+  background: hsl(0 0% 0% / 5.5%);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sb-context-menu-item:hover::after,
+.sb-context-menu-item:focus-visible::after {
+  opacity: 1;
+}
+
+.sb-context-menu-item:focus {
+  outline: none;
+}
+
+.sb-context-menu-label {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-current-board {
+  max-width: 280px;
+  overflow: hidden;
+  color: #3b3933;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-button:disabled,
+.sb-save-status:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sb-screen-message {
+  display: grid;
+  height: 100dvh;
+  place-content: center;
+  gap: 14px;
+  padding: 32px;
+  background: #f6f5f1;
+  color: #1f1e1c;
+  text-align: center;
+}
+
+.sb-screen-message h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.03em;
+}
+
+.sb-screen-message p {
+  max-width: 560px;
+  margin: 0;
+  color: #6f6d66;
+  line-height: 1.65;
+}
+
+.sb-screen-message pre {
+  max-width: min(720px, 90vw);
+  max-height: 260px;
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid #e4b9b3;
+  border-radius: 10px;
+  background: #fff8f6;
+  color: #a53d30;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 12px;
+  text-align: left;
+  white-space: pre-wrap;
+}

@@ -1,0 +1,42 @@
+
+/* Custom shapes */
+
+.sb-shape-container {
+  width: 100%;
+  height: 100%;
+  pointer-events: all;
+}
+
+.sb-card {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border: var(--sb-block-border-width, 1px) var(--sb-block-border-style, solid)
+    color-mix(
+      in srgb,
+      var(--sb-block-border-color, var(--sb-card-border)) var(--sb-block-border-opacity, 100%),
+      transparent
+    );
+  border-radius: var(--sb-card-radius);
+  background: color-mix(
+    in srgb,
+    var(--sb-block-bg-color, var(--sb-card-bg)) var(--sb-block-bg-opacity, 100%),
+    transparent
+  );
+  color: var(--tl-color-text, #1f1e1c);
+}
+
+.sb-card-scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+  overscroll-behavior: contain;
+}
+
+.sb-empty {
+  margin: 0;
+  color: var(--tl-color-text-3, #8b877d);
+  font-size: 13px;
+}

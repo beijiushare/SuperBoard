@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import 'tldraw/tldraw.css'
-import '../styles.css'
+import '../styles/index.css'
 import { isTreePageData } from '../shared/board/page'
 import { TreeViewerApp } from './TreeViewerApp'
 import { ViewerApp } from './ViewerApp'

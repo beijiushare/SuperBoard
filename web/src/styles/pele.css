@@ -1,0 +1,98 @@
+/* Pele */
+
+.sb-card-pele,
+.pele,
+.sb-pele-theme {
+  --pele-bg: #fffcf0;
+  --pele-fg: #100f0f;
+  --pele-fg-on-light: #1f1f1f;
+  --pele-fg-on-dark: #ffffff;
+  --pele-muted: #6f6e69;
+  --pele-line: #100f0f;
+  --pele-surface: #f2f0e5;
+  --pele-surface-alt: #e6e4d9;
+  --pele-border: #cecdc3;
+  --pele-accent: #205ea6;
+  --pele-critical: #af3029;
+  --pele-error: #af3029;
+  --pele-font: -apple-system, BlinkMacSystemFont, 'Inter Variable', Inter, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --pele-font-mono: ui-monospace, SFMono-Regular, 'Cascadia Code', 'IBM Plex Mono', 'Roboto Mono',
+    'DejaVu Sans Mono', 'Liberation Mono', Menlo, Monaco, Consolas, 'Source Code Pro', monospace;
+  --pele-title-weight: bold;
+  --pele-heading-weight: bold;
+  --pele-bold-weight: bold;
+  --pele-radius: 6px;
+  --pele-series-1: #af3029;
+  --pele-series-2: #bc5215;
+  --pele-series-3: #ad8301;
+  --pele-series-4: #66800b;
+  --pele-series-5: #24837b;
+  --pele-series-6: #205ea6;
+  --pele-series-7: #5e409d;
+  --pele-series-8: #a02f6f;
+}
+
+.sb-card-pele {
+  color: var(--pele-fg);
+}
+
+.sb-pele {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding: 16px;
+  color: var(--pele-fg);
+  overscroll-behavior: contain;
+}
+
+.sb-preview-pane-pele {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--sb-canvas-bg);
+}
+
+.sb-preview-card {
+  flex: none;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.sb-preview-card.sb-card-pele {
+  border-color: var(--pele-border);
+  background: var(--pele-bg);
+}
+
+.sb-pele-svg {
+  display: grid;
+  min-width: min-content;
+  place-items: center;
+}
+
+.sb-pele-svg svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.sb-pele-loading,
+.sb-pele-error {
+  display: grid;
+  min-height: 120px;
+  place-items: center;
+  color: var(--pele-muted);
+  font-size: 12px;
+}
+
+.sb-pele-error {
+  display: block;
+  padding: 12px;
+  border: 1px solid #e4b9b3;
+  border-radius: 8px;
+  background: #fff8f6;
+  color: #a53d30;
+  font-family: var(--pele-font-mono);
+  white-space: pre-wrap;
+  text-align: left;
+}
