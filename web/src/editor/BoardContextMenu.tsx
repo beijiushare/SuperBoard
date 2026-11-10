@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 import type { BoardTreeContextTarget } from '../shared/board/BoardTree'
-import type { BoardTreeFile } from '../shared/board/types'
+import type { BoardTreeFile, BoardTreeFolder } from '../shared/board/types'
 
 export type BoardContextTarget = BoardTreeContextTarget | { type: 'root' }
 
@@ -11,6 +11,7 @@ interface BoardContextMenuProps {
   onClose: () => void
   onCreate: (folder: string) => void
   onRename: (board: BoardTreeFile) => void
+  onRenameFolder: (folder: BoardTreeFolder) => void
   onDelete: (board: BoardTreeFile) => void
 }
 
@@ -21,6 +22,7 @@ export function BoardContextMenu({
   onClose,
   onCreate,
   onRename,
+  onRenameFolder,
   onDelete,
 }: BoardContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null)
@@ -128,17 +130,32 @@ export function BoardContextMenu({
           </div>
         </>
       ) : (
-        <div className="sb-context-menu-group">
-          <button
-            className="sb-context-menu-item"
-            type="button"
-            role="menuitem"
-            onClick={() => run(() => onCreate(folder))}
-            title={folder ? `在 ${folder} 中新建白板` : '在根目录新建白板'}
-          >
-            <span className="sb-context-menu-label">{target.type === 'folder' ? '在此新建白板…' : '新建白板…'}</span>
-          </button>
-        </div>
+        <>
+          <div className="sb-context-menu-group">
+            <button
+              className="sb-context-menu-item"
+              type="button"
+              role="menuitem"
+              onClick={() => run(() => onCreate(folder))}
+              title={folder ? `在 ${folder} 中新建白板` : '在根目录新建白板'}
+            >
+              <span className="sb-context-menu-label">{target.type === 'folder' ? '在此新建白板…' : '新建白板…'}</span>
+            </button>
+          </div>
+          {target.type === 'folder' ? (
+            <div className="sb-context-menu-group">
+              <button
+                className="sb-context-menu-item"
+                type="button"
+                role="menuitem"
+                onClick={() => run(() => onRenameFolder(target.node))}
+                title={`重命名文件夹 ${folder}`}
+              >
+                <span className="sb-context-menu-label">重命名…</span>
+              </button>
+            </div>
+          ) : null}
+        </>
       )}
     </div>
   )

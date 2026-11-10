@@ -31,6 +31,11 @@ interface PatchBoardBody {
   summary?: unknown
 }
 
+interface RenameFolderBody {
+  path?: unknown
+  name?: unknown
+}
+
 class HttpError extends Error {
   constructor(
     readonly status: number,
@@ -153,6 +158,17 @@ function validateBoardPayload(value: unknown): asserts value is BoardFile {
   }
 }
 
+function validateFolderName(part: string) {
+  if (!part || part === '.' || part === '..') {
+    throw new HttpError(400, `非法文件夹名: ${JSON.stringify(part)}`)
+  }
+  if (part.startsWith('.')) throw new HttpError(400, '文件夹名不能以点开头')
+  if (/[<>:"|?*\u0000-\u001f]/.test(part)) throw new HttpError(400, `文件夹名包含非法字符: ${part}`)
+  if (/[. ]$/.test(part)) throw new HttpError(400, '文件夹名不能以点或空格结尾')
+  if (RESERVED_FOLDER_NAMES.test(part)) throw new HttpError(400, `文件夹名不可用: ${part}`)
+  if (part.length > 80) throw new HttpError(400, '文件夹名过长')
+}
+
 function normalizeFolder(value: unknown): string {
   if (value === undefined || value === null || value === '') return ''
   if (typeof value !== 'string') throw new HttpError(400, 'folder 必须是字符串')
@@ -161,17 +177,17 @@ function normalizeFolder(value: unknown): string {
   if (!raw) return ''
 
   const parts = raw.split('/')
-  for (const part of parts) {
-    if (!part || part === '.' || part === '..') {
-      throw new HttpError(400, `非法文件夹路径: ${JSON.stringify(value)}`)
-    }
-    if (part.startsWith('.')) throw new HttpError(400, '文件夹名不能以点开头')
-    if (/[<>:"|?*\u0000-\u001f]/.test(part)) throw new HttpError(400, `文件夹名包含非法字符: ${part}`)
-    if (/[. ]$/.test(part)) throw new HttpError(400, '文件夹名不能以点或空格结尾')
-    if (RESERVED_FOLDER_NAMES.test(part)) throw new HttpError(400, `文件夹名不可用: ${part}`)
-    if (part.length > 80) throw new HttpError(400, '文件夹名过长')
-  }
+  for (const part of parts) validateFolderName(part)
   return parts.join('/')
+}
+
+function normalizeFolderName(value: unknown): string {
+  if (typeof value !== 'string') throw new HttpError(400, '文件夹名必须是字符串')
+  const name = value.trim()
+  if (!name) throw new HttpError(400, '文件夹名不能为空')
+  if (name.includes('/') || name.includes('\\')) throw new HttpError(400, '文件夹名不能包含路径分隔符')
+  validateFolderName(name)
+  return name
 }
 
 function resolveBoardFile(root: string, folder: string, slug: string) {
@@ -183,6 +199,15 @@ function resolveBoardFile(root: string, folder: string, slug: string) {
     throw new HttpError(400, '白板路径越界')
   }
   return file
+}
+
+function resolveFolderDir(root: string, folder: string) {
+  const boardsRoot = path.resolve(root, BOARDS_DIR)
+  const resolved = path.resolve(boardsRoot, ...folder.split('/').filter(Boolean))
+  if (resolved === boardsRoot || !resolved.startsWith(`${boardsRoot}${path.sep}`)) {
+    throw new HttpError(400, '文件夹路径越界')
+  }
+  return resolved
 }
 
 async function writeBoardFile(file: string, board: BoardFile) {
@@ -330,6 +355,47 @@ async function deleteBoard(root: string, slug: string) {
   await removeEmptyParents(root, found.file)
 }
 
+async function renameFolder(root: string, body: RenameFolderBody) {
+  if (typeof body.path !== 'string') throw new HttpError(400, 'path 必须是字符串')
+  const folder = normalizeFolder(body.path)
+  if (!folder) throw new HttpError(400, '不能重命名根目录')
+  const name = normalizeFolderName(body.name)
+
+  const source = resolveFolderDir(root, folder)
+  const target = path.resolve(path.dirname(source), name)
+  const boardsRoot = path.resolve(root, BOARDS_DIR)
+  if (!target.startsWith(`${boardsRoot}${path.sep}`)) throw new HttpError(400, '文件夹路径越界')
+
+  let stat
+  try {
+    stat = await fs.stat(source)
+  } catch {
+    throw new HttpError(404, '文件夹不存在')
+  }
+  if (!stat.isDirectory()) throw new HttpError(404, '文件夹不存在')
+  if (source === target) return { path: folder }
+
+  const caseOnly = source.toLowerCase() === target.toLowerCase()
+  if (!caseOnly) {
+    try {
+      await fs.access(target)
+      throw new HttpError(409, `文件夹已存在: ${name}`)
+    } catch (error) {
+      if (error instanceof HttpError) throw error
+    }
+  }
+
+  if (caseOnly) {
+    const temp = `${source}.renaming-${process.pid}-${Date.now()}`
+    await fs.rename(source, temp)
+    await fs.rename(temp, target)
+  } else {
+    await fs.rename(source, target)
+  }
+
+  return { path: path.relative(boardsRoot, target).split(path.sep).join('/') }
+}
+
 async function handle(
   root: string,
   req: IncomingMessage,
@@ -337,12 +403,23 @@ async function handle(
   next: () => void,
 ) {
   const url = new URL(req.url || '/', 'http://superboard.local')
-  if (!url.pathname.startsWith('/__boards')) {
+  if (!url.pathname.startsWith('/__boards') && !url.pathname.startsWith('/__folders')) {
     next()
     return
   }
 
   try {
+    if (url.pathname === '/__folders') {
+      if (req.method === 'PATCH') {
+        const body = await readJsonBody<RenameFolderBody>(req)
+        const renamed = await renameFolder(root, body)
+        sendJson(res, 200, { ok: true, path: renamed.path })
+      } else {
+        sendJson(res, 405, { error: 'method not allowed' })
+      }
+      return
+    }
+
     if (url.pathname === '/__boards' && req.method === 'GET') {
       sendJson(res, 200, { boards: await listBoards(root) })
       return

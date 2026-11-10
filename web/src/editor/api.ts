@@ -100,3 +100,15 @@ export async function deleteBoard(slug: string): Promise<void> {
   })
   await readJson<{ ok: boolean }>(response)
 }
+
+export async function renameFolder(folder: string, name: string): Promise<{ path: string }> {
+  const response = await fetch('/__folders', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ path: folder, name }),
+  })
+  return readJson<{ path: string }>(response)
+}

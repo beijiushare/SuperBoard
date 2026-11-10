@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { Tldraw, createShapeId, type Editor, type TLShapeId } from 'tldraw'
-import type { BoardFile, BoardListItem } from '../shared/board/types'
+import type { BoardFile, BoardListItem, BoardTreeFolder } from '../shared/board/types'
 import { BoardTree, type BoardTreeContextTarget } from '../shared/board/BoardTree'
 import { ancestorFolderPaths, buildBoardTree } from '../shared/board/tree'
 import {
@@ -16,9 +16,9 @@ import {
   type SbPeleShape,
 } from '../shared/shapes/types'
 import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
-import { BoardDialog, DeleteBoardDialog, type BoardFormValues } from './BoardDialog'
+import { BoardDialog, DeleteBoardDialog, RenameFolderDialog, type BoardFormValues } from './BoardDialog'
 import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
-import { createBoard, deleteBoard, fetchBoard, fetchBoards, patchBoard, putBoard } from './api'
+import { createBoard, deleteBoard, fetchBoard, fetchBoards, patchBoard, putBoard, renameFolder } from './api'
 import { ShapeEditor, type EditingShape } from './ShapeEditor'
 
 type SaveState = 'saved' | 'dirty' | 'saving' | 'error'
@@ -74,6 +74,7 @@ export function EditorApp() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [expandedReady, setExpandedReady] = useState(false)
   const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
+  const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
 
@@ -346,6 +347,20 @@ export function EditorApp() {
     })
   }
 
+  function renameExpandedPath(from: string, to: string) {
+    if (from === to) return
+    setExpanded((current) => {
+      const next = new Set<string>()
+      const prefix = `${from}/`
+      for (const path of current) {
+        if (path === from) next.add(to)
+        else if (path.startsWith(prefix)) next.add(`${to}${path.slice(from.length)}`)
+        else next.add(path)
+      }
+      return next
+    })
+  }
+
   function enableTreeMode() {
     if (treeMode) {
       setTreeOpen((open) => !open)
@@ -425,6 +440,15 @@ export function EditorApp() {
       setBoard(result.board)
       updateBoardUrl(result.board.meta.slug)
     }
+  }
+
+  async function handleRenameFolder(name: string) {
+    if (!folderDialog) return
+    await flushCurrentBoard()
+    const result = await renameFolder(folderDialog.path, name)
+    const list = await fetchBoards()
+    setBoards(list)
+    renameExpandedPath(folderDialog.path, result.path)
   }
 
   async function handleDelete(slug: string) {
@@ -692,6 +716,7 @@ export function EditorApp() {
           onClose={() => setContextMenu(null)}
           onCreate={(folder) => setBoardDialog({ mode: 'create', folder })}
           onRename={(node) => setBoardDialog({ mode: 'rename', board: node })}
+          onRenameFolder={(folder) => setFolderDialog(folder)}
           onDelete={(node) => setPendingDelete(node)}
         />
       ) : null}
@@ -712,6 +737,15 @@ export function EditorApp() {
           }
           onClose={() => setBoardDialog(null)}
           onSubmit={boardDialog.mode === 'create' ? handleCreate : handleRename}
+        />
+      ) : null}
+
+      {folderDialog ? (
+        <RenameFolderDialog
+          key={folderDialog.path}
+          folder={folderDialog}
+          onClose={() => setFolderDialog(null)}
+          onSubmit={handleRenameFolder}
         />
       ) : null}
 
