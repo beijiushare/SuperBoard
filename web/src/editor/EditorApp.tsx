@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
-import { Tldraw, type Editor, type TLUiContextMenuProps } from 'tldraw'
+import { Tldraw, DefaultMenuPanel, type Editor, type TLUiContextMenuProps } from 'tldraw'
 import UseAnimations from 'react-useanimations'
 import aperture from 'react-useanimations/lib/aperture'
 import checkCircle from 'react-useanimations/lib/checkCircle'
+import command from 'react-useanimations/lib/command'
 import gitBranch from 'react-useanimations/lib/gitBranch'
 import sidebar from 'react-useanimations/lib/sidebar'
 import type { BoardFile, BoardListItem, BoardScope, BoardTreeFolder } from '../shared/board/types'
@@ -60,6 +61,7 @@ export function EditorApp() {
   const [treeOpen, setTreeOpen] = useState(true)
   const [scope, setScope] = useState<BoardScope>(readScopeFromUrl)
   const [stylePanelOpen, setStylePanelOpen] = useState(false)
+  const [menuPanelOpen, setMenuPanelOpen] = useState(false)
   const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
   const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
@@ -101,6 +103,7 @@ export function EditorApp() {
     () => ({
       ...superboardEditorComponents,
       StylePanel: stylePanelOpen ? SuperboardStylePanel : null,
+      MenuPanel: menuPanelOpen ? DefaultMenuPanel : null,
       ContextMenu: (props: TLUiContextMenuProps) => (
         <SuperboardContextMenu
           {...props}
@@ -109,7 +112,7 @@ export function EditorApp() {
         />
       ),
     }),
-    [addShape, stylePanelOpen],
+    [addShape, menuPanelOpen, stylePanelOpen],
   )
 
   useEffect(() => {
@@ -394,6 +397,7 @@ export function EditorApp() {
 
   const sidebarLabel = treeMode && treeOpen ? '收起目录' : '展开目录'
   const scopeLabel = scope === 'public' ? '切换到私有白板' : '切换到公开白板'
+  const menuPanelLabel = menuPanelOpen ? '隐藏顶部操作栏' : '显示顶部操作栏'
   const saveLabel =
     saveState === 'error'
       ? saveError || SAVE_STATUS_LABEL.error
@@ -426,6 +430,16 @@ export function EditorApp() {
           onClick={() => void switchScope(scope === 'public' ? 'private' : 'public')}
         >
           <UseAnimations animation={gitBranch} size={32} />
+        </button>
+        <button
+          type="button"
+          className="sb-rail-button"
+          data-tooltip={menuPanelLabel}
+          aria-label={menuPanelLabel}
+          aria-pressed={menuPanelOpen}
+          onClick={() => setMenuPanelOpen((open) => !open)}
+        >
+          <UseAnimations animation={command} size={32} interaction="click-replay" />
         </button>
         <button
           type="button"
