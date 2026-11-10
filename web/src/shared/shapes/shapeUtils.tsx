@@ -44,6 +44,10 @@ function SbShapeContainer({ shape, children }: SbShapeContainerProps) {
 
   function onPointerDownCapture(event: ReactPointerEvent) {
     if (editor.getInstanceState().isReadonly) return
+    if (event.button !== 0) {
+      lastDownRef.current = null
+      return
+    }
 
     const now = performance.now()
     const last = lastDownRef.current
