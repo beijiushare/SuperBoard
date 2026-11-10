@@ -38,9 +38,10 @@ async function commitAndPush(root: string) {
 
 function openWindowsTerminal(root: string) {
   const scriptPath = path.join(os.tmpdir(), `superboard-deploy-${process.pid}-${Date.now()}.cmd`)
+  const cwd = root.replaceAll('/', '\\')
   const script = [
     '@echo off',
-    `cd /d "${root}"`,
+    `cd /d "${cwd}"`,
     'git add -A',
     'git commit -m "chore: update boards"',
     'git push',
