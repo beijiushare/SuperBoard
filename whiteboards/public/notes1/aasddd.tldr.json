@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "meta": {
+    "title": "ssss",
+    "slug": "aasddd",
+    "updatedAt": "2026-11-10T17:12:53.839Z"
+  },
+  "document": {
+    "store": {
+      "shape:z98lNm8IqL-g99i3KMnVh": {
+        "x": 657.5977102286449,
+        "y": 534.7150808224162,
+        "rotation": 0,
+        "isLocked": false,
+        "opacity": 1,
+        "meta": {},
+        "id": "shape:z98lNm8IqL-g99i3KMnVh",
+        "type": "geo",
+        "props": {
+          "w": 200,
+          "h": 200,
+          "geo": "rectangle",
+          "dash": "draw",
+          "growY": 0,
+          "url": "",
+          "scale": 1,
+          "flipX": false,
+          "flipY": false,
+          "color": "black",
+          "labelColor": "black",
+          "fill": "none",
+          "size": "m",
+          "font": "draw",
+          "align": "middle",
+          "verticalAlign": "middle",
+          "richText": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph"
+              }
+            ]
+          }
+        },
+        "parentId": "page:page",
+        "index": "a9dAM",
+        "typeName": "shape"
+      },
+      "page:-FabqwysBANmYCWbVZb1O": {
+        "meta": {},
+        "id": "page:-FabqwysBANmYCWbVZb1O",
+        "name": "2",
+        "index": "a202M",
+        "typeName": "page"
+      },
+      "shape:Xu6H0U1pM_i8eKCtwBBWH": {
+        "x": 185,
+        "y": 157,
+        "rotation": 0,
+        "isLocked": false,
+        "opacity": 1,
+        "meta": {},
+        "id": "shape:Xu6H0U1pM_i8eKCtwBBWH",
+        "type": "sb-pele",
+        "props": {
+          "backgroundColor": "paper",
+          "backgroundOpacity": 100,
+          "borderColor": "grey",
+          "borderOpacity": 35,
+          "borderWidth": "thin",
+          "borderStyle": "solid",
+          "w": 580,
+          "h": 380,
+          "code": "---\ntitle: Node with text\n---\nflowchart LR\n    id1[This is the text in the box]\n",
+          "diagram": "flowchart"
+        },
+        "parentId": "page:-FabqwysBANmYCWbVZb1O",
+        "index": "a17Dz",
+        "typeName": "shape"
+      },
+      "shape:m4QlX-6PmkWOT09CoKhw8": {
+        "x": 1010.5782202807392,
+        "y": 682.1539352582722,
+        "rotation": 0,
+        "isLocked": false,
+        "opacity": 1,
+        "meta": {},
+        "id": "shape:m4QlX-6PmkWOT09CoKhw8",
+        "type": "sb-markdown",
+        "props": {
+          "backgroundColor": "white",
+          "backgroundOpacity": 100,
+          "borderColor": "grey",
+          "borderOpacity": 35,
+          "borderWidth": "thin",
+          "borderStyle": "solid",
+          "w": 460,
+          "h": 340,
+          "text": "# 新卡片\n\n这里支持 **Markdown**、表格、代码块和 AsciiMath等。\n\n行内公式：$a^2 + b^2 = c^2$\n\n$$\nsum_(i=1)^n i = (n(n+1))/2\n$$\n"
+        },
+        "parentId": "page:page",
+        "index": "a8GBQ",
+        "typeName": "shape"
+      },
+      "shape:mQFVJPIhD-hgL0xaXJUtK": {
+        "x": 400.2674014039219,
+        "y": 438.44538011309595,
+        "rotation": 0,
+        "isLocked": false,
+        "opacity": 1,
+        "meta": {},
+        "id": "shape:mQFVJPIhD-hgL0xaXJUtK",
+        "type": "sb-pele",
+        "props": {
+          "backgroundColor": "white",
+          "backgroundOpacity": 100,
+          "borderColor": "grey",
+          "borderOpacity": 40,
+          "borderWidth": "thin",
+          "borderStyle": "solid",
+          "w": 580,
+          "h": 416.8337284294235,
+          "code": "---\nconfig:\n  sankey:\n    showValues: false\n---\nsankey\n\nAgricultural 'waste',Bio-conversion,124.729\nBio-conversion,Liquid,0.597\nBio-conversion,Losses,26.862\nBio-conversion,Solid,280.322\nBio-conversion,Gas,81.144\nBiofuel imports,Liquid,35\nBiomass imports,Solid,35\nCoal imports,Coal,11.606\nCoal reserves,Coal,63.965\nCoal,Solid,75.571\nDistrict heating,Industry,10.639\nDistrict heating,Heating and cooling - commercial,22.505\nDistrict heating,Heating and cooling - homes,46.184\nElectricity grid,Over generation / exports,104.453\nElectricity grid,Heating and cooling - homes,113.726\nElectricity grid,H2 conversion,27.14\nElectricity grid,Industry,342.165\nElectricity grid,Road transport,37.797\nElectricity grid,Agriculture,4.412\nElectricity grid,Heating and cooling - commercial,40.858\nElectricity grid,Losses,56.691\nElectricity grid,Rail transport,7.863\nElectricity grid,Lighting & appliances - commercial,90.008\nElectricity grid,Lighting & appliances - homes,93.494\nGas imports,Ngas,40.719\nGas reserves,Ngas,82.233\nGas,Heating and cooling - commercial,0.129\nGas,Losses,1.401\nGas,Thermal generation,151.891\nGas,Agriculture,2.096\nGas,Industry,48.58\nGeothermal,Electricity grid,7.013\nH2 conversion,H2,20.897\nH2 conversion,Losses,6.242\nH2,Road transport,20.897\nHydro,Electricity grid,6.995\nLiquid,Industry,121.066\nLiquid,International shipping,128.69\nLiquid,Road transport,135.835\nLiquid,Domestic aviation,14.458\nLiquid,International aviation,206.267\nLiquid,Agriculture,3.64\nLiquid,National navigation,33.218\nLiquid,Rail transport,4.413\nMarine algae,Bio-conversion,4.375\nNgas,Gas,122.952\nNuclear,Thermal generation,839.978\nOil imports,Oil,504.287\nOil reserves,Oil,107.703\nOil,Liquid,611.99\nOther waste,Solid,56.587\nOther waste,Bio-conversion,77.81\nPumped heat,Heating and cooling - homes,193.026\nPumped heat,Heating and cooling - commercial,70.672\nSolar PV,Electricity grid,59.901\nSolar Thermal,Heating and cooling - homes,19.263\nSolar,Solar Thermal,19.263\nSolar,Solar PV,59.901\nSolid,Agriculture,0.882\nSolid,Thermal generation,400.12\nSolid,Industry,46.477\nThermal generation,Electricity grid,525.531\nThermal generation,Losses,787.129\nThermal generation,District heating,79.329\nTidal,Electricity grid,9.452\nUK land based bioenergy,Bio-conversion,182.01\nWave,Electricity grid,19.013\nWind,Electricity grid,289.366\n",
+          "diagram": "sankey"
+        },
+        "parentId": "page:page",
+        "index": "a7OQv",
+        "typeName": "shape"
+      },
+      "shape:UjcNxGsYoP-hkcvBj3Yd5": {
+        "x": 159.3986973915156,
+        "y": -3.684016566001361,
+        "rotation": 0,
+        "isLocked": false,
+        "opacity": 1,
+        "meta": {},
+        "id": "shape:UjcNxGsYoP-hkcvBj3Yd5",
+        "type": "sb-pele",
+        "props": {
+          "w": 438.8831004692588,
+          "h": 430.30733135462435,
+          "code": "requirementDiagram\n  requirement auto_save {\n    id: 1\n    text: Save the board automatically after editing\n    risk: low\n    verifymethod: test\n  }\n  element editor {\n    type: component\n  }\n  editor - satisfies -> auto_save\n",
+          "diagram": "requirement",
+          "backgroundColor": "white",
+          "backgroundOpacity": 0,
+          "borderColor": "grey",
+          "borderOpacity": 0,
+          "borderWidth": "thin",
+          "borderStyle": "solid"
+        },
+        "parentId": "page:page",
+        "index": "a6J4r",
+        "typeName": "shape"
+      },
+      "page:page": {
+        "meta": {},
+        "id": "page:page",
+        "name": "Page 1",
+        "index": "a1",
+        "typeName": "page"
+      },
+      "document:document": {
+        "gridSize": 10,
+        "name": "SuperBoard",
+        "meta": {},
+        "id": "document:document",
+        "typeName": "document"
+      }
+    },
+    "schema": {
+      "schemaVersion": 2,
+      "sequences": {
+        "com.tldraw.store": 5,
+        "com.tldraw.asset": 1,
+        "com.tldraw.camera": 1,
+        "com.tldraw.document": 2,
+        "com.tldraw.instance": 26,
+        "com.tldraw.instance_page_state": 5,
+        "com.tldraw.page": 1,
+        "com.tldraw.instance_presence": 6,
+        "com.tldraw.pointer": 1,
+        "com.tldraw.shape": 4,
+        "com.tldraw.user": 1,
+        "com.tldraw.asset.image": 6,
+        "com.tldraw.asset.video": 5,
+        "com.tldraw.asset.bookmark": 2,
+        "com.tldraw.shape.group": 0,
+        "com.tldraw.shape.text": 4,
+        "com.tldraw.shape.bookmark": 2,
+        "com.tldraw.shape.draw": 5,
+        "com.tldraw.shape.geo": 12,
+        "com.tldraw.shape.note": 13,
+        "com.tldraw.shape.line": 5,
+        "com.tldraw.shape.frame": 1,
+        "com.tldraw.shape.arrow": 8,
+        "com.tldraw.shape.highlight": 4,
+        "com.tldraw.shape.embed": 4,
+        "com.tldraw.shape.image": 5,
+        "com.tldraw.shape.video": 4,
+        "com.tldraw.shape.sb-markdown": 1,
+        "com.tldraw.shape.sb-pele": 1,
+        "com.tldraw.binding.arrow": 1
+      }
+    }
+  }
+}

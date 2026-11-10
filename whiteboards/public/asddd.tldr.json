@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "meta": {
+    "title": "ass发",
+    "slug": "asddd",
+    "updatedAt": "2026-11-10T13:34:43.329Z"
+  },
+  "document": {
+    "store": {
+      "page:page": {
+        "meta": {},
+        "id": "page:page",
+        "name": "Page 1",
+        "index": "a1",
+        "typeName": "page"
+      },
+      "document:document": {
+        "gridSize": 10,
+        "name": "SuperBoard",
+        "meta": {},
+        "id": "document:document",
+        "typeName": "document"
+      },
+      "shape:FOoTvnyfoj1ADCiVqKatO": {
+        "x": 478,
+        "y": 316.5,
+        "rotation": 0,
+        "isLocked": false,
+        "opacity": 1,
+        "meta": {},
+        "id": "shape:FOoTvnyfoj1ADCiVqKatO",
+        "type": "draw",
+        "props": {
+          "segments": [
+            {
+              "type": "free",
+              "path": "AAAAAAAAAAAAvgC8ALgAuADAALgAwAAAAMIAAADFAADAyAAAAMcAOMDKgESAyQBDwMmARYDMgEcAyYBFQMuARwDGAESAyQBIAMmASADFgEQAwgBFALwARAC+gEQAAIBFAACARAAAAEQAOIBFAEAARwBCAEYAQ4BEAEgASQBGgEVASIBGQEyASEBLAEbgTwBFoE0APuBOAABgTwDGAEsAxZBQIMxgT0DMAE9AzsBKgMvgTGDPAEVAzAAAwM4AuEDLgMiAz8DLwM+AykDM",
+              "dim": 2
+            }
+          ],
+          "color": "black",
+          "fill": "none",
+          "dash": "draw",
+          "size": "m",
+          "isComplete": true,
+          "isClosed": false,
+          "isPen": false,
+          "scale": 1,
+          "scaleX": 1,
+          "scaleY": 1
+        },
+        "parentId": "page:page",
+        "index": "a1cjr",
+        "typeName": "shape"
+      }
+    },
+    "schema": {
+      "schemaVersion": 2,
+      "sequences": {
+        "com.tldraw.store": 5,
+        "com.tldraw.asset": 1,
+        "com.tldraw.camera": 1,
+        "com.tldraw.document": 2,
+        "com.tldraw.instance": 26,
+        "com.tldraw.instance_page_state": 5,
+        "com.tldraw.page": 1,
+        "com.tldraw.instance_presence": 6,
+        "com.tldraw.pointer": 1,
+        "com.tldraw.shape": 4,
+        "com.tldraw.user": 1,
+        "com.tldraw.asset.image": 6,
+        "com.tldraw.asset.video": 5,
+        "com.tldraw.asset.bookmark": 2,
+        "com.tldraw.shape.group": 0,
+        "com.tldraw.shape.text": 4,
+        "com.tldraw.shape.bookmark": 2,
+        "com.tldraw.shape.draw": 5,
+        "com.tldraw.shape.geo": 12,
+        "com.tldraw.shape.note": 13,
+        "com.tldraw.shape.line": 5,
+        "com.tldraw.shape.frame": 1,
+        "com.tldraw.shape.arrow": 8,
+        "com.tldraw.shape.highlight": 4,
+        "com.tldraw.shape.embed": 4,
+        "com.tldraw.shape.image": 5,
+        "com.tldraw.shape.video": 4,
+        "com.tldraw.shape.sb-markdown": 1,
+        "com.tldraw.shape.sb-pele": 1,
+        "com.tldraw.binding.arrow": 1
+      }
+    }
+  }
+}
