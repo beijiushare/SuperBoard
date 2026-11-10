@@ -433,16 +433,6 @@ export function EditorApp() {
         </button>
         <button
           type="button"
-          className="sb-rail-button"
-          data-tooltip={menuPanelLabel}
-          aria-label={menuPanelLabel}
-          aria-pressed={menuPanelOpen}
-          onClick={() => setMenuPanelOpen((open) => !open)}
-        >
-          <UseAnimations animation={command} size={32} interaction="click-replay" />
-        </button>
-        <button
-          type="button"
           className={`sb-rail-button sb-rail-save is-${saveState}`}
           data-tooltip={saveLabel}
           aria-label={saveLabel}
@@ -460,6 +450,16 @@ export function EditorApp() {
           onClick={() => setStylePanelOpen((open) => !open)}
         >
           <UseAnimations animation={aperture} size={32} interaction="click-replay" />
+        </button>
+        <button
+          type="button"
+          className="sb-rail-button"
+          data-tooltip={menuPanelLabel}
+          aria-label={menuPanelLabel}
+          aria-pressed={menuPanelOpen}
+          onClick={() => setMenuPanelOpen((open) => !open)}
+        >
+          <UseAnimations animation={command} size={32} interaction="click-replay" />
         </button>
       </aside>
 
