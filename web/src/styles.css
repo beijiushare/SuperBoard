@@ -4,6 +4,11 @@
     'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  --sb-canvas-bg: #fafafa;
+  --sb-canvas-grid: #dddddd;
+  --sb-card-bg: #ffffff;
+  --sb-card-border: #dddddd;
+  --sb-card-radius: 8px;
 }
 
 * {
@@ -221,6 +226,17 @@ textarea {
   position: relative;
   flex: 1;
   min-height: 0;
+}
+
+.sb-canvas-background {
+  width: 100%;
+  height: 100%;
+  background-color: var(--sb-canvas-bg);
+}
+
+.sb-canvas .tl-grid,
+.sb-viewer .tl-grid {
+  display: none;
 }
 
 .sb-canvas-empty {
@@ -516,13 +532,10 @@ textarea {
   height: 100%;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--tl-color-low-border, #dedbd2);
-  border-radius: 12px;
-  background: var(--tl-color-panel, #fffdf8);
+  border: 2px solid var(--sb-card-border);
+  border-radius: var(--sb-card-radius);
+  background: var(--sb-card-bg);
   color: var(--tl-color-text, #1f1e1c);
-  box-shadow:
-    0 1px 2px rgb(35 31 20 / 6%),
-    0 12px 32px rgb(35 31 20 / 7%);
 }
 
 .sb-card-scroll {
@@ -768,7 +781,7 @@ textarea {
 .sb-card-kanban {
   overflow: auto;
   padding: 16px;
-  background: var(--tl-color-low, #f3f1ea);
+  background: var(--sb-canvas-bg);
 }
 
 .sb-kanban {
@@ -785,9 +798,9 @@ textarea {
   flex-direction: column;
   gap: 10px;
   padding: 11px;
-  border: 1px solid var(--tl-color-low-border, #dedbd2);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--tl-color-panel, #fffdf8) 55%, transparent);
+  border: 1px solid var(--sb-card-border);
+  border-radius: var(--sb-card-radius);
+  background: color-mix(in srgb, var(--sb-card-bg) 62%, transparent);
 }
 
 .sb-kanban-column-header {
@@ -823,10 +836,9 @@ textarea {
 
 .sb-kanban-card {
   padding: 10px 11px;
-  border: 1px solid var(--tl-color-low-border, #e1ded5);
-  border-radius: 8px;
-  background: var(--tl-color-panel, #fffdf8);
-  box-shadow: 0 1px 1px rgb(35 31 20 / 5%);
+  border: 1px solid #ececec;
+  border-radius: 6px;
+  background: var(--sb-card-bg);
   font-size: 12px;
   line-height: 1.45;
 }

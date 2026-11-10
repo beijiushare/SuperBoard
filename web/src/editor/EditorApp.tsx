@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as R
 import { Tldraw, createShapeId, type Editor, type TLShapeId } from 'tldraw'
 import type { BoardFile, BoardListItem, BoardTreeFolder } from '../shared/board/types'
 import { BoardTree, type BoardTreeContextTarget } from '../shared/board/BoardTree'
+import { superboardCanvasComponents } from '../shared/canvas/CanvasBackground'
 import { ancestorFolderPaths, buildBoardTree } from '../shared/board/tree'
 import {
   DEFAULT_KANBAN_TEXT,
@@ -716,6 +717,7 @@ export function EditorApp() {
             <Tldraw
               key={board.meta.slug}
               shapeUtils={superboardShapeUtils}
+              components={superboardCanvasComponents}
               licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
               onMount={handleMount}
             />

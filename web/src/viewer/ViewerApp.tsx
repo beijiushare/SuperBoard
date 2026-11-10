@@ -1,5 +1,6 @@
 import { Tldraw, type Editor } from 'tldraw'
 import { isTreePageData } from '../shared/board/page'
+import { superboardCanvasComponents } from '../shared/canvas/CanvasBackground'
 import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
 
 export function ViewerApp() {
@@ -29,6 +30,7 @@ export function ViewerApp() {
       <Tldraw
         hideUi
         shapeUtils={superboardShapeUtils}
+        components={superboardCanvasComponents}
         licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
         onMount={handleMount}
       />
