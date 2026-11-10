@@ -36,8 +36,7 @@ export function parseMediaSource(value: string): MediaSource | null {
   const url = normalizeUrl(trimmed)
   if (!url) return null
 
-  const pathname = new URL(url).pathname
-  if (IMAGE_EXTENSIONS.test(pathname)) return { url, kind: 'image' }
-  if (VIDEO_EXTENSIONS.test(pathname)) return { url, kind: 'video' }
+  if (IMAGE_EXTENSIONS.test(url)) return { url, kind: 'image' }
+  if (VIDEO_EXTENSIONS.test(url)) return { url, kind: 'video' }
   return { url, kind: 'iframe' }
 }

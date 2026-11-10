@@ -21,6 +21,7 @@ import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
 import { BoardDialog, DeleteBoardDialog, DeleteFolderDialog, DeployDialog, RenameFolderDialog, type BoardFormValues } from './dialogs'
 import { ShapeEditor } from './shape-editor'
 import { MediaDialog } from './media/MediaDialog'
+import { getMediaAspect } from './media/mediaSize'
 import type { MediaSource } from './media/parseMedia'
 import { SAVE_STATUS_LABEL, useAutoSave } from './useAutoSave'
 import { useShapeEditing } from './useShapeEditing'
@@ -423,10 +424,24 @@ export function EditorApp() {
     }
   }
 
-  function handleMediaSave(source: MediaSource) {
+  async function handleMediaSave(source: MediaSource) {
     const editor = editorRef.current
     const current = mediaDialog
     if (!editor || !current) return
+
+    let width = 640
+    let height = 360
+    if (source.kind !== 'iframe') {
+      const ratio = await getMediaAspect(source.url, source.kind)
+      if (ratio) {
+        if (ratio >= 1) {
+          height = Math.round(width / ratio)
+        } else {
+          height = 640
+          width = Math.round(height * ratio)
+        }
+      }
+    }
 
     if (current.mode === 'create') {
       const id = createShapeId()
@@ -435,8 +450,6 @@ export function EditorApp() {
         x: bounds.x + bounds.w / 2,
         y: bounds.y + bounds.h / 2,
       })
-      const width = 640
-      const height = 360
       const offset = (editor.getCurrentPageShapes().length % 6) * 24
       editor.createShape<SbMediaShape>({
         id,

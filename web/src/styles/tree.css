@@ -209,6 +209,15 @@
   white-space: nowrap;
 }
 
+.sb-context-menu-filter {
+  display: contents;
+}
+
+.sb-context-menu-filter [data-testid='context-menu-sub.copy-as-button'],
+.sb-context-menu-filter [data-testid='context-menu-sub.export-as-button'] {
+  display: none;
+}
+
 .sb-current-board {
   max-width: 280px;
   overflow: hidden;

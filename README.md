@@ -92,7 +92,7 @@ whiteboards/
 - tldraw 顶部操作栏默认隐藏，通过 `command` 按钮显示
 - 操作栏最后是 `uploadCloud` 提交按钮：确认后在 Windows 打开新终端窗口，运行 `scripts/deploy.cmd`（`git add` / `commit` / `push`），随后由 GitHub Actions 自动部署
 - 目录树支持文件夹、右键新建/重命名/删除文件夹、删除白板
-- 画布右键可添加 Markdown 块和图表块
+- 画布右键可添加 Markdown 块和图表块；空白处、iframe/视频媒体不显示“复制为 / 导出为”
 - 底部“媒体”工具改为 URL/iframe 输入：图片、视频直链、网页链接或直接粘贴 `<iframe>` 标签
 - 媒体块默认 640×360、锁定比例、圆角、无边框无背景；双击可修改链接
 - 媒体块右键支持裁剪：矩形、圆角矩形、圆形；样式面板可调起点/圆心、尺寸、半径和圆角

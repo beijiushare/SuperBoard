@@ -21,6 +21,11 @@ export function SuperboardContextMenu({
   ...props
 }: SuperboardContextMenuProps) {
   const editor = useEditor()
+  const selectedShapes = useValue(
+    'superboard context menu selection',
+    () => editor.getSelectedShapes(),
+    [editor],
+  )
   const mediaShape = useValue(
     'superboard selected media',
     () => {
@@ -31,6 +36,8 @@ export function SuperboardContextMenu({
     },
     [editor],
   )
+  const hideConversions =
+    selectedShapes.length === 0 || (mediaShape !== null && mediaShape.props.kind !== 'image')
 
   function setCrop(crop: SbMediaCrop) {
     if (!mediaShape) return
@@ -43,7 +50,9 @@ export function SuperboardContextMenu({
 
   return (
     <DefaultContextMenu {...props}>
-      <DefaultContextMenuContent />
+      <div className={hideConversions ? 'sb-context-menu-filter' : undefined}>
+        <DefaultContextMenuContent />
+      </div>
       {mediaShape ? (
         <TldrawUiMenuGroup id="superboard-media-crop">
           <TldrawUiMenuSubmenu id="superboard-crop" label="裁剪">
