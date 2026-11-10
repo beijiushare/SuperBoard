@@ -3,8 +3,12 @@ import {
   DefaultContextMenuContent,
   TldrawUiMenuGroup,
   TldrawUiMenuItem,
+  TldrawUiMenuSubmenu,
+  useEditor,
+  useValue,
   type TLUiContextMenuProps,
 } from 'tldraw'
+import { SB_MEDIA_TYPE, type SbMediaCrop, type SbMediaShape } from '../../shared/shapes/types'
 
 interface SuperboardContextMenuProps extends TLUiContextMenuProps {
   onAddMarkdown: () => void
@@ -16,9 +20,54 @@ export function SuperboardContextMenu({
   onAddPele,
   ...props
 }: SuperboardContextMenuProps) {
+  const editor = useEditor()
+  const mediaShape = useValue(
+    'superboard selected media',
+    () => {
+      const selected = editor.getSelectedShapes()
+      return selected.length === 1 && selected[0].type === SB_MEDIA_TYPE
+        ? (selected[0] as SbMediaShape)
+        : null
+    },
+    [editor],
+  )
+
+  function setCrop(crop: SbMediaCrop) {
+    if (!mediaShape) return
+    editor.updateShape<SbMediaShape>({
+      id: mediaShape.id,
+      type: SB_MEDIA_TYPE,
+      props: { ...mediaShape.props, crop },
+    })
+  }
+
   return (
     <DefaultContextMenu {...props}>
       <DefaultContextMenuContent />
+      {mediaShape ? (
+        <TldrawUiMenuGroup id="superboard-media-crop">
+          <TldrawUiMenuSubmenu id="superboard-crop" label="裁剪">
+            <TldrawUiMenuItem
+              id="superboard-crop-rect"
+              label="按矩形裁剪"
+              isSelected={mediaShape.props.crop === 'rect'}
+              onSelect={() => setCrop('rect')}
+            />
+            <TldrawUiMenuItem
+              id="superboard-crop-rounded"
+              label="按圆角矩形裁剪"
+              isSelected={mediaShape.props.crop === 'rounded'}
+              onSelect={() => setCrop('rounded')}
+            />
+            <TldrawUiMenuItem
+              id="superboard-crop-circle"
+              label="按圆形裁剪"
+              isSelected={mediaShape.props.crop === 'circle'}
+              onSelect={() => setCrop('circle')}
+            />
+          </TldrawUiMenuSubmenu>
+        </TldrawUiMenuGroup>
+      ) : null}
       <TldrawUiMenuGroup id="superboard-blocks">
         <TldrawUiMenuItem
           id="superboard-add-markdown"

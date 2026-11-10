@@ -15,6 +15,7 @@ import {
   SUPERBOARD_MEDIA_EVENT,
   sbMarkdownMigrations,
   sbMarkdownProps,
+  sbMediaMigrations,
   sbMediaProps,
   sbPeleMigrations,
   sbPeleProps,
@@ -36,7 +37,7 @@ function requestMediaEdit(editor: { getInstanceState: () => { isReadonly: boolea
 
 function SbMediaContainer({ shape }: { shape: SbMediaShape }) {
   const editor = useEditor()
-  const { url, kind, w, h } = shape.props
+  const { url, kind, w, h, crop } = shape.props
   const readonly = editor.getInstanceState().isReadonly
 
   function onDoubleClick(event: ReactMouseEvent) {
@@ -50,7 +51,7 @@ function SbMediaContainer({ shape }: { shape: SbMediaShape }) {
       style={{ width: w, height: h }}
       onDoubleClick={onDoubleClick}
     >
-      <div className="sb-card sb-card-media">
+      <div className={`sb-card sb-card-media is-crop-${crop}`}>
         {kind === 'image' ? (
           <img src={url} alt="" draggable={false} />
         ) : kind === 'video' ? (
@@ -212,9 +213,10 @@ export class SbPeleShapeUtil extends BaseBoxShapeUtil<SbPeleShape> {
 export class SbMediaShapeUtil extends BaseBoxShapeUtil<SbMediaShape> {
   static override type = SB_MEDIA_TYPE
   static override props = sbMediaProps
+  static override migrations = sbMediaMigrations
 
   getDefaultProps(): SbMediaShape['props'] {
-    return { w: 640, h: 360, url: '', kind: 'iframe' }
+    return { w: 640, h: 360, url: '', kind: 'iframe', crop: 'rounded' }
   }
 
   getGeometry(shape: SbMediaShape) {

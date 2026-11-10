@@ -40,6 +40,19 @@
   background: transparent;
 }
 
+.sb-card-media.is-crop-rect {
+  border-radius: 0;
+}
+
+.sb-card-media.is-crop-rounded {
+  border-radius: var(--sb-card-radius);
+}
+
+.sb-card-media.is-crop-circle {
+  border-radius: 0;
+  clip-path: circle(50% at 50% 50%);
+}
+
 .sb-card-media img,
 .sb-card-media video,
 .sb-card-media iframe {

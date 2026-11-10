@@ -86,12 +86,14 @@ export interface SbPeleProps extends SbBlockStyleValues {
 }
 
 export type SbMediaKind = 'image' | 'video' | 'iframe'
+export type SbMediaCrop = 'rect' | 'rounded' | 'circle'
 
 export interface SbMediaProps {
   w: number
   h: number
   url: string
   kind: SbMediaKind
+  crop: SbMediaCrop
 }
 
 declare module 'tldraw' {
@@ -127,7 +129,21 @@ export const sbMediaProps = {
   h: T.number,
   url: T.string,
   kind: T.literalEnum('image', 'video', 'iframe'),
+  crop: T.literalEnum('rect', 'rounded', 'circle'),
 }
+
+export const sbMediaMigrations = createShapePropsMigrationSequence({
+  sequence: [
+    {
+      id: 'com.tldraw.shape.sb-media/1',
+      up: (props) => {
+        props.crop ??= 'rounded'
+        return props
+      },
+      down: 'retired',
+    },
+  ],
+})
 
 function addBlockStyleDefaults(props: Record<string, unknown>, defaults: SbBlockStyleValues) {
   props.backgroundColor ??= defaults.backgroundColor
@@ -162,7 +178,7 @@ export const sbPeleMigrations = createShapePropsMigrationSequence({
 export const sbShapeSchemas = {
   [SB_MARKDOWN_TYPE]: { props: sbMarkdownProps, migrations: sbMarkdownMigrations },
   [SB_PELE_TYPE]: { props: sbPeleProps, migrations: sbPeleMigrations },
-  [SB_MEDIA_TYPE]: { props: sbMediaProps },
+  [SB_MEDIA_TYPE]: { props: sbMediaProps, migrations: sbMediaMigrations },
 }
 
 export const DEFAULT_MARKDOWN_TEXT = `# 新卡片

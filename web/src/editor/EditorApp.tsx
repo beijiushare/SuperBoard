@@ -443,7 +443,7 @@ export function EditorApp() {
         type: SB_MEDIA_TYPE,
         x: center.x - width / 2 + offset,
         y: center.y - height / 2 + offset,
-        props: { w: width, h: height, url: source.url, kind: source.kind },
+        props: { w: width, h: height, url: source.url, kind: source.kind, crop: 'rounded' },
       })
       editor.select(id)
     } else {
