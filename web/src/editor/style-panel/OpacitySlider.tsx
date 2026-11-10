@@ -9,10 +9,6 @@ export function OpacitySlider({ title, style }: { title: string; style: StylePro
 
   return (
     <div className="sb-block-opacity">
-      <div className="sb-block-opacity-head">
-        <span>{title}</span>
-        <span>{label}</span>
-      </div>
       <TldrawUiSlider
         value={value}
         label={label}

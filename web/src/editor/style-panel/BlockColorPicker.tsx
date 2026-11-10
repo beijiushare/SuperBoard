@@ -23,7 +23,6 @@ export function BlockColorPicker({ title, style }: { title: string; style: Style
 
   return (
     <div className="sb-block-style-picker">
-      <span className="sb-block-style-label">{title}</span>
       <div className="sb-block-color-grid" role="group" aria-label={title}>
         {SB_BLOCK_COLOR_VALUES.map((color) => {
           const active = current?.type === 'shared' && current.value === color

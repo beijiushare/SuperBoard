@@ -1,7 +1,6 @@
 import {
   DefaultStylePanel,
   StylePanelSection,
-  StylePanelSubheading,
   useEditor,
   useValue,
   type TLUiStylePanelProps,
@@ -22,16 +21,14 @@ function SuperboardBlockStylePanel() {
   return (
     <>
       <StylePanelSection>
-        <StylePanelSubheading>块背景</StylePanelSubheading>
-        <BlockColorPicker title="颜色" style={sbBlockBackgroundColorStyle} />
-        <OpacitySlider title="透明度" style={sbBlockBackgroundOpacityStyle} />
+        <BlockColorPicker title="背景颜色" style={sbBlockBackgroundColorStyle} />
+        <OpacitySlider title="背景透明度" style={sbBlockBackgroundOpacityStyle} />
       </StylePanelSection>
       <StylePanelSection>
-        <StylePanelSubheading>块边框</StylePanelSubheading>
-        <BlockColorPicker title="颜色" style={sbBlockBorderColorStyle} />
+        <BlockColorPicker title="边框颜色" style={sbBlockBorderColorStyle} />
         <BorderWidthPicker />
         <BorderStylePicker />
-        <OpacitySlider title="透明度" style={sbBlockBorderOpacityStyle} />
+        <OpacitySlider title="边框透明度" style={sbBlockBorderOpacityStyle} />
       </StylePanelSection>
     </>
   )

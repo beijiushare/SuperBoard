@@ -14,8 +14,7 @@ export function BorderWidthPicker() {
   const current = useSharedValue(sbBlockBorderWidthStyle)
 
   return (
-    <div className="sb-block-style-picker sb-block-style-picker-inline">
-      <span className="sb-block-style-label">粗细</span>
+    <div className="sb-block-style-picker">
       <div className="sb-block-choice-row" role="group" aria-label="边框粗细">
         {SB_BLOCK_BORDER_WIDTH_VALUES.map((width) => {
           const active = current?.type === 'shared' && current.value === width
@@ -34,7 +33,7 @@ export function BorderWidthPicker() {
               }}
             >
               {width === 'none' ? (
-                <span className="sb-block-choice-none">无</span>
+                <span className="sb-block-choice-none" />
               ) : (
                 <span
                   className="sb-block-border-sample"
@@ -54,8 +53,7 @@ export function BorderStylePicker() {
   const current = useSharedValue(sbBlockBorderStyleStyle)
 
   return (
-    <div className="sb-block-style-picker sb-block-style-picker-inline">
-      <span className="sb-block-style-label">样式</span>
+    <div className="sb-block-style-picker">
       <div className="sb-block-choice-row" role="group" aria-label="边框样式">
         {SB_BLOCK_BORDER_STYLE_VALUES.map((borderStyle) => {
           const active = current?.type === 'shared' && current.value === borderStyle
