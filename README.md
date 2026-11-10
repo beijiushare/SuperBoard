@@ -3,7 +3,7 @@
 文件驱动的个人白板系统：本地用浏览器编辑，画布保存为 Git 友好的 `.tldr.json`，推送到 GitHub 后自动构建成只读静态站点。
 
 - 一个白板一个文件，无数据库、无后端存储
-- 本地编辑器直接读写 `whiteboards/`
+- 本地编辑器直接读写 `whiteboards/public/` 和 `whiteboards/private/`
 - 线上按白板生成独立 HTML，强制只读
 - 支持 Markdown、AsciiMath 公式、Pele 图表和手绘
 
@@ -22,7 +22,7 @@ npm run dev
 
 | 命令 | 说明 |
 | --- | --- |
-| `npm run dev` | 启动本地编辑器，读写 `whiteboards/` |
+| `npm run dev` | 启动本地编辑器，读写 `whiteboards/public/`、`whiteboards/private/` |
 | `npm run typecheck` | TypeScript 类型检查 |
 | `npm run build:viewer` | 只打包只读端前端资源到 `dist/` |
 | `npm run build:site` | 打包并生成完整静态站（每个白板一个 HTML） |
@@ -40,6 +40,8 @@ npm run dev
   - `dist/boards/<slug>.json`
   - `404.html`、`.nojekyll`、可选的 `CNAME`
 
+每个 `<slug>.html` 已经内嵌该白板的 JSON，页面运行不依赖旁边的 `<slug>.json`。`.json` 是额外输出的原始数据副本，方便直接取用、调试或给外部脚本读取。
+
 ### 预览必须通过 HTTP
 
 不要直接双击 `dist/` 里的 HTML 用 `file://` 打开。产物使用 ES Module，且资源路径是 `/SuperBoard/assets/...`，`file://` 下会触发 CORS 和 404。
@@ -56,7 +58,8 @@ npm run preview:site
 ## 目录结构
 
 ```text
-whiteboards/          白板源文件，按文件夹组织
+whiteboards/public/   公开白板，提交 Git，参与构建
+whiteboards/private/  私有白板，本地专用，已被 .gitignore
 web/src/shared/       编辑器与只读端共用代码
 web/src/editor/       本地编辑器
 web/src/viewer/       只读页面
@@ -71,15 +74,20 @@ scripts/              seed、MathJax 资源复制
 
 ```text
 whiteboards/
-├─ 项目规划.tldr.json
-└─ 项目/
-   └─ 路线图.tldr.json
+├─ public/
+│  ├─ 项目规划.tldr.json
+│  └─ 项目/路线图.tldr.json
+└─ private/
+   └─ 私密草稿.tldr.json
 ```
+
+`private/` 不会进入 Git，也不会进入 `dist/`；构建脚本只读取 `whiteboards/public/`。
 
 ## 编辑器
 
-- 最左侧竖向操作栏：目录开关、保存、样式面板开关
-- 目录树支持文件夹、右键新建/重命名/删除
+- 最左侧竖向操作栏：目录开关、公开/私有切换、保存、样式面板开关
+- 目录标题同步显示 `SuperBoard-public` / `SuperBoard-private`
+- 目录树支持文件夹、右键新建/重命名/删除文件夹、删除白板
 - 画布右键可添加 Markdown 块和图表块
 - 左键双击块进入编辑，右键不会触发
 - 自动保存 debounce 800ms，支持 `Ctrl/⌘ + S`
