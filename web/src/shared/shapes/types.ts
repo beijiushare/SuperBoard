@@ -8,10 +8,12 @@ import {
 
 export const SB_MARKDOWN_TYPE = 'sb-markdown'
 export const SB_PELE_TYPE = 'sb-pele'
+export const SB_MEDIA_TYPE = 'sb-media'
 export const SUPERBOARD_SHAPE_TYPES = [SB_MARKDOWN_TYPE, SB_PELE_TYPE] as const
 export type SuperboardShapeType = (typeof SUPERBOARD_SHAPE_TYPES)[number]
 
 export const SUPERBOARD_EDIT_EVENT = 'superboard:edit-shape'
+export const SUPERBOARD_MEDIA_EVENT = 'superboard:edit-media'
 
 export function isSuperboardShapeType(type: string): type is SuperboardShapeType {
   return (SUPERBOARD_SHAPE_TYPES as readonly string[]).includes(type)
@@ -83,15 +85,26 @@ export interface SbPeleProps extends SbBlockStyleValues {
   diagram: string
 }
 
+export type SbMediaKind = 'image' | 'video' | 'iframe'
+
+export interface SbMediaProps {
+  w: number
+  h: number
+  url: string
+  kind: SbMediaKind
+}
+
 declare module 'tldraw' {
   interface TLGlobalShapePropsMap {
     'sb-markdown': SbMarkdownProps
     'sb-pele': SbPeleProps
+    'sb-media': SbMediaProps
   }
 }
 
 export type SbMarkdownShape = TLBaseShape<'sb-markdown', SbMarkdownProps>
 export type SbPeleShape = TLBaseShape<'sb-pele', SbPeleProps>
+export type SbMediaShape = TLBaseShape<'sb-media', SbMediaProps>
 export type SuperboardShape = SbMarkdownShape | SbPeleShape
 
 export const sbMarkdownProps = {
@@ -107,6 +120,13 @@ export const sbPeleProps = {
   h: T.number,
   code: T.string,
   diagram: T.string,
+}
+
+export const sbMediaProps = {
+  w: T.number,
+  h: T.number,
+  url: T.string,
+  kind: T.literalEnum('image', 'video', 'iframe'),
 }
 
 function addBlockStyleDefaults(props: Record<string, unknown>, defaults: SbBlockStyleValues) {
@@ -142,6 +162,7 @@ export const sbPeleMigrations = createShapePropsMigrationSequence({
 export const sbShapeSchemas = {
   [SB_MARKDOWN_TYPE]: { props: sbMarkdownProps, migrations: sbMarkdownMigrations },
   [SB_PELE_TYPE]: { props: sbPeleProps, migrations: sbPeleMigrations },
+  [SB_MEDIA_TYPE]: { props: sbMediaProps },
 }
 
 export const DEFAULT_MARKDOWN_TEXT = `# 新卡片

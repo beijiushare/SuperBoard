@@ -9,13 +9,17 @@ import {
   DEFAULT_SB_BLOCK_STYLE,
   DEFAULT_SB_PELE_STYLE,
   SB_MARKDOWN_TYPE,
+  SB_MEDIA_TYPE,
   SB_PELE_TYPE,
   SUPERBOARD_EDIT_EVENT,
+  SUPERBOARD_MEDIA_EVENT,
   sbMarkdownMigrations,
   sbMarkdownProps,
+  sbMediaProps,
   sbPeleMigrations,
   sbPeleProps,
   type SbMarkdownShape,
+  type SbMediaShape,
   type SbPeleShape,
   type SuperboardShape,
 } from './types'
@@ -23,6 +27,47 @@ import {
 function requestEdit(editor: { getInstanceState: () => { isReadonly: boolean } }, shapeId: string) {
   if (editor.getInstanceState().isReadonly) return
   window.dispatchEvent(new CustomEvent(SUPERBOARD_EDIT_EVENT, { detail: { shapeId } }))
+}
+
+function requestMediaEdit(editor: { getInstanceState: () => { isReadonly: boolean } }, shapeId: string) {
+  if (editor.getInstanceState().isReadonly) return
+  window.dispatchEvent(new CustomEvent(SUPERBOARD_MEDIA_EVENT, { detail: { shapeId } }))
+}
+
+function SbMediaContainer({ shape }: { shape: SbMediaShape }) {
+  const editor = useEditor()
+  const { url, kind, w, h } = shape.props
+  const readonly = editor.getInstanceState().isReadonly
+
+  function onDoubleClick(event: ReactMouseEvent) {
+    event.stopPropagation()
+    requestMediaEdit(editor, shape.id)
+  }
+
+  return (
+    <HTMLContainer
+      className="sb-shape-container"
+      style={{ width: w, height: h }}
+      onDoubleClick={onDoubleClick}
+    >
+      <div className="sb-card sb-card-media">
+        {kind === 'image' ? (
+          <img src={url} alt="" draggable={false} />
+        ) : kind === 'video' ? (
+          <video src={url} controls playsInline />
+        ) : (
+          <iframe
+            src={url}
+            title="嵌入内容"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            style={{ pointerEvents: readonly ? 'auto' : 'none' }}
+          />
+        )}
+      </div>
+    </HTMLContainer>
+  )
 }
 
 interface SbShapeContainerProps {
@@ -164,4 +209,35 @@ export class SbPeleShapeUtil extends BaseBoxShapeUtil<SbPeleShape> {
   }
 }
 
-export const superboardShapeUtils = [SbMarkdownShapeUtil, SbPeleShapeUtil]
+export class SbMediaShapeUtil extends BaseBoxShapeUtil<SbMediaShape> {
+  static override type = SB_MEDIA_TYPE
+  static override props = sbMediaProps
+
+  getDefaultProps(): SbMediaShape['props'] {
+    return { w: 640, h: 360, url: '', kind: 'iframe' }
+  }
+
+  getGeometry(shape: SbMediaShape) {
+    return new Rectangle2d({ width: shape.props.w, height: shape.props.h, isFilled: true })
+  }
+
+  override isAspectRatioLocked() {
+    return true
+  }
+
+  component(shape: SbMediaShape) {
+    return <SbMediaContainer shape={shape} />
+  }
+
+  getIndicatorPath(shape: SbMediaShape) {
+    const path = new Path2D()
+    path.rect(0, 0, shape.props.w, shape.props.h)
+    return path
+  }
+
+  override onDoubleClick(shape: SbMediaShape) {
+    requestMediaEdit(this.editor, shape.id)
+  }
+}
+
+export const superboardShapeUtils = [SbMarkdownShapeUtil, SbPeleShapeUtil, SbMediaShapeUtil]

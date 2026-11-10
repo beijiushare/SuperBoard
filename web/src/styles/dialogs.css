@@ -61,6 +61,26 @@
   box-shadow: 0 0 0 3px rgb(100 95 80 / 10%);
 }
 
+.sb-media-input {
+  min-height: 130px;
+  padding: 10px;
+  border: 1px solid #d8d4c9;
+  border-radius: 8px;
+  outline: none;
+  background: #fffdf8;
+  color: #1f1e1c;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.sb-media-input:focus {
+  border-color: #8f8a7d;
+  box-shadow: 0 0 0 3px rgb(100 95 80 / 10%);
+}
+
 .sb-field small {
   color: #8b877d;
   font-size: 11px;
