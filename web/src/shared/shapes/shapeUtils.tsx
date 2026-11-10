@@ -73,10 +73,12 @@ function SbMediaContainer({ shape }: { shape: SbMediaShape }) {
 
 interface SbShapeContainerProps {
   shape: SuperboardShape
+  baseWidth: number
+  baseHeight: number
   children: ReactNode
 }
 
-function SbShapeContainer({ shape, children }: SbShapeContainerProps) {
+function SbShapeContainer({ shape, baseWidth, baseHeight, children }: SbShapeContainerProps) {
   const editor = useEditor()
   const colors = useValue(
     'superboard block colors',
@@ -129,7 +131,16 @@ function SbShapeContainer({ shape, children }: SbShapeContainerProps) {
       onPointerDownCapture={onPointerDownCapture}
       onDoubleClick={onDoubleClick}
     >
-      {children}
+      <div
+        className="sb-block-scale"
+        style={{
+          width: baseWidth,
+          height: baseHeight,
+          transform: `scale(${shape.props.w / baseWidth}, ${shape.props.h / baseHeight})`,
+        }}
+      >
+        {children}
+      </div>
     </HTMLContainer>
   )
 }
@@ -143,13 +154,17 @@ export class SbMarkdownShapeUtil extends BaseBoxShapeUtil<SbMarkdownShape> {
     return { ...DEFAULT_SB_BLOCK_STYLE, w: 460, h: 340, text: DEFAULT_MARKDOWN_TEXT }
   }
 
+  override isAspectRatioLocked() {
+    return true
+  }
+
   getGeometry(shape: SbMarkdownShape) {
     return new Rectangle2d({ width: shape.props.w, height: shape.props.h, isFilled: true })
   }
 
   component(shape: SbMarkdownShape) {
     return (
-      <SbShapeContainer shape={shape}>
+      <SbShapeContainer shape={shape} baseWidth={460} baseHeight={340}>
         <div className="sb-card sb-card-markdown">
           <div className="sb-card-scroll">
             <MarkdownView source={shape.props.text} />
@@ -185,13 +200,17 @@ export class SbPeleShapeUtil extends BaseBoxShapeUtil<SbPeleShape> {
     }
   }
 
+  override isAspectRatioLocked() {
+    return true
+  }
+
   getGeometry(shape: SbPeleShape) {
     return new Rectangle2d({ width: shape.props.w, height: shape.props.h, isFilled: true })
   }
 
   component(shape: SbPeleShape) {
     return (
-      <SbShapeContainer shape={shape}>
+      <SbShapeContainer shape={shape} baseWidth={580} baseHeight={380}>
         <div className="sb-card sb-card-pele">
           <PeleView code={shape.props.code} />
         </div>
