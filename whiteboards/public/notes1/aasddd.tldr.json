@@ -3,7 +3,7 @@
   "meta": {
     "title": "ssss",
     "slug": "aasddd",
-    "updatedAt": "2026-11-10T20:46:25.930Z"
+    "updatedAt": "2026-11-10T20:54:03.761Z"
   },
   "document": {
     "store": {
@@ -192,6 +192,38 @@
         },
         "parentId": "page:page",
         "index": "a6J4r",
+        "typeName": "shape"
+      },
+      "shape:ppLM-uHfpnzW9kV1M93a5": {
+        "x": 738.4401979792398,
+        "y": 286.18994656208235,
+        "rotation": 0,
+        "isLocked": false,
+        "opacity": 1,
+        "meta": {},
+        "id": "shape:ppLM-uHfpnzW9kV1M93a5",
+        "type": "draw",
+        "props": {
+          "segments": [
+            {
+              "type": "free",
+              "path": "AAAAAAAAAACkv647TcilSzfKEEzIyCxLf81zTqnQYVFC0TZSI9F/UZ3RI1Ej0Z1RI9F/UcjMyEyK0EJRLtBCUcjM7k6K0HRSENB0UuPPdFKmyyxPpMfHTE7I+k2kvwRNAAA3SgAAu0UAAE5IqUO7RaQ/vUGxRshEvEmkR7FKqUMQTKRD7k4AAFVSpL97VBDM5lQ2zn9VaM+SVmDR+VVC0RhWStMYVkrT5lQB1FFVmtQ=",
+              "dim": 2
+            }
+          ],
+          "color": "black",
+          "fill": "none",
+          "dash": "draw",
+          "size": "m",
+          "isComplete": true,
+          "isClosed": false,
+          "isPen": false,
+          "scale": 1,
+          "scaleX": 1,
+          "scaleY": 1
+        },
+        "parentId": "page:page",
+        "index": "aBKPU",
         "typeName": "shape"
       },
       "page:page": {
