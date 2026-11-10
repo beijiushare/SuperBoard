@@ -42,7 +42,8 @@ function clampPercent(value: number) {
 
 function mediaClipPath(props: SbMediaProps) {
   if (props.crop === 'circle') {
-    return `circle(${clampPercent(props.cropRadius)}% at ${clampPercent(props.cropCx)}% ${clampPercent(props.cropCy)}%)`
+    const radius = (Math.min(props.w, props.h) * clampPercent(props.cropRadius)) / 100
+    return `circle(${radius}px at ${clampPercent(props.cropCx)}% ${clampPercent(props.cropCy)}%)`
   }
 
   const x = clampPercent(props.cropX)
@@ -53,7 +54,10 @@ function mediaClipPath(props: SbMediaProps) {
   const bottom = clampPercent(100 - y - height)
   const inset = `inset(${y}% ${right}% ${bottom}% ${x}%`
   if (props.crop === 'rounded') {
-    return `${inset} round ${Math.min(50, clampPercent(props.cropCorner))}%)`
+    const cropWidth = (props.w * width) / 100
+    const cropHeight = (props.h * height) / 100
+    const radius = (Math.min(cropWidth, cropHeight) * Math.min(50, clampPercent(props.cropCorner))) / 100
+    return `${inset} round ${radius}px)`
   }
   return `${inset})`
 }
