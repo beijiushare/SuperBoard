@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { Tldraw, type Editor, type TLUiContextMenuProps } from 'tldraw'
 import UseAnimations from 'react-useanimations'
+import aperture from 'react-useanimations/lib/aperture'
 import checkCircle from 'react-useanimations/lib/checkCircle'
 import sidebar from 'react-useanimations/lib/sidebar'
 import type { BoardFile, BoardListItem, BoardTreeFolder } from '../shared/board/types'
@@ -10,7 +11,7 @@ import { buildBoardTree } from '../shared/board/tree'
 import { useTreeExpansion } from '../shared/board/useTreeExpansion'
 import { SB_MARKDOWN_TYPE, SB_PELE_TYPE } from '../shared/shapes/types'
 import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
-import { superboardEditorComponents } from './style-panel'
+import { superboardEditorComponents, SuperboardStylePanel } from './style-panel'
 import { SuperboardContextMenu } from './context-menu'
 import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
 import { BoardDialog, DeleteBoardDialog, RenameFolderDialog, type BoardFormValues } from './dialogs'
@@ -44,6 +45,7 @@ export function EditorApp() {
   const [editorReady, setEditorReady] = useState(false)
   const [treeMode, setTreeMode] = useState(() => new URLSearchParams(window.location.search).has('tree'))
   const [treeOpen, setTreeOpen] = useState(true)
+  const [stylePanelOpen, setStylePanelOpen] = useState(false)
   const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
   const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
@@ -74,6 +76,7 @@ export function EditorApp() {
   const editorComponents = useMemo(
     () => ({
       ...superboardEditorComponents,
+      StylePanel: stylePanelOpen ? SuperboardStylePanel : null,
       ContextMenu: (props: TLUiContextMenuProps) => (
         <SuperboardContextMenu
           {...props}
@@ -82,7 +85,7 @@ export function EditorApp() {
         />
       ),
     }),
-    [addShape],
+    [addShape, stylePanelOpen],
   )
 
   useEffect(() => {
@@ -334,6 +337,16 @@ export function EditorApp() {
           onClick={() => void saveNow()}
         >
           <UseAnimations animation={checkCircle} size={32} />
+        </button>
+        <button
+          type="button"
+          className="sb-rail-button"
+          data-tooltip={stylePanelOpen ? '隐藏样式面板' : '显示样式面板'}
+          aria-label={stylePanelOpen ? '隐藏样式面板' : '显示样式面板'}
+          aria-pressed={stylePanelOpen}
+          onClick={() => setStylePanelOpen((open) => !open)}
+        >
+          <UseAnimations animation={aperture} size={32} />
         </button>
       </aside>
 
