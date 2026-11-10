@@ -1,5 +1,6 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
+import type { BoardScope } from '../../shared/board/types'
 import { isValidSlug, type BoardFile } from '../../shared/board/types'
 import {
   createBlankBoard,
@@ -8,7 +9,7 @@ import {
   writeBoardFile,
 } from './files'
 import { HttpError } from './http'
-import { normalizeFolder, resolveBoardFile } from './paths'
+import { normalizeFolder, normalizeScope, resolveBoardFile } from './paths'
 import type { CreateBoardBody, PatchBoardBody } from './types'
 
 export async function createBoard(root: string, body: CreateBoardBody) {
@@ -22,11 +23,12 @@ export async function createBoard(root: string, body: CreateBoardBody) {
     throw new HttpError(400, 'summary 必须是字符串')
   }
 
+  const scope = normalizeScope(body.scope)
   const folder = normalizeFolder(body.folder)
-  const existing = await findBoardFile(root, body.slug)
+  const existing = await findBoardFile(root, scope, body.slug)
   if (existing) throw new HttpError(409, `slug 已存在: ${body.slug}`)
 
-  const file = resolveBoardFile(root, folder, body.slug)
+  const file = resolveBoardFile(root, scope, folder, body.slug)
   try {
     await fs.access(file)
     throw new HttpError(409, `文件已存在: ${path.relative(root, file)}`)
@@ -36,11 +38,11 @@ export async function createBoard(root: string, body: CreateBoardBody) {
 
   const board = createBlankBoard(body.title.trim(), body.slug, body.summary?.trim() || undefined)
   await writeBoardFile(file, board)
-  return { board, folder }
+  return { board, folder, scope }
 }
 
-export async function patchBoard(root: string, slug: string, body: PatchBoardBody) {
-  const found = await findBoardFile(root, slug)
+export async function patchBoard(root: string, scope: BoardScope, slug: string, body: PatchBoardBody) {
+  const found = await findBoardFile(root, scope, slug)
   if (!found) throw new HttpError(404, '白板不存在')
 
   if (
@@ -79,7 +81,7 @@ export async function patchBoard(root: string, slug: string, body: PatchBoardBod
   const nextFolder = body.folder === undefined ? found.folder : normalizeFolder(body.folder)
 
   if (nextSlug !== slug) {
-    const conflict = await findBoardFile(root, nextSlug)
+    const conflict = await findBoardFile(root, scope, nextSlug)
     if (conflict) throw new HttpError(409, `slug 已存在: ${nextSlug}`)
   }
 
@@ -94,7 +96,7 @@ export async function patchBoard(root: string, slug: string, body: PatchBoardBod
     },
   }
 
-  const nextFile = resolveBoardFile(root, nextFolder, nextSlug)
+  const nextFile = resolveBoardFile(root, scope, nextFolder, nextSlug)
   if (nextFile !== found.file) {
     try {
       await fs.access(nextFile)
@@ -107,15 +109,15 @@ export async function patchBoard(root: string, slug: string, body: PatchBoardBod
   await writeBoardFile(nextFile, board)
   if (nextFile !== found.file) {
     await fs.unlink(found.file)
-    await removeEmptyParents(root, found.file)
+    await removeEmptyParents(root, scope, found.file)
   }
 
   return { board, folder: nextFolder }
 }
 
-export async function deleteBoard(root: string, slug: string) {
-  const found = await findBoardFile(root, slug)
+export async function deleteBoard(root: string, scope: BoardScope, slug: string) {
+  const found = await findBoardFile(root, scope, slug)
   if (!found) throw new HttpError(404, '白板不存在')
   await fs.unlink(found.file)
-  await removeEmptyParents(root, found.file)
+  await removeEmptyParents(root, scope, found.file)
 }

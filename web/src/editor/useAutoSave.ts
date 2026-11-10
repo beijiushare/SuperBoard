@@ -8,7 +8,7 @@ import {
   type SetStateAction,
 } from 'react'
 import type { Editor } from 'tldraw'
-import type { BoardFile, BoardListItem } from '../shared/board/types'
+import type { BoardFile, BoardListItem, BoardScope } from '../shared/board/types'
 import { putBoard } from './api'
 
 export type SaveState = 'saved' | 'dirty' | 'saving' | 'error'
@@ -23,11 +23,12 @@ export const SAVE_STATUS_LABEL: Record<SaveState, string> = {
 interface UseAutoSaveOptions {
   editorRef: MutableRefObject<Editor | null>
   boardRef: MutableRefObject<BoardFile | null>
+  scopeRef: MutableRefObject<BoardScope>
   setBoard: Dispatch<SetStateAction<BoardFile | null>>
   setBoards: Dispatch<SetStateAction<BoardListItem[]>>
 }
 
-export function useAutoSave({ editorRef, boardRef, setBoard, setBoards }: UseAutoSaveOptions) {
+export function useAutoSave({ editorRef, boardRef, scopeRef, setBoard, setBoards }: UseAutoSaveOptions) {
   const [saveState, setSaveState] = useState<SaveState>('saved')
   const [saveError, setSaveError] = useState('')
   const dirtyRef = useRef(false)
@@ -66,13 +67,13 @@ export function useAutoSave({ editorRef, boardRef, setBoard, setBoards }: UseAut
     dirtyRef.current = false
 
     try {
-      const result = await putBoard(current.meta.slug, payload)
+      const result = await putBoard(current.meta.slug, scopeRef.current, payload)
       const next = { ...payload, meta: result.meta }
       boardRef.current = next
       setBoard(next)
       setBoards((items) =>
         items.map((item) =>
-          item.slug === next.meta.slug
+          item.slug === next.meta.slug && (item.scope ?? 'public') === scopeRef.current
             ? {
                 ...item,
                 title: next.meta.title,
@@ -96,7 +97,7 @@ export function useAutoSave({ editorRef, boardRef, setBoard, setBoards }: UseAut
         }, 600)
       }
     }
-  }, [boardRef, editorRef, setBoard, setBoards])
+  }, [boardRef, editorRef, scopeRef, setBoard, setBoards])
 
   saveNowRef.current = saveNow
 

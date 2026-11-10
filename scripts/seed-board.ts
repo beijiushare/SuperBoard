@@ -23,16 +23,16 @@ import {
 } from '../web/src/shared/shapes/types'
 
 const root = process.cwd()
-const boardsDir = path.join(root, 'whiteboards')
+const boardsDir = path.join(root, 'whiteboards', 'public')
 const pageId = 'page:main' as TLPageId
 
 const intro = `# SuperBoard
 
 一个用 **tldraw** 搭建的本地白板工作台。
 
-- 本地编辑，自动保存到 \`whiteboards/*.tldr.json\`
+- 本地编辑，自动保存到 \`whiteboards/public/*.tldr.json\`
 - 提交到 Git 后自动部署为只读分享站
-- “+” 按钮可添加 Markdown 和图表卡片
+- 右键画布可添加 Markdown 和图表卡片
 - 双击卡片即可编辑
 
 ## AsciiMath
@@ -196,7 +196,7 @@ async function main() {
 
   await fs.mkdir(boardsDir, { recursive: true })
   await fs.writeFile(path.join(boardsDir, 'superboard-demo.tldr.json'), `${JSON.stringify(board, null, 2)}\n`, 'utf8')
-  console.log('SuperBoard: 已生成 whiteboards/superboard-demo.tldr.json')
+  console.log('SuperBoard: 已生成 whiteboards/public/superboard-demo.tldr.json')
 }
 
 main()

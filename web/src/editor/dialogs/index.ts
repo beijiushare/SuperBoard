@@ -1,4 +1,5 @@
 export { BoardDialog } from './BoardDialog'
 export { DeleteBoardDialog } from './DeleteBoardDialog'
+export { DeleteFolderDialog } from './DeleteFolderDialog'
 export { RenameFolderDialog } from './RenameFolderDialog'
 export type { BoardFormValues } from './types'

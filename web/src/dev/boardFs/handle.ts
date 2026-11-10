@@ -2,8 +2,9 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { isValidSlug, type BoardFile } from '../../shared/board/types'
 import { createBoard, deleteBoard, patchBoard } from './boards'
 import { contentHash, findBoardFile, listBoards, writeBoardFile } from './files'
-import { renameFolder } from './folders'
+import { renameFolder, deleteFolder } from './folders'
 import { HttpError, readJsonBody, sendJson } from './http'
+import { normalizeScope } from './paths'
 import type { CreateBoardBody, PatchBoardBody, RenameFolderBody } from './types'
 
 function validateBoardPayload(value: unknown): asserts value is BoardFile {
@@ -40,6 +41,12 @@ export async function handleBoardFsRequest(
         const body = await readJsonBody<RenameFolderBody>(req)
         const renamed = await renameFolder(root, body)
         sendJson(res, 200, { ok: true, path: renamed.path })
+      } else if (req.method === 'DELETE') {
+        const folder = await deleteFolder(root, {
+          path: url.searchParams.get('path') ?? undefined,
+          scope: url.searchParams.get('scope') ?? undefined,
+        })
+        sendJson(res, 200, { ok: true, path: folder.path })
       } else {
         sendJson(res, 405, { error: 'method not allowed' })
       }
@@ -54,7 +61,7 @@ export async function handleBoardFsRequest(
     if (url.pathname === '/__boards' && req.method === 'POST') {
       const body = await readJsonBody<CreateBoardBody>(req)
       const created = await createBoard(root, body)
-      sendJson(res, 201, { ok: true, board: created.board, path: created.folder })
+      sendJson(res, 201, { ok: true, board: created.board, path: created.folder, scope: created.scope })
       return
     }
 
@@ -70,7 +77,8 @@ export async function handleBoardFsRequest(
       return
     }
 
-    const found = await findBoardFile(root, slug)
+    const scope = normalizeScope(url.searchParams.get('scope'))
+    const found = await findBoardFile(root, scope, slug)
     if (!found) {
       sendJson(res, 404, { error: '白板不存在' })
       return
@@ -100,24 +108,26 @@ export async function handleBoardFsRequest(
         hash: nextHash,
         meta: payload.meta,
         path: found.folder,
+        scope,
       })
       return
     }
 
     if (req.method === 'PATCH') {
       const body = await readJsonBody<PatchBoardBody>(req)
-      const updated = await patchBoard(root, slug, body)
+      const updated = await patchBoard(root, scope, slug, body)
       sendJson(res, 200, {
         ok: true,
         meta: updated.board.meta,
         path: updated.folder,
         board: updated.board,
+        scope,
       })
       return
     }
 
     if (req.method === 'DELETE') {
-      await deleteBoard(root, slug)
+      await deleteBoard(root, scope, slug)
       sendJson(res, 200, { ok: true })
       return
     }

@@ -3,7 +3,7 @@ import path from 'node:path'
 
 const root = process.cwd()
 const distDir = path.join(root, 'dist')
-const boardsDir = path.join(root, 'whiteboards')
+const boardsDir = path.join(root, 'whiteboards', 'public')
 const manifestPath = path.join(distDir, '.vite', 'manifest.json')
 const templatePath = path.join(root, 'web', 'template.html')
 

@@ -1,6 +1,7 @@
 node_modules/
 dist/
 public/mathjax/
+whiteboards/private/
 .preview/
 .env
 .env.local

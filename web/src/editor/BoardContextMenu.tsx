@@ -13,6 +13,7 @@ interface BoardContextMenuProps {
   onRename: (board: BoardTreeFile) => void
   onRenameFolder: (folder: BoardTreeFolder) => void
   onDelete: (board: BoardTreeFile) => void
+  onDeleteFolder: (folder: BoardTreeFolder) => void
 }
 
 export function BoardContextMenu({
@@ -24,6 +25,7 @@ export function BoardContextMenu({
   onRename,
   onRenameFolder,
   onDelete,
+  onDeleteFolder,
 }: BoardContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ left: x, top: y })
@@ -143,17 +145,30 @@ export function BoardContextMenu({
             </button>
           </div>
           {target.type === 'folder' ? (
-            <div className="sb-context-menu-group">
-              <button
-                className="sb-context-menu-item"
-                type="button"
-                role="menuitem"
-                onClick={() => run(() => onRenameFolder(target.node))}
-                title={`重命名文件夹 ${folder}`}
-              >
-                <span className="sb-context-menu-label">重命名…</span>
-              </button>
-            </div>
+            <>
+              <div className="sb-context-menu-group">
+                <button
+                  className="sb-context-menu-item"
+                  type="button"
+                  role="menuitem"
+                  onClick={() => run(() => onRenameFolder(target.node))}
+                  title={`重命名文件夹 ${folder}`}
+                >
+                  <span className="sb-context-menu-label">重命名…</span>
+                </button>
+              </div>
+              <div className="sb-context-menu-group">
+                <button
+                  className="sb-context-menu-item"
+                  type="button"
+                  role="menuitem"
+                  onClick={() => run(() => onDeleteFolder(target.node))}
+                  title={`删除文件夹 ${folder}`}
+                >
+                  <span className="sb-context-menu-label">删除文件夹…</span>
+                </button>
+              </div>
+            </>
           ) : null}
         </>
       )}

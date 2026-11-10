@@ -11,6 +11,7 @@ interface DeleteBoardDialogProps {
 export function DeleteBoardDialog({ board, onClose, onConfirm }: DeleteBoardDialogProps) {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const scope = board.scope ?? 'public'
 
   useDialogEscape(busy, onClose)
 
@@ -40,9 +41,14 @@ export function DeleteBoardDialog({ board, onClose, onConfirm }: DeleteBoardDial
 
         <div className="sb-dialog-body">
           <p className="sb-dialog-copy">
-            确定删除 <strong>{board.title}</strong> 吗？文件会从 <code>{board.path ? `${board.path}/` : ''}{board.slug}.tldr.json</code> 删除。
+            确定删除 <strong>{board.title}</strong> 吗？文件会从{' '}
+            <code>whiteboards/{scope}/{board.path ? `${board.path}/` : ''}{board.slug}.tldr.json</code> 删除。
           </p>
-          <p className="sb-dialog-hint">此操作不可撤销，但提交后仍可从 Git 恢复。</p>
+          <p className="sb-dialog-hint">
+            {scope === 'public'
+              ? '此操作不可撤销。公开白板若已提交到 Git，可从提交历史恢复。'
+              : '此操作不可撤销。私有白板未纳入 Git，删除后无法恢复。'}
+          </p>
           {error ? <p className="sb-dialog-error">{error}</p> : null}
         </div>
 

@@ -1,16 +1,18 @@
 import { createHash } from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
-import type { BoardFile, BoardListItem } from '../../shared/board/types'
-import { BLANK_DOCUMENT, BOARDS_DIR } from './constants'
+import type { BoardFile, BoardListItem, BoardScope } from '../../shared/board/types'
+import { BOARD_SCOPES } from '../../shared/board/types'
+import { BLANK_DOCUMENT } from './constants'
+import { resolveScopeDir } from './paths'
 import type { ScannedBoard } from './types'
 
 async function readJson(file: string): Promise<BoardFile> {
   return JSON.parse(await fs.readFile(file, 'utf8')) as BoardFile
 }
 
-export async function scanBoardFiles(root: string): Promise<ScannedBoard[]> {
-  const dir = path.join(root, BOARDS_DIR)
+export async function scanBoardFiles(root: string, scope: BoardScope): Promise<ScannedBoard[]> {
+  const dir = resolveScopeDir(root, scope)
   const files: Array<{ file: string; folder: string }> = []
 
   async function visit(current: string, folder: string) {
@@ -50,14 +52,22 @@ export async function scanBoardFiles(root: string): Promise<ScannedBoard[]> {
 }
 
 export async function listBoards(root: string) {
-  const boards: BoardListItem[] = (await scanBoardFiles(root)).map(({ folder, board }) => ({
-    slug: board.meta.slug,
-    title: board.meta.title,
-    summary: board.meta.summary,
-    order: board.meta.order,
-    updatedAt: board.meta.updatedAt,
-    path: folder,
-  }))
+  const boards: BoardListItem[] = []
+
+  for (const scope of BOARD_SCOPES) {
+    const scanned = await scanBoardFiles(root, scope)
+    boards.push(
+      ...scanned.map(({ folder, board }) => ({
+        slug: board.meta.slug,
+        title: board.meta.title,
+        summary: board.meta.summary,
+        order: board.meta.order,
+        updatedAt: board.meta.updatedAt,
+        path: folder,
+        scope,
+      })),
+    )
+  }
 
   return boards.sort((a, b) => {
     const ai = a.order ?? Number.MAX_SAFE_INTEGER
@@ -66,8 +76,8 @@ export async function listBoards(root: string) {
   })
 }
 
-export async function findBoardFile(root: string, slug: string) {
-  const found = (await scanBoardFiles(root)).find((item) => item.board.meta.slug === slug)
+export async function findBoardFile(root: string, scope: BoardScope, slug: string) {
+  const found = (await scanBoardFiles(root, scope)).find((item) => item.board.meta.slug === slug)
   return found ?? null
 }
 
@@ -82,8 +92,8 @@ export async function writeBoardFile(file: string, board: BoardFile) {
   await fs.rename(tempFile, file)
 }
 
-export async function removeEmptyParents(root: string, file: string) {
-  const boardsRoot = path.resolve(root, BOARDS_DIR)
+export async function removeEmptyParents(root: string, scope: BoardScope, file: string) {
+  const boardsRoot = resolveScopeDir(root, scope)
   let dir = path.dirname(file)
   while (dir !== boardsRoot && dir.startsWith(`${boardsRoot}${path.sep}`)) {
     let entries

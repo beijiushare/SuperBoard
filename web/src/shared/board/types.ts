@@ -1,5 +1,13 @@
 import type { TLStoreSnapshot } from 'tldraw'
 
+export type BoardScope = 'public' | 'private'
+
+export const BOARD_SCOPES: BoardScope[] = ['public', 'private']
+
+export function isBoardScope(value: unknown): value is BoardScope {
+  return value === 'public' || value === 'private'
+}
+
 export interface BoardMeta {
   title: string
   slug: string
@@ -23,6 +31,7 @@ export interface BoardListItem {
   order?: number
   updatedAt?: string
   path: string
+  scope?: BoardScope
 }
 
 export interface BoardTreeFile extends BoardListItem {

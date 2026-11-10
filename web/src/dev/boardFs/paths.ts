@@ -1,6 +1,17 @@
 import path from 'node:path'
+import { isBoardScope, type BoardScope } from '../../shared/board/types'
 import { BOARDS_DIR, RESERVED_FOLDER_NAMES } from './constants'
 import { HttpError } from './http'
+
+export function normalizeScope(value: unknown): BoardScope {
+  if (value === undefined || value === null || value === '') return 'public'
+  if (isBoardScope(value)) return value
+  throw new HttpError(400, 'scope 必须是 public 或 private')
+}
+
+export function resolveScopeDir(root: string, scope: BoardScope) {
+  return path.resolve(root, BOARDS_DIR, scope)
+}
 
 export function validateFolderName(part: string) {
   if (!part || part === '.' || part === '..') {
@@ -34,8 +45,8 @@ export function normalizeFolderName(value: unknown): string {
   return name
 }
 
-export function resolveBoardFile(root: string, folder: string, slug: string) {
-  const boardsRoot = path.resolve(root, BOARDS_DIR)
+export function resolveBoardFile(root: string, scope: BoardScope, folder: string, slug: string) {
+  const boardsRoot = resolveScopeDir(root, scope)
   const dir = path.join(boardsRoot, ...folder.split('/').filter(Boolean))
   const file = path.join(dir, `${slug}.tldr.json`)
   const resolved = path.resolve(file)
@@ -45,8 +56,8 @@ export function resolveBoardFile(root: string, folder: string, slug: string) {
   return file
 }
 
-export function resolveFolderDir(root: string, folder: string) {
-  const boardsRoot = path.resolve(root, BOARDS_DIR)
+export function resolveFolderDir(root: string, scope: BoardScope, folder: string) {
+  const boardsRoot = resolveScopeDir(root, scope)
   const resolved = path.resolve(boardsRoot, ...folder.split('/').filter(Boolean))
   if (resolved === boardsRoot || !resolved.startsWith(`${boardsRoot}${path.sep}`)) {
     throw new HttpError(400, '文件夹路径越界')
