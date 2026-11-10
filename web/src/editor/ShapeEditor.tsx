@@ -1,18 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import type { TLShapeId } from 'tldraw'
 import { MarkdownView } from '../shared/markdown/MarkdownView'
 import { PELE_EXAMPLE_GROUPS, type PeleExample, type PeleExampleGroup } from '../shared/pele/examples'
 import { PeleView } from '../shared/pele/PeleView'
 import { SB_MARKDOWN_TYPE, SB_PELE_TYPE } from '../shared/shapes/types'
+import type { EditingShape } from './shape-editor/types'
 
-export type EditingShape = {
-  id: TLShapeId
-  type: typeof SB_MARKDOWN_TYPE | typeof SB_PELE_TYPE
-  props: Record<string, unknown>
-} & (
-  | { mode: 'create'; position: { x: number; y: number } }
-  | { mode: 'edit' }
-)
+export type { EditingShape } from './shape-editor/types'
 
 interface ShapeEditorProps {
   shape: EditingShape
