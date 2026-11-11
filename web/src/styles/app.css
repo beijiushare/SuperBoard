@@ -147,6 +147,11 @@
   cursor: move;
 }
 
+.sb-director-overlay.is-readonly .sb-director-frame {
+  pointer-events: none;
+  cursor: default;
+}
+
 .sb-director-frame.is-selected {
   z-index: 2;
   border-style: solid;

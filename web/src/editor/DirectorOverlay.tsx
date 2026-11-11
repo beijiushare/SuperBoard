@@ -10,6 +10,7 @@ interface DirectorOverlayProps {
   onSelect: (id: string | null) => void
   onChangeFrames: (frames: DirectorFrame[]) => void
   onPlayFrame: (frame: DirectorFrame) => void
+  readOnly?: boolean
 }
 
 interface DragState {
@@ -37,6 +38,7 @@ export function DirectorOverlay({
   onSelect,
   onChangeFrames,
   onPlayFrame,
+  readOnly = false,
 }: DirectorOverlayProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -101,7 +103,7 @@ export function DirectorOverlay({
   }
 
   function beginMove(event: ReactPointerEvent, frame: DirectorFrame) {
-    if (event.button !== 0) return
+    if (readOnly || event.button !== 0) return
     event.stopPropagation()
     onSelect(frame.id)
     dragRef.current = { kind: 'move', frame, startPage: pagePoint(event) }
@@ -162,6 +164,11 @@ export function DirectorOverlay({
   }
 
   function handleContextMenu(event: ReactMouseEvent, frame: DirectorFrame | null) {
+    if (readOnly) {
+      event.preventDefault()
+      event.stopPropagation()
+      return
+    }
     event.preventDefault()
     event.stopPropagation()
     if (frame) onSelect(frame.id)
@@ -209,7 +216,7 @@ export function DirectorOverlay({
   return (
     <div
       ref={overlayRef}
-      className="sb-director-overlay"
+      className={`sb-director-overlay${readOnly ? ' is-readonly' : ''}`}
       onPointerDown={(event) => {
         setMenu(null)
         beginPan(event)
@@ -223,14 +230,14 @@ export function DirectorOverlay({
         event.stopPropagation()
       }}
       onContextMenu={(event) => {
-        if (event.target === event.currentTarget) handleContextMenu(event, null)
+        if (!readOnly && event.target === event.currentTarget) handleContextMenu(event, null)
       }}
     >
       {curtain ? <div className="sb-director-curtain" style={curtain} /> : null}
 
       {frames.map((frame) => {
         const point = editor.pageToScreen({ x: frame.x, y: frame.y })
-        const selected = frame.id === selectedId
+        const selected = !readOnly && frame.id === selectedId
         return (
           <div
             key={frame.id}
@@ -244,6 +251,7 @@ export function DirectorOverlay({
             }}
             onPointerDown={(event) => beginMove(event, frame)}
             onDoubleClick={(event) => {
+              if (readOnly) return
               event.stopPropagation()
               setControllerOpen(true)
             }}
@@ -265,7 +273,7 @@ export function DirectorOverlay({
         )
       })}
 
-      {menu ? (
+      {!readOnly && menu ? (
         <div
           ref={menuRef}
           className="sb-director-menu"
@@ -306,7 +314,7 @@ export function DirectorOverlay({
         </div>
       ) : null}
 
-      {controllerOpen ? (
+      {!readOnly && controllerOpen ? (
         <DirectorFrameController
           frames={frames}
           selectedId={selectedId}

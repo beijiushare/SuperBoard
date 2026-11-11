@@ -115,23 +115,7 @@ async function readBoards() {
   })
 }
 
-function renderIndex(boards) {
-  const cards = boards
-    .filter(({ board }) => !board.meta.draft)
-    .map(({ board }) => {
-      const title = escapeHtml(board.meta.title)
-      const href = `${base}boards/${board.meta.slug}.html`
-      const updated = board.meta.updatedAt
-        ? `<p class="meta">更新于 ${escapeHtml(formatDate(board.meta.updatedAt))}</p>`
-        : ''
-      const summary = board.meta.summary
-        ? `<p class="summary">${escapeHtml(board.meta.summary)}</p>`
-        : ''
-      return `<a class="card" href="${href}"><h2>${title}</h2>${summary}<p class="slug">${escapeHtml(board.meta.slug)}</p>${updated}</a>`
-    })
-    .join('\n')
-
-  const body = cards || '<p class="empty">还没有白板。运行 <code>npm run seed</code> 创建一个示例。</p>'
+function renderIndex() {
   return `<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -139,54 +123,14 @@ function renderIndex(boards) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
 <title>${siteName}</title>
-<script>
-if (new URLSearchParams(location.search).has('tree')) {
-  location.replace('${base}tree.html' + location.search);
-}
-</script>
-<style>
-:root { color-scheme: light; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
-* { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; background: #f6f5f1; color: #1f1e1c; }
-main { width: min(980px, calc(100% - 40px)); margin: 0 auto; padding: 72px 0; }
-header { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 32px; }
-h1 { margin: 0; font-size: clamp(32px, 6vw, 56px); line-height: 1; letter-spacing: -0.04em; }
-header p { margin: 0; color: #6f6d66; font-size: 14px; }
-header a { color: #205ea6; text-decoration: none; }
-header a:hover { text-decoration: underline; text-underline-offset: 2px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-.card { display: block; padding: 22px; border: 1px solid #dedbd2; border-radius: 16px; background: #fffdf8; color: inherit; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
-.card:hover { transform: translateY(-2px); border-color: #b9b5a9; box-shadow: 0 12px 30px rgba(50, 45, 30, .08); }
-.card h2 { margin: 0 0 8px; font-size: 20px; letter-spacing: -0.02em; }
-.card .summary { margin: 0 0 14px; color: #55524c; line-height: 1.55; }
-.card .slug { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; color: #8b877d; }
-.card .meta { margin: 12px 0 0; font-size: 12px; color: #8b877d; }
-.empty { padding: 40px; border: 1px dashed #cbc7bc; border-radius: 16px; color: #6f6d66; }
-.empty code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-footer { margin-top: 48px; font-size: 12px; color: #969187; }
-@media (max-width: 640px) { main { padding: 40px 0; } header { display: block; } header p { margin-top: 10px; } }
-</style>
+<meta http-equiv="refresh" content="0; url=${base}tree.html">
+<script>location.replace('${base}tree.html' + location.search + location.hash)</script>
 </head>
 <body>
-<main>
-<header><div><h1>${siteName}</h1><p>个人白板集合 · 只读分享</p></div><p><a href="${base}tree.html">目录视图</a> · ${boards.length} 个白板</p></header>
-<section class="grid">${body}</section>
-<footer>由 SuperBoard 生成 · 内容来自 Git 仓库</footer>
-</main>
+<p>正在进入白板目录…</p>
+<p><a href="${base}tree.html">如果没有自动跳转，请点击这里</a></p>
 </body>
 </html>`
-}
-
-function formatDate(value) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date)
 }
 
 function renderBoardPage(board, entry, cssFiles, template) {

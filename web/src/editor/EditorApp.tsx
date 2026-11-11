@@ -12,7 +12,9 @@ import type { BoardTreeContextTarget } from '../shared/board/BoardTree'
 import { buildBoardTree } from '../shared/board/tree'
 import { useTreeExpansion } from '../shared/board/useTreeExpansion'
 import { SB_MARKDOWN_TYPE, SB_PELE_TYPE } from '../shared/shapes/types'
-import { cancelCameraAnimation, moveCameraToFrame } from '../shared/shapes/directorFrames'
+import { DirectorHud } from '../shared/director/DirectorHud'
+import { PresentationOverlay } from '../shared/director/PresentationOverlay'
+import { useDirectorPresentation } from '../shared/director/useDirectorPresentation'
 import { superboardEditorComponents } from './style-panel'
 import { SuperboardMenuPanel } from './SuperboardMenuPanel'
 import { EditorRail } from './EditorRail'
@@ -64,10 +66,7 @@ export function EditorApp() {
   const [deployDialogOpen, setDeployDialogOpen] = useState(false)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
   const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null)
-  const [presentation, setPresentation] = useState<{ frames: DirectorFrame[]; index: number } | null>(null)
-  const [presentationMenu, setPresentationMenu] = useState<{ x: number; y: number } | null>(null)
   const appRef = useRef<HTMLDivElement | null>(null)
-  const cameraBeforePresentationRef = useRef<{ x: number; y: number; z: number } | null>(null)
 
   const editorRef = useRef<Editor | null>(null)
   const boardRef = useRef<BoardFile | null>(null)
@@ -90,6 +89,19 @@ export function EditorApp() {
     () => [...(board?.director?.frames ?? [])].sort((a, b) => a.order - b.order),
     [board?.director?.frames],
   )
+  const {
+    presentation,
+    presentationMenu,
+    setPresentationMenu,
+    startPresentation,
+    exitPresentation,
+    advancePresentation,
+  } = useDirectorPresentation({
+    appRef,
+    editorRef,
+    frames: directorFrames,
+    setDirectorMode,
+  })
   const { expanded, toggleFolder, expandPath, renameExpandedPath } = useTreeExpansion(scopedBoards)
   const {
     saveState,
@@ -240,87 +252,6 @@ export function EditorApp() {
 
     setEditorReady(true)
   }, [])
-
-  async function startPresentation(startFrameId?: string) {
-    const editor = editorRef.current
-    const source = boardRef.current?.director?.frames ?? directorFrames
-    const frames = [...source].sort((a, b) => a.order - b.order)
-    if (!editor || frames.length === 0) return
-
-    let index = 0
-    if (startFrameId) {
-      const found = frames.findIndex((frame) => frame.id === startFrameId)
-      if (found >= 0) index = found
-    }
-
-    setDirectorMode(true)
-    cameraBeforePresentationRef.current = editor.getCamera()
-    setContextMenu(null)
-    setPresentationMenu(null)
-    setPresentation({ frames, index })
-
-    try {
-      if (!document.fullscreenElement) await appRef.current?.requestFullscreen()
-    } catch {
-      // Fullscreen can be denied by the browser; presentation still works in-page.
-    }
-
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-    moveCameraToFrame(editor, frames[index], false)
-  }
-
-  function restoreCameraAfterPresentation() {
-    const editor = editorRef.current
-    const camera = cameraBeforePresentationRef.current
-    if (!editor || !camera) return
-    cameraBeforePresentationRef.current = null
-    window.setTimeout(() => editor.setCamera(camera, { force: true, immediate: true }), 50)
-  }
-
-  function exitPresentation() {
-    cancelCameraAnimation()
-    setPresentation(null)
-    setPresentationMenu(null)
-    if (document.fullscreenElement) void document.exitFullscreen().catch(() => {})
-    restoreCameraAfterPresentation()
-  }
-
-  function advancePresentation() {
-    if (!presentation) return
-    const nextIndex = presentation.index + 1
-    if (nextIndex >= presentation.frames.length) {
-      exitPresentation()
-      return
-    }
-
-    const editor = editorRef.current
-    if (editor) moveCameraToFrame(editor, presentation.frames[nextIndex], true)
-    setPresentation({ ...presentation, index: nextIndex })
-  }
-
-  useEffect(() => {
-    if (!presentation) return
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.code !== 'Space') return
-      event.preventDefault()
-      advancePresentation()
-    }
-    const onFullscreenChange = () => {
-      if (!document.fullscreenElement) {
-        setPresentation(null)
-        setPresentationMenu(null)
-        restoreCameraAfterPresentation()
-      }
-    }
-
-    window.addEventListener('keydown', onKeyDown)
-    document.addEventListener('fullscreenchange', onFullscreenChange)
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-      document.removeEventListener('fullscreenchange', onFullscreenChange)
-    }
-  }, [presentation])
 
   function openContextMenu(event: ReactMouseEvent<HTMLElement>, target: BoardTreeContextTarget) {
     event.preventDefault()
@@ -591,7 +522,10 @@ export function EditorApp() {
                 selectedId={selectedFrameId}
                 onSelect={setSelectedFrameId}
                 onChangeFrames={updateDirectorFrames}
-                onPlayFrame={(frame) => void startPresentation(frame.id)}
+                onPlayFrame={(frame) => {
+                  setContextMenu(null)
+                  void startPresentation(frame.id)
+                }}
               />
             ) : undefined
           }
@@ -600,45 +534,25 @@ export function EditorApp() {
       </div>
 
       {directorMode && !presentation ? (
-        <div className="sb-director-hud">
-          <button className="sb-button sb-button-primary" type="button" onClick={() => void startPresentation()}>
-            从头播放
-          </button>
-          <button
-            className="sb-button"
-            type="button"
-            onClick={() => {
-              setDirectorMode(false)
-              setSelectedFrameId(null)
-            }}
-          >
-            退出导演幕布
-          </button>
-        </div>
+        <DirectorHud
+          onPlay={() => {
+            setContextMenu(null)
+            void startPresentation()
+          }}
+          onExit={() => {
+            setDirectorMode(false)
+            setSelectedFrameId(null)
+          }}
+        />
       ) : null}
 
       {presentation ? (
-        <div
-          className="sb-presentation-overlay"
-          onClick={advancePresentation}
-          onContextMenu={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            setPresentationMenu({ x: event.clientX, y: event.clientY })
-          }}
-        >
-          {presentationMenu ? (
-            <div
-              className="sb-presentation-menu"
-              style={{ left: presentationMenu.x, top: presentationMenu.y }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <button type="button" onClick={exitPresentation}>
-                停止播放
-              </button>
-            </div>
-          ) : null}
-        </div>
+        <PresentationOverlay
+          menu={presentationMenu}
+          onMenu={setPresentationMenu}
+          onAdvance={advancePresentation}
+          onExit={exitPresentation}
+        />
       ) : null}
 
       {editing ? <ShapeEditor key={editing.id} shape={editing} onClose={() => setEditing(null)} onSave={saveEdit} /> : null}

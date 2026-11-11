@@ -7,10 +7,12 @@ import { EditorUiStateContext, type EditorUiState } from './editorUiState'
 interface EditorCanvasProps {
   board: BoardFile | null
   scope: BoardScope
-  components: Partial<TLUiComponents>
-  overrides: TLUiOverrides
-  uiState: EditorUiState
+  components?: Partial<TLUiComponents>
+  overrides?: TLUiOverrides
+  uiState?: EditorUiState
   overlay?: ReactNode
+  emptyState?: ReactNode
+  readOnly?: boolean
   onMount: (editor: Editor) => void
 }
 
@@ -21,30 +23,37 @@ export function EditorCanvas({
   overrides,
   uiState,
   overlay,
+  emptyState,
+  readOnly = false,
   onMount,
 }: EditorCanvasProps) {
   if (!board) {
     return (
       <main className="sb-canvas">
-        <div className="sb-canvas-empty">
-          <div>
-            <h2>还没有白板</h2>
-            <p>在左侧目录空白处右键新建白板，或先把 .tldr.json 放进 whiteboards/{scope}/。</p>
+        {emptyState ?? (
+          <div className="sb-canvas-empty">
+            <div>
+              <h2>还没有白板</h2>
+              <p>在左侧目录空白处右键新建白板，或先把 .tldr.json 放进 whiteboards/{scope}/。</p>
+            </div>
           </div>
-        </div>
+        )}
       </main>
     )
   }
 
   return (
     <main className="sb-canvas">
-      <EditorUiStateContext.Provider value={uiState}>
+      <EditorUiStateContext.Provider
+        value={uiState ?? { stylePanelOpen: false, menuPanelOpen: false }}
+      >
         <Tldraw
           key={`${scope}:${board.meta.slug}`}
           shapeUtils={superboardShapeUtils}
           components={components}
           overrides={overrides}
           options={{ actionShortcutsLocation: 'menu' }}
+          hideUi={readOnly}
           licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
           onMount={onMount}
         />

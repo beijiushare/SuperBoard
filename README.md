@@ -7,6 +7,7 @@
 - 一个白板一个文件，无数据库、无后端存储
 - 本地编辑器直接读写 `whiteboards/public/` 和 `whiteboards/private/`
 - 线上按白板生成独立 HTML，强制只读
+- 线上与编辑器共用外壳：左 rail、目录抽屉、导演幕布和播放逻辑保持一致，只隐藏编辑相关操作
 - 支持 Markdown、AsciiMath 公式、Pele 图表和手绘
 
 ## 快速开始
@@ -36,7 +37,7 @@ npm run dev
 
 - `build:viewer`：执行 `npm run mathjax && vite build`，只产出 `dist/assets/*` 和 Vite manifest，不生成白板页面。
 - `build:site`：先执行 `build:viewer`，再运行 `web/build.js`，生成：
-  - `dist/index.html`
+  - `dist/index.html`（自动跳转目录视图）
   - `dist/tree.html`
   - `dist/boards/<slug>.html`
   - `dist/boards/<slug>.json`
@@ -62,9 +63,9 @@ npm run preview:site
 ```text
 whiteboards/public/   公开白板，提交 Git，参与构建
 whiteboards/private/  私有白板，本地专用，已被 .gitignore
-web/src/shared/       编辑器与只读端共用代码
+web/src/shared/       编辑器与只读端共用代码，含 rail、目录、导演幕布与播放逻辑
 web/src/editor/       本地编辑器
-web/src/viewer/       只读页面
+web/src/viewer/       只读页面入口，复用编辑器外壳
 web/src/dev/boardFs/  Vite 文件读写插件
 web/src/styles/       全局样式模块
 web/build.js          生成静态多页面站点
