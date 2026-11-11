@@ -117,6 +117,7 @@ whiteboards/
 | SVG 清洗 | [DOMPurify](https://github.com/cure53/DOMPurify) |
 | 前端框架 | React + Vite |
 | 图标动画 | react-useanimations |
+| 拖拽排序 | [dnd-kit](https://github.com/clauderic/dnd-kit) |
 
 Markdown 使用标准 Markdown/GFM 语法；公式使用行内 `$...$`、块级 `$$...$$`，内容按 AsciiMath 解释，由 MathJax 输出 SVG。
 
@@ -154,5 +155,6 @@ SuperBoard 建立在以下优秀开源项目之上：
 - [AsciiMath](https://asciimath.org/)：公式语法
 - [MathJax](https://www.mathjax.org/)：AsciiMath 到 SVG 的渲染
 - [DOMPurify](https://github.com/cure53/DOMPurify)：SVG 安全清洗
+- [dnd-kit](https://github.com/clauderic/dnd-kit)：控制帧拖拽排序
 
 感谢这些项目的作者与维护者。
