@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import { boardFsPlugin } from './web/src/dev/boardFs'
+import { canvasFsPlugin } from './web/src/dev/canvasFs/plugin'
 import { gitDeployPlugin } from './web/src/dev/gitDeploy'
 
 function siteBase(value: string) {
@@ -13,7 +14,7 @@ function siteBase(value: string) {
 
 export default defineConfig(({ command, isPreview }) => ({
   base: command === 'build' || isPreview ? siteBase(process.env.BASE_PATH || '') : '/',
-  plugins: [react(), boardFsPlugin(), gitDeployPlugin()],
+  plugins: [react(), boardFsPlugin(), canvasFsPlugin(), gitDeployPlugin()],
   optimizeDeps: {
     entries: ['index.html'],
   },

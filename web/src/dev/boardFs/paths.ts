@@ -46,9 +46,22 @@ export function normalizeFolderName(value: unknown): string {
 }
 
 export function resolveBoardFile(root: string, scope: BoardScope, folder: string, slug: string) {
+  return resolveScopedFile(root, scope, folder, `${slug}.tldr.json`)
+}
+
+export function resolveCanvasFile(root: string, scope: BoardScope, folder: string, slug: string) {
+  return resolveScopedFile(root, scope, folder, `${slug}.canvas`)
+}
+
+function resolveScopedFile(
+  root: string,
+  scope: BoardScope,
+  folder: string,
+  fileName: string,
+) {
   const boardsRoot = resolveScopeDir(root, scope)
   const dir = path.join(boardsRoot, ...folder.split('/').filter(Boolean))
-  const file = path.join(dir, `${slug}.tldr.json`)
+  const file = path.join(dir, fileName)
   const resolved = path.resolve(file)
   if (resolved !== boardsRoot && !resolved.startsWith(`${boardsRoot}${path.sep}`)) {
     throw new HttpError(400, '白板路径越界')

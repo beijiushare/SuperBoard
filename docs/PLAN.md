@@ -163,7 +163,7 @@ web/src/
 - [x] 定义 JSON Canvas 类型
 - [x] 定义 `x-superboard` 扩展类型
 - [x] 实现解析、校验、序列化
-- [ ] 实现 `.canvas` 文件扫描与 dev API
+- [x] 实现 `.canvas` 文件扫描与 dev API
 - [x] 保留旧 `.tldr.json` 转换核心
 - [x] 批量转换 CLI（`npm run convert:canvas`）
 - [x] 添加模型层测试脚本
