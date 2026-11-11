@@ -4,6 +4,10 @@
 
 文件驱动的个人白板系统：本地用浏览器编辑，画布保存为 Git 友好的 `.tldr.json`，推送到 GitHub 后自动构建成只读静态站点。
 
+> **迁移中**：正在从 tldraw 迁移到 JSON Canvas（`.canvas`）+ 自建轻量编辑器 + fork 查看器。
+> 目标、格式和阶段见 [`docs/PLAN.md`](docs/PLAN.md)，目标架构见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)。
+> 当前 README 的“技术栈”和命令仍描述迁移前的 tldraw 实现，迁移完成后再更新。
+
 - 一个白板一个文件，无数据库、无后端存储
 - 本地编辑器直接读写 `whiteboards/public/` 和 `whiteboards/private/`
 - 线上按白板生成独立 HTML，强制只读
@@ -138,7 +142,12 @@ Markdown 使用标准 Markdown/GFM 语法；公式使用行内 `$...$`、块级 
 
 ## 文档
 
-实现规范与细节见：
+迁移计划与目标架构：
+
+- [`docs/PLAN.md`](docs/PLAN.md)
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+
+旧实现规范与细节见：
 
 - `参考/规范.md`
 - `参考/doc/`
