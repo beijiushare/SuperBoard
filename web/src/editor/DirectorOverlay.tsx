@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from 'react'
-import type { Editor } from 'tldraw'
+import { Vec, type Editor } from 'tldraw'
 import type { DirectorFrame } from '../shared/board/types'
 
 interface DirectorOverlayProps {
@@ -146,6 +146,17 @@ export function DirectorOverlay({
       onPointerDown={() => setMenu(null)}
       onPointerMove={handleMove}
       onPointerUp={endDrag}
+      onWheel={(event) => {
+        if (!event.ctrlKey && !event.metaKey) return
+        event.preventDefault()
+        const rect = overlayRef.current?.getBoundingClientRect()
+        const point = new Vec(
+          event.clientX - (rect?.left ?? 0),
+          event.clientY - (rect?.top ?? 0),
+        )
+        if (event.deltaY < 0) editor.zoomIn(point, { force: true })
+        else editor.zoomOut(point, { force: true })
+      }}
       onContextMenu={(event) => {
         if (event.target === event.currentTarget) handleContextMenu(event, null)
       }}

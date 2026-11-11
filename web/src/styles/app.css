@@ -228,6 +228,7 @@
   background: #f1eee5;
 }
 
+.sb-app-editor.is-director-mode .tlui-layout__bottom,
 .sb-app-editor.is-presenting .sb-rail,
 .sb-app-editor.is-presenting .sb-tree-panel,
 .sb-app-editor.is-presenting .tlui-layout__top,

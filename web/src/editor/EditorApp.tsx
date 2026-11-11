@@ -225,9 +225,10 @@ export function EditorApp() {
         .filter((shape) => (shape.type as string) === 'sb-frame')
       if (legacyFrames.length > 0) {
         editor.deleteShapes(legacyFrames.map((shape) => shape.id))
-        for (const shape of editor.getCurrentPageShapes()) {
-          if (shape.isLocked) editor.updateShape({ ...shape, isLocked: false })
-        }
+      }
+
+      for (const shape of editor.getCurrentPageShapes()) {
+        if (shape.isLocked) editor.updateShape({ ...shape, isLocked: false })
       }
 
       editor.updateInstanceState({ isReadonly: false })
@@ -243,11 +244,13 @@ export function EditorApp() {
 
   async function startPresentation(startFrameId?: string) {
     const editor = editorRef.current
-    if (!editor || directorFrames.length === 0) return
+    const source = boardRef.current?.director?.frames ?? directorFrames
+    const frames = [...source].sort((a, b) => a.order - b.order)
+    if (!editor || frames.length === 0) return
 
     let index = 0
     if (startFrameId) {
-      const found = directorFrames.findIndex((frame) => frame.id === startFrameId)
+      const found = frames.findIndex((frame) => frame.id === startFrameId)
       if (found >= 0) index = found
     }
 
@@ -255,7 +258,7 @@ export function EditorApp() {
     setEditingFrame(null)
     setContextMenu(null)
     setPresentationMenu(null)
-    setPresentation({ frames: directorFrames, index })
+    setPresentation({ frames, index })
 
     try {
       if (!document.fullscreenElement) await appRef.current?.requestFullscreen()
@@ -264,7 +267,7 @@ export function EditorApp() {
     }
 
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-    moveCameraToFrame(editor, directorFrames[index], false)
+    moveCameraToFrame(editor, frames[index], false)
   }
 
   function exitPresentation() {
