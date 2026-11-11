@@ -150,6 +150,7 @@ function convertShape(shape: ShapeRecord): CanvasNode | null {
       'x-superboard': {
         kind: 'pele',
         diagram: typeof props.diagram === 'string' ? props.diagram : undefined,
+        code,
         style: styleFromProps(props, shape.opacity),
       },
     }

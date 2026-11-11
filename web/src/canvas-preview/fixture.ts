@@ -59,6 +59,19 @@ export const previewCanvas: CanvasDocument = {
         ],
       },
     },
+    {
+      id: 'pele',
+      type: 'text',
+      x: 680,
+      y: 300,
+      width: 320,
+      height: 220,
+      text: '',
+      'x-superboard': {
+        kind: 'pele',
+        code: 'flowchart LR\n  A[Start] --> B{Ready?}\n  B -->|Yes| C[Go]\n  B -->|No| D[Wait]',
+      },
+    },
   ],
   edges: [
     {
