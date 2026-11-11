@@ -1,63 +1,33 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
-import { Tldraw, createShapeId, type Editor, type TLShapeId, type TLUiContextMenuProps, type TLUiOverrides } from 'tldraw'
-import UseAnimations from 'react-useanimations'
-import aperture from 'react-useanimations/lib/aperture'
-import checkCircle from 'react-useanimations/lib/checkCircle'
-import command from 'react-useanimations/lib/command'
-import gitBranch from 'react-useanimations/lib/gitBranch'
-import sidebar from 'react-useanimations/lib/sidebar'
-import uploadCloud from 'react-useanimations/lib/uploadCloud'
+import { type Editor, type TLUiContextMenuProps, type TLUiOverrides } from 'tldraw'
 import type { BoardFile, BoardListItem, BoardScope, BoardTreeFolder } from '../shared/board/types'
-import { isBoardScope } from '../shared/board/types'
 import { BoardTreePanel } from '../shared/board/BoardTreePanel'
 import type { BoardTreeContextTarget } from '../shared/board/BoardTree'
 import { buildBoardTree } from '../shared/board/tree'
 import { useTreeExpansion } from '../shared/board/useTreeExpansion'
-import { SB_MARKDOWN_TYPE, SB_MEDIA_TYPE, SB_PELE_TYPE, SUPERBOARD_MEDIA_EVENT, type SbMediaShape } from '../shared/shapes/types'
-import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
+import { SB_MARKDOWN_TYPE, SB_PELE_TYPE } from '../shared/shapes/types'
 import { superboardEditorComponents } from './style-panel'
 import { SuperboardMenuPanel } from './SuperboardMenuPanel'
-import { EditorUiStateContext } from './editorUiState'
+import { EditorRail } from './EditorRail'
+import { EditorCanvas } from './EditorCanvas'
+import { readScopeFromUrl, updateBoardUrl, isPathInside } from './boardUrl'
 import { SuperboardContextMenu } from './context-menu'
 import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
 import { BoardDialog, DeleteBoardDialog, DeleteFolderDialog, DeployDialog, RenameFolderDialog, type BoardFormValues } from './dialogs'
 import { ShapeEditor } from './shape-editor'
 import { MediaDialog } from './media/MediaDialog'
-import { getMediaAspect } from './media/mediaSize'
-import type { MediaSource } from './media/parseMedia'
 import { SAVE_STATUS_LABEL, useAutoSave } from './useAutoSave'
 import { useShapeEditing } from './useShapeEditing'
+import { useMediaController } from './useMediaController'
 import { createBoard, deleteBoard, deleteFolder, fetchBoard, fetchBoards, patchBoard, renameFolder } from './api'
 
 type BoardDialogState =
   | { mode: 'create'; folder?: string }
   | { mode: 'rename'; board: BoardListItem }
-type MediaDialogState =
-  | { mode: 'create' }
-  | { mode: 'edit'; shapeId: string; initialValue: string }
 interface ContextMenuState {
   x: number
   y: number
   target: BoardContextTarget
-}
-
-function readScopeFromUrl() {
-  const value = new URLSearchParams(window.location.search).get('scope')
-  return isBoardScope(value) ? value : 'public'
-}
-
-function isPathInside(path: string, folder: string) {
-  return path === folder || path.startsWith(`${folder}/`)
-}
-
-function updateBoardUrl(slug: string | null, scope: BoardScope) {
-  const params = new URLSearchParams(window.location.search)
-  if (slug) params.set('board', slug)
-  else params.delete('board')
-  if (scope === 'private') params.set('scope', 'private')
-  else params.delete('scope')
-  const query = params.toString()
-  window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`)
 }
 
 export function EditorApp() {
@@ -76,7 +46,6 @@ export function EditorApp() {
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
   const [pendingDeleteFolder, setPendingDeleteFolder] = useState<BoardTreeFolder | null>(null)
   const [deployDialogOpen, setDeployDialogOpen] = useState(false)
-  const [mediaDialog, setMediaDialog] = useState<MediaDialogState | null>(null)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
 
   const editorRef = useRef<Editor | null>(null)
@@ -109,6 +78,7 @@ export function EditorApp() {
     flush,
   } = useAutoSave({ editorRef, boardRef, scopeRef, setBoard, setBoards })
   const { editing, setEditing, addShape, saveEdit } = useShapeEditing({ editorRef })
+  const { mediaDialog, openMediaCreate, closeMediaDialog, saveMedia } = useMediaController({ editorRef })
 
   const editorComponents = useMemo(
     () => ({
@@ -137,12 +107,12 @@ export function EditorApp() {
           ...tools,
           asset: {
             ...tools.asset,
-            onSelect: () => setMediaDialog({ mode: 'create' }),
+            onSelect: openMediaCreate,
           },
         }
       },
     }),
-    [],
+    [openMediaCreate],
   )
 
   useEffect(() => {
@@ -207,25 +177,6 @@ export function EditorApp() {
       { scope: 'document' },
     )
   }, [editorReady, board?.meta.slug, scheduleSave])
-
-  useEffect(() => {
-    const onEditMedia = (event: Event) => {
-      const detail = (event as CustomEvent<{ shapeId?: string }>).detail
-      const editor = editorRef.current
-      if (!editor || !detail?.shapeId) return
-      const shape = editor.getShape(detail.shapeId as TLShapeId)
-      if (!shape || shape.type !== SB_MEDIA_TYPE) return
-      const props = shape.props as { url?: unknown }
-      setMediaDialog({
-        mode: 'edit',
-        shapeId: shape.id,
-        initialValue: typeof props.url === 'string' ? props.url : '',
-      })
-    }
-
-    window.addEventListener(SUPERBOARD_MEDIA_EVENT, onEditMedia)
-    return () => window.removeEventListener(SUPERBOARD_MEDIA_EVENT, onEditMedia)
-  }, [])
 
   const handleMount = useCallback((editor: Editor) => {
     editorRef.current = editor
@@ -430,69 +381,6 @@ export function EditorApp() {
     }
   }
 
-  async function handleMediaSave(source: MediaSource) {
-    const editor = editorRef.current
-    const current = mediaDialog
-    if (!editor || !current) return
-
-    let width = 640
-    let height = 360
-    if (source.kind !== 'iframe') {
-      const ratio = await getMediaAspect(source.url, source.kind)
-      if (ratio) {
-        if (ratio >= 1) {
-          height = Math.round(width / ratio)
-        } else {
-          height = 640
-          width = Math.round(height * ratio)
-        }
-      }
-    }
-
-    if (current.mode === 'create') {
-      const id = createShapeId()
-      const bounds = editor.getViewportScreenBounds()
-      const center = editor.screenToPage({
-        x: bounds.x + bounds.w / 2,
-        y: bounds.y + bounds.h / 2,
-      })
-      const offset = (editor.getCurrentPageShapes().length % 6) * 24
-      editor.createShape<SbMediaShape>({
-        id,
-        type: SB_MEDIA_TYPE,
-        x: center.x - width / 2 + offset,
-        y: center.y - height / 2 + offset,
-        props: {
-          w: width,
-          h: height,
-          url: source.url,
-          kind: source.kind,
-          crop: 'rounded',
-          cropX: 0,
-          cropY: 0,
-          cropW: 100,
-          cropH: 100,
-          cropCx: 50,
-          cropCy: 50,
-          cropRadius: 50,
-          cropCorner: 8,
-        },
-      })
-      editor.select(id)
-    } else {
-      const shape = editor.getShape<SbMediaShape>(current.shapeId as TLShapeId)
-      if (shape) {
-        editor.updateShape<SbMediaShape>({
-          id: shape.id,
-          type: SB_MEDIA_TYPE,
-          props: { ...shape.props, url: source.url, kind: source.kind },
-        })
-      }
-    }
-
-    setMediaDialog(null)
-  }
-
   if (loading) {
     return <div className="sb-screen-message">正在加载白板…</div>
   }
@@ -519,70 +407,24 @@ export function EditorApp() {
 
   return (
     <div className="sb-app sb-app-editor">
-      <aside className="sb-rail" aria-label="编辑器操作">
-        <button
-          type="button"
-          className="sb-rail-button"
-          data-tooltip={sidebarLabel}
-          aria-label={sidebarLabel}
-          onClick={enableTreeMode}
-        >
-          <UseAnimations
-            animation={sidebar}
-            size={32}
-            interaction="click-toggle"
-            active={treeMode && treeOpen}
-          />
-        </button>
-        <button
-          type="button"
-          className="sb-rail-button"
-          data-tooltip={scopeLabel}
-          aria-label={scopeLabel}
-          onClick={() => void switchScope(scope === 'public' ? 'private' : 'public')}
-        >
-          <UseAnimations animation={gitBranch} size={32} />
-        </button>
-        <button
-          type="button"
-          className={`sb-rail-button sb-rail-save is-${saveState}`}
-          data-tooltip={saveLabel}
-          aria-label={saveLabel}
-          disabled={!board}
-          onClick={() => void saveNow()}
-        >
-          <UseAnimations animation={checkCircle} size={32} />
-        </button>
-        <button
-          type="button"
-          className="sb-rail-button"
-          data-tooltip={stylePanelOpen ? '隐藏样式面板' : '显示样式面板'}
-          aria-label={stylePanelOpen ? '隐藏样式面板' : '显示样式面板'}
-          aria-pressed={stylePanelOpen}
-          onClick={() => setStylePanelOpen((open) => !open)}
-        >
-          <UseAnimations animation={aperture} size={32} interaction="click-replay" />
-        </button>
-        <button
-          type="button"
-          className="sb-rail-button"
-          data-tooltip={menuPanelLabel}
-          aria-label={menuPanelLabel}
-          aria-pressed={menuPanelOpen}
-          onClick={() => setMenuPanelOpen((open) => !open)}
-        >
-          <UseAnimations animation={command} size={32} interaction="click-replay" />
-        </button>
-        <button
-          type="button"
-          className="sb-rail-button"
-          data-tooltip="提交并推送"
-          aria-label="提交并推送"
-          onClick={() => setDeployDialogOpen(true)}
-        >
-          <UseAnimations animation={uploadCloud} size={32} />
-        </button>
-      </aside>
+      <EditorRail
+        treeMode={treeMode}
+        treeOpen={treeOpen}
+        sidebarLabel={sidebarLabel}
+        onToggleTree={enableTreeMode}
+        scopeLabel={scopeLabel}
+        onSwitchScope={() => void switchScope(scope === 'public' ? 'private' : 'public')}
+        saveLabel={saveLabel}
+        saveState={saveState}
+        canSave={Boolean(board)}
+        onSave={() => void saveNow()}
+        stylePanelOpen={stylePanelOpen}
+        onToggleStylePanel={() => setStylePanelOpen((open) => !open)}
+        menuPanelOpen={menuPanelOpen}
+        menuPanelLabel={menuPanelLabel}
+        onToggleMenuPanel={() => setMenuPanelOpen((open) => !open)}
+        onDeploy={() => setDeployDialogOpen(true)}
+      />
 
       <div className="sb-workspace">
         {treeMode ? (
@@ -603,27 +445,14 @@ export function EditorApp() {
           />
         ) : null}
 
-        <main className="sb-canvas">
-          {board ? (
-            <EditorUiStateContext.Provider value={editorUiState}>
-              <Tldraw
-                key={`${scope}:${board.meta.slug}`}
-                shapeUtils={superboardShapeUtils}
-                components={editorComponents}
-                overrides={editorOverrides}
-                licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
-                onMount={handleMount}
-              />
-            </EditorUiStateContext.Provider>
-          ) : (
-            <div className="sb-canvas-empty">
-              <div>
-                <h2>还没有白板</h2>
-                <p>在左侧目录空白处右键新建白板，或先把 .tldr.json 放进 whiteboards/{scope}/。</p>
-              </div>
-            </div>
-          )}
-        </main>
+        <EditorCanvas
+          board={board}
+          scope={scope}
+          components={editorComponents}
+          overrides={editorOverrides}
+          uiState={editorUiState}
+          onMount={handleMount}
+        />
       </div>
 
       {editing ? <ShapeEditor key={editing.id} shape={editing} onClose={() => setEditing(null)} onSave={saveEdit} /> : null}
@@ -631,8 +460,8 @@ export function EditorApp() {
       {mediaDialog ? (
         <MediaDialog
           initialValue={mediaDialog.mode === 'edit' ? mediaDialog.initialValue : ''}
-          onClose={() => setMediaDialog(null)}
-          onSave={handleMediaSave}
+          onClose={closeMediaDialog}
+          onSave={saveMedia}
         />
       ) : null}
 
