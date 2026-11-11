@@ -14,7 +14,6 @@ interface BoardContextMenuProps {
   onRenameFolder: (folder: BoardTreeFolder) => void
   onDelete: (board: BoardTreeFile) => void
   onDeleteFolder: (folder: BoardTreeFolder) => void
-  onExport: (board: BoardTreeFile, format: 'svg' | 'png') => void
 }
 
 export function BoardContextMenu({
@@ -27,7 +26,6 @@ export function BoardContextMenu({
   onRenameFolder,
   onDelete,
   onDeleteFolder,
-  onExport,
 }: BoardContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ left: x, top: y })
@@ -120,24 +118,6 @@ export function BoardContextMenu({
               onClick={() => run(() => onRename(target.node))}
             >
               <span className="sb-context-menu-label">重命名…</span>
-            </button>
-          </div>
-          <div className="sb-context-menu-group">
-            <button
-              className="sb-context-menu-item"
-              type="button"
-              role="menuitem"
-              onClick={() => run(() => onExport(target.node, 'svg'))}
-            >
-              <span className="sb-context-menu-label">导出为 SVG</span>
-            </button>
-            <button
-              className="sb-context-menu-item"
-              type="button"
-              role="menuitem"
-              onClick={() => run(() => onExport(target.node, 'png'))}
-            >
-              <span className="sb-context-menu-label">导出为 PNG</span>
             </button>
           </div>
           <div className="sb-context-menu-group">
