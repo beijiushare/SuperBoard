@@ -26,7 +26,6 @@ import {
   DeleteBoardDialog,
   DeleteFolderDialog,
   DeployDialog,
-  FrameValueDialog,
   RenameFolderDialog,
   type BoardFormValues,
 } from './dialogs'
@@ -65,7 +64,6 @@ export function EditorApp() {
   const [deployDialogOpen, setDeployDialogOpen] = useState(false)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
   const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null)
-  const [editingFrame, setEditingFrame] = useState<DirectorFrame | null>(null)
   const [presentation, setPresentation] = useState<{ frames: DirectorFrame[]; index: number } | null>(null)
   const [presentationMenu, setPresentationMenu] = useState<{ x: number; y: number } | null>(null)
   const appRef = useRef<HTMLDivElement | null>(null)
@@ -257,7 +255,6 @@ export function EditorApp() {
 
     setDirectorMode(true)
     cameraBeforePresentationRef.current = editor.getCamera()
-    setEditingFrame(null)
     setContextMenu(null)
     setPresentationMenu(null)
     setPresentation({ frames, index })
@@ -324,14 +321,6 @@ export function EditorApp() {
       document.removeEventListener('fullscreenchange', onFullscreenChange)
     }
   }, [presentation])
-
-  function handleFrameOrder(value: number) {
-    if (!editingFrame) return
-    updateDirectorFrames(
-      directorFrames.map((frame) => (frame.id === editingFrame.id ? { ...frame, order: value } : frame)),
-    )
-    setEditingFrame(null)
-  }
 
   function openContextMenu(event: ReactMouseEvent<HTMLElement>, target: BoardTreeContextTarget) {
     event.preventDefault()
@@ -602,7 +591,6 @@ export function EditorApp() {
                 selectedId={selectedFrameId}
                 onSelect={setSelectedFrameId}
                 onChangeFrames={updateDirectorFrames}
-                onEditFrame={setEditingFrame}
                 onPlayFrame={(frame) => void startPresentation(frame.id)}
               />
             ) : undefined
@@ -627,17 +615,6 @@ export function EditorApp() {
             退出导演幕布
           </button>
         </div>
-      ) : null}
-
-      {editingFrame ? (
-        <FrameValueDialog
-          frame={editingFrame}
-          existingValues={directorFrames
-            .filter((frame) => frame.id !== editingFrame.id)
-            .map((frame) => frame.order)}
-          onClose={() => setEditingFrame(null)}
-          onSubmit={handleFrameOrder}
-        />
       ) : null}
 
       {presentation ? (

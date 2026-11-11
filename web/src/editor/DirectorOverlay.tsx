@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from 'react'
 import type { Editor } from 'tldraw'
 import type { DirectorFrame } from '../shared/board/types'
+import { DirectorFrameController } from './DirectorFrameController'
 
 interface DirectorOverlayProps {
   editor: Editor
@@ -8,7 +9,6 @@ interface DirectorOverlayProps {
   selectedId: string | null
   onSelect: (id: string | null) => void
   onChangeFrames: (frames: DirectorFrame[]) => void
-  onEditFrame: (frame: DirectorFrame) => void
   onPlayFrame: (frame: DirectorFrame) => void
 }
 
@@ -36,7 +36,6 @@ export function DirectorOverlay({
   selectedId,
   onSelect,
   onChangeFrames,
-  onEditFrame,
   onPlayFrame,
 }: DirectorOverlayProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
@@ -49,6 +48,7 @@ export function DirectorOverlay({
   } | null>(null)
   const suppressContextMenuRef = useRef(false)
   const [menu, setMenu] = useState<MenuState | null>(null)
+  const [controllerOpen, setControllerOpen] = useState(false)
   const [, setCameraTick] = useState(0)
 
   useEffect(() => {
@@ -244,7 +244,7 @@ export function DirectorOverlay({
             onPointerDown={(event) => beginMove(event, frame)}
             onDoubleClick={(event) => {
               event.stopPropagation()
-              onEditFrame(frame)
+              setControllerOpen(true)
             }}
             onContextMenu={(event) => handleContextMenu(event, frame)}
           >
@@ -271,8 +271,8 @@ export function DirectorOverlay({
         >
           {menu.frame ? (
             <>
-              <button type="button" onClick={() => { setMenu(null); onEditFrame(menu.frame!) }}>
-                编辑帧值
+              <button type="button" onClick={() => { setMenu(null); setControllerOpen(true) }}>
+                控制帧
               </button>
               <button type="button" onClick={() => { setMenu(null); onPlayFrame(menu.frame!) }}>
                 此帧开始播放
@@ -301,6 +301,16 @@ export function DirectorOverlay({
             </button>
           )}
         </div>
+      ) : null}
+
+      {controllerOpen ? (
+        <DirectorFrameController
+          frames={frames}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          onChangeFrames={onChangeFrames}
+          onClose={() => setControllerOpen(false)}
+        />
       ) : null}
     </div>
   )

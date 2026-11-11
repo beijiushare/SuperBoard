@@ -140,6 +140,7 @@
 
 .sb-director-frame {
   position: absolute;
+  z-index: 1;
   border: 2px dashed #2f80ed;
   border-radius: 8px;
   background: rgb(47 128 237 / 4%);
@@ -147,6 +148,7 @@
 }
 
 .sb-director-frame.is-selected {
+  z-index: 2;
   border-style: solid;
   background: rgb(47 128 237 / 7%);
 }
@@ -204,6 +206,105 @@
 
 .sb-director-menu button:hover {
   background: #f1eee5;
+}
+
+.sb-frame-controller {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #d8d4c9;
+  border-radius: 12px;
+  background: #fffdf8;
+  box-shadow: 0 16px 44px rgb(20 18 10 / 20%);
+}
+
+.sb-frame-controller-title {
+  display: flex;
+  height: 38px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 0 12px;
+  border-bottom: 1px solid #dedbd2;
+  color: #3b3933;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: move;
+  user-select: none;
+}
+
+.sb-frame-controller-title button {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #6f6d66;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.sb-frame-controller-title button:hover {
+  background: #f1eee5;
+}
+
+.sb-frame-controller-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 6px;
+}
+
+.sb-frame-controller-row {
+  display: flex;
+  height: 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  border-radius: 7px;
+  color: #3b3933;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sb-frame-controller-row:hover {
+  background: #f1eee5;
+}
+
+.sb-frame-controller-row.is-selected {
+  background: #e8f1ff;
+  color: #1f5fbf;
+}
+
+.sb-frame-controller-handle {
+  color: #b1ada2;
+  cursor: grab;
+}
+
+.sb-frame-controller-order {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 6px;
+  background: #ebe8df;
+  color: #6f6d66;
+  font-size: 10px;
+}
+
+.sb-frame-controller-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-frame-controller-resize {
+  height: 8px;
+  flex-shrink: 0;
+  cursor: ns-resize;
 }
 
 .sb-presentation-overlay {
