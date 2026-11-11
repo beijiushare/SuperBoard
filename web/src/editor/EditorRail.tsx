@@ -2,6 +2,7 @@ import UseAnimations from 'react-useanimations'
 import aperture from 'react-useanimations/lib/aperture'
 import checkCircle from 'react-useanimations/lib/checkCircle'
 import command from 'react-useanimations/lib/command'
+import film from 'react-useanimations/lib/film'
 import gitBranch from 'react-useanimations/lib/gitBranch'
 import sidebar from 'react-useanimations/lib/sidebar'
 import uploadCloud from 'react-useanimations/lib/uploadCloud'
@@ -23,6 +24,8 @@ interface EditorRailProps {
   menuPanelOpen: boolean
   menuPanelLabel: string
   onToggleMenuPanel: () => void
+  presenterMode: boolean
+  onTogglePresenter: () => void
   onDeploy: () => void
 }
 
@@ -42,6 +45,8 @@ export function EditorRail({
   menuPanelOpen,
   menuPanelLabel,
   onToggleMenuPanel,
+  presenterMode,
+  onTogglePresenter,
   onDeploy,
 }: EditorRailProps) {
   return (
@@ -98,6 +103,16 @@ export function EditorRail({
         onClick={onToggleMenuPanel}
       >
         <UseAnimations animation={command} size={32} interaction="click-replay" />
+      </button>
+      <button
+        type="button"
+        className="sb-rail-button"
+        data-tooltip="讲演者模式"
+        aria-label="讲演者模式"
+        aria-pressed={presenterMode}
+        onClick={onTogglePresenter}
+      >
+        <UseAnimations animation={film} size={32} interaction="click-toggle" active={presenterMode} />
       </button>
       <button
         type="button"

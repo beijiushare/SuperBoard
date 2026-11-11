@@ -106,6 +106,60 @@
   min-width: 0;
 }
 
+.sb-presenter-hud {
+  position: fixed;
+  z-index: 500;
+  bottom: 18px;
+  left: 50%;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid #dedbd2;
+  border-radius: 10px;
+  background: #fffdf8;
+  box-shadow: 0 8px 28px rgb(20 18 10 / 14%);
+  transform: translateX(-50%);
+}
+
+.sb-presentation-overlay {
+  position: fixed;
+  z-index: 9000;
+  inset: 0;
+  cursor: pointer;
+}
+
+.sb-presentation-menu {
+  position: fixed;
+  z-index: 10001;
+  padding: 4px;
+  border: 1px solid #dedbd2;
+  border-radius: 8px;
+  background: #fffdf8;
+  box-shadow: 0 8px 24px rgb(20 18 10 / 18%);
+}
+
+.sb-presentation-menu button {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #1f1e1c;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sb-presentation-menu button:hover {
+  background: #f1eee5;
+}
+
+.sb-app-editor.is-presenting .sb-rail,
+.sb-app-editor.is-presenting .sb-tree-panel,
+.sb-app-editor.is-presenting .tlui-layout__top,
+.sb-app-editor.is-presenting .tlui-layout__bottom,
+.sb-app-editor.is-presenting .tlui-style-panel {
+  display: none;
+}
+
 .sb-toolbar {
   z-index: 100;
   display: flex;

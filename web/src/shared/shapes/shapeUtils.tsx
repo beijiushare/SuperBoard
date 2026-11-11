@@ -1,5 +1,11 @@
+import { SbFrameShapeUtil } from './frameShapeUtil'
 import { SbMarkdownShapeUtil } from './markdownShapeUtil'
 import { SbMediaShapeUtil } from './mediaShapeUtil'
 import { SbPeleShapeUtil } from './peleShapeUtil'
 
-export const superboardShapeUtils = [SbMarkdownShapeUtil, SbPeleShapeUtil, SbMediaShapeUtil]
+export const superboardShapeUtils = [
+  SbMarkdownShapeUtil,
+  SbPeleShapeUtil,
+  SbMediaShapeUtil,
+  SbFrameShapeUtil,
+]
