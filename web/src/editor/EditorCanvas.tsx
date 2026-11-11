@@ -34,6 +34,7 @@ export function EditorCanvas({ board, scope, components, overrides, uiState, onM
           shapeUtils={superboardShapeUtils}
           components={components}
           overrides={overrides}
+          options={{ actionShortcutsLocation: 'menu' }}
           licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
           onMount={onMount}
         />
