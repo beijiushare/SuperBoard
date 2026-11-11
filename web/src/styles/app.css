@@ -109,7 +109,7 @@
 .sb-presenter-hud {
   position: fixed;
   z-index: 500;
-  bottom: 18px;
+  top: 18px;
   left: 50%;
   display: flex;
   gap: 8px;
