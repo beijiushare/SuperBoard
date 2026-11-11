@@ -8,7 +8,7 @@ import {
   useValue,
   type TLUiContextMenuProps,
 } from 'tldraw'
-import { SB_MEDIA_TYPE, type SbMediaCrop, type SbMediaShape } from '../../shared/shapes/types'
+import { SB_MEDIA_TYPE, SUPERBOARD_MEDIA_EVENT, type SbMediaCrop, type SbMediaShape } from '../../shared/shapes/types'
 
 interface SuperboardContextMenuProps extends TLUiContextMenuProps {
   onAddMarkdown: () => void
@@ -53,6 +53,19 @@ export function SuperboardContextMenu({
       <div className={hideConversions ? 'sb-context-menu-filter' : undefined}>
         <DefaultContextMenuContent />
       </div>
+      {mediaShape ? (
+        <TldrawUiMenuGroup id="superboard-media-edit">
+          <TldrawUiMenuItem
+            id="superboard-edit-media"
+            label="编辑媒体链接"
+            onSelect={() => {
+              window.dispatchEvent(
+                new CustomEvent(SUPERBOARD_MEDIA_EVENT, { detail: { shapeId: mediaShape.id } }),
+              )
+            }}
+          />
+        </TldrawUiMenuGroup>
+      ) : null}
       {mediaShape ? (
         <TldrawUiMenuGroup id="superboard-media-crop">
           <TldrawUiMenuSubmenu id="superboard-crop" label="裁剪">

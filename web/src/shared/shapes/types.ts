@@ -70,6 +70,8 @@ export const DEFAULT_SB_BLOCK_STYLE = {
 export const DEFAULT_SB_PELE_STYLE = {
   ...DEFAULT_SB_BLOCK_STYLE,
   backgroundColor: 'paper',
+  borderWidth: 'none',
+  borderOpacity: 0,
 } satisfies SbBlockStyleValues
 
 export interface SbMarkdownProps extends SbBlockStyleValues {

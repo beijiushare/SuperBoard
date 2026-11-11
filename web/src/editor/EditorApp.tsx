@@ -20,6 +20,7 @@ import { SuperboardContextMenu } from './context-menu'
 import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
 import { BoardDialog, DeleteBoardDialog, DeleteFolderDialog, DeployDialog, RenameFolderDialog, type BoardFormValues } from './dialogs'
 import { ShapeEditor } from './shape-editor'
+import { BoardExportStage } from './export/BoardExportStage'
 import { MediaDialog } from './media/MediaDialog'
 import { getMediaAspect } from './media/mediaSize'
 import type { MediaSource } from './media/parseMedia'
@@ -75,6 +76,7 @@ export function EditorApp() {
   const [pendingDeleteFolder, setPendingDeleteFolder] = useState<BoardTreeFolder | null>(null)
   const [deployDialogOpen, setDeployDialogOpen] = useState(false)
   const [mediaDialog, setMediaDialog] = useState<MediaDialogState | null>(null)
+  const [exportRequest, setExportRequest] = useState<{ board: BoardFile; format: 'svg' | 'png' } | null>(null)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
 
   const editorRef = useRef<Editor | null>(null)
@@ -487,6 +489,15 @@ export function EditorApp() {
     setMediaDialog(null)
   }
 
+  async function handleExport(node: BoardListItem, format: 'svg' | 'png') {
+    try {
+      const board = await fetchBoard(node.slug, node.scope ?? scope)
+      setExportRequest({ board, format })
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : String(error))
+    }
+  }
+
   if (loading) {
     return <div className="sb-screen-message">正在加载白板…</div>
   }
@@ -618,6 +629,18 @@ export function EditorApp() {
         </main>
       </div>
 
+      {exportRequest ? (
+        <BoardExportStage
+          board={exportRequest.board}
+          format={exportRequest.format}
+          onDone={() => setExportRequest(null)}
+          onError={(error) => {
+            setExportRequest(null)
+            window.alert(error instanceof Error ? error.message : String(error))
+          }}
+        />
+      ) : null}
+
       {editing ? <ShapeEditor key={editing.id} shape={editing} onClose={() => setEditing(null)} onSave={saveEdit} /> : null}
 
       {mediaDialog ? (
@@ -639,6 +662,7 @@ export function EditorApp() {
           onRenameFolder={(folder) => setFolderDialog(folder)}
           onDelete={(node) => setPendingDelete(node)}
           onDeleteFolder={(folder) => setPendingDeleteFolder(folder)}
+          onExport={(node, format) => void handleExport(node, format)}
         />
       ) : null}
 

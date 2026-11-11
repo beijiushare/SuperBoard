@@ -1,5 +1,7 @@
-import { useLayoutEffect, useRef, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
+import { useRef, useLayoutEffect, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import { BaseBoxShapeUtil, HTMLContainer, Rectangle2d, useEditor, useValue } from 'tldraw'
+import { renderAsync } from 'pele/lazy'
+import markdownCss from '../../styles/markdown.css?raw'
 import { MarkdownView } from '../markdown/MarkdownView'
 import { PeleView } from '../pele/PeleView'
 import { getSbBlockStyle } from './blockStyles'
@@ -40,6 +42,22 @@ function clampPercent(value: number) {
   return Math.min(100, Math.max(0, value))
 }
 
+async function fetchImageDataUrl(url: string) {
+  try {
+    const response = await fetch(url)
+    if (!response.ok) return null
+    const blob = await response.blob()
+    return await new Promise<string | null>((resolve) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : null)
+      reader.onerror = () => resolve(null)
+      reader.readAsDataURL(blob)
+    })
+  } catch {
+    return null
+  }
+}
+
 function mediaClipPath(props: SbMediaProps) {
   if (props.crop === 'circle') {
     const radius = (Math.min(props.w, props.h) * clampPercent(props.cropRadius)) / 100
@@ -66,6 +84,12 @@ function SbMediaContainer({ shape }: { shape: SbMediaShape }) {
   const editor = useEditor()
   const { url, kind, w, h } = shape.props
   const readonly = editor.getInstanceState().isReadonly
+  const isSelected = useValue(
+    'superboard media selected',
+    () => editor.getSelectedShapeIds().includes(shape.id),
+    [editor, shape.id],
+  )
+  const interactive = readonly || isSelected
 
   function onDoubleClick(event: ReactMouseEvent) {
     event.stopPropagation()
@@ -82,7 +106,12 @@ function SbMediaContainer({ shape }: { shape: SbMediaShape }) {
         {kind === 'image' ? (
           <img src={url} alt="" draggable={false} />
         ) : kind === 'video' ? (
-          <video src={url} controls playsInline />
+          <video
+            src={url}
+            controls
+            playsInline
+            style={{ pointerEvents: interactive ? 'auto' : 'none' }}
+          />
         ) : (
           <iframe
             src={url}
@@ -90,7 +119,7 @@ function SbMediaContainer({ shape }: { shape: SbMediaShape }) {
             allowFullScreen
             referrerPolicy="strict-origin-when-cross-origin"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            style={{ pointerEvents: readonly ? 'auto' : 'none' }}
+            style={{ pointerEvents: interactive ? 'auto' : 'none' }}
           />
         )}
       </div>
@@ -249,6 +278,32 @@ export class SbMarkdownShapeUtil extends BaseBoxShapeUtil<SbMarkdownShape> {
     )
   }
 
+  override toSvg(shape: SbMarkdownShape) {
+    const { w, h } = shape.props
+    const style = {
+      width: '100%',
+      height: '100%',
+      boxSizing: 'border-box',
+      overflow: 'hidden',
+      padding: 24,
+      background: '#ffffff',
+      color: '#1f1e1c',
+      fontFamily:
+        'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif',
+      '--tl-color-text': '#1f1e1c',
+      '--tl-color-text-3': '#8b877d',
+    } as React.CSSProperties
+
+    return (
+      <foreignObject x={0} y={0} width={w} height={h}>
+        <div style={style}>
+          <style>{markdownCss}</style>
+          <MarkdownView source={shape.props.text} />
+        </div>
+      </foreignObject>
+    )
+  }
+
   getIndicatorPath(shape: SbMarkdownShape) {
     const path = new Path2D()
     path.rect(0, 0, shape.props.w, shape.props.h)
@@ -313,6 +368,28 @@ export class SbPeleShapeUtil extends BaseBoxShapeUtil<SbPeleShape> {
     )
   }
 
+  override async toSvg(shape: SbPeleShape) {
+    try {
+      const { svg } = await renderAsync(shape.props.code)
+      const href = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+      return (
+        <g>
+          <rect width={shape.props.w} height={shape.props.h} rx={8} fill="#fffcf0" />
+          <image
+            href={href}
+            x={16}
+            y={16}
+            width={Math.max(1, shape.props.w - 32)}
+            height={Math.max(1, shape.props.h - 32)}
+            preserveAspectRatio="xMidYMid meet"
+          />
+        </g>
+      )
+    } catch {
+      return null
+    }
+  }
+
   getIndicatorPath(shape: SbPeleShape) {
     const path = new Path2D()
     path.rect(0, 0, shape.props.w, shape.props.h)
@@ -357,6 +434,44 @@ export class SbMediaShapeUtil extends BaseBoxShapeUtil<SbMediaShape> {
 
   component(shape: SbMediaShape) {
     return <SbMediaContainer shape={shape} />
+  }
+
+  override async toSvg(shape: SbMediaShape) {
+    const { url, kind, w, h } = shape.props
+    if (kind === 'image') {
+      const href = await fetchImageDataUrl(url)
+      if (href) {
+        return <image href={href} width={w} height={h} preserveAspectRatio="xMidYMid meet" />
+      }
+    }
+
+    const label = kind === 'video' ? '视频链接' : kind === 'iframe' ? '网页链接' : '图片链接'
+    return (
+      <foreignObject x={0} y={0} width={w} height={h}>
+        <div
+          style={{
+            display: 'flex',
+            width: '100%',
+            height: '100%',
+            boxSizing: 'border-box',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+            background: '#f6f5f1',
+            color: '#1f1e1c',
+            fontFamily: 'system-ui, sans-serif',
+            fontSize: 14,
+            textAlign: 'center',
+            overflow: 'hidden',
+            wordBreak: 'break-all',
+          }}
+        >
+          <a href={url} style={{ color: '#205ea6' }}>
+            {label}：{url}
+          </a>
+        </div>
+      </foreignObject>
+    )
   }
 
   getIndicatorPath(shape: SbMediaShape) {
