@@ -241,6 +241,11 @@
   width: 100%;
   height: 100%;
   background-color: var(--sb-canvas-bg);
+  pointer-events: none;
+}
+
+.sb-canvas .tl-background__wrapper {
+  pointer-events: none;
 }
 
 .sb-canvas .tl-grid,

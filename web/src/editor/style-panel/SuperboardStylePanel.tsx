@@ -53,12 +53,15 @@ export function SuperboardStylePanel(props: TLUiStylePanelProps) {
 
   if (!stylePanelOpen) return null
 
-  return (
-    <DefaultStylePanel {...props}>
-      {hasCustomShape ? <SuperboardBlockStylePanel /> : undefined}
-      {hasMediaShape ? <MediaCropPanel /> : undefined}
-    </DefaultStylePanel>
-  )
+  const customContent =
+    hasCustomShape || hasMediaShape ? (
+      <>
+        {hasCustomShape ? <SuperboardBlockStylePanel /> : null}
+        {hasMediaShape ? <MediaCropPanel /> : null}
+      </>
+    ) : undefined
+
+  return <DefaultStylePanel {...props}>{customContent}</DefaultStylePanel>
 }
 
 export const superboardEditorComponents = {

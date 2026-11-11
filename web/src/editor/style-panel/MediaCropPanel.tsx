@@ -1,11 +1,5 @@
 import { StylePanelSection, TldrawUiSlider, useEditor, useValue } from 'tldraw'
-import { SB_MEDIA_TYPE, type SbMediaCrop, type SbMediaProps, type SbMediaShape } from '../../shared/shapes/types'
-
-const CROP_LABELS: Record<SbMediaCrop, string> = {
-  rect: '矩形',
-  rounded: '圆角矩形',
-  circle: '圆形',
-}
+import { SB_MEDIA_TYPE, type SbMediaProps, type SbMediaShape } from '../../shared/shapes/types'
 
 function CropSlider({
   label,
@@ -67,7 +61,6 @@ export function MediaCropPanel() {
 
   return (
     <StylePanelSection>
-      <div className="sb-crop-heading">媒体裁剪 · {CROP_LABELS[crop]}</div>
       {crop === 'circle' ? (
         <>
           <CropSlider label="圆心 X" value={shape.props.cropCx} onChange={(cropCx) => update({ cropCx })} onHistoryMark={mark} />
