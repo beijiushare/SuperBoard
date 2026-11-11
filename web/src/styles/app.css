@@ -125,6 +125,7 @@
   position: absolute;
   z-index: 600;
   inset: 0;
+  overflow: hidden;
   pointer-events: auto;
   cursor: default;
 }

@@ -124,8 +124,8 @@ export function DirectorOverlay({
       if (Math.hypot(dx, dy) > 3) pan.moved = true
       editor.setCamera(
         {
-          x: pan.startCamera.x - dx / pan.startCamera.z,
-          y: pan.startCamera.y - dy / pan.startCamera.z,
+          x: pan.startCamera.x + dx / pan.startCamera.z,
+          y: pan.startCamera.y + dy / pan.startCamera.z,
           z: pan.startCamera.z,
         },
         { force: true, immediate: true },
