@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
-import { type Editor, type TLUiContextMenuProps, type TLUiOverrides } from 'tldraw'
+import { type Editor, type TLShapeId, type TLUiContextMenuProps, type TLUiOverrides } from 'tldraw'
 import type { BoardFile, BoardListItem, BoardScope, BoardTreeFolder } from '../shared/board/types'
 import { BoardTreePanel } from '../shared/board/BoardTreePanel'
 import type { BoardTreeContextTarget } from '../shared/board/BoardTree'
@@ -69,6 +69,7 @@ export function EditorApp() {
   const [presentation, setPresentation] = useState<{ frames: SbFrameShape[]; index: number } | null>(null)
   const [presentationMenu, setPresentationMenu] = useState<{ x: number; y: number } | null>(null)
   const appRef = useRef<HTMLDivElement | null>(null)
+  const presenterLockedRef = useRef<Set<TLShapeId>>(new Set())
 
   const editorRef = useRef<Editor | null>(null)
   const boardRef = useRef<BoardFile | null>(null)
@@ -85,6 +86,29 @@ export function EditorApp() {
   useEffect(() => {
     setFrameMode(presenterMode)
   }, [presenterMode])
+
+  useEffect(() => {
+    const editor = editorRef.current
+    if (!editor) return
+
+    if (presenterMode) {
+      const shapes = editor
+        .getCurrentPageShapes()
+        .filter((shape) => shape.type !== SB_FRAME_TYPE && !shape.isLocked)
+      for (const shape of shapes) {
+        editor.updateShape({ ...shape, isLocked: true })
+      }
+      presenterLockedRef.current = new Set(shapes.map((shape) => shape.id))
+      return
+    }
+
+    const ids = [...presenterLockedRef.current]
+    for (const id of ids) {
+      const shape = editor.getShape(id)
+      if (shape) editor.updateShape({ ...shape, isLocked: false })
+    }
+    presenterLockedRef.current.clear()
+  }, [presenterMode, editorReady, board?.meta.slug])
 
   const scopedBoards = useMemo(
     () => boards.filter((item) => (item.scope ?? 'public') === scope),

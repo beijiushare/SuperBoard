@@ -32,15 +32,11 @@ export function moveCameraToFrame(editor: Editor, frame: SbFrameShape, animate: 
   const bounds = editor.getShapePageBounds(frame)
   if (!bounds) return
 
-  const viewport = editor.getViewportScreenBounds()
-  const zoom = Math.max(viewport.w / bounds.w, viewport.h / bounds.h)
-  const x = bounds.x + bounds.w / 2 - viewport.w / (2 * zoom)
-  const y = bounds.y + bounds.h / 2 - viewport.h / (2 * zoom)
-
-  editor.setCamera(
-    { x, y, z: zoom },
-    animate
-      ? { animation: { duration: 280, easing: (t) => t }, force: true }
-      : { force: true },
-  )
+  editor.zoomToBounds(bounds, {
+    inset: 0,
+    force: true,
+    ...(animate
+      ? { animation: { duration: 280, easing: (t: number) => t } }
+      : {}),
+  })
 }
