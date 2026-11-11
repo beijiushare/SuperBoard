@@ -1,4 +1,21 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import type { DirectorFrame } from '../shared/board/types'
 
 interface DirectorFrameControllerProps {
@@ -18,8 +35,84 @@ interface DragState {
   startHeight: number
 }
 
+interface SortableFrameRowProps {
+  frame: DirectorFrame
+  selected: boolean
+  renaming: boolean
+  renameValue: string
+  onSelect: () => void
+  onStartRename: () => void
+  onRenameChange: (value: string) => void
+  onCommitRename: () => void
+  onCancelRename: () => void
+}
+
 const WIDTH = 220
 const MIN_HEIGHT = 150
+
+function SortableFrameRow({
+  frame,
+  selected,
+  renaming,
+  renameValue,
+  onSelect,
+  onStartRename,
+  onRenameChange,
+  onCommitRename,
+  onCancelRename,
+}: SortableFrameRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: frame.id,
+    disabled: renaming,
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`sb-frame-controller-row${selected ? ' is-selected' : ''}${
+        isDragging ? ' is-dragging' : ''
+      }`}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      {...attributes}
+      onClick={onSelect}
+      onDoubleClick={onStartRename}
+    >
+      <span
+        className="sb-frame-controller-handle"
+        {...listeners}
+        onClick={(event) => event.stopPropagation()}
+        onDoubleClick={(event) => event.stopPropagation()}
+      >
+        ⋮⋮
+      </span>
+      <span className="sb-frame-controller-order">{frame.order}</span>
+      {renaming ? (
+        <input
+          className="sb-frame-controller-input"
+          value={renameValue}
+          autoFocus
+          onFocus={(event) => event.currentTarget.select()}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+          onDoubleClick={(event) => event.stopPropagation()}
+          onChange={(event) => onRenameChange(event.target.value)}
+          onBlur={onCommitRename}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault()
+              onCommitRename()
+            } else if (event.key === 'Escape') {
+              event.preventDefault()
+              onCancelRename()
+            }
+          }}
+        />
+      ) : (
+        <span className="sb-frame-controller-name">{frame.name || `帧${frame.order}`}</span>
+      )}
+    </div>
+  )
+}
 
 export function DirectorFrameController({
   frames,
@@ -31,9 +124,13 @@ export function DirectorFrameController({
   const [position, setPosition] = useState({ left: 20, top: 80 })
   const [height, setHeight] = useState(300)
   const dragRef = useRef<DragState | null>(null)
-  const [dragId, setDragId] = useState<string | null>(null)
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  const orderedFrames = [...frames].sort((a, b) => a.order - b.order)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
 
   function beginMove(event: ReactPointerEvent) {
     if (event.button !== 0) return
@@ -80,16 +177,13 @@ export function DirectorFrameController({
     dragRef.current = null
   }
 
-  function dropOn(targetId: string) {
-    if (!dragId || dragId === targetId) return
-    const ordered = [...frames].sort((a, b) => a.order - b.order)
-    const from = ordered.findIndex((frame) => frame.id === dragId)
-    const to = ordered.findIndex((frame) => frame.id === targetId)
+  function handleSortEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const from = orderedFrames.findIndex((frame) => frame.id === active.id)
+    const to = orderedFrames.findIndex((frame) => frame.id === over.id)
     if (from < 0 || to < 0) return
-    const [moved] = ordered.splice(from, 1)
-    ordered.splice(to, 0, moved)
-    onChangeFrames(ordered.map((frame, index) => ({ ...frame, order: index + 1 })))
-    setDragId(null)
+    onChangeFrames(arrayMove(orderedFrames, from, to).map((frame, index) => ({ ...frame, order: index + 1 })))
   }
 
   function commitRename(frame: DirectorFrame) {
@@ -126,51 +220,30 @@ export function DirectorFrameController({
       </div>
 
       <div className="sb-frame-controller-list">
-        {[...frames]
-          .sort((a, b) => a.order - b.order)
-          .map((frame) => (
-            <div
-              key={frame.id}
-              className={`sb-frame-controller-row${frame.id === selectedId ? ' is-selected' : ''}`}
-              draggable={renamingId !== frame.id}
-              onDragStart={() => setDragId(frame.id)}
-              onDragEnd={() => setDragId(null)}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={() => dropOn(frame.id)}
-              onClick={() => onSelect(frame.id)}
-              onDoubleClick={() => {
-                setRenamingId(frame.id)
-                setRenameValue(frame.name || `帧${frame.order}`)
-              }}
-            >
-              <span className="sb-frame-controller-handle">⋮⋮</span>
-              <span className="sb-frame-controller-order">{frame.order}</span>
-              {renamingId === frame.id ? (
-                <input
-                  className="sb-frame-controller-input"
-                  value={renameValue}
-                  autoFocus
-                  onFocus={(event) => event.currentTarget.select()}
-                  onPointerDown={(event) => event.stopPropagation()}
-                  onChange={(event) => setRenameValue(event.target.value)}
-                  onBlur={() => commitRename(frame)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault()
-                      commitRename(frame)
-                    } else if (event.key === 'Escape') {
-                      event.preventDefault()
-                      setRenamingId(null)
-                    }
-                  }}
-                />
-              ) : (
-                <span className="sb-frame-controller-name">
-                  {frame.name || `帧${frame.order}`}
-                </span>
-              )}
-            </div>
-          ))}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSortEnd}>
+          <SortableContext
+            items={orderedFrames.map((frame) => frame.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {orderedFrames.map((frame) => (
+              <SortableFrameRow
+                key={frame.id}
+                frame={frame}
+                selected={frame.id === selectedId}
+                renaming={renamingId === frame.id}
+                renameValue={renameValue}
+                onSelect={() => onSelect(frame.id)}
+                onStartRename={() => {
+                  setRenamingId(frame.id)
+                  setRenameValue(frame.name || `帧${frame.order}`)
+                }}
+                onRenameChange={setRenameValue}
+                onCommitRename={() => commitRename(frame)}
+                onCancelRename={() => setRenamingId(null)}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
 
       <div className="sb-frame-controller-resize" onPointerDown={beginResize} />

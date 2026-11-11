@@ -279,9 +279,15 @@
   color: #1f5fbf;
 }
 
+.sb-frame-controller-row.is-dragging {
+  z-index: 1;
+  opacity: 0.4;
+}
+
 .sb-frame-controller-handle {
   color: #b1ada2;
   cursor: grab;
+  touch-action: none;
 }
 
 .sb-frame-controller-order {
