@@ -69,6 +69,7 @@ export function EditorApp() {
   const [presentation, setPresentation] = useState<{ frames: DirectorFrame[]; index: number } | null>(null)
   const [presentationMenu, setPresentationMenu] = useState<{ x: number; y: number } | null>(null)
   const appRef = useRef<HTMLDivElement | null>(null)
+  const cameraBeforePresentationRef = useRef<{ x: number; y: number; z: number } | null>(null)
 
   const editorRef = useRef<Editor | null>(null)
   const boardRef = useRef<BoardFile | null>(null)
@@ -255,6 +256,7 @@ export function EditorApp() {
     }
 
     setDirectorMode(true)
+    cameraBeforePresentationRef.current = editor.getCamera()
     setEditingFrame(null)
     setContextMenu(null)
     setPresentationMenu(null)
@@ -270,11 +272,20 @@ export function EditorApp() {
     moveCameraToFrame(editor, frames[index], false)
   }
 
+  function restoreCameraAfterPresentation() {
+    const editor = editorRef.current
+    const camera = cameraBeforePresentationRef.current
+    if (!editor || !camera) return
+    cameraBeforePresentationRef.current = null
+    window.setTimeout(() => editor.setCamera(camera, { force: true, immediate: true }), 50)
+  }
+
   function exitPresentation() {
     cancelCameraAnimation()
     setPresentation(null)
     setPresentationMenu(null)
     if (document.fullscreenElement) void document.exitFullscreen().catch(() => {})
+    restoreCameraAfterPresentation()
   }
 
   function advancePresentation() {
@@ -302,6 +313,7 @@ export function EditorApp() {
       if (!document.fullscreenElement) {
         setPresentation(null)
         setPresentationMenu(null)
+        restoreCameraAfterPresentation()
       }
     }
 

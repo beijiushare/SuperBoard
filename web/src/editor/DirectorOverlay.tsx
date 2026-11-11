@@ -42,6 +42,12 @@ export function DirectorOverlay({
   const overlayRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<DragState | null>(null)
+  const panRef = useRef<{
+    startClient: { x: number; y: number }
+    startCamera: { x: number; y: number; z: number }
+    moved: boolean
+  } | null>(null)
+  const suppressContextMenuRef = useRef(false)
   const [menu, setMenu] = useState<MenuState | null>(null)
   const [, setCameraTick] = useState(0)
 
@@ -78,6 +84,18 @@ export function DirectorOverlay({
     return editor.screenToPage({ x: event.clientX, y: event.clientY })
   }
 
+  function beginPan(event: ReactPointerEvent) {
+    if (event.button !== 1 && event.button !== 2) return false
+    event.preventDefault()
+    panRef.current = {
+      startClient: { x: event.clientX, y: event.clientY },
+      startCamera: editor.getCamera(),
+      moved: false,
+    }
+    event.currentTarget.setPointerCapture(event.pointerId)
+    return true
+  }
+
   function updateFrame(frame: DirectorFrame) {
     onChangeFrames(frames.map((item) => (item.id === frame.id ? frame : item)))
   }
@@ -99,6 +117,22 @@ export function DirectorOverlay({
   }
 
   function handleMove(event: ReactPointerEvent) {
+    const pan = panRef.current
+    if (pan) {
+      const dx = event.clientX - pan.startClient.x
+      const dy = event.clientY - pan.startClient.y
+      if (Math.hypot(dx, dy) > 3) pan.moved = true
+      editor.setCamera(
+        {
+          x: pan.startCamera.x - dx / pan.startCamera.z,
+          y: pan.startCamera.y - dy / pan.startCamera.z,
+          z: pan.startCamera.z,
+        },
+        { force: true, immediate: true },
+      )
+      return
+    }
+
     const drag = dragRef.current
     if (!drag) return
     const point = pagePoint(event)
@@ -123,6 +157,8 @@ export function DirectorOverlay({
 
   function endDrag() {
     dragRef.current = null
+    if (panRef.current?.moved) suppressContextMenuRef.current = true
+    panRef.current = null
   }
 
   function handleContextMenu(event: ReactMouseEvent, frame: DirectorFrame | null) {
@@ -174,9 +210,18 @@ export function DirectorOverlay({
     <div
       ref={overlayRef}
       className="sb-director-overlay"
-      onPointerDown={() => setMenu(null)}
+      onPointerDown={(event) => {
+        setMenu(null)
+        beginPan(event)
+      }}
       onPointerMove={handleMove}
       onPointerUp={endDrag}
+      onContextMenuCapture={(event) => {
+        if (!suppressContextMenuRef.current) return
+        suppressContextMenuRef.current = false
+        event.preventDefault()
+        event.stopPropagation()
+      }}
       onContextMenu={(event) => {
         if (event.target === event.currentTarget) handleContextMenu(event, null)
       }}
