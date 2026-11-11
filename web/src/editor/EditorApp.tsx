@@ -13,7 +13,7 @@ import {
   SUPERBOARD_FRAME_PLAY_EVENT,
   type SbFrameShape,
 } from '../shared/shapes/types'
-import { getFrames, moveCameraToFrame } from '../shared/shapes/frameUtils'
+import { cancelCameraAnimation, getFrames, moveCameraToFrame } from '../shared/shapes/frameUtils'
 import { setFrameMode } from '../shared/shapes/frameMode'
 import { superboardEditorComponents } from './style-panel'
 import { SuperboardMenuPanel } from './SuperboardMenuPanel'
@@ -99,6 +99,11 @@ export function EditorApp() {
         editor.updateShape({ ...shape, isLocked: true })
       }
       presenterLockedRef.current = new Set(shapes.map((shape) => shape.id))
+
+      const frames = editor.getCurrentPageShapes().filter((shape) => shape.type === SB_FRAME_TYPE)
+      for (const frame of frames) {
+        editor.updateShape({ ...frame, isLocked: false })
+      }
       return
     }
 
@@ -108,6 +113,12 @@ export function EditorApp() {
       if (shape) editor.updateShape({ ...shape, isLocked: false })
     }
     presenterLockedRef.current.clear()
+
+    const frames = editor.getCurrentPageShapes().filter((shape) => shape.type === SB_FRAME_TYPE)
+    for (const frame of frames) {
+      editor.updateShape({ ...frame, isLocked: true })
+    }
+    editor.selectNone()
   }, [presenterMode, editorReady, board?.meta.slug])
 
   const scopedBoards = useMemo(
@@ -275,6 +286,7 @@ export function EditorApp() {
   }
 
   function exitPresentation() {
+    cancelCameraAnimation()
     setPresentation(null)
     setPresentationMenu(null)
     if (document.fullscreenElement) void document.exitFullscreen().catch(() => {})

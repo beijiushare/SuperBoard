@@ -23,7 +23,7 @@ export class SbFrameShapeUtil extends BaseBoxShapeUtil<SbFrameShape> {
   }
 
   getGeometry(shape: SbFrameShape) {
-    if (!isFrameMode()) {
+    if (!isFrameMode() || this.editor.getInstanceState().isReadonly) {
       return new Rectangle2d({ width: 0, height: 0, isFilled: false })
     }
     return new Rectangle2d({ width: shape.props.w, height: shape.props.h, isFilled: true })
