@@ -21,6 +21,7 @@ export interface BoardMeta {
 export interface DirectorFrame {
   id: string
   order: number
+  name?: string
   x: number
   y: number
   w: number

@@ -240,6 +240,7 @@ export function DirectorOverlay({
               top: point.y - viewport.y,
               width: frame.w * zoom,
               height: frame.h * zoom,
+              borderWidth: Math.max(1, zoom * 2),
             }}
             onPointerDown={(event) => beginMove(event, frame)}
             onDoubleClick={(event) => {
@@ -248,7 +249,9 @@ export function DirectorOverlay({
             }}
             onContextMenu={(event) => handleContextMenu(event, frame)}
           >
-            <div className="sb-director-frame-label">帧 {frame.order}</div>
+            <div className="sb-director-frame-label">
+              {frame.order}:{frame.name || `帧${frame.order}`}
+            </div>
             {selected
               ? ['nw', 'ne', 'sw', 'se'].map((corner) => (
                   <span

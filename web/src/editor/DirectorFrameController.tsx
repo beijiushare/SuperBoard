@@ -32,6 +32,8 @@ export function DirectorFrameController({
   const [height, setHeight] = useState(300)
   const dragRef = useRef<DragState | null>(null)
   const [dragId, setDragId] = useState<string | null>(null)
+  const [renamingId, setRenamingId] = useState<string | null>(null)
+  const [renameValue, setRenameValue] = useState('')
 
   function beginMove(event: ReactPointerEvent) {
     if (event.button !== 0) return
@@ -90,6 +92,18 @@ export function DirectorFrameController({
     setDragId(null)
   }
 
+  function commitRename(frame: DirectorFrame) {
+    const value = renameValue.trim()
+    onChangeFrames(
+      frames.map((item) =>
+        item.id === frame.id
+          ? { ...item, name: value && value !== `帧${item.order}` ? value : undefined }
+          : item,
+      ),
+    )
+    setRenamingId(null)
+  }
+
   return (
     <div
       className="sb-frame-controller"
@@ -101,7 +115,12 @@ export function DirectorFrameController({
     >
       <div className="sb-frame-controller-title" onPointerDown={beginMove}>
         <span>控制帧</span>
-        <button type="button" onClick={onClose} aria-label="关闭">
+        <button
+          type="button"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={onClose}
+          aria-label="关闭"
+        >
           ×
         </button>
       </div>
@@ -113,16 +132,43 @@ export function DirectorFrameController({
             <div
               key={frame.id}
               className={`sb-frame-controller-row${frame.id === selectedId ? ' is-selected' : ''}`}
-              draggable
+              draggable={renamingId !== frame.id}
               onDragStart={() => setDragId(frame.id)}
               onDragEnd={() => setDragId(null)}
               onDragOver={(event) => event.preventDefault()}
               onDrop={() => dropOn(frame.id)}
               onClick={() => onSelect(frame.id)}
+              onDoubleClick={() => {
+                setRenamingId(frame.id)
+                setRenameValue(frame.name || `帧${frame.order}`)
+              }}
             >
               <span className="sb-frame-controller-handle">⋮⋮</span>
               <span className="sb-frame-controller-order">{frame.order}</span>
-              <span className="sb-frame-controller-name">帧 {frame.order}</span>
+              {renamingId === frame.id ? (
+                <input
+                  className="sb-frame-controller-input"
+                  value={renameValue}
+                  autoFocus
+                  onFocus={(event) => event.currentTarget.select()}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onChange={(event) => setRenameValue(event.target.value)}
+                  onBlur={() => commitRename(frame)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault()
+                      commitRename(frame)
+                    } else if (event.key === 'Escape') {
+                      event.preventDefault()
+                      setRenamingId(null)
+                    }
+                  }}
+                />
+              ) : (
+                <span className="sb-frame-controller-name">
+                  {frame.name || `帧${frame.order}`}
+                </span>
+              )}
             </div>
           ))}
       </div>
