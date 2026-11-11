@@ -164,11 +164,13 @@ web/src/
 - [x] 定义 `x-superboard` 扩展类型
 - [x] 实现解析、校验、序列化
 - [ ] 实现 `.canvas` 文件扫描与 dev API
-- [ ] 保留旧 `.tldr.json` 读取/迁移工具
+- [x] 保留旧 `.tldr.json` 转换核心
+- [x] 批量转换 CLI（`npm run convert:canvas`）
 - [x] 添加模型层测试脚本
 
 ### Phase 2：查看器
 
+- [x] 使用上游 `json-canvas-viewer` 做渲染 spike
 - [ ] 整合/ fork `json-canvas-viewer`
 - [ ] 渲染标准节点和边
 - [ ] 增加 Markdown / Pele / 媒体模块
