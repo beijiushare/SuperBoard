@@ -18,10 +18,24 @@ export interface BoardMeta {
   updatedAt?: string
 }
 
+export interface DirectorFrame {
+  id: string
+  order: number
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+export interface DirectorData {
+  frames: DirectorFrame[]
+}
+
 export interface BoardFile {
   version: 1
   meta: BoardMeta
   document: TLStoreSnapshot
+  director?: DirectorData
 }
 
 export interface BoardListItem {

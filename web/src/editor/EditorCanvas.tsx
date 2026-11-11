@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Tldraw, type Editor, type TLUiComponents, type TLUiOverrides } from 'tldraw'
 import type { BoardFile, BoardScope } from '../shared/board/types'
 import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
@@ -9,10 +10,19 @@ interface EditorCanvasProps {
   components: Partial<TLUiComponents>
   overrides: TLUiOverrides
   uiState: EditorUiState
+  overlay?: ReactNode
   onMount: (editor: Editor) => void
 }
 
-export function EditorCanvas({ board, scope, components, overrides, uiState, onMount }: EditorCanvasProps) {
+export function EditorCanvas({
+  board,
+  scope,
+  components,
+  overrides,
+  uiState,
+  overlay,
+  onMount,
+}: EditorCanvasProps) {
   if (!board) {
     return (
       <main className="sb-canvas">
@@ -39,6 +49,7 @@ export function EditorCanvas({ board, scope, components, overrides, uiState, onM
           onMount={onMount}
         />
       </EditorUiStateContext.Provider>
+      {overlay}
     </main>
   )
 }

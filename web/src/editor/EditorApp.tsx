@@ -1,24 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { type Editor, type TLUiContextMenuProps, type TLUiOverrides } from 'tldraw'
-import type { BoardFile, BoardListItem, BoardScope, BoardTreeFolder } from '../shared/board/types'
+import type {
+  BoardFile,
+  BoardListItem,
+  BoardScope,
+  BoardTreeFolder,
+  DirectorFrame,
+} from '../shared/board/types'
 import { BoardTreePanel } from '../shared/board/BoardTreePanel'
 import type { BoardTreeContextTarget } from '../shared/board/BoardTree'
 import { buildBoardTree } from '../shared/board/tree'
 import { useTreeExpansion } from '../shared/board/useTreeExpansion'
-import {
-  SB_FRAME_TYPE,
-  SB_MARKDOWN_TYPE,
-  SB_PELE_TYPE,
-  SUPERBOARD_FRAME_EDIT_EVENT,
-  SUPERBOARD_FRAME_PLAY_EVENT,
-  type SbFrameShape,
-} from '../shared/shapes/types'
-import { cancelCameraAnimation, getFrames, moveCameraToFrame } from '../shared/shapes/frameUtils'
-import { setFrameMode } from '../shared/shapes/frameMode'
+import { SB_MARKDOWN_TYPE, SB_PELE_TYPE } from '../shared/shapes/types'
+import { cancelCameraAnimation, moveCameraToFrame } from '../shared/shapes/directorFrames'
 import { superboardEditorComponents } from './style-panel'
 import { SuperboardMenuPanel } from './SuperboardMenuPanel'
 import { EditorRail } from './EditorRail'
 import { EditorCanvas } from './EditorCanvas'
+import { DirectorOverlay } from './DirectorOverlay'
 import { readScopeFromUrl, updateBoardUrl, isPathInside } from './boardUrl'
 import { SuperboardContextMenu } from './context-menu'
 import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
@@ -58,15 +57,16 @@ export function EditorApp() {
   const [scope, setScope] = useState<BoardScope>(readScopeFromUrl)
   const [stylePanelOpen, setStylePanelOpen] = useState(false)
   const [menuPanelOpen, setMenuPanelOpen] = useState(false)
-  const [presenterMode, setPresenterMode] = useState(false)
+  const [directorMode, setDirectorMode] = useState(false)
   const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
   const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
   const [pendingDeleteFolder, setPendingDeleteFolder] = useState<BoardTreeFolder | null>(null)
   const [deployDialogOpen, setDeployDialogOpen] = useState(false)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
-  const [editingFrame, setEditingFrame] = useState<SbFrameShape | null>(null)
-  const [presentation, setPresentation] = useState<{ frames: SbFrameShape[]; index: number } | null>(null)
+  const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null)
+  const [editingFrame, setEditingFrame] = useState<DirectorFrame | null>(null)
+  const [presentation, setPresentation] = useState<{ frames: DirectorFrame[]; index: number } | null>(null)
   const [presentationMenu, setPresentationMenu] = useState<{ x: number; y: number } | null>(null)
   const appRef = useRef<HTMLDivElement | null>(null)
 
@@ -82,46 +82,15 @@ export function EditorApp() {
     scopeRef.current = scope
   }, [scope])
 
-  useEffect(() => {
-    setFrameMode(presenterMode)
-  }, [presenterMode])
-
-  useEffect(() => {
-    const editor = editorRef.current
-    if (!editor) return
-
-    const shapes = editor.getCurrentPageShapes()
-    const frames = shapes.filter((shape) => shape.type === SB_FRAME_TYPE)
-
-    if (presenterMode) {
-      for (const shape of shapes) {
-        if (shape.type === SB_FRAME_TYPE || shape.isLocked) continue
-        editor.updateShape({ ...shape, isLocked: true })
-      }
-      for (const frame of frames) {
-        editor.updateShape({ ...frame, isLocked: false })
-      }
-      return
-    }
-
-    if (frames.length > 0) {
-      for (const shape of shapes) {
-        if (shape.type === SB_FRAME_TYPE || !shape.isLocked) continue
-        editor.updateShape({ ...shape, isLocked: false })
-      }
-    }
-
-    for (const frame of frames) {
-      editor.updateShape({ ...frame, isLocked: true })
-    }
-    editor.selectNone()
-  }, [presenterMode, editorReady, board?.meta.slug])
-
   const scopedBoards = useMemo(
     () => boards.filter((item) => (item.scope ?? 'public') === scope),
     [boards, scope],
   )
   const treeNodes = useMemo(() => buildBoardTree(scopedBoards), [scopedBoards])
+  const directorFrames = useMemo(
+    () => [...(board?.director?.frames ?? [])].sort((a, b) => a.order - b.order),
+    [board?.director?.frames],
+  )
   const { expanded, toggleFolder, expandPath, renameExpandedPath } = useTreeExpansion(scopedBoards)
   const {
     saveState,
@@ -136,6 +105,15 @@ export function EditorApp() {
   } = useAutoSave({ editorRef, boardRef, scopeRef, setBoard, setBoards })
   const { editing, setEditing, addShape, saveEdit } = useShapeEditing({ editorRef })
   const { mediaDialog, openMediaCreate, closeMediaDialog, saveMedia } = useMediaController({ editorRef })
+
+  function updateDirectorFrames(frames: DirectorFrame[]) {
+    const current = boardRef.current
+    if (!current) return
+    const next = { ...current, director: { frames } }
+    boardRef.current = next
+    setBoard(next)
+    scheduleSave()
+  }
 
   const editorComponents = useMemo(
     () => ({
@@ -153,8 +131,8 @@ export function EditorApp() {
   )
 
   const editorUiState = useMemo(
-    () => ({ stylePanelOpen, menuPanelOpen, presenterMode }),
-    [stylePanelOpen, menuPanelOpen, presenterMode],
+    () => ({ stylePanelOpen, menuPanelOpen }),
+    [stylePanelOpen, menuPanelOpen],
   )
 
   const editorOverrides = useMemo<TLUiOverrides>(
@@ -241,6 +219,17 @@ export function EditorApp() {
 
     try {
       if (current) editor.loadSnapshot(current.document)
+
+      const legacyFrames = editor
+        .getCurrentPageShapes()
+        .filter((shape) => (shape.type as string) === 'sb-frame')
+      if (legacyFrames.length > 0) {
+        editor.deleteShapes(legacyFrames.map((shape) => shape.id))
+        for (const shape of editor.getCurrentPageShapes()) {
+          if (shape.isLocked) editor.updateShape({ ...shape, isLocked: false })
+        }
+      }
+
       editor.updateInstanceState({ isReadonly: false })
       editor.zoomToFit({ animation: { duration: 0 } })
       editor.setCurrentTool('select')
@@ -252,24 +241,21 @@ export function EditorApp() {
     setEditorReady(true)
   }, [])
 
-  async function startPresentation(startShapeId?: string) {
+  async function startPresentation(startFrameId?: string) {
     const editor = editorRef.current
-    if (!editor) return
-    const frames = getFrames(editor)
-    if (frames.length === 0) return
+    if (!editor || directorFrames.length === 0) return
 
     let index = 0
-    if (startShapeId) {
-      const found = frames.findIndex((frame) => frame.id === startShapeId)
+    if (startFrameId) {
+      const found = directorFrames.findIndex((frame) => frame.id === startFrameId)
       if (found >= 0) index = found
     }
 
-    setPresenterMode(true)
+    setDirectorMode(true)
     setEditingFrame(null)
     setContextMenu(null)
     setPresentationMenu(null)
-    setPresentation({ frames, index })
-    editor.selectNone()
+    setPresentation({ frames: directorFrames, index })
 
     try {
       if (!document.fullscreenElement) await appRef.current?.requestFullscreen()
@@ -278,7 +264,7 @@ export function EditorApp() {
     }
 
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-    moveCameraToFrame(editor, frames[index], false)
+    moveCameraToFrame(editor, directorFrames[index], false)
   }
 
   function exitPresentation() {
@@ -324,36 +310,11 @@ export function EditorApp() {
     }
   }, [presentation])
 
-  useEffect(() => {
-    const onEditFrame = (event: Event) => {
-      const detail = (event as CustomEvent<{ shapeId?: string }>).detail
-      const editor = editorRef.current
-      if (!editor || !detail?.shapeId) return
-      const shape = editor.getShape(detail.shapeId as Parameters<Editor['getShape']>[0])
-      if (!shape || shape.type !== SB_FRAME_TYPE) return
-      setEditingFrame(shape as SbFrameShape)
-    }
-    const onPlayFrame = (event: Event) => {
-      const detail = (event as CustomEvent<{ shapeId?: string }>).detail
-      if (detail?.shapeId) void startPresentation(detail.shapeId)
-    }
-
-    window.addEventListener(SUPERBOARD_FRAME_EDIT_EVENT, onEditFrame)
-    window.addEventListener(SUPERBOARD_FRAME_PLAY_EVENT, onPlayFrame)
-    return () => {
-      window.removeEventListener(SUPERBOARD_FRAME_EDIT_EVENT, onEditFrame)
-      window.removeEventListener(SUPERBOARD_FRAME_PLAY_EVENT, onPlayFrame)
-    }
-  }, [])
-
   function handleFrameOrder(value: number) {
-    const editor = editorRef.current
-    if (!editor || !editingFrame) return
-    editor.updateShape<SbFrameShape>({
-      id: editingFrame.id,
-      type: SB_FRAME_TYPE,
-      props: { ...editingFrame.props, order: value },
-    })
+    if (!editingFrame) return
+    updateDirectorFrames(
+      directorFrames.map((frame) => (frame.id === editingFrame.id ? { ...frame, order: value } : frame)),
+    )
     setEditingFrame(null)
   }
 
@@ -570,7 +531,7 @@ export function EditorApp() {
   return (
     <div
       ref={appRef}
-      className={`sb-app sb-app-editor${presenterMode ? ' is-presenter-mode' : ''}${presentation ? ' is-presenting' : ''}`}
+      className={`sb-app sb-app-editor${directorMode ? ' is-director-mode' : ''}${presentation ? ' is-presenting' : ''}`}
     >
       <EditorRail
         treeMode={treeMode}
@@ -588,8 +549,8 @@ export function EditorApp() {
         menuPanelOpen={menuPanelOpen}
         menuPanelLabel={menuPanelLabel}
         onToggleMenuPanel={() => setMenuPanelOpen((open) => !open)}
-        presenterMode={presenterMode}
-        onTogglePresenter={() => setPresenterMode((open) => !open)}
+        directorMode={directorMode}
+        onToggleDirector={() => setDirectorMode((open) => !open)}
         onDeploy={() => setDeployDialogOpen(true)}
       />
 
@@ -618,17 +579,37 @@ export function EditorApp() {
           components={editorComponents}
           overrides={editorOverrides}
           uiState={editorUiState}
+          overlay={
+            directorMode && !presentation && editorReady && editorRef.current ? (
+              <DirectorOverlay
+                editor={editorRef.current}
+                frames={directorFrames}
+                selectedId={selectedFrameId}
+                onSelect={setSelectedFrameId}
+                onChangeFrames={updateDirectorFrames}
+                onEditFrame={setEditingFrame}
+                onPlayFrame={(frame) => void startPresentation(frame.id)}
+              />
+            ) : undefined
+          }
           onMount={handleMount}
         />
       </div>
 
-      {presenterMode && !presentation ? (
-        <div className="sb-presenter-hud">
+      {directorMode && !presentation ? (
+        <div className="sb-director-hud">
           <button className="sb-button sb-button-primary" type="button" onClick={() => void startPresentation()}>
             从头播放
           </button>
-          <button className="sb-button" type="button" onClick={() => setPresenterMode(false)}>
-            退出讲演者
+          <button
+            className="sb-button"
+            type="button"
+            onClick={() => {
+              setDirectorMode(false)
+              setSelectedFrameId(null)
+            }}
+          >
+            退出导演幕布
           </button>
         </div>
       ) : null}
@@ -636,13 +617,9 @@ export function EditorApp() {
       {editingFrame ? (
         <FrameValueDialog
           frame={editingFrame}
-          existingValues={
-            editorRef.current
-              ? getFrames(editorRef.current)
-                  .filter((frame) => frame.id !== editingFrame.id)
-                  .map((frame) => frame.props.order)
-              : []
-          }
+          existingValues={directorFrames
+            .filter((frame) => frame.id !== editingFrame.id)
+            .map((frame) => frame.order)}
           onClose={() => setEditingFrame(null)}
           onSubmit={handleFrameOrder}
         />

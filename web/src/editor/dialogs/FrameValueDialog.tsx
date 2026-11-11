@@ -1,16 +1,16 @@
 import { useState, type FormEvent } from 'react'
-import type { SbFrameShape } from '../../shared/shapes/types'
+import type { DirectorFrame } from '../../shared/board/types'
 import { useDialogEscape } from './useDialogEscape'
 
 interface FrameValueDialogProps {
-  frame: SbFrameShape
+  frame: DirectorFrame
   existingValues: number[]
   onClose: () => void
   onSubmit: (value: number) => void
 }
 
 export function FrameValueDialog({ frame, existingValues, onClose, onSubmit }: FrameValueDialogProps) {
-  const [value, setValue] = useState(String(frame.props.order))
+  const [value, setValue] = useState(String(frame.order))
   const [error, setError] = useState('')
 
   useDialogEscape(false, onClose)

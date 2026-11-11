@@ -9,17 +9,11 @@ import {
   type TLUiContextMenuProps,
 } from 'tldraw'
 import {
-  SB_FRAME_TYPE,
   SB_MEDIA_TYPE,
-  SUPERBOARD_FRAME_EDIT_EVENT,
-  SUPERBOARD_FRAME_PLAY_EVENT,
   SUPERBOARD_MEDIA_EVENT,
-  type SbFrameShape,
   type SbMediaCrop,
   type SbMediaShape,
 } from '../../shared/shapes/types'
-import { createFrameAt } from '../../shared/shapes/frameUtils'
-import { useEditorUiState } from '../editorUiState'
 
 interface SuperboardContextMenuProps extends TLUiContextMenuProps {
   onAddMarkdown: () => void
@@ -32,7 +26,6 @@ export function SuperboardContextMenu({
   ...props
 }: SuperboardContextMenuProps) {
   const editor = useEditor()
-  const { presenterMode } = useEditorUiState()
   const selectedShapes = useValue(
     'superboard context menu selection',
     () => editor.getSelectedShapes(),
@@ -48,16 +41,6 @@ export function SuperboardContextMenu({
     },
     [editor],
   )
-  const frameShape = useValue(
-    'superboard selected frame',
-    () => {
-      const selected = editor.getSelectedShapes()
-      return selected.length === 1 && selected[0].type === SB_FRAME_TYPE
-        ? (selected[0] as SbFrameShape)
-        : null
-    },
-    [editor],
-  )
   const hideConversions =
     selectedShapes.length === 0 || (mediaShape !== null && mediaShape.props.kind !== 'image')
 
@@ -68,45 +51,6 @@ export function SuperboardContextMenu({
       type: SB_MEDIA_TYPE,
       props: { ...mediaShape.props, crop },
     })
-  }
-
-  if (presenterMode) {
-    return (
-      <DefaultContextMenu {...props}>
-        {frameShape ? (
-          <TldrawUiMenuGroup id="superboard-frame">
-            <TldrawUiMenuItem
-              id="superboard-frame-edit"
-              label="编辑帧值"
-              onSelect={() => {
-                window.dispatchEvent(
-                  new CustomEvent(SUPERBOARD_FRAME_EDIT_EVENT, { detail: { shapeId: frameShape.id } }),
-                )
-              }}
-            />
-            <TldrawUiMenuItem
-              id="superboard-frame-play"
-              label="此帧开始播放"
-              onSelect={() => {
-                window.dispatchEvent(
-                  new CustomEvent(SUPERBOARD_FRAME_PLAY_EVENT, { detail: { shapeId: frameShape.id } }),
-                )
-              }}
-            />
-          </TldrawUiMenuGroup>
-        ) : (
-          <TldrawUiMenuGroup id="superboard-frame-add">
-            <TldrawUiMenuItem
-              id="superboard-frame-add-item"
-              label="添加帧"
-              onSelect={() => {
-                createFrameAt(editor, editor.inputs.getCurrentPagePoint())
-              }}
-            />
-          </TldrawUiMenuGroup>
-        )}
-      </DefaultContextMenu>
-    )
   }
 
   return (

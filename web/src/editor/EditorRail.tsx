@@ -24,8 +24,8 @@ interface EditorRailProps {
   menuPanelOpen: boolean
   menuPanelLabel: string
   onToggleMenuPanel: () => void
-  presenterMode: boolean
-  onTogglePresenter: () => void
+  directorMode: boolean
+  onToggleDirector: () => void
   onDeploy: () => void
 }
 
@@ -45,8 +45,8 @@ export function EditorRail({
   menuPanelOpen,
   menuPanelLabel,
   onToggleMenuPanel,
-  presenterMode,
-  onTogglePresenter,
+  directorMode,
+  onToggleDirector,
   onDeploy,
 }: EditorRailProps) {
   return (
@@ -107,12 +107,12 @@ export function EditorRail({
       <button
         type="button"
         className="sb-rail-button"
-        data-tooltip="讲演者模式"
-        aria-label="讲演者模式"
-        aria-pressed={presenterMode}
-        onClick={onTogglePresenter}
+        data-tooltip="导演幕布"
+        aria-label="导演幕布"
+        aria-pressed={directorMode}
+        onClick={onToggleDirector}
       >
-        <UseAnimations animation={film} size={32} interaction="click-toggle" active={presenterMode} />
+        <UseAnimations animation={film} size={32} interaction="click-toggle" active={directorMode} />
       </button>
       <button
         type="button"
