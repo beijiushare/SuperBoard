@@ -50,9 +50,6 @@ export function SuperboardContextMenu({
 
   return (
     <DefaultContextMenu {...props}>
-      <div className={hideConversions ? 'sb-context-menu-filter' : undefined}>
-        <DefaultContextMenuContent />
-      </div>
       {mediaShape ? (
         <TldrawUiMenuGroup id="superboard-media-edit">
           <TldrawUiMenuItem
@@ -102,6 +99,9 @@ export function SuperboardContextMenu({
           onSelect={onAddPele}
         />
       </TldrawUiMenuGroup>
+      <div className={hideConversions ? 'sb-context-menu-filter' : undefined}>
+        <DefaultContextMenuContent />
+      </div>
     </DefaultContextMenu>
   )
 }
