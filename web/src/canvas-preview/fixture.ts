@@ -31,6 +31,34 @@ export const previewCanvas: CanvasDocument = {
       height: 180,
       'x-superboard': { kind: 'shape', shape: 'ellipse' },
     },
+    {
+      id: 'drawing',
+      type: 'group',
+      x: 380,
+      y: 300,
+      width: 260,
+      height: 160,
+      'x-superboard': {
+        kind: 'drawing',
+        strokes: [
+          {
+            id: 'stroke-1',
+            color: '#2f80ed',
+            size: 8,
+            simulatePressure: true,
+            points: [
+              [10, 120, 0.3],
+              [40, 80, 0.5],
+              [80, 40, 0.8],
+              [120, 60, 0.6],
+              [160, 20, 0.9],
+              [200, 70, 0.5],
+              [240, 40, 0.4],
+            ],
+          },
+        ],
+      },
+    },
   ],
   edges: [
     {
