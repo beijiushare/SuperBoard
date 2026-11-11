@@ -11,6 +11,8 @@
     "preview:site": "vite preview --outDir dist",
     "typecheck": "tsc --noEmit",
     "test:model": "tsx scripts/test-canvas-model.ts",
+    "test:migration": "tsx scripts/test-tldraw-migration.ts",
+    "convert:canvas": "tsx scripts/convert-boards.ts",
     "seed": "tsx scripts/seed-board.ts"
   },
   "dependencies": {
