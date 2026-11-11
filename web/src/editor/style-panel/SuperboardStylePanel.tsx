@@ -6,6 +6,7 @@ import {
   type TLUiStylePanelProps,
 } from 'tldraw'
 import { superboardCanvasComponents } from '../../shared/canvas/CanvasBackground'
+import { useEditorUiState } from '../editorUiState'
 import {
   isSuperboardShapeType,
   SB_MEDIA_TYPE,
@@ -37,6 +38,7 @@ function SuperboardBlockStylePanel() {
 }
 
 export function SuperboardStylePanel(props: TLUiStylePanelProps) {
+  const { stylePanelOpen } = useEditorUiState()
   const editor = useEditor()
   const hasCustomShape = useValue(
     'superboard style panel selection',
@@ -48,6 +50,8 @@ export function SuperboardStylePanel(props: TLUiStylePanelProps) {
     () => editor.getSelectedShapes().some((shape) => shape.type === SB_MEDIA_TYPE),
     [editor],
   )
+
+  if (!stylePanelOpen) return null
 
   return (
     <DefaultStylePanel {...props}>

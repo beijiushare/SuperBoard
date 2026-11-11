@@ -1,4 +1,4 @@
-import { StylePanelSection, useEditor, useValue } from 'tldraw'
+import { StylePanelSection, TldrawUiSlider, useEditor, useValue } from 'tldraw'
 import { SB_MEDIA_TYPE, type SbMediaCrop, type SbMediaProps, type SbMediaShape } from '../../shared/shapes/types'
 
 const CROP_LABELS: Record<SbMediaCrop, string> = {
@@ -10,31 +10,29 @@ const CROP_LABELS: Record<SbMediaCrop, string> = {
 function CropSlider({
   label,
   value,
-  min = 0,
   max = 100,
   onChange,
+  onHistoryMark,
 }: {
   label: string
   value: number
-  min?: number
   max?: number
   onChange: (value: number) => void
+  onHistoryMark: (id: string) => void
 }) {
+  const rounded = Math.round(value)
   return (
-    <label className="sb-crop-slider">
-      <span className="sb-crop-slider-head">
-        <span>{label}</span>
-        <b>{Math.round(value)}%</b>
-      </span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={1}
-        value={Math.round(value)}
-        onChange={(event) => onChange(Number(event.target.value))}
+    <div className="sb-block-opacity">
+      <TldrawUiSlider
+        value={rounded}
+        label={`${rounded}%`}
+        title={label}
+        min={0}
+        steps={max}
+        onHistoryMark={onHistoryMark}
+        onValueChange={onChange}
       />
-    </label>
+    </div>
   )
 }
 
@@ -63,27 +61,32 @@ export function MediaCropPanel() {
     })
   }
 
+  function mark() {
+    editor.markHistoryStoppingPoint('media crop')
+  }
+
   return (
     <StylePanelSection>
       <div className="sb-crop-heading">媒体裁剪 · {CROP_LABELS[crop]}</div>
       {crop === 'circle' ? (
         <>
-          <CropSlider label="圆心 X" value={shape.props.cropCx} onChange={(cropCx) => update({ cropCx })} />
-          <CropSlider label="圆心 Y" value={shape.props.cropCy} onChange={(cropCy) => update({ cropCy })} />
-          <CropSlider label="半径" value={shape.props.cropRadius} onChange={(cropRadius) => update({ cropRadius })} />
+          <CropSlider label="圆心 X" value={shape.props.cropCx} onChange={(cropCx) => update({ cropCx })} onHistoryMark={mark} />
+          <CropSlider label="圆心 Y" value={shape.props.cropCy} onChange={(cropCy) => update({ cropCy })} onHistoryMark={mark} />
+          <CropSlider label="半径" value={shape.props.cropRadius} onChange={(cropRadius) => update({ cropRadius })} onHistoryMark={mark} />
         </>
       ) : (
         <>
-          <CropSlider label="起点 X" value={shape.props.cropX} onChange={(cropX) => update({ cropX })} />
-          <CropSlider label="起点 Y" value={shape.props.cropY} onChange={(cropY) => update({ cropY })} />
-          <CropSlider label="宽度" value={shape.props.cropW} onChange={(cropW) => update({ cropW })} />
-          <CropSlider label="高度" value={shape.props.cropH} onChange={(cropH) => update({ cropH })} />
+          <CropSlider label="起点 X" value={shape.props.cropX} onChange={(cropX) => update({ cropX })} onHistoryMark={mark} />
+          <CropSlider label="起点 Y" value={shape.props.cropY} onChange={(cropY) => update({ cropY })} onHistoryMark={mark} />
+          <CropSlider label="宽度" value={shape.props.cropW} onChange={(cropW) => update({ cropW })} onHistoryMark={mark} />
+          <CropSlider label="高度" value={shape.props.cropH} onChange={(cropH) => update({ cropH })} onHistoryMark={mark} />
           {crop === 'rounded' ? (
             <CropSlider
               label="圆角"
               value={shape.props.cropCorner}
               max={50}
               onChange={(cropCorner) => update({ cropCorner })}
+              onHistoryMark={mark}
             />
           ) : null}
         </>

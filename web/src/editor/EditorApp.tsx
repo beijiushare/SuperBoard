@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
-import { Tldraw, DefaultMenuPanel, createShapeId, type Editor, type TLShapeId, type TLUiContextMenuProps, type TLUiOverrides } from 'tldraw'
+import { Tldraw, createShapeId, type Editor, type TLShapeId, type TLUiContextMenuProps, type TLUiOverrides } from 'tldraw'
 import UseAnimations from 'react-useanimations'
 import aperture from 'react-useanimations/lib/aperture'
 import checkCircle from 'react-useanimations/lib/checkCircle'
@@ -15,7 +15,9 @@ import { buildBoardTree } from '../shared/board/tree'
 import { useTreeExpansion } from '../shared/board/useTreeExpansion'
 import { SB_MARKDOWN_TYPE, SB_MEDIA_TYPE, SB_PELE_TYPE, SUPERBOARD_MEDIA_EVENT, type SbMediaShape } from '../shared/shapes/types'
 import { superboardShapeUtils } from '../shared/shapes/shapeUtils'
-import { superboardEditorComponents, SuperboardStylePanel } from './style-panel'
+import { superboardEditorComponents } from './style-panel'
+import { SuperboardMenuPanel } from './SuperboardMenuPanel'
+import { EditorUiStateContext } from './editorUiState'
 import { SuperboardContextMenu } from './context-menu'
 import { BoardContextMenu, type BoardContextTarget } from './BoardContextMenu'
 import { BoardDialog, DeleteBoardDialog, DeleteFolderDialog, DeployDialog, RenameFolderDialog, type BoardFormValues } from './dialogs'
@@ -111,8 +113,7 @@ export function EditorApp() {
   const editorComponents = useMemo(
     () => ({
       ...superboardEditorComponents,
-      StylePanel: stylePanelOpen ? SuperboardStylePanel : null,
-      MenuPanel: menuPanelOpen ? DefaultMenuPanel : null,
+      MenuPanel: SuperboardMenuPanel,
       ContextMenu: (props: TLUiContextMenuProps) => (
         <SuperboardContextMenu
           {...props}
@@ -121,7 +122,12 @@ export function EditorApp() {
         />
       ),
     }),
-    [addShape, menuPanelOpen, stylePanelOpen],
+    [addShape],
+  )
+
+  const editorUiState = useMemo(
+    () => ({ stylePanelOpen, menuPanelOpen }),
+    [stylePanelOpen, menuPanelOpen],
   )
 
   const editorOverrides = useMemo<TLUiOverrides>(
@@ -599,14 +605,16 @@ export function EditorApp() {
 
         <main className="sb-canvas">
           {board ? (
-            <Tldraw
-              key={`${scope}:${board.meta.slug}`}
-              shapeUtils={superboardShapeUtils}
-              components={editorComponents}
-              overrides={editorOverrides}
-              licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
-              onMount={handleMount}
-            />
+            <EditorUiStateContext.Provider value={editorUiState}>
+              <Tldraw
+                key={`${scope}:${board.meta.slug}`}
+                shapeUtils={superboardShapeUtils}
+                components={editorComponents}
+                overrides={editorOverrides}
+                licenseKey={import.meta.env.VITE_TLDRAW_LICENSE_KEY || undefined}
+                onMount={handleMount}
+              />
+            </EditorUiStateContext.Provider>
           ) : (
             <div className="sb-canvas-empty">
               <div>
