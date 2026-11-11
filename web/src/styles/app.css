@@ -129,6 +129,14 @@
   cursor: default;
 }
 
+.sb-director-curtain {
+  position: absolute;
+  border: 1px solid rgb(47 128 237 / 30%);
+  border-radius: 10px;
+  background: rgb(47 128 237 / 3%);
+  pointer-events: none;
+}
+
 .sb-director-frame {
   position: absolute;
   border: 2px dashed #2f80ed;

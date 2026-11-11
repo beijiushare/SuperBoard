@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from 'react'
-import { Vec, type Editor } from 'tldraw'
+import type { Editor } from 'tldraw'
 import type { DirectorFrame } from '../shared/board/types'
 
 interface DirectorOverlayProps {
@@ -50,6 +50,22 @@ export function DirectorOverlay({
   }, [editor])
 
   useEffect(() => {
+    const node = overlayRef.current
+    if (!node) return
+
+    const onWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.deltaY < 0) editor.zoomIn(undefined, { force: true })
+      else editor.zoomOut(undefined, { force: true })
+    }
+
+    node.addEventListener('wheel', onWheel, { passive: false })
+    return () => node.removeEventListener('wheel', onWheel)
+  }, [editor])
+
+  useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
       if (menuRef.current?.contains(event.target as Node)) return
       setMenu(null)
@@ -59,11 +75,7 @@ export function DirectorOverlay({
   }, [])
 
   function pagePoint(event: { clientX: number; clientY: number }) {
-    const rect = overlayRef.current?.getBoundingClientRect()
-    return editor.screenToPage({
-      x: event.clientX - (rect?.left ?? 0),
-      y: event.clientY - (rect?.top ?? 0),
-    })
+    return editor.screenToPage({ x: event.clientX, y: event.clientY })
   }
 
   function updateFrame(frame: DirectorFrame) {
@@ -139,6 +151,25 @@ export function DirectorOverlay({
     onSelect(frame.id)
   }
 
+  const zoom = editor.getZoomLevel()
+  const viewport = editor.getViewportScreenBounds()
+  const curtain =
+    frames.length > 0
+      ? (() => {
+          const minX = Math.min(...frames.map((frame) => frame.x))
+          const minY = Math.min(...frames.map((frame) => frame.y))
+          const maxX = Math.max(...frames.map((frame) => frame.x + frame.w))
+          const maxY = Math.max(...frames.map((frame) => frame.y + frame.h))
+          const topLeft = editor.pageToScreen({ x: minX, y: minY })
+          return {
+            left: topLeft.x - viewport.x,
+            top: topLeft.y - viewport.y,
+            width: (maxX - minX) * zoom,
+            height: (maxY - minY) * zoom,
+          }
+        })()
+      : null
+
   return (
     <div
       ref={overlayRef}
@@ -146,32 +177,22 @@ export function DirectorOverlay({
       onPointerDown={() => setMenu(null)}
       onPointerMove={handleMove}
       onPointerUp={endDrag}
-      onWheel={(event) => {
-        if (!event.ctrlKey && !event.metaKey) return
-        event.preventDefault()
-        const rect = overlayRef.current?.getBoundingClientRect()
-        const point = new Vec(
-          event.clientX - (rect?.left ?? 0),
-          event.clientY - (rect?.top ?? 0),
-        )
-        if (event.deltaY < 0) editor.zoomIn(point, { force: true })
-        else editor.zoomOut(point, { force: true })
-      }}
       onContextMenu={(event) => {
         if (event.target === event.currentTarget) handleContextMenu(event, null)
       }}
     >
+      {curtain ? <div className="sb-director-curtain" style={curtain} /> : null}
+
       {frames.map((frame) => {
         const point = editor.pageToScreen({ x: frame.x, y: frame.y })
-        const zoom = editor.getZoomLevel()
         const selected = frame.id === selectedId
         return (
           <div
             key={frame.id}
             className={`sb-director-frame${selected ? ' is-selected' : ''}`}
             style={{
-              left: point.x,
-              top: point.y,
+              left: point.x - viewport.x,
+              top: point.y - viewport.y,
               width: frame.w * zoom,
               height: frame.h * zoom,
             }}
@@ -210,6 +231,17 @@ export function DirectorOverlay({
               </button>
               <button type="button" onClick={() => { setMenu(null); onPlayFrame(menu.frame!) }}>
                 此帧开始播放
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const frame = menu.frame!
+                  setMenu(null)
+                  onChangeFrames(frames.filter((item) => item.id !== frame.id))
+                  onSelect(null)
+                }}
+              >
+                删除帧
               </button>
             </>
           ) : (
