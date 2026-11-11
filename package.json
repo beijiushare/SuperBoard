@@ -10,6 +10,7 @@
     "build:site": "npm run build:viewer && node web/build.js",
     "preview:site": "vite preview --outDir dist",
     "typecheck": "tsc --noEmit",
+    "test:model": "tsx scripts/test-canvas-model.ts",
     "seed": "tsx scripts/seed-board.ts"
   },
   "dependencies": {

@@ -160,12 +160,12 @@ web/src/
 
 ### Phase 1：模型与文件层
 
-- [ ] 定义 JSON Canvas 类型
-- [ ] 定义 `x-superboard` 扩展类型
-- [ ] 实现解析、校验、序列化
+- [x] 定义 JSON Canvas 类型
+- [x] 定义 `x-superboard` 扩展类型
+- [x] 实现解析、校验、序列化
 - [ ] 实现 `.canvas` 文件扫描与 dev API
 - [ ] 保留旧 `.tldr.json` 读取/迁移工具
-- [ ] 添加模型层测试脚本
+- [x] 添加模型层测试脚本
 
 ### Phase 2：查看器
 
