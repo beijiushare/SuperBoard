@@ -171,7 +171,7 @@ web/src/
 ### Phase 2：查看器
 
 - [x] 使用上游 `json-canvas-viewer` 做渲染 spike
-- [ ] 整合/ fork `json-canvas-viewer`
+- [x] 整合/ fork `json-canvas-viewer`
 - [ ] 渲染标准节点和边
 - [ ] 增加 Markdown / Pele / 媒体模块
 - [x] 增加手写渲染

@@ -100,8 +100,7 @@ export class ShapeLayer extends BaseModule {
 
   private readonly draw = () => {
     this.resize()
-    const { offsetX, offsetY, scale, nodeMap, container } = this.dm.data
-    const background = getComputedStyle(container).backgroundColor || '#fafafa'
+    const { offsetX, offsetY, scale, nodeMap } = this.dm.data
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     this.ctx.save()
     this.ctx.translate(offsetX, offsetY)
@@ -117,8 +116,6 @@ export class ShapeLayer extends BaseModule {
 
       this.ctx.save()
       this.ctx.globalAlpha = opacity
-      this.ctx.fillStyle = background
-      this.ctx.fillRect(node.x - 1, node.y - 1, node.width + 2, node.height + 2)
       this.ctx.fillStyle = style.fill && style.fill !== 'none' ? style.fill : 'transparent'
       this.ctx.strokeStyle = style.stroke ?? '#1d1d1d'
       this.ctx.lineWidth = style.strokeWidth ?? 2

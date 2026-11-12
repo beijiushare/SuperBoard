@@ -61,8 +61,11 @@ export default class Renderer extends BaseModule {
 		Object.values(this.DM.data.nodeMap).forEach((item) => {
 			if (this.isOutside(item.box, currentViewport)) return;
 			const node = item.ref;
+			const kind = (node as { 'x-superboard'?: { kind?: string } })['x-superboard']?.kind;
 			if (node.type === 'file') this.drawFile(item);
-			else if (node.type === 'group') this.drawGroup(node, scale);
+			else if (node.type === 'group' && kind !== 'shape' && kind !== 'drawing') {
+				this.drawGroup(node, scale);
+			}
 		});
 		Object.values(this.DM.data.edgeMap).forEach((item) => {
 			if (this.isOutside(item.box, currentViewport)) return;
