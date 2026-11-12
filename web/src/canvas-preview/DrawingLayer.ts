@@ -1,4 +1,4 @@
-import { BaseModule, internal, type BaseArgs } from 'json-canvas-viewer'
+import { BaseModule, internal, type BaseArgs } from '../vendor/json-canvas-viewer/src/index.ts'
 import { getStroke } from 'perfect-freehand'
 import type { SuperBoardStroke } from '../canvas/model'
 

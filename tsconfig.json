@@ -6,6 +6,14 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "$": ["./web/src/vendor/json-canvas-viewer/src/kernel"],
+      "$/*": ["./web/src/vendor/json-canvas-viewer/src/kernel/*"],
+      "@": ["./web/src/vendor/json-canvas-viewer/src"],
+      "@/*": ["./web/src/vendor/json-canvas-viewer/src/*"],
+      "@repo/shared": ["./web/src/vendor/json-canvas-viewer/shared/index.ts"]
+    },
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,

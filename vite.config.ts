@@ -15,6 +15,27 @@ function siteBase(value: string) {
 export default defineConfig(({ command, isPreview }) => ({
   base: command === 'build' || isPreview ? siteBase(process.env.BASE_PATH || '') : '/',
   plugins: [react(), boardFsPlugin(), canvasFsPlugin(), gitDeployPlugin()],
+  resolve: {
+    alias: [
+      { find: '@repo/shared', replacement: resolve(process.cwd(), 'web/src/vendor/json-canvas-viewer/shared/index.ts') },
+      {
+        find: /^\$\//,
+        replacement: resolve(process.cwd(), 'web/src/vendor/json-canvas-viewer/src/kernel') + '/',
+      },
+      {
+        find: '$',
+        replacement: resolve(process.cwd(), 'web/src/vendor/json-canvas-viewer/src/kernel'),
+      },
+      {
+        find: /^@\//,
+        replacement: resolve(process.cwd(), 'web/src/vendor/json-canvas-viewer/src') + '/',
+      },
+      {
+        find: '@',
+        replacement: resolve(process.cwd(), 'web/src/vendor/json-canvas-viewer/src'),
+      },
+    ],
+  },
   optimizeDeps: {
     entries: ['index.html'],
   },

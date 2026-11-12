@@ -1,4 +1,4 @@
-import type { JSONCanvasLinkNode, JSONCanvasTextNode } from 'json-canvas-viewer'
+import type { JSONCanvasLinkNode, JSONCanvasTextNode } from '../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownView } from '../shared/markdown/MarkdownView'
 import { PeleView } from '../shared/pele/PeleView'
 import type { SuperBoardNodeExtension } from '../canvas/model'

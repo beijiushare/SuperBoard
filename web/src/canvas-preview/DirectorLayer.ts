@@ -1,4 +1,4 @@
-import { BaseModule, internal, type BaseArgs } from 'json-canvas-viewer'
+import { BaseModule, internal, type BaseArgs } from '../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasFrame } from '../canvas/model'
 
 type DataManager = {
