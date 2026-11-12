@@ -520,6 +520,22 @@
   background: #fbfaf6;
 }
 
+.canvas-editor-toolbar strong {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.canvas-editor-board-select {
+  max-width: 220px;
+  padding: 5px 8px;
+  border: 1px solid #dedbd2;
+  border-radius: 7px;
+  background: #fff;
+  font-size: 13px;
+}
+
 .canvas-editor-meta {
   color: #8b877d;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

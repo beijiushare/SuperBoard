@@ -53,6 +53,9 @@ type ControllerLike = {
 
 const HISTORY_LIMIT = 100
 const PASTE_OFFSET = 24
+const AUTOSAVE_DELAY = 1200
+
+type SaveState = 'saved' | 'dirty' | 'saving' | 'error'
 
 function readViewport(handle: CanvasViewerHandle | null): Viewport | null {
   try {
@@ -99,7 +102,7 @@ export function CanvasEditorApp() {
   const [tool, setTool] = useState<EditorTool>('select')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [saved, setSaved] = useState(true)
+  const [saveState, setSaveState] = useState<SaveState>('saved')
   const [historyState, setHistoryState] = useState({ canUndo: false, canRedo: false })
   const viewerRef = useRef<CanvasViewerHandle>(null)
   const shiftRef = useRef(false)
@@ -110,6 +113,8 @@ export function CanvasEditorApp() {
   const clipboardRef = useRef<Clipboard | null>(null)
   const pasteCountRef = useRef(0)
   const pendingViewportRef = useRef<Viewport | null>(null)
+  const revisionRef = useRef(0)
+  const savingRef = useRef(false)
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -198,11 +203,16 @@ export function CanvasEditorApp() {
     syncHistoryState()
   }
 
+  function markDirty() {
+    revisionRef.current += 1
+    setSaveState('dirty')
+  }
+
   function applyDocument(next: CanvasDocument, selection: string[] = []) {
     pendingViewportRef.current = readViewport(viewerRef.current)
     setSelectedIds(selection)
     setCanvas(next)
-    setSaved(false)
+    markDirty()
   }
 
   function undo() {
@@ -424,7 +434,7 @@ export function CanvasEditorApp() {
       if (allLocked) delete extension.locked
       else extension.locked = true
     }
-    setSaved(false)
+    markDirty()
     setSelectedIds(allLocked ? [...selectedIds] : [])
   }
 
@@ -434,7 +444,7 @@ export function CanvasEditorApp() {
     if (locked.length === 0) return
     recordHistory()
     for (const node of locked) delete node['x-superboard']?.locked
-    setSaved(false)
+    markDirty()
     setSelectedIds([])
   }
 
@@ -494,6 +504,11 @@ export function CanvasEditorApp() {
       if (target?.closest('input, textarea, select, [contenteditable="true"]')) return
       const mod = event.ctrlKey || event.metaKey
       const key = event.key.toLowerCase()
+      if (mod && key === 's') {
+        event.preventDefault()
+        void save()
+        return
+      }
       if (mod && key === 'z') {
         event.preventDefault()
         if (event.shiftKey) redo()
@@ -574,25 +589,88 @@ export function CanvasEditorApp() {
     return () => window.removeEventListener('keydown', onKeyDown)
   })
 
+  useEffect(() => {
+    if (saveState !== 'dirty') return
+    const timer = window.setTimeout(() => {
+      void save()
+    }, AUTOSAVE_DELAY)
+    return () => window.clearTimeout(timer)
+  }, [saveState, canvas, selectedSlug])
+
+  useEffect(() => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (saveState === 'saved') return
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [saveState])
+
   async function save() {
-    if (!canvas) return
+    if (!canvas || savingRef.current) return
     const meta = canvas['x-superboard']?.meta
     if (!meta) return
     const item = items.find((entry) => entry.slug === selectedSlug)
     if (!item) return
-    const response = await fetch(
-      `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(canvas),
-      },
-    )
-    if (!response.ok) {
-      setError(`保存失败（${response.status}）`)
+    const revision = revisionRef.current
+    savingRef.current = true
+    setSaveState('saving')
+    try {
+      const response = await fetch(
+        `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(canvas),
+        },
+      )
+      if (!response.ok) {
+        setSaveState('error')
+        return
+      }
+      setSaveState(revisionRef.current === revision ? 'saved' : 'dirty')
+    } catch {
+      setSaveState('error')
+    } finally {
+      savingRef.current = false
+    }
+  }
+
+  async function openBoard(slug: string) {
+    if (!slug || slug === selectedSlug) return
+    const item = items.find((entry) => entry.slug === slug)
+    if (!item) return
+    if (savingRef.current) {
+      window.alert('正在保存，请稍候再切换白板。')
       return
     }
-    setSaved(true)
+    if (
+      saveState !== 'saved' &&
+      !window.confirm('当前白板有未保存的修改，切换后会丢失，继续？')
+    ) {
+      return
+    }
+    setLoading(true)
+    try {
+      const response = await fetch(
+        `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}`,
+      )
+      if (!response.ok) throw new Error(`加载失败（${response.status}）`)
+      const next = await parseCanvas(await response.text())
+      historyRef.current = { past: [], future: [] }
+      setHistoryState({ canUndo: false, canRedo: false })
+      clipboardRef.current = null
+      setSelectedIds([])
+      setTool('select')
+      setSelectedSlug(item.slug)
+      setCanvas(next)
+      setSaveState('saved')
+      setLoading(false)
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : String(loadError))
+      setLoading(false)
+    }
   }
 
   if (loading) return <div className="sb-screen-message">正在加载画布…</div>
@@ -624,12 +702,40 @@ export function CanvasEditorApp() {
     return node?.['x-superboard']?.kind === 'group' && !isLocked(node, nodeMap)
   })
   const hasLocked = canvas.nodes.some((node) => isLocked(node, nodeMap))
+  const activeItem = items.find((entry) => entry.slug === selectedSlug)
+  const saveLabel =
+    saveState === 'saving'
+      ? '保存中…'
+      : saveState === 'dirty'
+        ? '保存'
+        : saveState === 'error'
+          ? '重试保存'
+          : '已保存'
 
   return (
     <div className="canvas-editor">
       <header className="canvas-editor-toolbar">
         <strong>{canvas['x-superboard']?.meta.title}</strong>
-        <span className="canvas-editor-meta">{selectedSlug}</span>
+        <select
+          className="canvas-editor-board-select"
+          value={selectedSlug}
+          title="切换白板"
+          onChange={(event) => void openBoard(event.target.value)}
+        >
+          {items.map((item) => (
+            <option key={item.slug} value={item.slug}>
+              {item.title || item.slug}
+              {item.scope === 'private' ? '（私有）' : ''}
+            </option>
+          ))}
+        </select>
+        <span className="canvas-editor-meta">
+          {selectedIds.length > 0
+            ? `已选 ${selectedIds.length} 项`
+            : activeItem?.scope === 'private'
+              ? '私有'
+              : '公开'}
+        </span>
         <div className="canvas-editor-actions">
           <button type="button" onClick={undo} disabled={!historyState.canUndo}>
             撤销
@@ -655,8 +761,13 @@ export function CanvasEditorApp() {
           <button type="button" onClick={unlockAllLocked} disabled={!hasLocked} title="解锁全部锁定元素">
             解锁全部
           </button>
-          <button type="button" onClick={() => void save()} disabled={saved}>
-            {saved ? '已保存' : '保存'}
+          <button
+            type="button"
+            onClick={() => void save()}
+            disabled={saveState === 'saved' || saveState === 'saving'}
+            title="Ctrl+S"
+          >
+            {saveLabel}
           </button>
         </div>
       </header>
@@ -685,7 +796,7 @@ export function CanvasEditorApp() {
           viewerRef={viewerRef}
           selectedIds={selectedIds}
           onSelect={setSelectedIds}
-          onChange={() => setSaved(false)}
+          onChange={markDirty}
           onBeforeChange={recordHistory}
         />
         <CanvasEditorTools
@@ -693,7 +804,7 @@ export function CanvasEditorApp() {
           tool={tool}
           viewerRef={viewerRef}
           onBeforeChange={recordHistory}
-          onChange={() => setSaved(false)}
+          onChange={markDirty}
           onApply={applyDocument}
           onExitTool={() => setTool('select')}
         />
