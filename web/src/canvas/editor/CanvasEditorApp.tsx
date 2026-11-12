@@ -756,6 +756,7 @@ export function CanvasEditorApp() {
     ) {
       return
     }
+    setSaveState('saved')
     setLoading(true)
     try {
       const response = await fetch(

@@ -160,6 +160,15 @@ export function CanvasEditorTools({
   const arrowRef = useRef<ArrowDraft | null>(null)
   const editingRef = useRef<Editing | null>(null)
   const eraserRef = useRef<{ changed: boolean } | null>(null)
+  const panModeRef = useRef(false)
+  const panGestureRef = useRef<{
+    startClientX: number
+    startClientY: number
+    offsetX: number
+    offsetY: number
+    controller: Controller
+    dm: DataManager
+  } | null>(null)
   const [draft, setDraft] = useState<ShapeDraft | null>(null)
   const [arrowDraft, setArrowDraft] = useState<ArrowDraft | null>(null)
   const [editing, setEditing] = useState<Editing | null>(null)
@@ -213,8 +222,28 @@ export function CanvasEditorTools({
     strokeRef.current = null
     arrowRef.current = null
     eraserRef.current = null
+    panGestureRef.current = null
     updateEditing(null)
   }, [tool])
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code !== 'Space' || event.repeat) return
+      const target = event.target as HTMLElement | null
+      if (target?.closest('input, textarea, select, button, [contenteditable="true"]')) return
+      panModeRef.current = true
+      event.preventDefault()
+    }
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.code === 'Space') panModeRef.current = false
+    }
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+    }
+  }, [])
 
   useEffect(() => {
     if (!editing) return
@@ -633,6 +662,21 @@ export function CanvasEditorTools({
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.button === 1 || (event.button === 0 && panModeRef.current)) {
+      const data = internals()
+      if (!data) return
+      panGestureRef.current = {
+        startClientX: event.clientX,
+        startClientY: event.clientY,
+        offsetX: data.dm.data.offsetX,
+        offsetY: data.dm.data.offsetY,
+        controller: data.controller,
+        dm: data.dm,
+      }
+      event.currentTarget.setPointerCapture(event.pointerId)
+      event.preventDefault()
+      return
+    }
     if (event.button !== 0) return
     if (editingRef.current) {
       commitEditing()
@@ -684,6 +728,13 @@ export function CanvasEditorTools({
   }
 
   function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    const pan = panGestureRef.current
+    if (pan) {
+      pan.dm.data.offsetX = pan.offsetX + event.clientX - pan.startClientX
+      pan.dm.data.offsetY = pan.offsetY + event.clientY - pan.startClientY
+      pan.controller.refresh()
+      return
+    }
     if (tool === 'draw' && strokeRef.current) {
       const surface = surfaceRef.current
       if (!surface) return
@@ -713,6 +764,10 @@ export function CanvasEditorTools({
   }
 
   function handlePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    if (panGestureRef.current) {
+      panGestureRef.current = null
+      return
+    }
     if (event.button !== 0) return
     if (tool === 'rect' || tool === 'ellipse' || tool === 'diamond' || tool === 'line') {
       commitShape(tool)
