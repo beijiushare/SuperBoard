@@ -204,8 +204,8 @@ web/src/
 
 ### Phase 5：导出与优化
 
-- [ ] PNG 导出
-- [ ] SVG 导出
+- [x] PNG 导出
+- [x] SVG 导出
 - [ ] 单文件 HTML 导出（后补）
 - [ ] 视口裁剪
 - [ ] 媒体/Markdown 懒加载

@@ -10,6 +10,7 @@ import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasEditorTools } from './CanvasEditorTools'
 import { CanvasStylePanel } from './CanvasStylePanel'
+import { downloadCanvasPng, downloadCanvasSvg } from './export'
 import { TOOL_SHORTCUTS, TOOLS, detectMediaKind, type EditorTool } from './tools'
 import {
   collectBlocks,
@@ -864,6 +865,12 @@ export function CanvasEditorApp() {
           </button>
           <button type="button" onClick={unlockAllLocked} disabled={!hasLocked} title="解锁全部锁定元素">
             解锁全部
+          </button>
+          <button type="button" onClick={() => downloadCanvasSvg(canvas)}>
+            导出 SVG
+          </button>
+          <button type="button" onClick={() => downloadCanvasPng(canvas)}>
+            导出 PNG
           </button>
           <button
             type="button"

@@ -1,0 +1,368 @@
+import { getStroke } from 'perfect-freehand'
+import type {
+  CanvasDocument,
+  CanvasEdge,
+  CanvasNode,
+  SuperBoardStyle,
+} from '../model'
+
+const PADDING = 64
+
+const COLOR_TOKENS: Record<string, string> = {
+  '0': '#ffffff',
+  '1': '#fecaca',
+  '2': '#fed7aa',
+  '3': '#fef08a',
+  '4': '#bbf7d0',
+  '5': '#bfdbfe',
+  '6': '#e9d5ff',
+}
+
+function escapeXml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&apos;')
+}
+
+function svgColor(value: string | undefined, fallback: string) {
+  if (!value) return fallback
+  if (value === 'none' || value === 'transparent') return 'none'
+  if (/^(#|rgb|hsl|oklch|color\()/i.test(value)) return value
+  if (value in COLOR_TOKENS) return COLOR_TOKENS[value]
+  return fallback
+}
+
+function rotationOf(node: CanvasNode) {
+  return node['x-superboard']?.rotation ?? 0
+}
+
+function rotateAttr(node: CanvasNode) {
+  const rotation = rotationOf(node)
+  if (!rotation) return ''
+  const cx = node.x + node.width / 2
+  const cy = node.y + node.height / 2
+  return ` transform="rotate(${rotation} ${cx} ${cy})"`
+}
+
+function wrapLine(line: string, maxChars: number) {
+  if (maxChars <= 0) return [line]
+  const chars = Array.from(line)
+  if (chars.length <= maxChars) return [line]
+  const lines: string[] = []
+  for (let index = 0; index < chars.length; index += maxChars) {
+    lines.push(chars.slice(index, index + maxChars).join(''))
+  }
+  return lines
+}
+
+function markdownToText(source: string) {
+  return source
+    .replace(/```[a-zA-Z]*\n?/g, '')
+    .split('\n')
+    .map((line) =>
+      line
+        .replace(/^#{1,6}\s+/, '')
+        .replace(/^>\s?/, '')
+        .replace(/^[-*]\s+/, '• '),
+    )
+    .join('\n')
+}
+
+interface TextBlock {
+  text: string
+  fontSize: number
+  color: string
+  align: 'left' | 'center' | 'right'
+  fontFamily: string
+  muted?: boolean
+}
+
+function textBlockFor(node: CanvasNode): TextBlock | null {
+  const extension = node['x-superboard']
+  const style: SuperBoardStyle = extension?.style ?? {}
+  const kind = extension?.kind
+  if (node.type === 'text') {
+    if (kind === 'markdown') {
+      return {
+        text: markdownToText(node.text),
+        fontSize: 15,
+        color: '#3f3c35',
+        align: style.textAlign ?? 'left',
+        fontFamily: "'Inter', 'Noto Sans SC', sans-serif",
+      }
+    }
+    if (kind === 'pele') {
+      const code = typeof extension?.code === 'string' ? extension.code : node.text
+      return {
+        text: markdownToText(code),
+        fontSize: 13,
+        color: '#3f3c35',
+        align: 'left',
+        fontFamily: "'JetBrains Mono', 'Consolas', monospace",
+        muted: true,
+      }
+    }
+    return {
+      text: node.text,
+      fontSize: style.fontSize ?? 16,
+      color: svgColor(style.color, '#1d1d1d'),
+      align: style.textAlign ?? 'left',
+      fontFamily: style.fontFamily ?? "'Inter', 'Noto Sans SC', sans-serif",
+    }
+  }
+  if (node.type === 'link') {
+    const media = extension?.media
+    const url = media?.url ?? node.url
+    const label = media ? `媒体（${media.kind}）` : '链接'
+    return {
+      text: `${label}\n${url}`,
+      fontSize: 13,
+      color: '#6b7280',
+      align: 'left',
+      fontFamily: "'JetBrains Mono', 'Consolas', monospace",
+      muted: true,
+    }
+  }
+  return null
+}
+
+function textMarkup(node: CanvasNode) {
+  const block = textBlockFor(node)
+  if (!block) return ''
+  const padding = 16
+  const lineHeight = block.fontSize * 1.45
+  const maxChars = Math.max(1, Math.floor((node.width - padding * 2) / (block.fontSize * 0.62)))
+  const lines = block.text.split('\n').flatMap((line) => wrapLine(line, maxChars))
+  const anchor =
+    block.align === 'center' ? 'middle' : block.align === 'right' ? 'end' : 'start'
+  const x =
+    block.align === 'center'
+      ? node.x + node.width / 2
+      : block.align === 'right'
+        ? node.x + node.width - padding
+        : node.x + padding
+  const startY = node.y + padding + block.fontSize * 0.9
+  const tspans = lines
+    .map(
+      (line, index) =>
+        `<tspan x="${x}" y="${startY + index * lineHeight}">${escapeXml(line) || ' '}</tspan>`,
+    )
+    .join('')
+  const rotation = rotateAttr(node)
+  const fill =
+    COLOR_TOKENS[node.color ?? ''] ?? (block.muted ? '#f6f5f1' : '#ffffff')
+  const background = `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="12" fill="${fill}" stroke="#dedbd2" stroke-width="1"${rotation}/>`
+  return `${background}<g${rotation}><text text-anchor="${anchor}" font-family="${block.fontFamily}" font-size="${block.fontSize}" fill="${block.color}">${tspans}</text></g>`
+}
+
+function shapeMarkup(node: CanvasNode) {
+  const extension = node['x-superboard']
+  if (extension?.kind !== 'shape') return ''
+  const style = extension.style ?? {}
+  const shape = extension.shape ?? 'rect'
+  const fill = svgColor(style.fill, shape === 'line' ? 'none' : '#ffffff')
+  const stroke = svgColor(style.stroke, '#1d1d1d')
+  const strokeWidth = typeof style.strokeWidth === 'number' ? style.strokeWidth : 2
+  const dash = style.strokeDash?.length
+    ? ` stroke-dasharray="${style.strokeDash.join(' ')}"`
+    : ''
+  const opacity = style.opacity ?? 1
+  const rotation = rotateAttr(node)
+  const common = `fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"${dash} opacity="${opacity}"${rotation}`
+  if (shape === 'ellipse') {
+    return `<ellipse cx="${node.x + node.width / 2}" cy="${node.y + node.height / 2}" rx="${Math.abs(node.width / 2)}" ry="${Math.abs(node.height / 2)}" ${common}/>`
+  }
+  if (shape === 'diamond') {
+    const points = [
+      `${node.x + node.width / 2},${node.y}`,
+      `${node.x + node.width},${node.y + node.height / 2}`,
+      `${node.x + node.width / 2},${node.y + node.height}`,
+      `${node.x},${node.y + node.height / 2}`,
+    ].join(' ')
+    return `<polygon points="${points}" ${common}/>`
+  }
+  if (shape === 'line') {
+    const flip = extension.lineFlip
+    const x1 = node.x + (flip?.x ? node.width : 0)
+    const y1 = node.y + (flip?.y ? node.height : 0)
+    const x2 = node.x + (flip?.x ? 0 : node.width)
+    const y2 = node.y + (flip?.y ? 0 : node.height)
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${strokeWidth}"${dash} opacity="${opacity}"${rotation}/>`
+  }
+  const radius = style.cornerRadius ?? 8
+  return `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="${radius}" ${common}/>`
+}
+
+function drawingMarkup(node: CanvasNode) {
+  const extension = node['x-superboard']
+  if (extension?.kind !== 'drawing') return ''
+  const rotation = rotationOf(node)
+  const inner = (extension.strokes ?? [])
+    .map((stroke) => {
+      const outline = getStroke(stroke.points as number[][], {
+        size: stroke.size,
+        thinning: stroke.thinning,
+        smoothing: stroke.smoothing,
+        streamline: stroke.streamline,
+        simulatePressure: stroke.simulatePressure,
+        start: stroke.start === undefined ? undefined : { taper: stroke.start },
+        end: stroke.end === undefined ? undefined : { taper: stroke.end },
+      })
+      if (outline.length < 3) return ''
+      const d = outline
+        .map(([x, y], index) => `${index === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`)
+        .join(' ')
+      return `<path d="${d} Z" fill="${svgColor(stroke.color, '#1d1d1d')}"/>`
+    })
+    .join('')
+  const centerX = node.width / 2
+  const centerY = node.height / 2
+  return `<g transform="translate(${node.x} ${node.y})${rotation ? ` rotate(${rotation} ${centerX} ${centerY})` : ''}">${inner}</g>`
+}
+
+function groupMarkup(node: CanvasNode) {
+  const extension = node['x-superboard']
+  if (extension?.kind !== 'group') return ''
+  const fill = COLOR_TOKENS[node.color ?? '0'] ?? '#ffffff'
+  const label = node.type === 'group' && node.label ? node.label : ''
+  const rotation = rotateAttr(node)
+  const rect = `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="12" fill="${fill}" fill-opacity="0.6" stroke="#d9d5ca" stroke-width="1.5"${rotation}/>`
+  if (!label) return rect
+  const bar = `<text x="${node.x + 8}" y="${node.y - 10}" font-family="'Inter', sans-serif" font-size="14" fill="#6b7280">${escapeXml(label)}</text>`
+  return rect + bar
+}
+
+function nodeMarkup(node: CanvasNode) {
+  const kind = node['x-superboard']?.kind
+  if (kind === 'shape') return shapeMarkup(node)
+  if (kind === 'drawing') return drawingMarkup(node)
+  if (kind === 'group') return groupMarkup(node)
+  return textMarkup(node)
+}
+
+function anchor(node: CanvasNode, side: CanvasEdge['fromSide']) {
+  if (side === 'top') return { x: node.x + node.width / 2, y: node.y }
+  if (side === 'bottom') return { x: node.x + node.width / 2, y: node.y + node.height }
+  if (side === 'left') return { x: node.x, y: node.y + node.height / 2 }
+  if (side === 'right') return { x: node.x + node.width, y: node.y + node.height / 2 }
+  return { x: node.x + node.width / 2, y: node.y + node.height / 2 }
+}
+
+function nearestSide(from: CanvasNode, to: CanvasNode): CanvasEdge['fromSide'] {
+  const dx = to.x + to.width / 2 - (from.x + from.width / 2)
+  const dy = to.y + to.height / 2 - (from.y + from.height / 2)
+  if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? 'right' : 'left'
+  return dy >= 0 ? 'bottom' : 'top'
+}
+
+function opposite(side: CanvasEdge['fromSide']): CanvasEdge['fromSide'] {
+  if (side === 'top') return 'bottom'
+  if (side === 'bottom') return 'top'
+  if (side === 'left') return 'right'
+  return 'left'
+}
+
+function edgeMarkup(edge: CanvasEdge, nodes: Map<string, CanvasNode>) {
+  const from = nodes.get(edge.fromNode)
+  const to = nodes.get(edge.toNode)
+  if (!from || !to) return ''
+  const fromSide = edge.fromSide ?? nearestSide(from, to)
+  const toSide = edge.toSide ?? opposite(fromSide)
+  const start = anchor(from, fromSide)
+  const end = anchor(to, toSide)
+  const color = svgColor(edge.color, '#6b7280')
+  const line = `<line x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" stroke="${color}" stroke-width="1.8"/>`
+  if (edge.toEnd === 'none') return line
+  const angle = Math.atan2(end.y - start.y, end.x - start.x)
+  const length = 12
+  const width = 5
+  const tip = end
+  const left = {
+    x: tip.x - Math.cos(angle) * length - Math.sin(angle) * width,
+    y: tip.y - Math.sin(angle) * length + Math.cos(angle) * width,
+  }
+  const right = {
+    x: tip.x - Math.cos(angle) * length + Math.sin(angle) * width,
+    y: tip.y - Math.sin(angle) * length - Math.cos(angle) * width,
+  }
+  const head = `<polygon points="${tip.x},${tip.y} ${left.x},${left.y} ${right.x},${right.y}" fill="${color}"/>`
+  return line + head
+}
+
+export function buildCanvasSvg(canvas: CanvasDocument) {
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+  for (const node of canvas.nodes) {
+    minX = Math.min(minX, node.x)
+    minY = Math.min(minY, node.y)
+    maxX = Math.max(maxX, node.x + node.width)
+    maxY = Math.max(maxY, node.y + node.height)
+  }
+  if (!Number.isFinite(minX)) {
+    minX = 0
+    minY = 0
+    maxX = 640
+    maxY = 480
+  }
+  const width = Math.max(1, Math.ceil(maxX - minX + PADDING * 2))
+  const height = Math.max(1, Math.ceil(maxY - minY + PADDING * 2))
+  const offsetX = PADDING - minX
+  const offsetY = PADDING - minY
+  const nodes = new Map(canvas.nodes.map((node) => [node.id, node]))
+  const body = [
+    ...canvas.nodes.map(nodeMarkup),
+    ...canvas.edges.map((edge) => edgeMarkup(edge, nodes)),
+  ].join('')
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" fill="#faf9f5"/><g transform="translate(${offsetX} ${offsetY})">${body}</g></svg>`
+}
+
+function filename(canvas: CanvasDocument, extension: string) {
+  const slug = canvas['x-superboard']?.meta.slug || 'superboard'
+  return `${slug}.${extension}`
+}
+
+function download(blob: Blob, name: string) {
+  const url = URL.createObjectURL(blob)
+  const anchorElement = document.createElement('a')
+  anchorElement.href = url
+  anchorElement.download = name
+  anchorElement.click()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+export function downloadCanvasSvg(canvas: CanvasDocument) {
+  const svg = buildCanvasSvg(canvas)
+  download(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), filename(canvas, 'svg'))
+}
+
+export function downloadCanvasPng(canvas: CanvasDocument) {
+  const svg = buildCanvasSvg(canvas)
+  const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const image = new Image()
+  image.onload = () => {
+    const sourceWidth = image.naturalWidth || image.width
+    const sourceHeight = image.naturalHeight || image.height
+    const scale = Math.min(2, 6000 / Math.max(1, sourceWidth, sourceHeight))
+    const canvasElement = document.createElement('canvas')
+    canvasElement.width = Math.max(1, Math.round(sourceWidth * scale))
+    canvasElement.height = Math.max(1, Math.round(sourceHeight * scale))
+    const ctx = canvasElement.getContext('2d')
+    if (ctx) {
+      ctx.fillStyle = '#faf9f5'
+      ctx.fillRect(0, 0, canvasElement.width, canvasElement.height)
+      ctx.drawImage(image, 0, 0, canvasElement.width, canvasElement.height)
+      canvasElement.toBlob((png) => {
+        if (png) download(png, filename(canvas, 'png'))
+      }, 'image/png')
+    }
+    URL.revokeObjectURL(url)
+  }
+  image.onerror = () => URL.revokeObjectURL(url)
+  image.src = url
+}
