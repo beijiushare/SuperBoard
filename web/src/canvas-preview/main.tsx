@@ -1,24 +1,10 @@
 import { useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { JSONCanvasViewerComponent, parser } from '../vendor/json-canvas-viewer/react/index.ts'
-import type { JSONCanvas } from '../vendor/json-canvas-viewer/src/index.ts'
-import type { CanvasFrame } from '../canvas/model'
-import { DirectorLayer } from './DirectorLayer'
-import { DrawingLayer } from './DrawingLayer'
-import { LinkSlot, TextSlot } from './NodeSlots'
-import { ShapeLayer } from './ShapeLayer'
+import { CanvasViewer, type CanvasViewerHandle } from '../canvas/viewer/CanvasViewer'
 import { previewCanvas } from './fixture'
 
-interface ViewerHandle {
-  viewer?: {
-    setDirectorVisible?: (visible: boolean) => void
-    playDirectorFrame?: (frame: CanvasFrame, animate?: boolean) => Promise<void>
-    restoreDirectorCamera?: () => void
-  }
-}
-
 function PreviewApp() {
-  const viewerRef = useRef<ViewerHandle>(null)
+  const viewerRef = useRef<CanvasViewerHandle>(null)
   const [directorOpen, setDirectorOpen] = useState(false)
   const frames = previewCanvas['x-superboard']?.director?.frames ?? []
 
@@ -36,20 +22,15 @@ function PreviewApp() {
     }
   }
 
-  function stopPlayback() {
+  function stopDirector() {
     viewerRef.current?.viewer?.restoreDirectorCamera?.()
   }
 
   return (
     <>
-      <JSONCanvasViewerComponent
+      <CanvasViewer
         ref={viewerRef}
-        canvas={previewCanvas as unknown as JSONCanvas}
-        modules={[ShapeLayer, DrawingLayer, DirectorLayer]}
-        text={({ node }) => <TextSlot node={node} />}
-        link={({ node }) => <LinkSlot node={node} />}
-        options={{ parser }}
-        theme="light"
+        canvas={previewCanvas}
         style={{ height: '100dvh', width: '100vw' }}
       />
       <div className="preview-controls">
@@ -61,7 +42,7 @@ function PreviewApp() {
             <button type="button" onClick={() => void playAll()}>
               从头播放
             </button>
-            <button type="button" onClick={stopPlayback}>
+            <button type="button" onClick={stopDirector}>
               恢复镜头
             </button>
           </>
