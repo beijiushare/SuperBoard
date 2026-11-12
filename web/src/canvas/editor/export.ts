@@ -359,6 +359,76 @@ function download(blob: Blob, name: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
+export function buildCanvasHtml(canvas: CanvasDocument) {
+  const svg = buildCanvasSvg(canvas)
+  const title = escapeXml(canvas['x-superboard']?.meta.title || 'SuperBoard')
+  return `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${title}</title>
+<style>
+html,body{margin:0;height:100%;background:#faf9f5;overflow:hidden;font-family:system-ui,sans-serif}
+#viewport{position:fixed;inset:0;overflow:hidden;touch-action:none;cursor:grab}
+#viewport:active{cursor:grabbing}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#stage svg{display:block}
+#hint{position:fixed;left:12px;bottom:12px;padding:5px 9px;border-radius:7px;background:rgba(255,253,248,.92);color:#6f6d66;font-size:12px;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">${svg}</div></div>
+<div id="hint">滚轮缩放 · 拖动平移</div>
+<script>
+(function(){
+  var viewport=document.getElementById('viewport');
+  var stage=document.getElementById('stage');
+  var svg=stage.querySelector('svg');
+  var scale=1,tx=0,ty=0,drag=null;
+  function apply(){stage.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')';}
+  function fit(){
+    var w=svg.width.baseVal.value||svg.clientWidth||1;
+    var h=svg.height.baseVal.value||svg.clientHeight||1;
+    scale=Math.min(1,(window.innerWidth-80)/w,(window.innerHeight-80)/h);
+    tx=(window.innerWidth-w*scale)/2;
+    ty=(window.innerHeight-h*scale)/2;
+    apply();
+  }
+  function zoom(factor,cx,cy){
+    var next=Math.min(8,Math.max(0.05,scale*factor));
+    var wx=(cx-tx)/scale, wy=(cy-ty)/scale;
+    tx=cx-wx*next; ty=cy-wy*next; scale=next; apply();
+  }
+  viewport.addEventListener('wheel',function(e){
+    e.preventDefault();
+    zoom(e.deltaY<0?1.1:1/1.1,e.clientX,e.clientY);
+  },{passive:false});
+  viewport.addEventListener('pointerdown',function(e){
+    if(e.button!==0)return;
+    drag={x:e.clientX,y:e.clientY,tx:tx,ty:ty};
+    viewport.setPointerCapture(e.pointerId);
+  });
+  viewport.addEventListener('pointermove',function(e){
+    if(!drag)return;
+    tx=drag.tx+e.clientX-drag.x; ty=drag.ty+e.clientY-drag.y; apply();
+  });
+  viewport.addEventListener('pointerup',function(){drag=null;});
+  viewport.addEventListener('pointercancel',function(){drag=null;});
+  viewport.addEventListener('dblclick',fit);
+  fit();
+  window.addEventListener('resize',fit);
+})();
+</script>
+</body>
+</html>`
+}
+
+export function downloadCanvasHtml(canvas: CanvasDocument) {
+  const html = buildCanvasHtml(canvas)
+  download(new Blob([html], { type: 'text/html;charset=utf-8' }), filename(canvas, 'html'))
+}
+
 export function downloadCanvasSvg(canvas: CanvasDocument) {
   const svg = buildCanvasSvg(canvas)
   download(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), filename(canvas, 'svg'))

@@ -42,7 +42,7 @@ import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
 import { CanvasStylePanel } from './CanvasStylePanel'
-import { downloadCanvasPng, downloadCanvasSvg } from './export'
+import { downloadCanvasHtml, downloadCanvasPng, downloadCanvasSvg } from './export'
 import { TOOL_SHORTCUTS, TOOLS, detectMediaKind, type EditorTool } from './tools'
 import {
   collectBlocks,
@@ -1575,6 +1575,13 @@ export function CanvasEditorApp() {
                   </button>
                   <button type="button" onClick={() => downloadCanvasPng(canvas)}>
                     导出 PNG
+                  </button>
+                  <button
+                    type="button"
+                    title="静态 SVG 快照，Markdown/Pele 等富内容会近似导出"
+                    onClick={() => downloadCanvasHtml(canvas)}
+                  >
+                    导出 HTML
                   </button>
                   <button
                     type="button"
