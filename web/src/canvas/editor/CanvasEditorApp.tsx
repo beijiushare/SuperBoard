@@ -39,6 +39,7 @@ import {
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
+import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
 import { CanvasStylePanel } from './CanvasStylePanel'
 import { downloadCanvasPng, downloadCanvasSvg } from './export'
@@ -99,6 +100,7 @@ interface CanvasMenuState {
   worldX: number
   worldY: number
   nodeId: string | null
+  edgeId?: string | null
 }
 
 function readViewport(handle: CanvasViewerHandle | null): Viewport | null {
@@ -165,6 +167,7 @@ export function CanvasEditorApp() {
   const [selectedSlug, setSelectedSlug] = useState('')
   const [canvas, setCanvas] = useState<CanvasDocument | null>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
   const [tool, setTool] = useState<EditorTool>('select')
   const [editRequest, setEditRequest] = useState<{ id: string; nonce: number } | null>(null)
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false)
@@ -343,6 +346,17 @@ export function CanvasEditorApp() {
     return () => container.removeEventListener('dblclick', onDoubleClick)
   }, [canvas])
 
+  useEffect(() => {
+    if (selectedIds.length > 0) setSelectedEdgeId(null)
+  }, [selectedIds])
+
+  useEffect(() => {
+    if (!selectedEdgeId) return
+    if (!canvas?.edges.some((edge) => edge.id === selectedEdgeId)) {
+      setSelectedEdgeId(null)
+    }
+  }, [canvas, selectedEdgeId])
+
   function syncHistoryState() {
     setHistoryState({
       canUndo: historyRef.current.past.length > 0,
@@ -439,13 +453,31 @@ export function CanvasEditorApp() {
       const worldY = (event.clientY - bounds.top - dm.data.offsetY) / dm.data.scale
       event.preventDefault()
       const hit = nodeAtWorldPoint(worldX, worldY)
-      if (hit) setSelectedIds([hit.id])
+      let edgeId: string | null = null
+      if (!hit) {
+        const map = nodeMapOf(canvas.nodes)
+        const tolerance = 10 / dm.data.scale
+        for (const edge of canvas.edges) {
+          if (distanceToEdge(edge, map, worldX, worldY) <= tolerance) {
+            edgeId = edge.id
+            break
+          }
+        }
+      }
+      if (hit) {
+        setSelectedIds([hit.id])
+        setSelectedEdgeId(null)
+      } else if (edgeId) {
+        setSelectedIds([])
+        setSelectedEdgeId(edgeId)
+      }
       setCanvasMenu({
         x: event.clientX,
         y: event.clientY,
         worldX,
         worldY,
         nodeId: hit?.id ?? null,
+        edgeId,
       })
     } catch {
       // ignore
@@ -608,7 +640,17 @@ export function CanvasEditorApp() {
   }
 
   function deleteSelection() {
-    if (!canvas || selectedIds.length === 0) return
+    if (!canvas) return
+    if (selectedEdgeId) {
+      recordHistory()
+      applyDocument({
+        ...canvas,
+        edges: canvas.edges.filter((edge) => edge.id !== selectedEdgeId),
+      })
+      setSelectedEdgeId(null)
+      return
+    }
+    if (selectedIds.length === 0) return
     const map = nodeMapOf(canvas.nodes)
     const selected = new Set(selectedIds)
     const deleted = new Set<string>()
@@ -889,6 +931,7 @@ export function CanvasEditorApp() {
       }
       if (event.key === 'Escape') {
         setSelectedIds([])
+        setSelectedEdgeId(null)
         setTool('select')
       }
     }
@@ -982,6 +1025,7 @@ export function CanvasEditorApp() {
     setHistoryState({ canUndo: false, canRedo: false })
     clipboardRef.current = null
     setSelectedIds([])
+    setSelectedEdgeId(null)
     setTool('select')
     setDirectorMode(false)
     setPresentation(false)
@@ -1519,6 +1563,11 @@ export function CanvasEditorApp() {
                     onChange={markDirty}
                     onBeforeChange={recordHistory}
                     interactive={tool === 'select'}
+                    selectedEdgeId={selectedEdgeId}
+                    onSelectEdge={(id) => {
+                      setSelectedEdgeId(id)
+                      if (id) setSelectedIds([])
+                    }}
                   />
                   <CanvasEditorTools
                     canvas={canvas}
@@ -1535,6 +1584,7 @@ export function CanvasEditorApp() {
                     <CanvasStylePanel
                       canvas={canvas}
                       selectedIds={selectedIds}
+                      selectedEdgeId={selectedEdgeId}
                       onBeforeChange={recordHistory}
                       onApply={applyDocument}
                     />
@@ -1647,6 +1697,20 @@ export function CanvasEditorApp() {
           onPointerDown={(event) => event.stopPropagation()}
           onContextMenu={(event) => event.preventDefault()}
         >
+          {canvasMenu.edgeId ? (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteSelection()
+                  setCanvasMenu(null)
+                }}
+              >
+                删除箭头
+              </button>
+              <div className="sb-canvas-menu-sep" />
+            </>
+          ) : null}
           {menuNode ? (
             <>
               {menuEditable ? (

@@ -35,6 +35,7 @@ export type JSONCanvasEdge = {
 	toNode: string;
 	fromSide: 'right' | 'left' | 'top' | 'bottom';
 	toSide: 'right' | 'left' | 'top' | 'bottom';
+	fromEnd?: 'arrow' | 'none';
 	toEnd?: 'arrow' | 'none';
 	label?: string;
 	styleAttributes?: Record<string, string>;

@@ -200,7 +200,12 @@ export default class Renderer extends BaseModule {
 			endControlY,
 			color.active,
 		);
-		this.drawArrowhead(endX, endY, endControlX, endControlY, color.active);
+		if (edge.toEnd !== 'none') {
+			this.drawArrowhead(endX, endY, endControlX, endControlY, color.active);
+		}
+		if (edge.fromEnd === 'arrow') {
+			this.drawArrowhead(startX, startY, startControlX, startControlY, color.active);
+		}
 		if (edge.label)
 			this.drawEdgeLabel(
 				startX,

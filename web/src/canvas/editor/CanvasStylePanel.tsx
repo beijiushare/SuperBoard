@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type {
   CanvasDocument,
+  CanvasEdge,
   CanvasNode,
   SuperBoardMedia,
   SuperBoardStyle,
@@ -10,9 +11,18 @@ import { collectDescendants } from './hierarchy'
 interface CanvasStylePanelProps {
   canvas: CanvasDocument
   selectedIds: string[]
+  selectedEdgeId?: string | null
   onBeforeChange: () => void
   onApply: (next: CanvasDocument, selection?: string[]) => void
 }
+
+const EDGE_COLORS = [
+  { value: '#6b7280', label: '灰色' },
+  { value: '#1d1d1d', label: '黑色' },
+  { value: '#2f80ed', label: '蓝色' },
+  { value: '#e03131', label: '红色' },
+  { value: '#2f9e44', label: '绿色' },
+]
 
 const FILLS = [
   { value: '#ffffff', label: '白色' },
@@ -108,12 +118,16 @@ function withStyle(node: CanvasNode, patch: Partial<SuperBoardStyle>): CanvasNod
 export function CanvasStylePanel({
   canvas,
   selectedIds,
+  selectedEdgeId = null,
   onBeforeChange,
   onApply,
 }: CanvasStylePanelProps) {
   const selected = new Set(selectedIds)
   const nodes = canvas.nodes.filter((node) => selected.has(node.id))
-  if (nodes.length === 0) return null
+  const edge = selectedEdgeId
+    ? canvas.edges.find((item) => item.id === selectedEdgeId)
+    : undefined
+  if (nodes.length === 0 && !edge) return null
 
   const shapes = nodes.filter((node) => kindOf(node) === 'shape')
   const texts = nodes.filter((node) => node.type === 'text' && (!kindOf(node) || kindOf(node) === 'text'))
@@ -162,6 +176,20 @@ export function CanvasStylePanel({
         height: Math.max(40, Math.round(lines * fontSize * 1.45 + 28)),
       }
     })
+  }
+
+  function updateEdge(patch: Partial<CanvasEdge>) {
+    if (!edge) return
+    onBeforeChange()
+    onApply(
+      {
+        ...canvas,
+        edges: canvas.edges.map((item) =>
+          item.id === edge.id ? { ...item, ...patch } : item,
+        ),
+      },
+      selectedIds,
+    )
   }
 
   function setMediaCrop(patch: Partial<SuperBoardMedia>) {
@@ -273,6 +301,65 @@ export function CanvasStylePanel({
 
   return (
     <aside className="sb-style-panel">
+      {edge ? (
+        <section>
+          <h3>箭头</h3>
+          <div className="sb-style-row">
+            <span>颜色</span>
+            <div className="sb-style-swatches">
+              {EDGE_COLORS.map((item) => (
+                <button
+                  key={item.value}
+                  type="button"
+                  title={item.label}
+                  className={(edge.color ?? '#6b7280') === item.value ? 'is-active' : undefined}
+                  style={{ background: item.value }}
+                  onClick={() => updateEdge({ color: item.value })}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="sb-style-row">
+            <span>终点</span>
+            <div className="sb-style-buttons">
+              <button
+                type="button"
+                className={edge.toEnd !== 'none' ? 'is-active' : undefined}
+                onClick={() => updateEdge({ toEnd: 'arrow' })}
+              >
+                箭头
+              </button>
+              <button
+                type="button"
+                className={edge.toEnd === 'none' ? 'is-active' : undefined}
+                onClick={() => updateEdge({ toEnd: 'none' })}
+              >
+                无
+              </button>
+            </div>
+          </div>
+          <div className="sb-style-row">
+            <span>起点</span>
+            <div className="sb-style-buttons">
+              <button
+                type="button"
+                className={edge.fromEnd === 'arrow' ? 'is-active' : undefined}
+                onClick={() => updateEdge({ fromEnd: 'arrow' })}
+              >
+                箭头
+              </button>
+              <button
+                type="button"
+                className={edge.fromEnd !== 'arrow' ? 'is-active' : undefined}
+                onClick={() => updateEdge({ fromEnd: 'none' })}
+              >
+                无
+              </button>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       {nodes.length >= 2 ? (
         <section>
           <h3>排列</h3>

@@ -8,6 +8,7 @@ import {
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
+import { edgeEndpoints } from './edges'
 import {
   collectDescendants,
   isLocked,
@@ -38,6 +39,8 @@ interface CanvasEditorOverlayProps {
   onChange?: () => void
   onBeforeChange?: () => void
   interactive?: boolean
+  selectedEdgeId?: string | null
+  onSelectEdge?: (id: string | null) => void
 }
 
 interface DragNode {
@@ -111,6 +114,8 @@ export function CanvasEditorOverlay({
   onChange,
   onBeforeChange,
   interactive = true,
+  selectedEdgeId = null,
+  onSelectEdge,
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
   const [marquee, setMarquee] = useState<Marquee | null>(null)
@@ -215,6 +220,7 @@ export function CanvasEditorOverlay({
         width: Math.abs(x - (start.x - bounds.left)),
         height: Math.abs(y - (start.y - bounds.top)),
       }
+      onSelectEdge?.(null)
       const { offsetX, offsetY, scale } = dm.data
       const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
       const map = nodeMapOf(nodes)
@@ -237,7 +243,7 @@ export function CanvasEditorOverlay({
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
     }
-  }, [onSelect, interactive])
+  }, [onSelect, onSelectEdge, interactive])
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
@@ -252,11 +258,12 @@ export function CanvasEditorOverlay({
         return
       }
       onSelect([])
+      onSelectEdge?.(null)
     }
 
     window.addEventListener('click', onClick)
     return () => window.removeEventListener('click', onClick)
-  }, [onSelect])
+  }, [onSelect, onSelectEdge])
 
   function beginMove(event: ReactPointerEvent, node: CanvasNode) {
     if (event.button !== 0) return
@@ -443,6 +450,43 @@ export function CanvasEditorOverlay({
 
   return (
     <div ref={overlayRef} className="sb-editor-overlay" data-tick={tick}>
+      <svg className="sb-editor-edge-layer">
+        {canvas.edges.map((edge) => {
+          const points = edgeEndpoints(edge, map)
+          if (!points) return null
+          const x1 = offsetX + points.start.x * scale
+          const y1 = offsetY + points.start.y * scale
+          const x2 = offsetX + points.end.x * scale
+          const y2 = offsetY + points.end.y * scale
+          return (
+            <g key={edge.id}>
+              <line
+                className="sb-editor-edge-hit"
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                onPointerDown={(event) => {
+                  if (event.button !== 0) return
+                  event.preventDefault()
+                  event.stopPropagation()
+                  onSelect?.([])
+                  onSelectEdge?.(edge.id)
+                }}
+              />
+              {edge.id === selectedEdgeId ? (
+                <line
+                  className="sb-editor-edge-selected"
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                />
+              ) : null}
+            </g>
+          )
+        })}
+      </svg>
       {editable
         .map((node) => (
           <div
