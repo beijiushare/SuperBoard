@@ -37,7 +37,6 @@ jobs:
         env:
           BASE_PATH: /SuperBoard/
           SUPERBOARD_CNAME: ${{ vars.SUPERBOARD_CNAME }}
-          VITE_TLDRAW_LICENSE_KEY: ${{ secrets.TLDRAW_LICENSE_KEY }}
         run: npm run build:site
 
       - name: Setup Pages
