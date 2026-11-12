@@ -1,4 +1,5 @@
 import type { CanvasDocument, CanvasNode, SuperBoardStyle } from '../model'
+import { collectDescendants } from './hierarchy'
 
 interface CanvasStylePanelProps {
   canvas: CanvasDocument
@@ -107,12 +108,124 @@ export function CanvasStylePanel({
     )
   }
 
+  function layoutRoots() {
+    const selectedSet = new Set(nodes.map((node) => node.id))
+    return nodes.filter((node) => {
+      const groupId = node['x-superboard']?.groupId
+      return !groupId || !selectedSet.has(groupId)
+    })
+  }
+
+  function moveBy(moves: Map<string, { dx: number; dy: number }>) {
+    onBeforeChange()
+    onApply(
+      {
+        ...canvas,
+        nodes: canvas.nodes.map((node) => {
+          const move = moves.get(node.id)
+          return move ? { ...node, x: node.x + move.dx, y: node.y + move.dy } : node
+        }),
+      },
+      selectedIds,
+    )
+  }
+
+  function align(mode: 'left' | 'hcenter' | 'right' | 'top' | 'vcenter' | 'bottom') {
+    const roots = layoutRoots()
+    if (roots.length < 2) return
+    const minX = Math.min(...roots.map((node) => node.x))
+    const maxX = Math.max(...roots.map((node) => node.x + node.width))
+    const minY = Math.min(...roots.map((node) => node.y))
+    const maxY = Math.max(...roots.map((node) => node.y + node.height))
+    const moves = new Map<string, { dx: number; dy: number }>()
+    for (const node of roots) {
+      let dx = 0
+      let dy = 0
+      if (mode === 'left') dx = minX - node.x
+      else if (mode === 'right') dx = maxX - (node.x + node.width)
+      else if (mode === 'hcenter') dx = (minX + maxX) / 2 - (node.x + node.width / 2)
+      else if (mode === 'top') dy = minY - node.y
+      else if (mode === 'bottom') dy = maxY - (node.y + node.height)
+      else dy = (minY + maxY) / 2 - (node.y + node.height / 2)
+      if (dx === 0 && dy === 0) continue
+      for (const item of [node, ...collectDescendants(node, canvas.nodes)]) {
+        moves.set(item.id, { dx, dy })
+      }
+    }
+    if (moves.size === 0) return
+    moveBy(moves)
+  }
+
+  function distribute(axis: 'h' | 'v') {
+    const roots = layoutRoots()
+    if (roots.length < 3) return
+    const horizontal = axis === 'h'
+    const sorted = [...roots].sort((a, b) => (horizontal ? a.x - b.x : a.y - b.y))
+    const start = horizontal
+      ? Math.min(...sorted.map((node) => node.x))
+      : Math.min(...sorted.map((node) => node.y))
+    const end = horizontal
+      ? Math.max(...sorted.map((node) => node.x + node.width))
+      : Math.max(...sorted.map((node) => node.y + node.height))
+    const total = sorted.reduce(
+      (sum, node) => sum + (horizontal ? node.width : node.height),
+      0,
+    )
+    const gap = (end - start - total) / (sorted.length - 1)
+    const moves = new Map<string, { dx: number; dy: number }>()
+    let cursor = start
+    for (const node of sorted) {
+      const dx = horizontal ? cursor - node.x : 0
+      const dy = horizontal ? 0 : cursor - node.y
+      if (dx !== 0 || dy !== 0) {
+        for (const item of [node, ...collectDescendants(node, canvas.nodes)]) {
+          moves.set(item.id, { dx, dy })
+        }
+      }
+      cursor += (horizontal ? node.width : node.height) + gap
+    }
+    if (moves.size === 0) return
+    moveBy(moves)
+  }
+
   const firstShape = shapes[0]
   const firstText = texts[0]
   const firstBlock = blocks[0]
 
   return (
     <aside className="sb-style-panel">
+      {nodes.length >= 2 ? (
+        <section>
+          <h3>排列</h3>
+          <div className="sb-style-buttons">
+            <button type="button" onClick={() => align('left')}>
+              左对齐
+            </button>
+            <button type="button" onClick={() => align('hcenter')}>
+              水平居中
+            </button>
+            <button type="button" onClick={() => align('right')}>
+              右对齐
+            </button>
+            <button type="button" onClick={() => align('top')}>
+              顶部
+            </button>
+            <button type="button" onClick={() => align('vcenter')}>
+              垂直居中
+            </button>
+            <button type="button" onClick={() => align('bottom')}>
+              底部
+            </button>
+            <button type="button" onClick={() => distribute('h')}>
+              横向分布
+            </button>
+            <button type="button" onClick={() => distribute('v')}>
+              纵向分布
+            </button>
+          </div>
+        </section>
+      ) : null}
+
       {shapes.length > 0 ? (
         <section>
           <h3>形状</h3>
