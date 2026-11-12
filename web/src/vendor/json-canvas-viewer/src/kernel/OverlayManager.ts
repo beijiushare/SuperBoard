@@ -234,6 +234,19 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 	private readonly updateOverlays = () => {
 		const data = this.DM.data;
 		this.overlaysLayer.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) scale(${data.scale})`;
+		Object.entries(this.overlays).forEach(([id, element]) => {
+			const item = data.nodeMap[id];
+			if (!item) return;
+			const node = item.ref;
+			element.style.left = `${node.x}px`;
+			element.style.top = `${node.y}px`;
+			element.style.width = `${node.width}px`;
+			element.style.height = `${node.height}px`;
+			const rotation = (node as { 'x-superboard'?: { rotation?: number } })['x-superboard']
+				?.rotation;
+			element.style.transformOrigin = 'center center';
+			element.style.transform = rotation ? `rotate(${rotation}deg)` : '';
+		});
 	};
 
 	private readonly createOverlay = (...args: CreateOverlayArgs) => {

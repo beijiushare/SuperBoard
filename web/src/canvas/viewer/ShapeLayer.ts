@@ -116,6 +116,14 @@ export class ShapeLayer extends BaseModule {
 
       this.ctx.save()
       this.ctx.globalAlpha = opacity
+      const rotation = ext.rotation ?? 0
+      if (rotation) {
+        const centerX = node.x + node.width / 2
+        const centerY = node.y + node.height / 2
+        this.ctx.translate(centerX, centerY)
+        this.ctx.rotate((rotation * Math.PI) / 180)
+        this.ctx.translate(-centerX, -centerY)
+      }
       this.ctx.fillStyle = style.fill && style.fill !== 'none' ? style.fill : 'transparent'
       this.ctx.strokeStyle = style.stroke ?? '#1d1d1d'
       this.ctx.lineWidth = style.strokeWidth ?? 2

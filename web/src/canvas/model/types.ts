@@ -141,6 +141,7 @@ export interface SuperBoardStroke {
 
 export interface SuperBoardNodeExtension {
   kind: SuperBoardNodeKind
+  rotation?: number
   style?: SuperBoardStyle
   shape?: SuperBoardShapeKind
   media?: SuperBoardMedia

@@ -8,7 +8,18 @@ type DataManager = {
     offsetX: number
     offsetY: number
     scale: number
-    nodeMap: Record<string, { ref: { x: number; y: number; 'x-superboard'?: { strokes?: SuperBoardStroke[] } } }>
+    nodeMap: Record<
+      string,
+      {
+        ref: {
+          x: number
+          y: number
+          width: number
+          height: number
+          'x-superboard'?: { strokes?: SuperBoardStroke[]; rotation?: number }
+        }
+      }
+    >
   }
 }
 
@@ -74,9 +85,17 @@ export class DrawingLayer extends BaseModule {
     this.ctx.scale(scale, scale)
     for (const item of Object.values(nodeMap)) {
       const node = item.ref
+      const rotation = node['x-superboard']?.rotation ?? 0
       const strokes = node['x-superboard']?.strokes
       if (!strokes?.length) continue
       this.ctx.save()
+      if (rotation) {
+        const centerX = node.x + node.width / 2
+        const centerY = node.y + node.height / 2
+        this.ctx.translate(centerX, centerY)
+        this.ctx.rotate((rotation * Math.PI) / 180)
+        this.ctx.translate(-centerX, -centerY)
+      }
       this.ctx.translate(node.x, node.y)
       for (const stroke of strokes) {
         const outline = getStroke(

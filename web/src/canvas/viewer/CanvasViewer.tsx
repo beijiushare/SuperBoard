@@ -1,8 +1,11 @@
-import { forwardRef, type CSSProperties } from 'react'
+import { forwardRef, useCallback, useMemo, type CSSProperties } from 'react'
 import {
   JSONCanvasViewerComponent,
   parser,
+  type Hook,
   type JSONCanvas,
+  type JSONCanvasLinkNode,
+  type JSONCanvasTextNode,
 } from '../../vendor/json-canvas-viewer/react/index.ts'
 import type { CanvasDocument, CanvasFrame } from '../model'
 import { DirectorLayer } from './DirectorLayer'
@@ -30,18 +33,28 @@ interface CanvasViewerProps {
 
 export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
   function CanvasViewer({ canvas, theme = 'light', className, style, onNodeSelect }, ref) {
+    const options = useMemo(() => ({ parser }), [])
+    const renderText = useCallback(
+      ({ node, onActive }: { node: JSONCanvasTextNode; onActive: Hook }) => (
+        <TextSlot node={node} onActive={onActive} onSelect={onNodeSelect} />
+      ),
+      [onNodeSelect],
+    )
+    const renderLink = useCallback(
+      ({ node, onActive }: { node: JSONCanvasLinkNode; onActive: Hook }) => (
+        <LinkSlot node={node} onActive={onActive} onSelect={onNodeSelect} />
+      ),
+      [onNodeSelect],
+    )
+
     return (
       <JSONCanvasViewerComponent
         ref={ref}
         canvas={canvas as unknown as JSONCanvas}
         modules={modules}
-        text={({ node, onActive }) => (
-          <TextSlot node={node} onActive={onActive} onSelect={onNodeSelect} />
-        )}
-        link={({ node, onActive }) => (
-          <LinkSlot node={node} onActive={onActive} onSelect={onNodeSelect} />
-        )}
-        options={{ parser }}
+        text={renderText}
+        link={renderLink}
+        options={options}
         theme={theme}
         className={className}
         style={style}
