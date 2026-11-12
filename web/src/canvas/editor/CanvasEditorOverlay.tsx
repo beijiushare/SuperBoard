@@ -8,7 +8,7 @@ import {
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
-import { edgeEndpoints } from './edges'
+import { edgePath } from './edges'
 import {
   collectDescendants,
   isInsideGroup,
@@ -480,41 +480,35 @@ export function CanvasEditorOverlay({
   return (
     <div ref={overlayRef} className="sb-editor-overlay" data-tick={tick}>
       <svg className="sb-editor-edge-layer">
-        {canvas.edges.map((edge) => {
-          const points = edgeEndpoints(edge, map)
-          if (!points) return null
-          const x1 = offsetX + points.start.x * scale
-          const y1 = offsetY + points.start.y * scale
-          const x2 = offsetX + points.end.x * scale
-          const y2 = offsetY + points.end.y * scale
-          return (
-            <g key={edge.id}>
-              <line
-                className="sb-editor-edge-hit"
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                onPointerDown={(event) => {
-                  if (event.button !== 0) return
-                  event.preventDefault()
-                  event.stopPropagation()
-                  onSelect?.([])
-                  onSelectEdge?.(edge.id)
-                }}
-              />
-              {edge.id === selectedEdgeId ? (
-                <line
-                  className="sb-editor-edge-selected"
-                  x1={x1}
-                  y1={y1}
-                  x2={x2}
-                  y2={y2}
+        <g transform={`translate(${offsetX} ${offsetY}) scale(${scale})`}>
+          {canvas.edges.map((edge) => {
+            const path = edgePath(edge, map)
+            if (!path) return null
+            return (
+              <g key={edge.id}>
+                <path
+                  className="sb-editor-edge-hit"
+                  d={path}
+                  vectorEffect="non-scaling-stroke"
+                  onPointerDown={(event) => {
+                    if (event.button !== 0) return
+                    event.preventDefault()
+                    event.stopPropagation()
+                    onSelect?.([])
+                    onSelectEdge?.(edge.id)
+                  }}
                 />
-              ) : null}
-            </g>
-          )
-        })}
+                {edge.id === selectedEdgeId ? (
+                  <path
+                    className="sb-editor-edge-selected"
+                    d={path}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ) : null}
+              </g>
+            )
+          })}
+        </g>
       </svg>
       {focusedNode ? (
         <div

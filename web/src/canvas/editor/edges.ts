@@ -24,7 +24,32 @@ function opposite(side: CanvasSide): CanvasSide {
   return 'left'
 }
 
-export function edgeEndpoints(
+function controlPoints(
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+  fromSide: CanvasSide,
+  toSide: CanvasSide,
+) {
+  const distanceX = end.x - start.x
+  const distanceY = end.y - start.y
+  const realDistance =
+    Math.min(Math.abs(distanceX), Math.abs(distanceY)) +
+    0.3 * Math.max(Math.abs(distanceX), Math.abs(distanceY))
+  const padding = Math.max(60, Math.min(300, realDistance * 0.5))
+  const controlA = { ...start }
+  const controlB = { ...end }
+  if (fromSide === 'top') controlA.y -= padding
+  else if (fromSide === 'bottom') controlA.y += padding
+  else if (fromSide === 'left') controlA.x -= padding
+  else controlA.x += padding
+  if (toSide === 'top') controlB.y -= padding
+  else if (toSide === 'bottom') controlB.y += padding
+  else if (toSide === 'left') controlB.x -= padding
+  else controlB.x += padding
+  return { controlA, controlB }
+}
+
+export function edgeGeometry(
   edge: CanvasEdge,
   nodes: Map<string, CanvasNode>,
 ) {
@@ -33,7 +58,19 @@ export function edgeEndpoints(
   if (!from || !to) return null
   const fromSide = edge.fromSide ?? nearestSide(from, to)
   const toSide = edge.toSide ?? opposite(fromSide)
-  return { start: anchor(from, fromSide), end: anchor(to, toSide) }
+  const start = anchor(from, fromSide)
+  const end = anchor(to, toSide)
+  return { start, end, ...controlPoints(start, end, fromSide, toSide) }
+}
+
+export function edgePath(
+  edge: CanvasEdge,
+  nodes: Map<string, CanvasNode>,
+) {
+  const geometry = edgeGeometry(edge, nodes)
+  if (!geometry) return null
+  const { start, end, controlA, controlB } = geometry
+  return `M ${start.x} ${start.y} C ${controlA.x} ${controlA.y} ${controlB.x} ${controlB.y} ${end.x} ${end.y}`
 }
 
 export function distanceToEdge(
@@ -42,18 +79,41 @@ export function distanceToEdge(
   x: number,
   y: number,
 ) {
-  const points = edgeEndpoints(edge, nodes)
-  if (!points) return Infinity
-  const dx = points.end.x - points.start.x
-  const dy = points.end.y - points.start.y
-  const lengthSquared = dx * dx + dy * dy
-  if (lengthSquared === 0) {
-    return Math.hypot(x - points.start.x, y - points.start.y)
+  const geometry = edgeGeometry(edge, nodes)
+  if (!geometry) return Infinity
+  const { start, end, controlA, controlB } = geometry
+  let best = Infinity
+  let previous = start
+  for (let index = 1; index <= 24; index += 1) {
+    const t = index / 24
+    const inverse = 1 - t
+    const point = {
+      x:
+        inverse ** 3 * start.x +
+        3 * inverse ** 2 * t * controlA.x +
+        3 * inverse * t ** 2 * controlB.x +
+        t ** 3 * end.x,
+      y:
+        inverse ** 3 * start.y +
+        3 * inverse ** 2 * t * controlA.y +
+        3 * inverse * t ** 2 * controlB.y +
+        t ** 3 * end.y,
+    }
+    const dx = point.x - previous.x
+    const dy = point.y - previous.y
+    const lengthSquared = dx * dx + dy * dy
+    let segmentT = 0
+    if (lengthSquared > 0) {
+      segmentT =
+        ((x - previous.x) * dx + (y - previous.y) * dy) / lengthSquared
+      segmentT = Math.max(0, Math.min(1, segmentT))
+    }
+    const distance = Math.hypot(
+      x - (previous.x + segmentT * dx),
+      y - (previous.y + segmentT * dy),
+    )
+    best = Math.min(best, distance)
+    previous = point
   }
-  let t = ((x - points.start.x) * dx + (y - points.start.y) * dy) / lengthSquared
-  t = Math.max(0, Math.min(1, t))
-  return Math.hypot(
-    x - (points.start.x + t * dx),
-    y - (points.start.y + t * dy),
-  )
+  return best
 }

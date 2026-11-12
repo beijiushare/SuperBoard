@@ -5,6 +5,7 @@ import type {
   CanvasNode,
   SuperBoardStyle,
 } from '../model'
+import { edgeGeometry } from './edges'
 
 const PADDING = 64
 
@@ -265,21 +266,14 @@ function opposite(side: CanvasEdge['fromSide']): CanvasEdge['fromSide'] {
   return 'left'
 }
 
-function edgeMarkup(edge: CanvasEdge, nodes: Map<string, CanvasNode>) {
-  const from = nodes.get(edge.fromNode)
-  const to = nodes.get(edge.toNode)
-  if (!from || !to) return ''
-  const fromSide = edge.fromSide ?? nearestSide(from, to)
-  const toSide = edge.toSide ?? opposite(fromSide)
-  const start = anchor(from, fromSide)
-  const end = anchor(to, toSide)
-  const color = svgColor(edge.color, '#6b7280')
-  const line = `<line x1="${start.x}" y1="${start.y}" x2="${end.x}" y2="${end.y}" stroke="${color}" stroke-width="1.8"/>`
-  if (edge.toEnd === 'none') return line
-  const angle = Math.atan2(end.y - start.y, end.x - start.x)
+function arrowHead(
+  tip: { x: number; y: number },
+  from: { x: number; y: number },
+  color: string,
+) {
+  const angle = Math.atan2(tip.y - from.y, tip.x - from.x)
   const length = 12
   const width = 5
-  const tip = end
   const left = {
     x: tip.x - Math.cos(angle) * length - Math.sin(angle) * width,
     y: tip.y - Math.sin(angle) * length + Math.cos(angle) * width,
@@ -288,8 +282,19 @@ function edgeMarkup(edge: CanvasEdge, nodes: Map<string, CanvasNode>) {
     x: tip.x - Math.cos(angle) * length + Math.sin(angle) * width,
     y: tip.y - Math.sin(angle) * length - Math.cos(angle) * width,
   }
-  const head = `<polygon points="${tip.x},${tip.y} ${left.x},${left.y} ${right.x},${right.y}" fill="${color}"/>`
-  return line + head
+  return `<polygon points="${tip.x},${tip.y} ${left.x},${left.y} ${right.x},${right.y}" fill="${color}"/>`
+}
+
+function edgeMarkup(edge: CanvasEdge, nodes: Map<string, CanvasNode>) {
+  const geometry = edgeGeometry(edge, nodes)
+  if (!geometry) return ''
+  const { start, end, controlA, controlB } = geometry
+  const color = svgColor(edge.color, '#6b7280')
+  const line = `<path d="M ${start.x} ${start.y} C ${controlA.x} ${controlA.y} ${controlB.x} ${controlB.y} ${end.x} ${end.y}" fill="none" stroke="${color}" stroke-width="1.8"/>`
+  let markup = line
+  if (edge.toEnd !== 'none') markup += arrowHead(end, controlB, color)
+  if (edge.fromEnd === 'arrow') markup += arrowHead(start, controlA, color)
+  return markup
 }
 
 export function buildCanvasSvg(canvas: CanvasDocument) {
