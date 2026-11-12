@@ -548,6 +548,24 @@ export function CanvasEditorOverlay({
     setTick((value) => value + 1)
   }
 
+  function reflowTextHeight(node: CanvasNode) {
+    if (node.type !== 'text') return
+    const kind = node['x-superboard']?.kind
+    if (kind && kind !== 'text') return
+    const fontSize = node['x-superboard']?.style?.fontSize ?? 16
+    const charsPerLine = Math.max(
+      1,
+      Math.floor((node.width - 32) / (fontSize * 0.62)),
+    )
+    const lines = node.text
+      .split('\n')
+      .reduce(
+        (sum, line) => sum + Math.max(1, Math.ceil(Array.from(line).length / charsPerLine)),
+        0,
+      )
+    node.height = Math.max(40, Math.round(lines * fontSize * 1.45 + 28))
+  }
+
   function movePointer(event: ReactPointerEvent) {
     if (edgeDragRef.current) {
       const point = edgeWorldPoint(event)
@@ -720,6 +738,7 @@ export function CanvasEditorOverlay({
           item.node.height = Math.max(1, item.startHeight * scaleY)
         }
       }
+      if (drag.nodes.length === 1) reflowTextHeight(drag.primary)
     }
     const dmNow = dmRef.current
     if (focusedGroupId && dmNow) {
