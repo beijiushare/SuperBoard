@@ -1,5 +1,5 @@
-import { getPointsFromDrawSegments } from 'tldraw'
 import type { BoardFile } from '../../shared/board/types'
+import { pointsFromDrawSegments } from './drawPoints'
 import type {
   CanvasDocument,
   CanvasEdge,
@@ -89,7 +89,7 @@ function geometryFromPoints(points: Array<{ x: number; y: number }>) {
 
 function drawStrokes(shape: ShapeRecord): SuperBoardStroke[] {
   const segments = Array.isArray(shape.props.segments) ? shape.props.segments : []
-  const points = getPointsFromDrawSegments(segments, shape.props.scaleX ?? 1, shape.props.scaleY ?? 1)
+  const points = pointsFromDrawSegments(segments, shape.props.scaleX ?? 1, shape.props.scaleY ?? 1)
   if (points.length === 0) return []
 
   return [

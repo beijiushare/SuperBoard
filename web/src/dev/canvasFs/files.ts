@@ -2,7 +2,6 @@ import { createHash } from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { parseCanvas, serializeCanvas, type CanvasDocument, type CanvasMeta } from '../../canvas/model'
-import { convertTldrawBoard } from '../../canvas/migrate/fromTldraw'
 import type { BoardFile, BoardScope } from '../../shared/board/types'
 import { resolveScopeDir } from '../boardFs/paths'
 
@@ -96,6 +95,8 @@ async function scanLegacyFiles(root: string, scope: BoardScope): Promise<Scanned
   }
 
   await visit(dir, '')
+  if (files.length === 0) return []
+  const { convertTldrawBoard } = await import('../../canvas/migrate/fromTldraw')
 
   const canvases: ScannedCanvas[] = []
   for (const item of files) {
