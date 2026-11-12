@@ -48,10 +48,11 @@ import {
   collectBlocks,
   collectDescendants,
   hasSelectedAncestor,
+  isInsideGroup,
   isLocked,
   nextFreeId,
   nodeMapOf,
-  topAncestor,
+  selectableAncestor,
 } from './hierarchy'
 
 interface CanvasListItem extends BoardListItem {
@@ -168,6 +169,7 @@ export function CanvasEditorApp() {
   const [canvas, setCanvas] = useState<CanvasDocument | null>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
+  const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
   const [tool, setTool] = useState<EditorTool>('select')
   const [editRequest, setEditRequest] = useState<{ id: string; nonce: number } | null>(null)
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false)
@@ -251,8 +253,11 @@ export function CanvasEditorApp() {
       const map = nodeMapOf(canvas.nodes)
       const node = map.get(id)
       if (!node) return
-      const target = topAncestor(node, map)
+      const target = selectableAncestor(node, map, focusedGroupId)
       if (isLocked(target, map)) return
+      if (focusedGroupId && !isInsideGroup(node, focusedGroupId, map)) {
+        setFocusedGroupId(null)
+      }
       setSelectedIds((current) => {
         if (!shiftRef.current) return [target.id]
         return current.includes(target.id)
@@ -260,7 +265,7 @@ export function CanvasEditorApp() {
           : [...current, target.id]
       })
     },
-    [canvas],
+    [canvas, focusedGroupId],
   )
 
   useEffect(() => {
@@ -351,6 +356,14 @@ export function CanvasEditorApp() {
   }, [selectedIds])
 
   useEffect(() => {
+    if (!focusedGroupId) return
+    const group = canvas?.nodes.find((node) => node.id === focusedGroupId)
+    if (!group || group['x-superboard']?.kind !== 'group') {
+      setFocusedGroupId(null)
+    }
+  }, [canvas, focusedGroupId])
+
+  useEffect(() => {
     if (!selectedEdgeId) return
     if (!canvas?.edges.some((edge) => edge.id === selectedEdgeId)) {
       setSelectedEdgeId(null)
@@ -412,7 +425,7 @@ export function CanvasEditorApp() {
       const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
       const map = nodeMapOf(nodes)
       for (let index = nodes.length - 1; index >= 0; index -= 1) {
-        const root = topAncestor(nodes[index], map)
+        const root = selectableAncestor(nodes[index], map, focusedGroupId)
         if (isLocked(root, map)) continue
         if (
           x >= root.x &&
@@ -756,6 +769,20 @@ export function CanvasEditorApp() {
     setSelectedIds([...new Set([...remaining, ...released])])
   }
 
+  function enterGroup() {
+    if (!canvas || selectedIds.length !== 1) return
+    const map = nodeMapOf(canvas.nodes)
+    const node = map.get(selectedIds[0])
+    if (!node || node['x-superboard']?.kind !== 'group' || isLocked(node, map)) return
+    const children = canvas.nodes.filter(
+      (item) =>
+        item['x-superboard']?.groupId === node.id && !isLocked(item, map),
+    )
+    setFocusedGroupId(node.id)
+    setSelectedEdgeId(null)
+    setSelectedIds(children.map((item) => item.id))
+  }
+
   function toggleGroup() {
     if (canvas && selectedIds.length === 1) {
       const node = canvas.nodes.find((item) => item.id === selectedIds[0])
@@ -929,6 +956,20 @@ export function CanvasEditorApp() {
         deleteSelection()
         return
       }
+      if (event.key === 'Enter' && !mod && !event.shiftKey) {
+        if (target?.closest('button, a')) return
+        event.preventDefault()
+        enterGroup()
+        return
+      }
+      if (event.key === 'Escape' && focusedGroupId) {
+        event.preventDefault()
+        const group = canvas?.nodes.find((node) => node.id === focusedGroupId)
+        setSelectedIds([focusedGroupId])
+        setSelectedEdgeId(null)
+        setFocusedGroupId(group?.['x-superboard']?.groupId ?? null)
+        return
+      }
       if (event.key === 'Escape') {
         setSelectedIds([])
         setSelectedEdgeId(null)
@@ -1026,6 +1067,7 @@ export function CanvasEditorApp() {
     clipboardRef.current = null
     setSelectedIds([])
     setSelectedEdgeId(null)
+    setFocusedGroupId(null)
     setTool('select')
     setDirectorMode(false)
     setPresentation(false)
@@ -1568,6 +1610,7 @@ export function CanvasEditorApp() {
                       setSelectedEdgeId(id)
                       if (id) setSelectedIds([])
                     }}
+                    focusedGroupId={focusedGroupId}
                   />
                   <CanvasEditorTools
                     canvas={canvas}

@@ -22,6 +22,49 @@ export function topAncestor(node: CanvasNode, map: Map<string, CanvasNode>) {
   return current
 }
 
+export function selectableAncestor(
+  node: CanvasNode,
+  map: Map<string, CanvasNode>,
+  focusGroupId?: string | null,
+) {
+  if (!focusGroupId) return topAncestor(node, map)
+  const chain: CanvasNode[] = []
+  let current = node
+  const seen = new Set<string>()
+  while (!seen.has(current.id)) {
+    seen.add(current.id)
+    chain.push(current)
+    const groupId = groupIdOf(current)
+    if (!groupId) break
+    const parent = map.get(groupId)
+    if (!parent) break
+    current = parent
+  }
+  const focusIndex = chain.findIndex((item) => item.id === focusGroupId)
+  if (focusIndex < 0) return topAncestor(node, map)
+  return chain[Math.max(0, focusIndex - 1)]
+}
+
+export function isInsideGroup(
+  node: CanvasNode,
+  groupId: string,
+  map: Map<string, CanvasNode>,
+) {
+  if (node.id === groupId) return true
+  let current = node
+  const seen = new Set<string>()
+  while (!seen.has(current.id)) {
+    seen.add(current.id)
+    const parentId = groupIdOf(current)
+    if (!parentId) return false
+    if (parentId === groupId) return true
+    const parent = map.get(parentId)
+    if (!parent) return false
+    current = parent
+  }
+  return false
+}
+
 export function isLocked(node: CanvasNode, map?: Map<string, CanvasNode>) {
   if (node['x-superboard']?.locked) return true
   if (!map) return false

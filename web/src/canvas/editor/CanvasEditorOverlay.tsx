@@ -11,9 +11,10 @@ import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { edgeEndpoints } from './edges'
 import {
   collectDescendants,
+  isInsideGroup,
   isLocked,
   nodeMapOf,
-  topAncestor,
+  selectableAncestor,
 } from './hierarchy'
 
 type DataManager = {
@@ -41,6 +42,7 @@ interface CanvasEditorOverlayProps {
   interactive?: boolean
   selectedEdgeId?: string | null
   onSelectEdge?: (id: string | null) => void
+  focusedGroupId?: string | null
 }
 
 interface DragNode {
@@ -116,6 +118,7 @@ export function CanvasEditorOverlay({
   interactive = true,
   selectedEdgeId = null,
   onSelectEdge,
+  focusedGroupId = null,
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
   const [marquee, setMarquee] = useState<Marquee | null>(null)
@@ -224,14 +227,14 @@ export function CanvasEditorOverlay({
       const { offsetX, offsetY, scale } = dm.data
       const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
       const map = nodeMapOf(nodes)
-      const ids: string[] = []
+      const ids = new Set<string>()
       for (const node of nodes) {
-        const groupId = node['x-superboard']?.groupId
-        if (groupId && map.has(groupId)) continue
         if (isLocked(node, map)) continue
-        if (intersects(box, screenRect(node, offsetX, offsetY, scale))) ids.push(node.id)
+        if (focusedGroupId && !isInsideGroup(node, focusedGroupId, map)) continue
+        if (!intersects(box, screenRect(node, offsetX, offsetY, scale))) continue
+        ids.add(selectableAncestor(node, map, focusedGroupId).id)
       }
-      onSelect(ids)
+      onSelect([...ids])
       setMarquee(null)
     }
 
@@ -243,7 +246,7 @@ export function CanvasEditorOverlay({
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
     }
-  }, [onSelect, onSelectEdge, interactive])
+  }, [onSelect, onSelectEdge, interactive, focusedGroupId])
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
@@ -272,7 +275,7 @@ export function CanvasEditorOverlay({
     if (!dm) return
     const allNodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
     const map = nodeMapOf(allNodes)
-    const target = topAncestor(node, map)
+    const target = selectableAncestor(node, map, focusedGroupId)
     if (isLocked(target, map)) return
 
     if (event.shiftKey) {
@@ -326,7 +329,7 @@ export function CanvasEditorOverlay({
     if (!dm) return
     const allNodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
     const map = nodeMapOf(allNodes)
-    const target = topAncestor(node, map)
+    const target = selectableAncestor(node, map, focusedGroupId)
     if (isLocked(target, map)) return
     onSelect([target.id])
     const dragNodes: DragNode[] = [target, ...collectDescendants(target, allNodes)].map((item) => ({
@@ -358,27 +361,36 @@ export function CanvasEditorOverlay({
     const dm = dmRef.current
     const overlay = overlayRef.current
     if (!dm || !overlay || !node['x-superboard']) return
-    if (node['x-superboard'].kind === 'group') return
     const map = nodeMapOf(Object.values(dm.data.nodeMap).map((item) => item.ref))
-    if (isLocked(node, map)) return
-    onSelect([node.id])
+    const target = selectableAncestor(node, map, focusedGroupId)
+    if (!target['x-superboard'] || target['x-superboard'].kind === 'group') return
+    if (isLocked(target, map)) return
+    onSelect([target.id])
     const bounds = overlay.getBoundingClientRect()
     const { offsetX, offsetY, scale } = dm.data
-    const centerX = bounds.left + offsetX + (node.x + node.width / 2) * scale
-    const centerY = bounds.top + offsetY + (node.y + node.height / 2) * scale
+    const centerX = bounds.left + offsetX + (target.x + target.width / 2) * scale
+    const centerY = bounds.top + offsetY + (target.y + target.height / 2) * scale
     dragRef.current = {
       kind: 'rotate',
-      nodes: [{ node, startX: node.x, startY: node.y, startWidth: node.width, startHeight: node.height }],
-      primary: node,
+      nodes: [
+        {
+          node: target,
+          startX: target.x,
+          startY: target.y,
+          startWidth: target.width,
+          startHeight: target.height,
+        },
+      ],
+      primary: target,
       startClientX: event.clientX,
       startClientY: event.clientY,
-      startX: node.x,
-      startY: node.y,
-      startWidth: node.width,
-      startHeight: node.height,
+      startX: target.x,
+      startY: target.y,
+      startWidth: target.width,
+      startHeight: target.height,
       scale,
       startAngle: Math.atan2(event.clientY - centerY, event.clientX - centerX),
-      startRotation: node['x-superboard']?.rotation ?? 0,
+      startRotation: target['x-superboard']?.rotation ?? 0,
     }
     event.currentTarget.setPointerCapture(event.pointerId)
   }
@@ -427,6 +439,22 @@ export function CanvasEditorOverlay({
         item.node.height = Math.max(1, item.startHeight * scaleY)
       }
     }
+    const dmNow = dmRef.current
+    if (focusedGroupId && dmNow) {
+      const allNodes = Object.values(dmNow.data.nodeMap).map((item) => item.ref)
+      const group = dmNow.data.nodeMap[focusedGroupId]?.ref
+      const descendants = group ? collectDescendants(group, allNodes) : []
+      if (group && descendants.length > 0) {
+        const minX = Math.min(...descendants.map((node) => node.x))
+        const minY = Math.min(...descendants.map((node) => node.y))
+        const maxX = Math.max(...descendants.map((node) => node.x + node.width))
+        const maxY = Math.max(...descendants.map((node) => node.y + node.height))
+        group.x = minX
+        group.y = minY
+        group.width = Math.max(1, maxX - minX)
+        group.height = Math.max(1, maxY - minY)
+      }
+    }
     controllerRef.current?.refresh()
     onChange?.()
     setTick((value) => value + 1)
@@ -442,6 +470,7 @@ export function CanvasEditorOverlay({
   const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
   const map = nodeMapOf(nodes)
   const selectedNodes = nodes.filter((node) => selectedIds.includes(node.id))
+  const focusedNode = focusedGroupId ? map.get(focusedGroupId) ?? null : null
   const editable = nodes.filter((node) => {
     const kind = node['x-superboard']?.kind
     if (kind !== 'shape' && kind !== 'drawing' && kind !== 'group') return false
@@ -487,6 +516,12 @@ export function CanvasEditorOverlay({
           )
         })}
       </svg>
+      {focusedNode ? (
+        <div
+          className="sb-editor-group-focus"
+          style={screenStyle(focusedNode, offsetX, offsetY, scale)}
+        />
+      ) : null}
       {editable
         .map((node) => (
           <div
