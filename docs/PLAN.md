@@ -172,12 +172,12 @@ web/src/
 
 - [x] 使用上游 `json-canvas-viewer` 做渲染 spike
 - [x] 整合/ fork `json-canvas-viewer`
-- [ ] 渲染标准节点和边
-- [ ] 增加 Markdown / Pele / 媒体模块
+- [x] 渲染标准节点和边
+- [x] 增加 Markdown / Pele / 媒体模块
 - [x] 增加手写渲染
 - [x] 增加基础形状渲染
 - [x] 增加导演幕布覆盖层和播放
-- [ ] 保留目录抽屉与只读 rail
+- [x] 保留目录抽屉与只读 rail
 
 ### Phase 3：编辑器内核
 
@@ -195,10 +195,10 @@ web/src/
 
 ### Phase 4：迁移与构建
 
-- [ ] 旧白板转换为 `.canvas`
-- [ ] 构建脚本改为 `.canvas`
-- [ ] 静态页面、目录、别名、404
-- [ ] 线上 E2E
+- [x] 旧白板转换为 `.canvas`
+- [x] 构建脚本改为 `.canvas`
+- [x] 静态页面、目录、别名、404
+- [x] 线上 E2E
 - [ ] 编辑器 E2E
 
 ### Phase 5：导出与优化
