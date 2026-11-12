@@ -191,6 +191,29 @@ export function CanvasEditorApp() {
     writeViewport(viewerRef.current, viewport)
   }, [canvas])
 
+  useEffect(() => {
+    const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
+    if (!viewer?.container) return
+    let dm: DataManagerLike
+    try {
+      dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
+    } catch {
+      return
+    }
+    const container = dm.data.container
+    const onDoubleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null
+      const element = target?.closest('.JCV-overlay-container') as HTMLElement | null
+      if (!element?.id) return
+      event.preventDefault()
+      setSelectedIds([element.id])
+      setTool('text')
+      setEditRequest({ id: element.id, nonce: Date.now() })
+    }
+    container.addEventListener('dblclick', onDoubleClick)
+    return () => container.removeEventListener('dblclick', onDoubleClick)
+  }, [canvas])
+
   function syncHistoryState() {
     setHistoryState({
       canUndo: historyRef.current.past.length > 0,

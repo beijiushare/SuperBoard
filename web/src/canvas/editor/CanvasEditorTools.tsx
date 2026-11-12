@@ -18,6 +18,7 @@ type DataManager = {
     offsetY: number
     scale: number
     nodeMap: Record<string, { ref: CanvasNode }>
+    edgeMap: Record<string, { ref: CanvasEdge }>
   }
 }
 
@@ -471,7 +472,24 @@ export function CanvasEditorTools({
       }
       if (hit.size > 0) removals.push({ node, hit })
     }
-    if (removals.length === 0) return
+    const edgeIds = new Set<string>()
+    const edgeTolerance = 8 / dm.data.scale
+    for (const item of Object.values(dm.data.edgeMap ?? {})) {
+      const edge = item.ref
+      const from = dm.data.nodeMap[edge.fromNode]?.ref
+      const to = dm.data.nodeMap[edge.toNode]?.ref
+      if (!from || !to) continue
+      const distance = distanceToSegment(
+        x,
+        y,
+        from.x + from.width / 2,
+        from.y + from.height / 2,
+        to.x + to.width / 2,
+        to.y + to.height / 2,
+      )
+      if (distance <= edgeTolerance) edgeIds.add(edge.id)
+    }
+    if (removals.length === 0 && edgeIds.size === 0) return
     if (!gesture.changed) {
       gesture.changed = true
       onBeforeChange()
@@ -487,10 +505,13 @@ export function CanvasEditorTools({
       if (index >= 0) canvas.nodes.splice(index, 1)
       delete dm.data.nodeMap[removal.node.id]
     }
-    if (removedNodes.size > 0) {
-      canvas.edges = canvas.edges.filter(
-        (edge) => !removedNodes.has(edge.fromNode) && !removedNodes.has(edge.toNode),
-      )
+    const shouldRemoveEdge = (edge: CanvasEdge) =>
+      edgeIds.has(edge.id) ||
+      removedNodes.has(edge.fromNode) ||
+      removedNodes.has(edge.toNode)
+    canvas.edges = canvas.edges.filter((edge) => !shouldRemoveEdge(edge))
+    for (const edge of Object.values(dm.data.edgeMap ?? {})) {
+      if (shouldRemoveEdge(edge.ref)) delete dm.data.edgeMap[edge.ref.id]
     }
     controller.refresh()
     onChange()
