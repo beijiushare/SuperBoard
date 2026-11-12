@@ -721,6 +721,17 @@
   accent-color: #2f80ed;
 }
 
+.sb-style-input,
+.sb-style-select {
+  width: 110px;
+  padding: 3px 6px;
+  border: 1px solid #dedbd2;
+  border-radius: 5px;
+  background: #fff;
+  color: #1f1e1c;
+  font-size: 11px;
+}
+
 .sb-style-value {
   width: 26px;
   color: #8b877d;

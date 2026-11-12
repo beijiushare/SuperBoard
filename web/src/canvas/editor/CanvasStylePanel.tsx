@@ -320,7 +320,7 @@ export function CanvasStylePanel({
             </div>
           </div>
           <div className="sb-style-row">
-            <span>终点</span>
+            <span>终点箭头</span>
             <div className="sb-style-buttons">
               <button
                 type="button"
@@ -339,7 +339,7 @@ export function CanvasStylePanel({
             </div>
           </div>
           <div className="sb-style-row">
-            <span>起点</span>
+            <span>起点箭头</span>
             <div className="sb-style-buttons">
               <button
                 type="button"
@@ -354,6 +354,85 @@ export function CanvasStylePanel({
                 onClick={() => updateEdge({ fromEnd: 'none' })}
               >
                 无
+              </button>
+            </div>
+          </div>
+          <div className="sb-style-row">
+            <span>起点侧</span>
+            <select
+              className="sb-style-select"
+              value={edge.fromSide ?? ''}
+              onChange={(event) =>
+                updateEdge({
+                  fromSide: (event.target.value || undefined) as CanvasEdge['fromSide'],
+                })
+              }
+            >
+              <option value="">自动</option>
+              <option value="top">上</option>
+              <option value="right">右</option>
+              <option value="bottom">下</option>
+              <option value="left">左</option>
+            </select>
+          </div>
+          <div className="sb-style-row">
+            <span>终点侧</span>
+            <select
+              className="sb-style-select"
+              value={edge.toSide ?? ''}
+              onChange={(event) =>
+                updateEdge({
+                  toSide: (event.target.value || undefined) as CanvasEdge['toSide'],
+                })
+              }
+            >
+              <option value="">自动</option>
+              <option value="top">上</option>
+              <option value="right">右</option>
+              <option value="bottom">下</option>
+              <option value="left">左</option>
+            </select>
+          </div>
+          <div className="sb-style-row">
+            <span>标签</span>
+            <input
+              key={`edge-label:${edge.id}:${edge.label ?? ''}`}
+              className="sb-style-input"
+              defaultValue={edge.label ?? ''}
+              placeholder="连线标签"
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.currentTarget.blur()
+                } else if (event.key === 'Escape') {
+                  event.currentTarget.value = edge.label ?? ''
+                  event.currentTarget.blur()
+                }
+              }}
+              onBlur={(event) => {
+                const value = event.currentTarget.value.trim()
+                if (value !== (edge.label ?? '')) {
+                  updateEdge({ label: value || undefined })
+                }
+              }}
+            />
+          </div>
+          <div className="sb-style-row">
+            <span>方向</span>
+            <div className="sb-style-buttons">
+              <button
+                type="button"
+                onClick={() =>
+                  updateEdge({
+                    fromNode: edge.toNode,
+                    toNode: edge.fromNode,
+                    fromSide: edge.toSide,
+                    toSide: edge.fromSide,
+                    fromEnd: edge.toEnd,
+                    toEnd: edge.fromEnd,
+                  })
+                }
+              >
+                反转方向
               </button>
             </div>
           </div>

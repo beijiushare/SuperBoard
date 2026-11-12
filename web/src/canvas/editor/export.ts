@@ -294,6 +294,25 @@ function edgeMarkup(edge: CanvasEdge, nodes: Map<string, CanvasNode>) {
   let markup = line
   if (edge.toEnd !== 'none') markup += arrowHead(end, controlB, color)
   if (edge.fromEnd === 'arrow') markup += arrowHead(start, controlA, color)
+  if (edge.label) {
+    const t = 0.5
+    const inverse = 1 - t
+    const midX =
+      inverse ** 3 * start.x +
+      3 * inverse ** 2 * t * controlA.x +
+      3 * inverse * t ** 2 * controlB.x +
+      t ** 3 * end.x
+    const midY =
+      inverse ** 3 * start.y +
+      3 * inverse ** 2 * t * controlA.y +
+      3 * inverse * t ** 2 * controlB.y +
+      t ** 3 * end.y
+    const text = edge.label.replace(/\n/g, ' ')
+    const width = Math.max(24, Array.from(text).length * 8 + 16)
+    const height = 20
+    markup += `<rect x="${midX - width / 2}" y="${midY - height / 2}" width="${width}" height="${height}" rx="4" fill="${color}"/>`
+    markup += `<text x="${midX}" y="${midY + 4}" text-anchor="middle" font-family="'Inter', 'Noto Sans SC', sans-serif" font-size="12" fill="#fff">${escapeXml(text)}</text>`
+  }
   return markup
 }
 
