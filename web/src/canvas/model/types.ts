@@ -115,6 +115,7 @@ export interface SuperBoardStyle {
 export interface SuperBoardMedia {
   kind: SuperBoardMediaKind
   url: string
+  crop?: 'rect' | 'rounded' | 'circle'
   cropX?: number
   cropY?: number
   cropW?: number

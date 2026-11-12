@@ -1,4 +1,9 @@
-import type { CanvasDocument, CanvasNode, SuperBoardStyle } from '../model'
+import type {
+  CanvasDocument,
+  CanvasNode,
+  SuperBoardMedia,
+  SuperBoardStyle,
+} from '../model'
 import { collectDescendants } from './hierarchy'
 
 interface CanvasStylePanelProps {
@@ -82,6 +87,9 @@ export function CanvasStylePanel({
     const kind = kindOf(node)
     return kind === 'markdown' || kind === 'pele' || kind === 'media'
   })
+  const mediaNodes = nodes.filter(
+    (node) => node['x-superboard']?.kind === 'media' && node['x-superboard']?.media,
+  )
 
   function applyTo(targets: CanvasNode[], change: (node: CanvasNode) => CanvasNode) {
     if (targets.length === 0) return
@@ -98,6 +106,20 @@ export function CanvasStylePanel({
 
   function styleAll(targets: CanvasNode[], patch: Partial<SuperBoardStyle>) {
     applyTo(targets, (node) => withStyle(node, patch))
+  }
+
+  function setMediaCrop(patch: Partial<SuperBoardMedia>) {
+    applyTo(mediaNodes, (node) => {
+      const extension = node['x-superboard']
+      if (!extension?.media) return node
+      return {
+        ...node,
+        'x-superboard': {
+          ...extension,
+          media: { ...extension.media, ...patch },
+        },
+      }
+    })
   }
 
   function setBlockColor(color: string) {
@@ -191,6 +213,7 @@ export function CanvasStylePanel({
   const firstShape = shapes[0]
   const firstText = texts[0]
   const firstBlock = blocks[0]
+  const firstMedia = mediaNodes[0]?.['x-superboard']?.media
 
   return (
     <aside className="sb-style-panel">
@@ -390,6 +413,45 @@ export function CanvasStylePanel({
                 onClick={() => setBlockColor(item.value)}
               />
             ))}
+          </div>
+        </section>
+      ) : null}
+
+      {mediaNodes.length > 0 ? (
+        <section>
+          <h3>媒体裁剪</h3>
+          <div className="sb-style-buttons">
+            {(
+              [
+                ['rect', '矩形'],
+                ['rounded', '圆角'],
+                ['circle', '圆形'],
+              ] as const
+            ).map(([mode, label]) => (
+              <button
+                key={mode}
+                type="button"
+                className={firstMedia?.crop === mode ? 'is-active' : undefined}
+                onClick={() => setMediaCrop({ crop: mode })}
+              >
+                {label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                setMediaCrop({
+                  crop: 'rounded',
+                  cropX: 0,
+                  cropY: 0,
+                  cropW: 100,
+                  cropH: 100,
+                  cropCorner: 8,
+                })
+              }
+            >
+              重置
+            </button>
           </div>
         </section>
       ) : null}
