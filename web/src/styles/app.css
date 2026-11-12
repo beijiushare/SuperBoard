@@ -716,6 +716,48 @@
   color: #fff;
 }
 
+.sb-canvas-context-menu {
+  position: fixed;
+  z-index: 10001;
+  display: flex;
+  min-width: 156px;
+  max-height: calc(100dvh - 24px);
+  flex-direction: column;
+  padding: 4px;
+  overflow-y: auto;
+  border: 1px solid #dedbd2;
+  border-radius: 8px;
+  background: #fffdf8;
+  box-shadow: 0 8px 24px rgb(20 18 10 / 18%);
+}
+
+.sb-canvas-context-menu button {
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #1f1e1c;
+  font-size: 12px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sb-canvas-context-menu button:hover:not(:disabled) {
+  background: #f1eee5;
+}
+
+.sb-canvas-context-menu button:disabled {
+  color: #b8b4a9;
+  cursor: default;
+}
+
+.sb-canvas-menu-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: #e6e2d8;
+}
+
 .canvas-editor-dialog-backdrop {
   position: fixed;
   z-index: 10000;

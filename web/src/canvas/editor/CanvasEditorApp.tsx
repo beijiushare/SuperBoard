@@ -73,7 +73,10 @@ type ViewerInternals = {
 }
 
 type DataManagerLike = {
-  data: Viewport & { container: HTMLDivElement }
+  data: Viewport & {
+    container: HTMLDivElement
+    nodeMap: Record<string, { ref: CanvasNode }>
+  }
 }
 
 type ControllerLike = {
@@ -89,6 +92,14 @@ type SaveState = 'saved' | 'dirty' | 'saving' | 'error'
 type BoardDialogState =
   | { mode: 'create'; folder?: string }
   | { mode: 'rename'; board: BoardListItem }
+
+interface CanvasMenuState {
+  x: number
+  y: number
+  worldX: number
+  worldY: number
+  nodeId: string | null
+}
 
 function readViewport(handle: CanvasViewerHandle | null): Viewport | null {
   try {
@@ -152,6 +163,10 @@ export function CanvasEditorApp() {
   const [editRequest, setEditRequest] = useState<{ id: string; nonce: number } | null>(null)
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false)
   const [mediaUrl, setMediaUrl] = useState('')
+  const [mediaInsertPoint, setMediaInsertPoint] = useState<{ x: number; y: number } | null>(
+    null,
+  )
+  const [canvasMenu, setCanvasMenu] = useState<CanvasMenuState | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [saveState, setSaveState] = useState<SaveState>('saved')
@@ -369,10 +384,77 @@ export function CanvasEditorApp() {
     }
   }
 
-  function insertTextBlock(kind: 'markdown' | 'pele') {
+  function nodeAtWorldPoint(x: number, y: number) {
+    try {
+      const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
+      if (!viewer?.container) return null
+      const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
+      const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
+      const map = nodeMapOf(nodes)
+      for (let index = nodes.length - 1; index >= 0; index -= 1) {
+        const root = topAncestor(nodes[index], map)
+        if (isLocked(root, map)) continue
+        if (
+          x >= root.x &&
+          x <= root.x + root.width &&
+          y >= root.y &&
+          y <= root.y + root.height
+        ) {
+          return root
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return null
+  }
+
+  function openMediaDialog(point?: { x: number; y: number }) {
+    setMediaInsertPoint(point ?? null)
+    setMediaDialogOpen(true)
+  }
+
+  function openCanvasMenu(event: ReactMouseEvent<HTMLDivElement>) {
+    if (!canvas || directorMode) return
+    const target = event.target as HTMLElement
+    if (
+      target.closest(
+        'button, input, textarea, select, .sb-style-panel, .canvas-editor-toolstrip, .sb-director-overlay, .sb-frame-controller, .canvas-editor-toolbar, .JCV-controls, .JCV-minimap-container',
+      )
+    ) {
+      return
+    }
+    try {
+      const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
+      if (!viewer?.container) return
+      const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
+      const bounds = event.currentTarget.getBoundingClientRect()
+      const worldX = (event.clientX - bounds.left - dm.data.offsetX) / dm.data.scale
+      const worldY = (event.clientY - bounds.top - dm.data.offsetY) / dm.data.scale
+      event.preventDefault()
+      const hit = nodeAtWorldPoint(worldX, worldY)
+      if (hit) setSelectedIds([hit.id])
+      setCanvasMenu({
+        x: event.clientX,
+        y: event.clientY,
+        worldX,
+        worldY,
+        nodeId: hit?.id ?? null,
+      })
+    } catch {
+      // ignore
+    }
+  }
+
+  function insertTextBlock(
+    kind: 'markdown' | 'pele',
+    point?: { x: number; y: number },
+  ) {
     if (!canvas) return
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), kind)
-    const position = viewportCenter(360, 220)
+    const position = point
+      ? { x: Math.round(point.x - 180), y: Math.round(point.y - 110) }
+      : viewportCenter(360, 220)
     const code = 'flowchart LR\n    A[开始] --> B[结束]'
     const node: CanvasNode =
       kind === 'markdown'
@@ -407,7 +489,9 @@ export function CanvasEditorApp() {
     const url = mediaUrl.trim()
     if (!url) return
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'media')
-    const position = viewportCenter(480, 320)
+    const position = mediaInsertPoint
+      ? { x: Math.round(mediaInsertPoint.x - 240), y: Math.round(mediaInsertPoint.y - 160) }
+      : viewportCenter(480, 320)
     const node: CanvasNode = {
       id,
       type: 'link',
@@ -425,6 +509,7 @@ export function CanvasEditorApp() {
     applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
     setMediaDialogOpen(false)
     setMediaUrl('')
+    setMediaInsertPoint(null)
   }
 
   function undo() {
@@ -805,6 +890,16 @@ export function CanvasEditorApp() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   })
+
+  useEffect(() => {
+    if (!canvasMenu) return
+    const onPointerDown = (event: PointerEvent) => {
+      if ((event.target as HTMLElement | null)?.closest('.sb-canvas-context-menu')) return
+      setCanvasMenu(null)
+    }
+    window.addEventListener('pointerdown', onPointerDown, true)
+    return () => window.removeEventListener('pointerdown', onPointerDown, true)
+  }, [canvasMenu])
 
   useEffect(() => {
     if (saveState !== 'dirty') return
@@ -1247,6 +1342,17 @@ export function CanvasEditorApp() {
         : saveState === 'saving'
           ? '保存中…'
           : '已保存'
+  const menuNode = canvasMenu?.nodeId ? nodeMap.get(canvasMenu.nodeId) ?? null : null
+  const menuKind = menuNode?.['x-superboard']?.kind
+  const menuEditable = Boolean(
+    menuNode &&
+      ((menuNode.type === 'text' &&
+        (!menuKind ||
+          menuKind === 'text' ||
+          menuKind === 'markdown' ||
+          menuKind === 'pele')) ||
+        (menuNode.type === 'link' && menuKind === 'media')),
+  )
 
   return (
     <div
@@ -1390,7 +1496,7 @@ export function CanvasEditorApp() {
               </header>
             ) : null}
 
-            <div className="canvas-editor-stage">
+            <div className="canvas-editor-stage" onContextMenu={openCanvasMenu}>
               {canvas ? (
                 <>
                   <CanvasViewer
@@ -1492,7 +1598,7 @@ export function CanvasEditorApp() {
                     <button type="button" onClick={() => insertTextBlock('pele')}>
                       插入 Pele
                     </button>
-                    <button type="button" onClick={() => setMediaDialogOpen(true)}>
+                    <button type="button" onClick={() => openMediaDialog()}>
                       插入媒体
                     </button>
                   </div>
@@ -1525,10 +1631,172 @@ export function CanvasEditorApp() {
         />
       ) : null}
 
+      {canvasMenu ? (
+        <div
+          className="sb-canvas-context-menu"
+          style={{
+            left: Math.max(8, Math.min(canvasMenu.x, window.innerWidth - 200)),
+            top: Math.max(8, Math.min(canvasMenu.y, window.innerHeight - 340)),
+          }}
+          onPointerDown={(event) => event.stopPropagation()}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          {menuNode ? (
+            <>
+              {menuEditable ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedIds([menuNode.id])
+                    setTool('text')
+                    setEditRequest({ id: menuNode.id, nonce: Date.now() })
+                    setCanvasMenu(null)
+                  }}
+                >
+                  编辑内容
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => {
+                  copySelection()
+                  setCanvasMenu(null)
+                }}
+              >
+                复制
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  duplicateSelection()
+                  setCanvasMenu(null)
+                }}
+              >
+                创建副本
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteSelection()
+                  setCanvasMenu(null)
+                }}
+              >
+                删除
+              </button>
+              <button
+                type="button"
+                disabled={!canGroup && !canUngroup}
+                onClick={() => {
+                  toggleGroup()
+                  setCanvasMenu(null)
+                }}
+              >
+                {canUngroup ? '解组' : '编组'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  toggleLockSelection()
+                  setCanvasMenu(null)
+                }}
+              >
+                锁定
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  reorderSelection('front')
+                  setCanvasMenu(null)
+                }}
+              >
+                置顶
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  reorderSelection('back')
+                  setCanvasMenu(null)
+                }}
+              >
+                置底
+              </button>
+              <div className="sb-canvas-menu-sep" />
+            </>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => {
+              insertTextBlock('markdown', {
+                x: canvasMenu.worldX,
+                y: canvasMenu.worldY,
+              })
+              setCanvasMenu(null)
+            }}
+          >
+            插入 Markdown
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              insertTextBlock('pele', {
+                x: canvasMenu.worldX,
+                y: canvasMenu.worldY,
+              })
+              setCanvasMenu(null)
+            }}
+          >
+            插入 Pele
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              openMediaDialog({ x: canvasMenu.worldX, y: canvasMenu.worldY })
+              setCanvasMenu(null)
+            }}
+          >
+            插入媒体
+          </button>
+          {clipboardRef.current ? (
+            <button
+              type="button"
+              onClick={() => {
+                pasteClipboard()
+                setCanvasMenu(null)
+              }}
+            >
+              粘贴
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => {
+              selectAllUnlocked()
+              setCanvasMenu(null)
+            }}
+          >
+            全选
+          </button>
+          {hasLocked ? (
+            <button
+              type="button"
+              onClick={() => {
+                unlockAllLocked()
+                setCanvasMenu(null)
+              }}
+            >
+              解锁全部
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
       {mediaDialogOpen ? (
         <div
           className="canvas-editor-dialog-backdrop"
-          onClick={() => setMediaDialogOpen(false)}
+          onClick={() => {
+            setMediaDialogOpen(false)
+            setMediaInsertPoint(null)
+          }}
         >
           <div
             className="canvas-editor-dialog"
@@ -1543,11 +1811,20 @@ export function CanvasEditorApp() {
               onChange={(event) => setMediaUrl(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') insertMedia()
-                if (event.key === 'Escape') setMediaDialogOpen(false)
+                if (event.key === 'Escape') {
+                  setMediaDialogOpen(false)
+                  setMediaInsertPoint(null)
+                }
               }}
             />
             <div className="canvas-editor-dialog-actions">
-              <button type="button" onClick={() => setMediaDialogOpen(false)}>
+              <button
+                type="button"
+                onClick={() => {
+                  setMediaDialogOpen(false)
+                  setMediaInsertPoint(null)
+                }}
+              >
                 取消
               </button>
               <button type="button" onClick={insertMedia} disabled={!mediaUrl.trim()}>
