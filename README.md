@@ -2,10 +2,9 @@
 
 需要注意：这是一个纯粹的个人使用的项目，基本上就是几个项目拼凑起来加一些个性化，可能不维护，可能破坏式更新，请勿将其用于生产环境！
 
-文件驱动的个人白板系统：本地用浏览器编辑，画布保存为 Git 友好的 `.tldr.json`，推送到 GitHub 后自动构建成只读静态站点。
+文件驱动的个人白板系统：本地用浏览器编辑，画布保存为 Git 友好的 `.canvas`（JSON Canvas），推送到 GitHub 后自动构建成只读静态站点。
 
-> **迁移状态**：编辑器、查看器和主数据格式已切换到 JSON Canvas（`.canvas`）+ 自建轻量编辑器 + fork 查看器。
-> 旧 `.tldr.json` 仍可读取，首次保存时会生成对应的 `.canvas`。
+> 编辑器、查看器和数据格式统一使用 JSON Canvas（`.canvas`）+ 自建轻量编辑器 + fork 查看器。
 > 目标、格式和阶段见 [`docs/PLAN.md`](docs/PLAN.md)，目标架构见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)。
 
 - 一个白板一个文件，无数据库、无后端存储
@@ -29,11 +28,7 @@ npm run dev
 
 ```bash
 npm run test:model
-npm run test:migration
-npm run convert:canvas
 ```
-
-`convert:canvas` 把 `whiteboards/public` 的旧 `.tldr.json` 转换到 `.preview/canvas/`，不会修改原文件。
 
 ## 命令
 
@@ -77,12 +72,15 @@ npm run preview:site
 whiteboards/public/   公开白板，提交 Git，参与构建
 whiteboards/private/  私有白板，本地专用，已被 .gitignore
 web/src/shared/       编辑器与只读端共用代码，含 rail、目录、导演幕布与播放逻辑
-web/src/editor/       本地编辑器
-web/src/viewer/       只读页面入口，复用编辑器外壳
-web/src/dev/boardFs/  Vite 文件读写插件
+web/src/canvas/model/ JSON Canvas 类型、校验与序列化
+web/src/canvas/viewer/ 查看器适配层与自定义渲染层
+web/src/canvas/editor/ 自建编辑器（选择、工具、历史、样式、导出）
+web/src/editor/       编辑 shell 组件（rail、目录、对话框）
+web/src/viewer/       只读页面入口
+web/src/dev/          Vite 读写插件（.canvas 与文件夹）
 web/src/styles/       全局样式模块
 web/build.js          生成静态多页面站点
-scripts/              MathJax 资源复制、convert:canvas、deploy.cmd
+scripts/              MathJax 资源复制、prepare:canvas、deploy.cmd
 参考/                 设计文档与参考资料（默认不入库）
 ```
 
@@ -91,10 +89,10 @@ scripts/              MathJax 资源复制、convert:canvas、deploy.cmd
 ```text
 whiteboards/
 ├─ public/
-│  ├─ 项目规划.tldr.json
-│  └─ 项目/路线图.tldr.json
+│  ├─ 项目规划.canvas
+│  └─ 项目/路线图.canvas
 └─ private/
-   └─ 私密草稿.tldr.json
+   └─ 私密草稿.canvas
 ```
 
 `private/` 不会进入 Git，也不会进入 `dist/`；构建脚本只读取 `whiteboards/public/`。
@@ -166,7 +164,6 @@ Markdown 使用标准 Markdown/GFM 语法；公式使用行内 `$...$`、块级 
 
 SuperBoard 建立在以下优秀开源项目之上：
 
-- [tldraw](https://github.com/tldraw/tldraw)：画布底座与 shape 体系
 - [Pele](https://pele.run/)：Mermaid 兼容的图表渲染
 - [react-markdown](https://github.com/remarkjs/react-markdown) 及 remark/rehype 生态：Markdown 解析、GFM、清洗与代码高亮
 - [AsciiMath](https://asciimath.org/)：公式语法

@@ -1,6 +1,6 @@
 # SuperBoard 架构（JSON Canvas 方向）
 
-> 本文描述迁移目标架构；当前仓库仍保留 tldraw 旧实现，迁移期间以稳定提交为准。
+> 本文描述当前实际架构：全部白板使用 JSON Canvas（`.canvas`）。
 
 ## 1. 两端分离
 
@@ -123,7 +123,6 @@ interface SuperBoardNodeExtension {
 
 ## 7. 回退策略
 
-- 迁移前保留 tldraw 分支/提交
-- `.tldr.json` 先复制，再转换
-- 新实现按阶段提交
+- 每个阶段独立提交
 - 任一阶段失败可按 commit 回退
+- 用户白板数据不混入功能提交

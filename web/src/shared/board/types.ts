@@ -1,25 +1,9 @@
 export type BoardScope = 'public' | 'private'
 
-export interface BoardDocument {
-  store: Record<string, unknown>
-  schema?: Record<string, unknown>
-  [key: string]: unknown
-}
-
 export const BOARD_SCOPES: BoardScope[] = ['public', 'private']
 
 export function isBoardScope(value: unknown): value is BoardScope {
   return value === 'public' || value === 'private'
-}
-
-export interface BoardMeta {
-  title: string
-  slug: string
-  summary?: string
-  order?: number
-  draft?: boolean
-  aliases?: string[]
-  updatedAt?: string
 }
 
 export interface DirectorFrame {
@@ -30,17 +14,6 @@ export interface DirectorFrame {
   y: number
   w: number
   h: number
-}
-
-export interface DirectorData {
-  frames: DirectorFrame[]
-}
-
-export interface BoardFile {
-  version: 1
-  meta: BoardMeta
-  document: BoardDocument
-  director?: DirectorData
 }
 
 export interface BoardListItem {
@@ -66,10 +39,6 @@ export interface BoardTreeFolder {
 }
 
 export type BoardTreeNode = BoardTreeFile | BoardTreeFolder
-
-export interface BoardsResponse {
-  boards: BoardListItem[]
-}
 
 export const BOARD_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]*$/
 

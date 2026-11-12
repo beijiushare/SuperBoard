@@ -8,7 +8,28 @@ import {
   resolveFolderDir,
   resolveScopeDir,
 } from './paths'
+import type { BoardScope } from '../../shared/board/types'
 import type { DeleteFolderBody, RenameFolderBody } from './types'
+
+export async function removeEmptyParents(
+  root: string,
+  scope: BoardScope,
+  file: string,
+) {
+  const boardsRoot = resolveScopeDir(root, scope)
+  let dir = path.dirname(file)
+  while (dir !== boardsRoot && dir.startsWith(`${boardsRoot}${path.sep}`)) {
+    let entries
+    try {
+      entries = await fs.readdir(dir)
+    } catch {
+      return
+    }
+    if (entries.length > 0) return
+    await fs.rmdir(dir)
+    dir = path.dirname(dir)
+  }
+}
 
 export async function renameFolder(root: string, body: RenameFolderBody) {
   if (typeof body.path !== 'string') throw new HttpError(400, 'path 必须是字符串')

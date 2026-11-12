@@ -5,7 +5,7 @@ import { validateCanvas, type CanvasDocument } from '../../canvas/model'
 import { isValidSlug } from '../../shared/board/types'
 import { HttpError, readJsonBody, sendJson } from '../boardFs/http'
 import { normalizeFolder, normalizeScope, resolveCanvasFile } from '../boardFs/paths'
-import { removeEmptyParents } from '../boardFs/files'
+import { removeEmptyParents } from '../boardFs/folders'
 import {
   blankCanvas,
   canvasContentHash,
@@ -132,10 +132,7 @@ export async function handleCanvasFsRequest(
         meta.updatedAt = new Date().toISOString()
       }
 
-      const targetFile = found.legacy
-        ? resolveCanvasFile(root, scope, found.folder, slug)
-        : found.file
-      await writeCanvasFile(targetFile, payload)
+      await writeCanvasFile(found.file, payload)
       sendJson(res, 200, {
         ok: true,
         hash: nextHash,
@@ -189,7 +186,7 @@ export async function handleCanvasFsRequest(
       }
 
       await writeCanvasFile(nextFile, nextCanvas)
-      if (!found.legacy && nextFile !== found.file) {
+      if (nextFile !== found.file) {
         await fs.unlink(found.file)
         await removeEmptyParents(root, scope, found.file)
       }

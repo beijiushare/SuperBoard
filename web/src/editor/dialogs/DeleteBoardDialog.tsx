@@ -42,7 +42,7 @@ export function DeleteBoardDialog({ board, onClose, onConfirm }: DeleteBoardDial
         <div className="sb-dialog-body">
           <p className="sb-dialog-copy">
             确定删除 <strong>{board.title}</strong> 吗？文件会从{' '}
-            <code>whiteboards/{scope}/{board.path ? `${board.path}/` : ''}{board.slug}.tldr.json</code> 删除。
+            <code>whiteboards/{scope}/{board.path ? `${board.path}/` : ''}{board.slug}.canvas</code> 删除。
           </p>
           <p className="sb-dialog-hint">
             {scope === 'public'

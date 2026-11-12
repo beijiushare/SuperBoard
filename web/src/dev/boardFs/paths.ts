@@ -45,10 +45,6 @@ export function normalizeFolderName(value: unknown): string {
   return name
 }
 
-export function resolveBoardFile(root: string, scope: BoardScope, folder: string, slug: string) {
-  return resolveScopedFile(root, scope, folder, `${slug}.tldr.json`)
-}
-
 export function resolveCanvasFile(root: string, scope: BoardScope, folder: string, slug: string) {
   return resolveScopedFile(root, scope, folder, `${slug}.canvas`)
 }

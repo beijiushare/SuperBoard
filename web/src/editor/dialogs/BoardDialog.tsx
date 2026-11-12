@@ -75,7 +75,7 @@ export function BoardDialog({ mode, board, defaultFolder = '', onClose, onSubmit
               required
               disabled={busy}
             />
-            <small>文件名为 {slug.trim() || '…'}.tldr.json，只允许小写字母、数字和连字符。</small>
+            <small>文件名为 {slug.trim() || '…'}.canvas，只允许小写字母、数字和连字符。</small>
           </label>
 
           <label className="sb-field">
