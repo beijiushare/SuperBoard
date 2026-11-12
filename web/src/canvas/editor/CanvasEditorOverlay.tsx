@@ -37,6 +37,7 @@ interface CanvasEditorOverlayProps {
   onSelect: (ids: string[]) => void
   onChange?: () => void
   onBeforeChange?: () => void
+  interactive?: boolean
 }
 
 interface DragNode {
@@ -109,6 +110,7 @@ export function CanvasEditorOverlay({
   onSelect,
   onChange,
   onBeforeChange,
+  interactive = true,
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
   const [marquee, setMarquee] = useState<Marquee | null>(null)
@@ -154,6 +156,7 @@ export function CanvasEditorOverlay({
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
+      if (!interactive) return
       if (!event.shiftKey || event.button !== 0) return
       const overlay = overlayRef.current
       const dm = dmRef.current
@@ -177,6 +180,7 @@ export function CanvasEditorOverlay({
     }
 
     const onPointerMove = (event: PointerEvent) => {
+      if (!interactive) return
       const start = marqueeStartRef.current
       const overlay = overlayRef.current
       if (!start || !overlay) return
@@ -193,6 +197,11 @@ export function CanvasEditorOverlay({
 
     const onPointerUp = (event: PointerEvent) => {
       const start = marqueeStartRef.current
+      if (!interactive) {
+        marqueeStartRef.current = null
+        setMarquee(null)
+        return
+      }
       const dm = dmRef.current
       const overlay = overlayRef.current
       if (!start || !dm || !overlay) return
@@ -228,7 +237,7 @@ export function CanvasEditorOverlay({
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
     }
-  }, [onSelect])
+  }, [onSelect, interactive])
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {

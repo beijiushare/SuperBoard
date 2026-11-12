@@ -108,6 +108,7 @@ export function CanvasEditorApp() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [saveState, setSaveState] = useState<SaveState>('saved')
+  const [saveRequest, setSaveRequest] = useState(0)
   const [historyState, setHistoryState] = useState({ canUndo: false, canRedo: false })
   const viewerRef = useRef<CanvasViewerHandle>(null)
   const shiftRef = useRef(false)
@@ -697,10 +698,14 @@ export function CanvasEditorApp() {
   useEffect(() => {
     if (saveState !== 'dirty') return
     const timer = window.setTimeout(() => {
+      if (savingRef.current) {
+        setSaveRequest((value) => value + 1)
+        return
+      }
       void save()
     }, AUTOSAVE_DELAY)
     return () => window.clearTimeout(timer)
-  }, [saveState, canvas, selectedSlug])
+  }, [saveState, canvas, selectedSlug, saveRequest])
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -734,7 +739,12 @@ export function CanvasEditorApp() {
         setSaveState('error')
         return
       }
-      setSaveState(revisionRef.current === revision ? 'saved' : 'dirty')
+      if (revisionRef.current === revision) {
+        setSaveState('saved')
+      } else {
+        setSaveState('dirty')
+        setSaveRequest((value) => value + 1)
+      }
     } catch {
       setSaveState('error')
     } finally {
@@ -920,6 +930,7 @@ export function CanvasEditorApp() {
           onSelect={setSelectedIds}
           onChange={markDirty}
           onBeforeChange={recordHistory}
+          interactive={tool === 'select'}
         />
         <CanvasEditorTools
           canvas={canvas}
