@@ -25,17 +25,22 @@ interface CanvasViewerProps {
   theme?: 'light' | 'dark'
   className?: string
   style?: CSSProperties
+  onNodeSelect?: (id: string) => void
 }
 
 export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
-  function CanvasViewer({ canvas, theme = 'light', className, style }, ref) {
+  function CanvasViewer({ canvas, theme = 'light', className, style, onNodeSelect }, ref) {
     return (
       <JSONCanvasViewerComponent
         ref={ref}
         canvas={canvas as unknown as JSONCanvas}
         modules={modules}
-        text={({ node }) => <TextSlot node={node} />}
-        link={({ node }) => <LinkSlot node={node} />}
+        text={({ node, onActive }) => (
+          <TextSlot node={node} onActive={onActive} onSelect={onNodeSelect} />
+        )}
+        link={({ node, onActive }) => (
+          <LinkSlot node={node} onActive={onActive} onSelect={onNodeSelect} />
+        )}
         options={{ parser }}
         theme={theme}
         className={className}

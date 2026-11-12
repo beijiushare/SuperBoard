@@ -1,4 +1,5 @@
-import type { JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
+import { useEffect } from 'react'
+import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownView } from '../../shared/markdown/MarkdownView'
 import { PeleView } from '../../shared/pele/PeleView'
 import type { SuperBoardNodeExtension } from '../model'
@@ -23,7 +24,27 @@ function textStyle(node: JSONCanvasTextNode) {
   }
 }
 
-export function TextSlot({ node }: { node: JSONCanvasTextNode }) {
+function useNodeSelection(
+  id: string,
+  onActive: Hook | undefined,
+  onSelect: ((id: string) => void) | undefined,
+) {
+  useEffect(() => {
+    if (!onActive || !onSelect) return
+    return onActive.subscribe(() => onSelect(id))
+  }, [id, onActive, onSelect])
+}
+
+export function TextSlot({
+  node,
+  onActive,
+  onSelect,
+}: {
+  node: JSONCanvasTextNode
+  onActive?: Hook
+  onSelect?: (id: string) => void
+}) {
+  useNodeSelection(node.id, onActive, onSelect)
   const ext = extension(node)
   if (ext?.kind === 'markdown') {
     return <MarkdownView source={node.text} />
@@ -34,7 +55,16 @@ export function TextSlot({ node }: { node: JSONCanvasTextNode }) {
   return <div style={textStyle(node)}>{node.text}</div>
 }
 
-export function LinkSlot({ node }: { node: JSONCanvasLinkNode }) {
+export function LinkSlot({
+  node,
+  onActive,
+  onSelect,
+}: {
+  node: JSONCanvasLinkNode
+  onActive?: Hook
+  onSelect?: (id: string) => void
+}) {
+  useNodeSelection(node.id, onActive, onSelect)
   const media = extension(node)?.media
   if (!media) {
     return (
