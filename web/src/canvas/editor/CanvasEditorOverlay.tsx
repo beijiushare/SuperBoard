@@ -522,17 +522,58 @@ export function CanvasEditorOverlay({
       extension.rotation = Math.round(degree * 10) / 10
     } else {
       const corner = drag.corner ?? 'se'
-      const width = Math.max(40, drag.startWidth + (corner.includes('e') ? dx : -dx))
-      const height = Math.max(40, drag.startHeight + (corner.includes('s') ? dy : -dy))
-      const nextX = corner.includes('w') ? drag.startX + drag.startWidth - width : drag.startX
-      const nextY = corner.includes('n') ? drag.startY + drag.startHeight - height : drag.startY
-      const scaleX = drag.startWidth === 0 ? 1 : width / drag.startWidth
-      const scaleY = drag.startHeight === 0 ? 1 : height / drag.startHeight
-      for (const item of drag.nodes) {
-        item.node.x = nextX + (item.startX - drag.startX) * scaleX
-        item.node.y = nextY + (item.startY - drag.startY) * scaleY
-        item.node.width = Math.max(1, item.startWidth * scaleX)
-        item.node.height = Math.max(1, item.startHeight * scaleY)
+      const rotation = drag.primary['x-superboard']?.rotation ?? 0
+      const overlay = overlayRef.current
+      const dm = dmRef.current
+      if (drag.nodes.length === 1 && rotation !== 0 && overlay && dm) {
+        const bounds = overlay.getBoundingClientRect()
+        const pointerX = (event.clientX - bounds.left - dm.data.offsetX) / dm.data.scale
+        const pointerY = (event.clientY - bounds.top - dm.data.offsetY) / dm.data.scale
+        const radians = (rotation * Math.PI) / 180
+        const cos = Math.cos(radians)
+        const sin = Math.sin(radians)
+        const rotate = (x: number, y: number) => ({
+          x: x * cos - y * sin,
+          y: x * sin + y * cos,
+        })
+        const inverseRotate = (x: number, y: number) => ({
+          x: x * cos + y * sin,
+          y: -x * sin + y * cos,
+        })
+        const signX = corner.includes('e') ? 1 : -1
+        const signY = corner.includes('s') ? 1 : -1
+        const centerX = drag.startX + drag.startWidth / 2
+        const centerY = drag.startY + drag.startHeight / 2
+        const anchorOffset = rotate(
+          (-signX * drag.startWidth) / 2,
+          (-signY * drag.startHeight) / 2,
+        )
+        const anchor = { x: centerX + anchorOffset.x, y: centerY + anchorOffset.y }
+        const local = inverseRotate(
+          pointerX - anchor.x,
+          pointerY - anchor.y,
+        )
+        const width = Math.max(40, signX * local.x)
+        const height = Math.max(40, signY * local.y)
+        const centerOffset = rotate((signX * width) / 2, (signY * height) / 2)
+        const nextCenter = { x: anchor.x + centerOffset.x, y: anchor.y + centerOffset.y }
+        drag.primary.x = nextCenter.x - width / 2
+        drag.primary.y = nextCenter.y - height / 2
+        drag.primary.width = width
+        drag.primary.height = height
+      } else {
+        const width = Math.max(40, drag.startWidth + (corner.includes('e') ? dx : -dx))
+        const height = Math.max(40, drag.startHeight + (corner.includes('s') ? dy : -dy))
+        const nextX = corner.includes('w') ? drag.startX + drag.startWidth - width : drag.startX
+        const nextY = corner.includes('n') ? drag.startY + drag.startHeight - height : drag.startY
+        const scaleX = drag.startWidth === 0 ? 1 : width / drag.startWidth
+        const scaleY = drag.startHeight === 0 ? 1 : height / drag.startHeight
+        for (const item of drag.nodes) {
+          item.node.x = nextX + (item.startX - drag.startX) * scaleX
+          item.node.y = nextY + (item.startY - drag.startY) * scaleY
+          item.node.width = Math.max(1, item.startWidth * scaleX)
+          item.node.height = Math.max(1, item.startHeight * scaleY)
+        }
       }
     }
     const dmNow = dmRef.current
