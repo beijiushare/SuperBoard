@@ -213,6 +213,10 @@
   background: #f1eee5;
 }
 
+.sb-app-editor .sb-frame-controller {
+  z-index: 610;
+}
+
 .sb-frame-controller {
   position: absolute;
   z-index: 20;

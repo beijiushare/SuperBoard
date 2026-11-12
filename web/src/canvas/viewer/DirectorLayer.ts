@@ -26,7 +26,6 @@ type DirectorOptions = {
 export class DirectorLayer extends BaseModule {
   private readonly dm: DataManager
   private readonly controller: Controller
-  private readonly frames: CanvasFrame[]
   private readonly canvas: HTMLCanvasElement
   private readonly ctx: CanvasRenderingContext2D
   private visible = false
@@ -38,7 +37,6 @@ export class DirectorLayer extends BaseModule {
     super(...args)
     this.dm = this.container.get(internal.DataManager as never) as DataManager
     this.controller = this.container.get(internal.Controller as never) as Controller
-    this.frames = (this.options as DirectorOptions).canvas?.['x-superboard']?.director?.frames ?? []
     this.canvas = document.createElement('canvas')
     this.canvas.className = 'sb-canvas-director-layer'
     Object.assign(this.canvas.style, {
@@ -92,10 +90,11 @@ export class DirectorLayer extends BaseModule {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     if (!this.visible) return
     const { offsetX, offsetY, scale } = this.dm.data
+    const frames = (this.options as DirectorOptions).canvas?.['x-superboard']?.director?.frames ?? []
     this.ctx.save()
     this.ctx.translate(offsetX, offsetY)
     this.ctx.scale(scale, scale)
-    for (const frame of this.frames) {
+    for (const frame of frames) {
       this.ctx.fillStyle = 'rgba(47, 128, 237, 0.04)'
       this.ctx.strokeStyle = '#2f80ed'
       this.ctx.lineWidth = 2 / scale

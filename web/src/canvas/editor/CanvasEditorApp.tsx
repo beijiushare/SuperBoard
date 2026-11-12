@@ -16,6 +16,7 @@ import {
   RenameFolderDialog,
   type BoardFormValues,
 } from '../../editor/dialogs'
+import { DirectorFrameController } from '../../editor/DirectorFrameController'
 import { EditorRail } from '../../editor/EditorRail'
 import { BoardTreePanel } from '../../shared/board/BoardTreePanel'
 import type {
@@ -37,6 +38,7 @@ import {
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
+import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { CanvasEditorTools } from './CanvasEditorTools'
 import { CanvasStylePanel } from './CanvasStylePanel'
 import { downloadCanvasPng, downloadCanvasSvg } from './export'
@@ -172,6 +174,9 @@ export function CanvasEditorApp() {
     null,
   )
   const [frameIndex, setFrameIndex] = useState(0)
+  const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null)
+  const [frameControllerOpen, setFrameControllerOpen] = useState(false)
+  const [directorTick, setDirectorTick] = useState(0)
   const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
   const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
@@ -206,7 +211,7 @@ export function CanvasEditorApp() {
   const directorFrames = useMemo(() => {
     const frames = canvas?.['x-superboard']?.director?.frames ?? []
     return [...frames].sort((a, b) => a.order - b.order)
-  }, [canvas])
+  }, [canvas, directorTick])
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -880,6 +885,8 @@ export function CanvasEditorApp() {
     setDirectorMode(false)
     setPresentation(false)
     setPresentationMenu(null)
+    setSelectedFrameId(null)
+    setFrameControllerOpen(false)
     setSelectedSlug(item.slug)
     setScope(item.scope)
     setCanvas(next)
@@ -1139,6 +1146,16 @@ export function CanvasEditorApp() {
     }
   }
 
+  function updateDirectorFrames(frames: CanvasFrame[]) {
+    if (!canvas) return
+    const root = canvas['x-superboard']
+    if (!root) return
+    root.director = { ...(root.director ?? { frames: [] }), frames }
+    markDirty()
+    setDirectorTick((value) => value + 1)
+    viewerRef.current?.viewer?.refresh?.()
+  }
+
   function startPresentation(startIndex = 0) {
     if (directorFrames.length === 0) return
     const index = Math.max(0, Math.min(startIndex, directorFrames.length - 1))
@@ -1188,6 +1205,8 @@ export function CanvasEditorApp() {
       setDirectorMode(false)
       setPresentation(false)
       setPresentationMenu(null)
+      setSelectedFrameId(null)
+      setFrameControllerOpen(false)
       viewerRef.current?.viewer?.setDirectorVisible?.(false)
       viewerRef.current?.viewer?.restoreDirectorCamera?.()
       return
@@ -1406,6 +1425,52 @@ export function CanvasEditorApp() {
                       selectedIds={selectedIds}
                       onBeforeChange={recordHistory}
                       onApply={applyDocument}
+                    />
+                  ) : null}
+                  {directorMode && !presentation ? (
+                    <CanvasDirectorOverlay
+                      canvas={canvas}
+                      viewerRef={viewerRef}
+                      selectedId={selectedFrameId}
+                      onSelect={setSelectedFrameId}
+                      onBeforeChange={recordHistory}
+                      onChangeFrames={updateDirectorFrames}
+                      onPlayFrame={(frame) => {
+                        const index = directorFrames.findIndex(
+                          (item) => item.id === frame.id,
+                        )
+                        startPresentation(index < 0 ? 0 : index)
+                      }}
+                      onOpenController={() => setFrameControllerOpen(true)}
+                    />
+                  ) : null}
+                  {directorMode && !presentation && frameControllerOpen ? (
+                    <DirectorFrameController
+                      frames={directorFrames.map((frame) => ({
+                        id: frame.id,
+                        order: frame.order,
+                        name: frame.name,
+                        x: frame.x,
+                        y: frame.y,
+                        w: frame.width,
+                        h: frame.height,
+                      }))}
+                      selectedId={selectedFrameId}
+                      onSelect={setSelectedFrameId}
+                      onChangeFrames={(next) =>
+                        updateDirectorFrames(
+                          next.map((frame) => ({
+                            id: frame.id,
+                            order: frame.order,
+                            name: frame.name,
+                            x: frame.x,
+                            y: frame.y,
+                            width: frame.w,
+                            height: frame.h,
+                          })),
+                        )
+                      }
+                      onClose={() => setFrameControllerOpen(false)}
                     />
                   ) : null}
                   <div className="canvas-editor-toolstrip">
