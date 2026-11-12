@@ -26,12 +26,16 @@ interface CanvasEditorOverlayProps {
 }
 
 interface DragState {
+  kind: 'move' | 'resize'
   node: CanvasNode
   startClientX: number
   startClientY: number
   startX: number
   startY: number
+  startWidth: number
+  startHeight: number
   scale: number
+  corner?: string
 }
 
 export function CanvasEditorOverlay({
@@ -85,12 +89,36 @@ export function CanvasEditorOverlay({
     if (!dm) return
     onSelect(node.id)
     dragRef.current = {
+      kind: 'move',
       node,
       startClientX: event.clientX,
       startClientY: event.clientY,
       startX: node.x,
       startY: node.y,
+      startWidth: node.width,
+      startHeight: node.height,
       scale: dm.data.scale,
+    }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  function beginResize(event: ReactPointerEvent, node: CanvasNode, corner: string) {
+    if (event.button !== 0) return
+    event.stopPropagation()
+    const dm = dmRef.current
+    if (!dm) return
+    onSelect(node.id)
+    dragRef.current = {
+      kind: 'resize',
+      node,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startX: node.x,
+      startY: node.y,
+      startWidth: node.width,
+      startHeight: node.height,
+      scale: dm.data.scale,
+      corner,
     }
     event.currentTarget.setPointerCapture(event.pointerId)
   }
@@ -98,8 +126,20 @@ export function CanvasEditorOverlay({
   function moveDrag(event: ReactPointerEvent) {
     const drag = dragRef.current
     if (!drag) return
-    drag.node.x = drag.startX + (event.clientX - drag.startClientX) / drag.scale
-    drag.node.y = drag.startY + (event.clientY - drag.startClientY) / drag.scale
+    const dx = (event.clientX - drag.startClientX) / drag.scale
+    const dy = (event.clientY - drag.startClientY) / drag.scale
+    if (drag.kind === 'move') {
+      drag.node.x = drag.startX + dx
+      drag.node.y = drag.startY + dy
+    } else {
+      const corner = drag.corner ?? 'se'
+      const width = Math.max(40, drag.startWidth + (corner.includes('e') ? dx : -dx))
+      const height = Math.max(40, drag.startHeight + (corner.includes('s') ? dy : -dy))
+      drag.node.x = corner.includes('w') ? drag.startX + drag.startWidth - width : drag.startX
+      drag.node.y = corner.includes('n') ? drag.startY + drag.startHeight - height : drag.startY
+      drag.node.width = width
+      drag.node.height = height
+    }
     controllerRef.current?.refresh()
     onChange?.()
     setTick((value) => value + 1)
@@ -144,8 +184,25 @@ export function CanvasEditorOverlay({
         ))}
 
       {selectedRect ? (
-        <div className="sb-editor-selection" style={selectedRect}>
+        <div
+          className="sb-editor-selection"
+          style={selectedRect}
+          onPointerDown={(event) => selected && beginDrag(event, selected)}
+          onPointerMove={moveDrag}
+          onPointerUp={endDrag}
+        >
           <span className="sb-editor-selection-label">{selected?.id}</span>
+          {selected
+            ? ['nw', 'ne', 'sw', 'se'].map((corner) => (
+                <span
+                  key={corner}
+                  className={`sb-editor-handle sb-editor-handle-${corner}`}
+                  onPointerDown={(event) => beginResize(event, selected, corner)}
+                  onPointerMove={moveDrag}
+                  onPointerUp={endDrag}
+                />
+              ))
+            : null}
         </div>
       ) : null}
     </div>
