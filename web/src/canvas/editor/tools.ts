@@ -1,3 +1,5 @@
+import type { SuperBoardMediaKind } from '../model'
+
 export type EditorTool =
   | 'select'
   | 'text'
@@ -30,3 +32,9 @@ export const TOOLS: ToolDefinition[] = [
 export const TOOL_SHORTCUTS: Record<string, EditorTool> = Object.fromEntries(
   TOOLS.map((tool) => [tool.shortcut.toLowerCase(), tool.id]),
 )
+
+export function detectMediaKind(url: string): SuperBoardMediaKind {
+  if (/\.(?:png|jpe?g|gif|webp|svg|avif|bmp)(?:[?#]|$)/i.test(url)) return 'image'
+  if (/\.(?:mp4|webm|ogv|mov|m4v)(?:[?#]|$)/i.test(url)) return 'video'
+  return 'iframe'
+}

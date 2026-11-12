@@ -191,7 +191,7 @@ web/src/
 - [x] 箭头工具
 - [x] 文本工具
 - [x] 矩形/椭圆/菱形/线条
-- [ ] Markdown / Pele / 媒体块
+- [x] Markdown / Pele / 媒体块
 - [ ] 样式面板
 
 ### Phase 4：迁移与构建

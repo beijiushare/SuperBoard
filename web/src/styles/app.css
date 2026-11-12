@@ -601,6 +601,72 @@
   color: #fff;
 }
 
+.canvas-editor-tool-sep {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: #d8d4ca;
+}
+
+.canvas-editor-dialog-backdrop {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(40, 38, 33, 0.35);
+}
+
+.canvas-editor-dialog {
+  width: min(420px, calc(100vw - 40px));
+  padding: 18px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+}
+
+.canvas-editor-dialog h2 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.canvas-editor-dialog p {
+  margin: 0 0 12px;
+  color: #8b877d;
+  font-size: 12px;
+}
+
+.canvas-editor-dialog input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #dedbd2;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+.canvas-editor-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.canvas-editor-dialog-actions button {
+  padding: 6px 12px;
+  border: 1px solid #dedbd2;
+  border-radius: 7px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.canvas-editor-dialog-actions button:last-child {
+  border-color: #2f80ed;
+  background: #2f80ed;
+  color: #fff;
+}
+
 .sb-editor-tool-surface {
   position: absolute;
   z-index: 6;

@@ -10,7 +10,7 @@ import type {
 } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { isLocked, nextFreeId, nodeMapOf, topAncestor } from './hierarchy'
-import type { EditorTool } from './tools'
+import { detectMediaKind, type EditorTool } from './tools'
 
 type DataManager = {
   data: {
@@ -52,6 +52,7 @@ interface ArrowDraft {
 
 interface Editing {
   id: string | null
+  kind: 'text' | 'markdown' | 'pele' | 'media'
   x: number
   y: number
   width: number
@@ -71,6 +72,8 @@ interface CanvasEditorToolsProps {
   onChange: () => void
   onApply: (next: CanvasDocument, selection?: string[]) => void
   onExitTool: () => void
+  editRequest?: { id: string; nonce: number } | null
+  onEditRequestHandled?: () => void
 }
 
 const STROKE_SIZE = 4
@@ -146,6 +149,8 @@ export function CanvasEditorTools({
   onChange,
   onApply,
   onExitTool,
+  editRequest,
+  onEditRequestHandled,
 }: CanvasEditorToolsProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const previewCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -230,6 +235,37 @@ export function CanvasEditorTools({
     if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   }, [tool])
 
+  useEffect(() => {
+    if (!editRequest) return
+    const node = canvas.nodes.find((item) => item.id === editRequest.id)
+    if (node) startEditing(node, node.x, node.y)
+    onEditRequestHandled?.()
+  }, [editRequest, canvas])
+
+  function editKindOf(node: CanvasNode): Editing['kind'] | null {
+    const extension = node['x-superboard']
+    if (node.type === 'text') {
+      if (!extension?.kind || extension.kind === 'text') return 'text'
+      if (extension.kind === 'markdown') return 'markdown'
+      if (extension.kind === 'pele') return 'pele'
+      return null
+    }
+    if (node.type === 'link' && extension?.kind === 'media') return 'media'
+    return null
+  }
+
+  function editingValue(node: CanvasNode, kind: Editing['kind']) {
+    const extension = node['x-superboard']
+    if (kind === 'media') {
+      return node.type === 'link' ? (extension?.media?.url ?? node.url) : ''
+    }
+    if (kind === 'pele') {
+      const code = extension?.code
+      return typeof code === 'string' ? code : node.type === 'text' ? node.text : ''
+    }
+    return node.type === 'text' ? node.text : ''
+  }
+
   function redrawStrokePreview() {
     const canvasElement = previewCanvasRef.current
     const points = strokeRef.current
@@ -295,15 +331,17 @@ export function CanvasEditorTools({
   }
 
   function startEditing(node: CanvasNode | null, x: number, y: number) {
-    if (node && node.type === 'text') {
+    const kind = node ? editKindOf(node) : null
+    if (node && kind) {
       const style = node['x-superboard']?.style
       updateEditing({
         id: node.id,
+        kind,
         x: node.x,
         y: node.y,
         width: node.width,
         height: node.height,
-        value: node.text,
+        value: editingValue(node, kind),
         fontSize: style?.fontSize ?? 16,
         fontFamily: style?.fontFamily,
         color: style?.color,
@@ -313,6 +351,7 @@ export function CanvasEditorTools({
     }
     updateEditing({
       id: null,
+      kind: 'text',
       x,
       y,
       width: 260,
@@ -330,8 +369,9 @@ export function CanvasEditorTools({
     const measured = Math.max(40, (textarea?.scrollHeight ?? current.height * scale) / scale)
     updateEditing(null)
     if (current.id) {
-      const node = canvas.nodes.find((item) => item.id === current.id)
-      if (!node || node.type !== 'text') return
+      const index = canvas.nodes.findIndex((item) => item.id === current.id)
+      const node = canvas.nodes[index]
+      if (!node) return
       if (current.value === '') {
         onBeforeChange()
         onApply(
@@ -340,14 +380,41 @@ export function CanvasEditorTools({
         )
         return
       }
+      let nextNode: CanvasNode
+      if (current.kind === 'media') {
+        if (node.type !== 'link') return
+        const extension = node['x-superboard']
+        nextNode = {
+          ...node,
+          url: current.value,
+          'x-superboard': {
+            ...extension,
+            kind: 'media',
+            media: {
+              ...extension?.media,
+              kind: detectMediaKind(current.value),
+              url: current.value,
+            },
+          },
+        }
+      } else if (current.kind === 'pele') {
+        if (node.type !== 'text') return
+        nextNode = {
+          ...node,
+          text: `\`\`\`mermaid\n${current.value}\n\`\`\``,
+          height: measured,
+          'x-superboard': { ...node['x-superboard'], kind: 'pele', code: current.value },
+        }
+      } else {
+        if (node.type !== 'text') return
+        nextNode = { ...node, text: current.value, height: measured }
+      }
       onBeforeChange()
       onApply(
         {
           ...canvas,
-          nodes: canvas.nodes.map((item) =>
-            item.id === current.id
-              ? { ...item, text: current.value, height: measured }
-              : item,
+          nodes: canvas.nodes.map((item, itemIndex) =>
+            itemIndex === index ? nextNode : item,
           ),
         },
         [current.id],
@@ -553,11 +620,7 @@ export function CanvasEditorTools({
     const point = surfacePoint(event)
     if (!point) return
     if (tool === 'text') {
-      const hit = findNodeAt(
-        point.worldX,
-        point.worldY,
-        (node) => node.type === 'text' && node['x-superboard']?.kind === 'text',
-      )
+      const hit = findNodeAt(point.worldX, point.worldY, (node) => editKindOf(node) !== null)
       startEditing(hit, point.worldX, point.worldY)
       return
     }

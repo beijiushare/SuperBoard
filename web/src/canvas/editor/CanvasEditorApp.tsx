@@ -9,7 +9,7 @@ import {
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasEditorTools } from './CanvasEditorTools'
-import { TOOL_SHORTCUTS, TOOLS, type EditorTool } from './tools'
+import { TOOL_SHORTCUTS, TOOLS, detectMediaKind, type EditorTool } from './tools'
 import {
   collectBlocks,
   collectDescendants,
@@ -44,7 +44,7 @@ type ViewerInternals = {
 }
 
 type DataManagerLike = {
-  data: Viewport
+  data: Viewport & { container: HTMLDivElement }
 }
 
 type ControllerLike = {
@@ -100,6 +100,9 @@ export function CanvasEditorApp() {
   const [canvas, setCanvas] = useState<CanvasDocument | null>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [tool, setTool] = useState<EditorTool>('select')
+  const [editRequest, setEditRequest] = useState<{ id: string; nonce: number } | null>(null)
+  const [mediaDialogOpen, setMediaDialogOpen] = useState(false)
+  const [mediaUrl, setMediaUrl] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [saveState, setSaveState] = useState<SaveState>('saved')
@@ -213,6 +216,83 @@ export function CanvasEditorApp() {
     setSelectedIds(selection)
     setCanvas(next)
     markDirty()
+  }
+
+  function viewportCenter(width: number, height: number) {
+    try {
+      const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
+      if (!viewer?.container) return { x: 0, y: 0 }
+      const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
+      const container = dm.data.container
+      return {
+        x: Math.round(
+          (container.clientWidth / 2 - dm.data.offsetX) / dm.data.scale - width / 2,
+        ),
+        y: Math.round(
+          (container.clientHeight / 2 - dm.data.offsetY) / dm.data.scale - height / 2,
+        ),
+      }
+    } catch {
+      return { x: 0, y: 0 }
+    }
+  }
+
+  function insertTextBlock(kind: 'markdown' | 'pele') {
+    if (!canvas) return
+    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), kind)
+    const position = viewportCenter(360, 220)
+    const code = 'flowchart LR\n    A[开始] --> B[结束]'
+    const node: CanvasNode =
+      kind === 'markdown'
+        ? {
+            id,
+            type: 'text',
+            x: position.x,
+            y: position.y,
+            width: 360,
+            height: 220,
+            text: '# 新 Markdown\n\n在这里输入内容。',
+            'x-superboard': { kind: 'markdown' },
+          }
+        : {
+            id,
+            type: 'text',
+            x: position.x,
+            y: position.y,
+            width: 360,
+            height: 220,
+            text: `\`\`\`mermaid\n${code}\n\`\`\``,
+            'x-superboard': { kind: 'pele', diagram: 'flowchart', code },
+          }
+    recordHistory()
+    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    setTool('text')
+    setEditRequest({ id, nonce: Date.now() })
+  }
+
+  function insertMedia() {
+    if (!canvas) return
+    const url = mediaUrl.trim()
+    if (!url) return
+    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'media')
+    const position = viewportCenter(480, 320)
+    const node: CanvasNode = {
+      id,
+      type: 'link',
+      url,
+      x: position.x,
+      y: position.y,
+      width: 480,
+      height: 320,
+      'x-superboard': {
+        kind: 'media',
+        media: { kind: detectMediaKind(url), url },
+      },
+    }
+    recordHistory()
+    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    setMediaDialogOpen(false)
+    setMediaUrl('')
   }
 
   function undo() {
@@ -783,6 +863,16 @@ export function CanvasEditorApp() {
             {item.label}
           </button>
         ))}
+        <span className="canvas-editor-tool-sep" />
+        <button type="button" onClick={() => insertTextBlock('markdown')}>
+          插入 Markdown
+        </button>
+        <button type="button" onClick={() => insertTextBlock('pele')}>
+          插入 Pele
+        </button>
+        <button type="button" onClick={() => setMediaDialogOpen(true)}>
+          插入媒体
+        </button>
       </div>
       <main className="canvas-editor-stage">
         <CanvasViewer
@@ -807,8 +897,36 @@ export function CanvasEditorApp() {
           onChange={markDirty}
           onApply={applyDocument}
           onExitTool={() => setTool('select')}
+          editRequest={editRequest}
+          onEditRequestHandled={() => setEditRequest(null)}
         />
       </main>
+      {mediaDialogOpen ? (
+        <div className="canvas-editor-dialog-backdrop" onClick={() => setMediaDialogOpen(false)}>
+          <div className="canvas-editor-dialog" onClick={(event) => event.stopPropagation()}>
+            <h2>插入媒体</h2>
+            <p>支持图片、视频链接，以及其他可嵌入的 iframe 地址。</p>
+            <input
+              autoFocus
+              value={mediaUrl}
+              placeholder="https://..."
+              onChange={(event) => setMediaUrl(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') insertMedia()
+                if (event.key === 'Escape') setMediaDialogOpen(false)
+              }}
+            />
+            <div className="canvas-editor-dialog-actions">
+              <button type="button" onClick={() => setMediaDialogOpen(false)}>
+                取消
+              </button>
+              <button type="button" onClick={insertMedia} disabled={!mediaUrl.trim()}>
+                插入
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
