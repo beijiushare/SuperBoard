@@ -132,7 +132,10 @@ export async function handleCanvasFsRequest(
         meta.updatedAt = new Date().toISOString()
       }
 
-      await writeCanvasFile(found.file, payload)
+      const targetFile = found.legacy
+        ? resolveCanvasFile(root, scope, found.folder, slug)
+        : found.file
+      await writeCanvasFile(targetFile, payload)
       sendJson(res, 200, {
         ok: true,
         hash: nextHash,
@@ -186,7 +189,7 @@ export async function handleCanvasFsRequest(
       }
 
       await writeCanvasFile(nextFile, nextCanvas)
-      if (nextFile !== found.file) {
+      if (!found.legacy && nextFile !== found.file) {
         await fs.unlink(found.file)
         await removeEmptyParents(root, scope, found.file)
       }
