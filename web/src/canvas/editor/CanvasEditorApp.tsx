@@ -9,6 +9,7 @@ import {
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasEditorTools } from './CanvasEditorTools'
+import { CanvasStylePanel } from './CanvasStylePanel'
 import { TOOL_SHORTCUTS, TOOLS, detectMediaKind, type EditorTool } from './tools'
 import {
   collectBlocks,
@@ -899,6 +900,12 @@ export function CanvasEditorApp() {
           onExitTool={() => setTool('select')}
           editRequest={editRequest}
           onEditRequestHandled={() => setEditRequest(null)}
+        />
+        <CanvasStylePanel
+          canvas={canvas}
+          selectedIds={selectedIds}
+          onBeforeChange={recordHistory}
+          onApply={applyDocument}
         />
       </main>
       {mediaDialogOpen ? (

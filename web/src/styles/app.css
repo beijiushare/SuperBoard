@@ -608,6 +608,91 @@
   background: #d8d4ca;
 }
 
+.sb-style-panel {
+  position: absolute;
+  z-index: 8;
+  top: 16px;
+  right: 16px;
+  width: 224px;
+  max-height: calc(100% - 32px);
+  padding: 12px;
+  overflow-y: auto;
+  border: 1px solid #dedbd2;
+  border-radius: 10px;
+  background: rgba(251, 250, 246, 0.96);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+.sb-style-panel section + section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e6e2d8;
+}
+
+.sb-style-panel h3 {
+  margin: 0 0 8px;
+  color: #5c584e;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sb-style-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sb-style-row > span {
+  width: 32px;
+  flex-shrink: 0;
+  color: #8b877d;
+  font-size: 11px;
+}
+
+.sb-style-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.sb-style-swatches button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #d5d1c6;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.sb-style-swatches button.is-active {
+  outline: 2px solid #2f80ed;
+  outline-offset: 1px;
+}
+
+.sb-style-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.sb-style-buttons button {
+  min-width: 28px;
+  padding: 3px 6px;
+  border: 1px solid #dedbd2;
+  border-radius: 5px;
+  background: #fff;
+  color: #5c584e;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.sb-style-buttons button.is-active {
+  border-color: #2f80ed;
+  background: #2f80ed;
+  color: #fff;
+}
+
 .canvas-editor-dialog-backdrop {
   position: fixed;
   z-index: 10000;
