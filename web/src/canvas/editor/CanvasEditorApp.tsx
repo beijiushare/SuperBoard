@@ -143,6 +143,12 @@ function updateEditorUrl(slug: string | null, scope: BoardScope, tree: boolean) 
   )
 }
 
+function normalizeMediaUrl(input: string) {
+  const iframe = input.match(/<iframe[^>]*\bsrc\s*=\s*["']([^"']+)["']/i)
+  const raw = (iframe?.[1] ?? input).trim()
+  return raw.replaceAll('&amp;', '&')
+}
+
 function nextId(existing: Set<string>, base: string) {
   let id = `${base}-copy`
   let index = 1
@@ -486,7 +492,7 @@ export function CanvasEditorApp() {
 
   function insertMedia() {
     if (!canvas) return
-    const url = mediaUrl.trim()
+    const url = normalizeMediaUrl(mediaUrl)
     if (!url) return
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'media')
     const position = mediaInsertPoint

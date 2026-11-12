@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type {
   CanvasDocument,
   CanvasNode,
@@ -60,6 +61,39 @@ function fallbackKind(node: CanvasNode) {
   return node.type === 'text' ? 'text' : node.type === 'group' ? 'group' : 'media'
 }
 
+function CropSlider({
+  label,
+  value,
+  min = 0,
+  max = 100,
+  onCommit,
+}: {
+  label: string
+  value: number
+  min?: number
+  max?: number
+  onCommit: (value: number) => void
+}) {
+  const [local, setLocal] = useState(value)
+  useEffect(() => setLocal(value), [value])
+  return (
+    <div className="sb-style-row">
+      <span>{label}</span>
+      <input
+        className="sb-style-range"
+        type="range"
+        min={min}
+        max={max}
+        value={local}
+        onChange={(event) => setLocal(Number(event.target.value))}
+        onPointerUp={(event) => onCommit(Number(event.currentTarget.value))}
+        onKeyUp={(event) => onCommit(Number(event.currentTarget.value))}
+      />
+      <em className="sb-style-value">{local}</em>
+    </div>
+  )
+}
+
 function withStyle(node: CanvasNode, patch: Partial<SuperBoardStyle>): CanvasNode {
   const extension = node['x-superboard']
   return {
@@ -106,6 +140,28 @@ export function CanvasStylePanel({
 
   function styleAll(targets: CanvasNode[], patch: Partial<SuperBoardStyle>) {
     applyTo(targets, (node) => withStyle(node, patch))
+  }
+
+  function styleText(targets: CanvasNode[], patch: Partial<SuperBoardStyle>) {
+    applyTo(targets, (node) => {
+      const next = withStyle(node, patch)
+      if (node.type !== 'text' || !patch.fontSize) return next
+      const fontSize = patch.fontSize
+      const charsPerLine = Math.max(
+        1,
+        Math.floor((node.width - 32) / (fontSize * 0.62)),
+      )
+      const lines = node.text
+        .split('\n')
+        .reduce(
+          (sum, line) => sum + Math.max(1, Math.ceil(Array.from(line).length / charsPerLine)),
+          0,
+        )
+      return {
+        ...next,
+        height: Math.max(40, Math.round(lines * fontSize * 1.45 + 28)),
+      }
+    })
   }
 
   function setMediaCrop(patch: Partial<SuperBoardMedia>) {
@@ -349,7 +405,7 @@ export function CanvasStylePanel({
                       ? 'is-active'
                       : undefined
                   }
-                  onClick={() => styleAll(texts, { fontSize: value })}
+                  onClick={() => styleText(texts, { fontSize: value })}
                 >
                   {value}
                 </button>
@@ -453,6 +509,55 @@ export function CanvasStylePanel({
               重置
             </button>
           </div>
+          {firstMedia?.crop === 'circle' ? (
+            <>
+              <CropSlider
+                label="圆心X"
+                value={firstMedia.cropCx ?? 50}
+                onCommit={(value) => setMediaCrop({ cropCx: value })}
+              />
+              <CropSlider
+                label="圆心Y"
+                value={firstMedia.cropCy ?? 50}
+                onCommit={(value) => setMediaCrop({ cropCy: value })}
+              />
+              <CropSlider
+                label="半径"
+                value={firstMedia.cropRadius ?? 50}
+                onCommit={(value) => setMediaCrop({ cropRadius: value })}
+              />
+            </>
+          ) : (
+            <>
+              <CropSlider
+                label="起点X"
+                value={firstMedia?.cropX ?? 0}
+                onCommit={(value) => setMediaCrop({ cropX: value })}
+              />
+              <CropSlider
+                label="起点Y"
+                value={firstMedia?.cropY ?? 0}
+                onCommit={(value) => setMediaCrop({ cropY: value })}
+              />
+              <CropSlider
+                label="宽度"
+                value={firstMedia?.cropW ?? 100}
+                onCommit={(value) => setMediaCrop({ cropW: value })}
+              />
+              <CropSlider
+                label="高度"
+                value={firstMedia?.cropH ?? 100}
+                onCommit={(value) => setMediaCrop({ cropH: value })}
+              />
+            </>
+          )}
+          {firstMedia?.crop === 'rounded' ? (
+            <CropSlider
+              label="圆角"
+              value={firstMedia.cropCorner ?? 8}
+              onCommit={(value) => setMediaCrop({ cropCorner: value })}
+            />
+          ) : null}
         </section>
       ) : null}
     </aside>

@@ -716,6 +716,19 @@
   color: #fff;
 }
 
+.sb-style-range {
+  width: 100px;
+  accent-color: #2f80ed;
+}
+
+.sb-style-value {
+  width: 26px;
+  color: #8b877d;
+  font-size: 10px;
+  font-style: normal;
+  text-align: right;
+}
+
 .sb-canvas-context-menu {
   position: fixed;
   z-index: 10001;
