@@ -68,6 +68,14 @@ interface DragState {
   startAngle?: number
   startRotation?: number
   changed?: boolean
+  centerX?: number
+  centerY?: number
+  rotationNodes?: Array<{
+    node: CanvasNode
+    startRotation: number
+    offsetX: number
+    offsetY: number
+  }>
 }
 
 interface Marquee {
@@ -355,16 +363,81 @@ export function CanvasEditorOverlay({
     event.currentTarget.setPointerCapture(event.pointerId)
   }
 
+  function ensureExtension(node: CanvasNode) {
+    if (!node['x-superboard']) {
+      node['x-superboard'] = {
+        kind: node.type === 'text' ? 'text' : node.type === 'group' ? 'group' : 'media',
+      }
+    }
+    return node['x-superboard']
+  }
+
+  function beginMultiRotate(event: ReactPointerEvent, selection: CanvasNode[]) {
+    if (event.button !== 0 || selection.length < 2) return
+    event.stopPropagation()
+    const dm = dmRef.current
+    const overlay = overlayRef.current
+    if (!dm || !overlay) return
+    const map = nodeMapOf(selection)
+    if (
+      selection.some(
+        (node) =>
+          node['x-superboard']?.kind === 'group' || isLocked(node, map),
+      )
+    ) {
+      return
+    }
+    const minX = Math.min(...selection.map((node) => node.x))
+    const minY = Math.min(...selection.map((node) => node.y))
+    const maxX = Math.max(...selection.map((node) => node.x + node.width))
+    const maxY = Math.max(...selection.map((node) => node.y + node.height))
+    const centerX = (minX + maxX) / 2
+    const centerY = (minY + maxY) / 2
+    const bounds = overlay.getBoundingClientRect()
+    const { offsetX, offsetY, scale } = dm.data
+    const centerScreenX = bounds.left + offsetX + centerX * scale
+    const centerScreenY = bounds.top + offsetY + centerY * scale
+    dragRef.current = {
+      kind: 'rotate',
+      nodes: selection.map((node) => ({
+        node,
+        startX: node.x,
+        startY: node.y,
+        startWidth: node.width,
+        startHeight: node.height,
+      })),
+      primary: selection[0],
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startX: centerX,
+      startY: centerY,
+      startWidth: 0,
+      startHeight: 0,
+      scale,
+      centerX,
+      centerY,
+      startAngle: Math.atan2(event.clientY - centerScreenY, event.clientX - centerScreenX),
+      rotationNodes: selection.map((node) => ({
+        node,
+        startRotation: node['x-superboard']?.rotation ?? 0,
+        offsetX: node.x + node.width / 2 - centerX,
+        offsetY: node.y + node.height / 2 - centerY,
+      })),
+    }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
   function beginRotate(event: ReactPointerEvent, node: CanvasNode) {
     if (event.button !== 0) return
     event.stopPropagation()
     const dm = dmRef.current
     const overlay = overlayRef.current
-    if (!dm || !overlay || !node['x-superboard']) return
+    if (!dm || !overlay) return
     const map = nodeMapOf(Object.values(dm.data.nodeMap).map((item) => item.ref))
     const target = selectableAncestor(node, map, focusedGroupId)
-    if (!target['x-superboard'] || target['x-superboard'].kind === 'group') return
+    if (target['x-superboard']?.kind === 'group') return
     if (isLocked(target, map)) return
+    ensureExtension(target)
     onSelect([target.id])
     const bounds = overlay.getBoundingClientRect()
     const { offsetX, offsetY, scale } = dm.data
@@ -409,11 +482,34 @@ export function CanvasEditorOverlay({
         item.node.x = item.startX + dx
         item.node.y = item.startY + dy
       }
-    } else if (drag.kind === 'rotate') {
-      const extension = drag.primary['x-superboard']
+    } else if (drag.kind === 'rotate' && drag.rotationNodes) {
       const overlay = overlayRef.current
       const dm = dmRef.current
-      if (!extension || !overlay || !dm) return
+      if (!overlay || !dm || drag.centerX === undefined || drag.centerY === undefined) return
+      const bounds = overlay.getBoundingClientRect()
+      const { offsetX, offsetY, scale } = dm.data
+      const centerScreenX = bounds.left + offsetX + drag.centerX * scale
+      const centerScreenY = bounds.top + offsetY + drag.centerY * scale
+      const angle = Math.atan2(event.clientY - centerScreenY, event.clientX - centerScreenX)
+      let delta = ((angle - (drag.startAngle ?? angle)) * 180) / Math.PI
+      if (event.shiftKey) delta = Math.round(delta / 15) * 15
+      const radians = (delta * Math.PI) / 180
+      const cos = Math.cos(radians)
+      const sin = Math.sin(radians)
+      for (const item of drag.rotationNodes) {
+        const centerX = drag.centerX + item.offsetX * cos - item.offsetY * sin
+        const centerY = drag.centerY + item.offsetX * sin + item.offsetY * cos
+        item.node.x = centerX - item.node.width / 2
+        item.node.y = centerY - item.node.height / 2
+        const extension = ensureExtension(item.node)
+        const degree = ((item.startRotation + delta) % 360 + 360) % 360
+        extension.rotation = Math.round(degree * 10) / 10
+      }
+    } else if (drag.kind === 'rotate') {
+      const overlay = overlayRef.current
+      const dm = dmRef.current
+      if (!overlay || !dm) return
+      const extension = ensureExtension(drag.primary)
       const bounds = overlay.getBoundingClientRect()
       const { offsetX, offsetY, scale } = dm.data
       const centerX = bounds.left + offsetX + (drag.startX + drag.startWidth / 2) * scale
@@ -471,6 +567,20 @@ export function CanvasEditorOverlay({
   const map = nodeMapOf(nodes)
   const selectedNodes = nodes.filter((node) => selectedIds.includes(node.id))
   const focusedNode = focusedGroupId ? map.get(focusedGroupId) ?? null : null
+  const canMultiRotate =
+    selectedNodes.length > 1 &&
+    selectedNodes.every(
+      (node) => node['x-superboard']?.kind !== 'group' && !isLocked(node, map),
+    )
+  const selectedBounds =
+    selectedNodes.length > 0
+      ? {
+          left: Math.min(...selectedNodes.map((node) => node.x)),
+          top: Math.min(...selectedNodes.map((node) => node.y)),
+          right: Math.max(...selectedNodes.map((node) => node.x + node.width)),
+          bottom: Math.max(...selectedNodes.map((node) => node.y + node.height)),
+        }
+      : null
   const editable = nodes.filter((node) => {
     const kind = node['x-superboard']?.kind
     if (kind !== 'shape' && kind !== 'drawing' && kind !== 'group') return false
@@ -540,7 +650,7 @@ export function CanvasEditorOverlay({
           {selectedNodes.length === 1 ? (
             <>
               <span className="sb-editor-selection-label">{node.id}</span>
-              {node['x-superboard'] && node['x-superboard'].kind !== 'group' ? (
+              {node['x-superboard']?.kind !== 'group' ? (
                 <span
                   className="sb-editor-rotate"
                   onPointerDown={(event) => beginRotate(event, node)}
@@ -561,6 +671,28 @@ export function CanvasEditorOverlay({
           ) : null}
         </div>
       ))}
+
+      {canMultiRotate && selectedBounds ? (
+        <div
+          className="sb-editor-multi-selection"
+          style={{
+            left: offsetX + selectedBounds.left * scale,
+            top: offsetY + selectedBounds.top * scale,
+            width: (selectedBounds.right - selectedBounds.left) * scale,
+            height: (selectedBounds.bottom - selectedBounds.top) * scale,
+          }}
+        >
+          <span className="sb-editor-selection-label">
+            已选 {selectedNodes.length} 项
+          </span>
+          <span
+            className="sb-editor-rotate"
+            onPointerDown={(event) => beginMultiRotate(event, selectedNodes)}
+            onPointerMove={movePointer}
+            onPointerUp={endDrag}
+          />
+        </div>
+      ) : null}
 
       {nodes
         .filter((node) => node['x-superboard']?.locked)

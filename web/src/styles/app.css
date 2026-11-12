@@ -915,6 +915,17 @@
   pointer-events: none;
 }
 
+.sb-editor-multi-selection {
+  position: absolute;
+  border: 1px dashed #2f80ed;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.sb-editor-multi-selection > .sb-editor-rotate {
+  pointer-events: auto;
+}
+
 .sb-editor-edge-layer {
   position: absolute;
   inset: 0;
