@@ -6,9 +6,9 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
-import type { CanvasDocument, CanvasNode } from '../model'
+import type { CanvasDocument, CanvasEdge, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
-import { edgePath } from './edges'
+import { edgeGeometry, edgePath } from './edges'
 import {
   collectDescendants,
   isInsideGroup,
@@ -131,6 +131,18 @@ export function CanvasEditorOverlay({
   const [tick, setTick] = useState(0)
   const [marquee, setMarquee] = useState<Marquee | null>(null)
   const [guides, setGuides] = useState<{ x?: number; y?: number } | null>(null)
+  const [edgePreview, setEdgePreview] = useState<{
+    fromX: number
+    fromY: number
+    x: number
+    y: number
+  } | null>(null)
+  const edgeDragRef = useRef<{
+    edge: CanvasEdge
+    point: 'from' | 'to'
+    fixedX: number
+    fixedY: number
+  } | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const dmRef = useRef<DataManager | null>(null)
   const controllerRef = useRef<Controller | null>(null)
@@ -469,7 +481,86 @@ export function CanvasEditorOverlay({
     event.currentTarget.setPointerCapture(event.pointerId)
   }
 
+  function edgeWorldPoint(event: { clientX: number; clientY: number }) {
+    const overlay = overlayRef.current
+    const dm = dmRef.current
+    if (!overlay || !dm) return null
+    const bounds = overlay.getBoundingClientRect()
+    return {
+      x: (event.clientX - bounds.left - dm.data.offsetX) / dm.data.scale,
+      y: (event.clientY - bounds.top - dm.data.offsetY) / dm.data.scale,
+    }
+  }
+
+  function beginEdgeEndpoint(
+    event: ReactPointerEvent,
+    edge: CanvasEdge,
+    point: 'from' | 'to',
+  ) {
+    if (event.button !== 0) return
+    event.preventDefault()
+    event.stopPropagation()
+    const dm = dmRef.current
+    if (!dm) return
+    const map = nodeMapOf(Object.values(dm.data.nodeMap).map((item) => item.ref))
+    const geometry = edgeGeometry(edge, map)
+    if (!geometry) return
+    const fixed = point === 'from' ? geometry.end : geometry.start
+    edgeDragRef.current = { edge, point, fixedX: fixed.x, fixedY: fixed.y }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  function finishEdgeEndpoint(event: ReactPointerEvent) {
+    const dragEdge = edgeDragRef.current
+    if (!dragEdge) return
+    edgeDragRef.current = null
+    setEdgePreview(null)
+    const dm = dmRef.current
+    const point = edgeWorldPoint(event)
+    if (!dm || !point) return
+    const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
+    const map = nodeMapOf(nodes)
+    let target: CanvasNode | null = null
+    for (let index = nodes.length - 1; index >= 0; index -= 1) {
+      const candidate = selectableAncestor(nodes[index], map, focusedGroupId)
+      if (isLocked(candidate, map)) continue
+      if (
+        point.x >= candidate.x &&
+        point.x <= candidate.x + candidate.width &&
+        point.y >= candidate.y &&
+        point.y <= candidate.y + candidate.height
+      ) {
+        target = candidate
+        break
+      }
+    }
+    if (!target) return
+    onBeforeChange?.()
+    if (dragEdge.point === 'from') {
+      dragEdge.edge.fromNode = target.id
+      delete dragEdge.edge.fromSide
+    } else {
+      dragEdge.edge.toNode = target.id
+      delete dragEdge.edge.toSide
+    }
+    controllerRef.current?.refresh()
+    onChange?.()
+    setTick((value) => value + 1)
+  }
+
   function movePointer(event: ReactPointerEvent) {
+    if (edgeDragRef.current) {
+      const point = edgeWorldPoint(event)
+      if (point) {
+        setEdgePreview({
+          fromX: edgeDragRef.current.fixedX,
+          fromY: edgeDragRef.current.fixedY,
+          x: point.x,
+          y: point.y,
+        })
+      }
+      return
+    }
     const drag = dragRef.current
     if (!drag) return
     const dx = (event.clientX - drag.startClientX) / drag.scale
@@ -663,6 +754,10 @@ export function CanvasEditorOverlay({
   const map = nodeMapOf(nodes)
   const selectedNodes = nodes.filter((node) => selectedIds.includes(node.id))
   const focusedNode = focusedGroupId ? map.get(focusedGroupId) ?? null : null
+  const selectedEdge = selectedEdgeId
+    ? canvas.edges.find((edge) => edge.id === selectedEdgeId) ?? null
+    : null
+  const selectedEdgeGeometry = selectedEdge ? edgeGeometry(selectedEdge, map) : null
   const canMultiRotate =
     selectedNodes.length > 1 &&
     selectedNodes.every(
@@ -715,7 +810,41 @@ export function CanvasEditorOverlay({
             )
           })}
         </g>
+        {edgePreview ? (
+          <line
+            className="sb-editor-edge-preview"
+            x1={offsetX + edgePreview.fromX * scale}
+            y1={offsetY + edgePreview.fromY * scale}
+            x2={offsetX + edgePreview.x * scale}
+            y2={offsetY + edgePreview.y * scale}
+            vectorEffect="non-scaling-stroke"
+          />
+        ) : null}
       </svg>
+      {selectedEdge && selectedEdgeGeometry ? (
+        <>
+          <div
+            className="sb-editor-edge-endpoint"
+            style={{
+              left: offsetX + selectedEdgeGeometry.start.x * scale,
+              top: offsetY + selectedEdgeGeometry.start.y * scale,
+            }}
+            onPointerDown={(event) => beginEdgeEndpoint(event, selectedEdge, 'from')}
+            onPointerMove={movePointer}
+            onPointerUp={finishEdgeEndpoint}
+          />
+          <div
+            className="sb-editor-edge-endpoint"
+            style={{
+              left: offsetX + selectedEdgeGeometry.end.x * scale,
+              top: offsetY + selectedEdgeGeometry.end.y * scale,
+            }}
+            onPointerDown={(event) => beginEdgeEndpoint(event, selectedEdge, 'to')}
+            onPointerMove={movePointer}
+            onPointerUp={finishEdgeEndpoint}
+          />
+        </>
+      ) : null}
       {focusedNode ? (
         <div
           className="sb-editor-group-focus"
