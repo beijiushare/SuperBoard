@@ -8,6 +8,12 @@ import {
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
+import {
+  collectDescendants,
+  isLocked,
+  nodeMapOf,
+  topAncestor,
+} from './hierarchy'
 
 type DataManager = {
   data: {
@@ -37,6 +43,8 @@ interface DragNode {
   node: CanvasNode
   startX: number
   startY: number
+  startWidth: number
+  startHeight: number
 }
 
 interface DragState {
@@ -199,10 +207,15 @@ export function CanvasEditorOverlay({
         height: Math.abs(y - (start.y - bounds.top)),
       }
       const { offsetX, offsetY, scale } = dm.data
-      const ids = Object.values(dm.data.nodeMap)
-        .map((item) => item.ref)
-        .filter((node) => intersects(box, screenRect(node, offsetX, offsetY, scale)))
-        .map((node) => node.id)
+      const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
+      const map = nodeMapOf(nodes)
+      const ids: string[] = []
+      for (const node of nodes) {
+        const groupId = node['x-superboard']?.groupId
+        if (groupId && map.has(groupId)) continue
+        if (isLocked(node, map)) continue
+        if (intersects(box, screenRect(node, offsetX, offsetY, scale))) ids.push(node.id)
+      }
       onSelect(ids)
       setMarquee(null)
     }
@@ -241,31 +254,50 @@ export function CanvasEditorOverlay({
     event.stopPropagation()
     const dm = dmRef.current
     if (!dm) return
+    const allNodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
+    const map = nodeMapOf(allNodes)
+    const target = topAncestor(node, map)
+    if (isLocked(target, map)) return
+
     if (event.shiftKey) {
       onSelect(
-        selectedIds.includes(node.id)
-          ? selectedIds.filter((id) => id !== node.id)
-          : [...selectedIds, node.id],
+        selectedIds.includes(target.id)
+          ? selectedIds.filter((id) => id !== target.id)
+          : [...selectedIds, target.id],
       )
       return
     }
 
-    const ids = selectedIds.includes(node.id) ? selectedIds : [node.id]
-    if (!selectedIds.includes(node.id)) onSelect(ids)
-    const nodes = ids
-      .map((id) => dm.data.nodeMap[id]?.ref)
-      .filter((item): item is CanvasNode => Boolean(item))
-      .map((item) => ({ node: item, startX: item.x, startY: item.y }))
+    const rootIds = selectedIds.includes(target.id) ? selectedIds : [target.id]
+    if (!selectedIds.includes(target.id)) onSelect(rootIds)
+    const seen = new Set<string>()
+    const dragNodes: DragNode[] = []
+    for (const id of rootIds) {
+      const root = map.get(id)
+      if (!root) continue
+      for (const item of [root, ...collectDescendants(root, allNodes)]) {
+        if (seen.has(item.id)) continue
+        seen.add(item.id)
+        dragNodes.push({
+          node: item,
+          startX: item.x,
+          startY: item.y,
+          startWidth: item.width,
+          startHeight: item.height,
+        })
+      }
+    }
+    if (dragNodes.length === 0) return
     dragRef.current = {
       kind: 'move',
-      nodes,
-      primary: node,
+      nodes: dragNodes,
+      primary: target,
       startClientX: event.clientX,
       startClientY: event.clientY,
-      startX: node.x,
-      startY: node.y,
-      startWidth: node.width,
-      startHeight: node.height,
+      startX: target.x,
+      startY: target.y,
+      startWidth: target.width,
+      startHeight: target.height,
       scale: dm.data.scale,
     }
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -276,17 +308,28 @@ export function CanvasEditorOverlay({
     event.stopPropagation()
     const dm = dmRef.current
     if (!dm) return
-    onSelect([node.id])
+    const allNodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
+    const map = nodeMapOf(allNodes)
+    const target = topAncestor(node, map)
+    if (isLocked(target, map)) return
+    onSelect([target.id])
+    const dragNodes: DragNode[] = [target, ...collectDescendants(target, allNodes)].map((item) => ({
+      node: item,
+      startX: item.x,
+      startY: item.y,
+      startWidth: item.width,
+      startHeight: item.height,
+    }))
     dragRef.current = {
       kind: 'resize',
-      nodes: [{ node, startX: node.x, startY: node.y }],
-      primary: node,
+      nodes: dragNodes,
+      primary: target,
       startClientX: event.clientX,
       startClientY: event.clientY,
-      startX: node.x,
-      startY: node.y,
-      startWidth: node.width,
-      startHeight: node.height,
+      startX: target.x,
+      startY: target.y,
+      startWidth: target.width,
+      startHeight: target.height,
       scale: dm.data.scale,
       corner,
     }
@@ -299,6 +342,9 @@ export function CanvasEditorOverlay({
     const dm = dmRef.current
     const overlay = overlayRef.current
     if (!dm || !overlay || !node['x-superboard']) return
+    if (node['x-superboard'].kind === 'group') return
+    const map = nodeMapOf(Object.values(dm.data.nodeMap).map((item) => item.ref))
+    if (isLocked(node, map)) return
     onSelect([node.id])
     const bounds = overlay.getBoundingClientRect()
     const { offsetX, offsetY, scale } = dm.data
@@ -306,7 +352,7 @@ export function CanvasEditorOverlay({
     const centerY = bounds.top + offsetY + (node.y + node.height / 2) * scale
     dragRef.current = {
       kind: 'rotate',
-      nodes: [{ node, startX: node.x, startY: node.y }],
+      nodes: [{ node, startX: node.x, startY: node.y, startWidth: node.width, startHeight: node.height }],
       primary: node,
       startClientX: event.clientX,
       startClientY: event.clientY,
@@ -354,10 +400,16 @@ export function CanvasEditorOverlay({
       const corner = drag.corner ?? 'se'
       const width = Math.max(40, drag.startWidth + (corner.includes('e') ? dx : -dx))
       const height = Math.max(40, drag.startHeight + (corner.includes('s') ? dy : -dy))
-      drag.primary.x = corner.includes('w') ? drag.startX + drag.startWidth - width : drag.startX
-      drag.primary.y = corner.includes('n') ? drag.startY + drag.startHeight - height : drag.startY
-      drag.primary.width = width
-      drag.primary.height = height
+      const nextX = corner.includes('w') ? drag.startX + drag.startWidth - width : drag.startX
+      const nextY = corner.includes('n') ? drag.startY + drag.startHeight - height : drag.startY
+      const scaleX = drag.startWidth === 0 ? 1 : width / drag.startWidth
+      const scaleY = drag.startHeight === 0 ? 1 : height / drag.startHeight
+      for (const item of drag.nodes) {
+        item.node.x = nextX + (item.startX - drag.startX) * scaleX
+        item.node.y = nextY + (item.startY - drag.startY) * scaleY
+        item.node.width = Math.max(1, item.startWidth * scaleX)
+        item.node.height = Math.max(1, item.startHeight * scaleY)
+      }
     }
     controllerRef.current?.refresh()
     onChange?.()
@@ -372,12 +424,17 @@ export function CanvasEditorOverlay({
   if (!dm) return null
   const { offsetX, offsetY, scale } = dm.data
   const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
+  const map = nodeMapOf(nodes)
   const selectedNodes = nodes.filter((node) => selectedIds.includes(node.id))
+  const editable = nodes.filter((node) => {
+    const kind = node['x-superboard']?.kind
+    if (kind !== 'shape' && kind !== 'drawing' && kind !== 'group') return false
+    return !isLocked(node, map)
+  })
 
   return (
     <div ref={overlayRef} className="sb-editor-overlay" data-tick={tick}>
-      {nodes
-        .filter((node) => node['x-superboard']?.kind === 'shape' || node['x-superboard']?.kind === 'drawing')
+      {editable
         .map((node) => (
           <div
             key={node.id}
@@ -401,7 +458,7 @@ export function CanvasEditorOverlay({
           {selectedNodes.length === 1 ? (
             <>
               <span className="sb-editor-selection-label">{node.id}</span>
-              {node['x-superboard'] ? (
+              {node['x-superboard'] && node['x-superboard'].kind !== 'group' ? (
                 <span
                   className="sb-editor-rotate"
                   onPointerDown={(event) => beginRotate(event, node)}
@@ -422,6 +479,18 @@ export function CanvasEditorOverlay({
           ) : null}
         </div>
       ))}
+
+      {nodes
+        .filter((node) => node['x-superboard']?.locked)
+        .map((node) => (
+          <div
+            key={`locked-${node.id}`}
+            className="sb-editor-locked"
+            style={screenStyle(node, offsetX, offsetY, scale)}
+          >
+            <span className="sb-editor-locked-badge">锁定</span>
+          </div>
+        ))}
 
       {marquee ? <div className="sb-editor-marquee" style={marquee} /> : null}
     </div>

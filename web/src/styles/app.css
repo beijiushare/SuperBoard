@@ -529,7 +529,8 @@
 .canvas-editor-actions {
   display: flex;
   margin-left: auto;
-  gap: 8px;
+  gap: 6px;
+  overflow-x: auto;
 }
 
 .canvas-editor-toolbar button {
@@ -577,6 +578,25 @@
   border: 1px dashed #2f80ed;
   background: rgba(47, 128, 237, 0.08);
   pointer-events: none;
+}
+
+.sb-editor-locked {
+  position: absolute;
+  border: 1px dashed rgba(139, 135, 125, 0.7);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.sb-editor-locked-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(67, 63, 55, 0.72);
+  color: #fff;
+  font-size: 10px;
+  line-height: 16px;
 }
 
 .sb-editor-rotate {

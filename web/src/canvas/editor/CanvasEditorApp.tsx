@@ -8,6 +8,15 @@ import {
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
+import {
+  collectBlocks,
+  collectDescendants,
+  hasSelectedAncestor,
+  isLocked,
+  nextFreeId,
+  nodeMapOf,
+  topAncestor,
+} from './hierarchy'
 
 interface CanvasListItem {
   slug: string
@@ -107,14 +116,23 @@ export function CanvasEditorApp() {
     return () => window.removeEventListener('pointerdown', onPointerDown, true)
   }, [])
 
-  const handleNodeSelect = useCallback((id: string) => {
-    setSelectedIds((current) => {
-      if (!shiftRef.current) return [id]
-      return current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id]
-    })
-  }, [])
+  const handleNodeSelect = useCallback(
+    (id: string) => {
+      if (!canvas) return
+      const map = nodeMapOf(canvas.nodes)
+      const node = map.get(id)
+      if (!node) return
+      const target = topAncestor(node, map)
+      if (isLocked(target, map)) return
+      setSelectedIds((current) => {
+        if (!shiftRef.current) return [target.id]
+        return current.includes(target.id)
+          ? current.filter((item) => item !== target.id)
+          : [...current, target.id]
+      })
+    },
+    [canvas],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -207,10 +225,16 @@ export function CanvasEditorApp() {
   function copySelection() {
     if (!canvas || selectedIds.length === 0) return
     const ids = new Set(selectedIds)
+    const copied = new Map<string, CanvasNode>()
+    for (const node of canvas.nodes) {
+      if (!ids.has(node.id)) continue
+      copied.set(node.id, node)
+      for (const child of collectDescendants(node, canvas.nodes)) copied.set(child.id, child)
+    }
     clipboardRef.current = {
-      nodes: canvas.nodes.filter((node) => ids.has(node.id)).map((node) => structuredClone(node)),
+      nodes: [...copied.values()].map((node) => structuredClone(node)),
       edges: canvas.edges
-        .filter((edge) => ids.has(edge.fromNode) && ids.has(edge.toNode))
+        .filter((edge) => copied.has(edge.fromNode) && copied.has(edge.toNode))
         .map((edge) => structuredClone(edge)),
     }
     pasteCountRef.current = 0
@@ -235,6 +259,13 @@ export function CanvasEditorApp() {
       idMap.set(node.id, clone.id)
       return clone
     })
+    for (const node of nodes) {
+      const extension = node['x-superboard']
+      if (!extension?.groupId) continue
+      const mapped = idMap.get(extension.groupId)
+      if (mapped) extension.groupId = mapped
+      else delete extension.groupId
+    }
     const edges = clipboard.edges.map((edge) => {
       const clone = structuredClone(edge)
       clone.id = nextId(existing, edge.id)
@@ -247,7 +278,12 @@ export function CanvasEditorApp() {
       nodes: [...canvas.nodes, ...nodes],
       edges: [...canvas.edges, ...edges],
     })
-    if (nodes.length > 0) setSelectedIds(nodes.map((node) => node.id))
+    const clonedIds = new Set(nodes.map((node) => node.id))
+    const roots = nodes.filter((node) => {
+      const groupId = node['x-superboard']?.groupId
+      return !groupId || !clonedIds.has(groupId)
+    })
+    if (roots.length > 0) setSelectedIds(roots.map((node) => node.id))
   }
 
   function duplicateSelection() {
@@ -257,15 +293,196 @@ export function CanvasEditorApp() {
 
   function deleteSelection() {
     if (!canvas || selectedIds.length === 0) return
-    const ids = new Set(selectedIds)
+    const map = nodeMapOf(canvas.nodes)
+    const selected = new Set(selectedIds)
+    const deleted = new Set<string>()
+    for (const node of canvas.nodes) {
+      if (!selected.has(node.id) || isLocked(node, map)) continue
+      deleted.add(node.id)
+      for (const child of collectDescendants(node, canvas.nodes)) deleted.add(child.id)
+    }
+    if (deleted.size === 0) return
     recordHistory()
+    const nodes = canvas.nodes.filter((node) => !deleted.has(node.id))
+    for (const node of nodes) {
+      const groupId = node['x-superboard']?.groupId
+      if (groupId && deleted.has(groupId)) delete node['x-superboard']?.groupId
+    }
     applyDocument({
       ...canvas,
-      nodes: canvas.nodes.filter((node) => !ids.has(node.id)),
+      nodes,
       edges: canvas.edges.filter(
-        (edge) => !ids.has(edge.fromNode) && !ids.has(edge.toNode),
+        (edge) => !deleted.has(edge.fromNode) && !deleted.has(edge.toNode),
       ),
     })
+  }
+
+  function ensureExtension(node: CanvasNode) {
+    if (!node['x-superboard']) {
+      node['x-superboard'] = {
+        kind: node.type === 'text' ? 'text' : node.type === 'group' ? 'group' : 'media',
+      }
+    }
+    return node['x-superboard']!
+  }
+
+  function groupSelection() {
+    if (!canvas) return
+    const map = nodeMapOf(canvas.nodes)
+    const selected = new Set(selectedIds)
+    const roots = canvas.nodes.filter(
+      (node) =>
+        selected.has(node.id) &&
+        !hasSelectedAncestor(node, map, selected) &&
+        !isLocked(node, map),
+    )
+    if (roots.length < 2) return
+    recordHistory()
+    const existing = new Set(canvas.nodes.map((node) => node.id))
+    const groupId = nextFreeId(existing, 'group')
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+    for (const node of roots) {
+      minX = Math.min(minX, node.x)
+      minY = Math.min(minY, node.y)
+      maxX = Math.max(maxX, node.x + node.width)
+      maxY = Math.max(maxY, node.y + node.height)
+    }
+    const groupNode: CanvasNode = {
+      id: groupId,
+      type: 'group',
+      x: minX,
+      y: minY,
+      width: Math.max(1, maxX - minX),
+      height: Math.max(1, maxY - minY),
+      'x-superboard': { kind: 'group' },
+    }
+    for (const node of roots) ensureExtension(node).groupId = groupId
+    const minimumIndex = Math.min(...roots.map((node) => canvas.nodes.indexOf(node)))
+    const nodes = [...canvas.nodes]
+    nodes.splice(minimumIndex, 0, groupNode)
+    applyDocument({ ...canvas, nodes })
+    setSelectedIds([groupId])
+  }
+
+  function ungroupSelection() {
+    if (!canvas) return
+    const map = nodeMapOf(canvas.nodes)
+    const selected = new Set(selectedIds)
+    const groups = canvas.nodes.filter(
+      (node) =>
+        selected.has(node.id) &&
+        node['x-superboard']?.kind === 'group' &&
+        !isLocked(node, map),
+    )
+    if (groups.length === 0) return
+    recordHistory()
+    const groupIds = new Set(groups.map((node) => node.id))
+    const released = new Set<string>()
+    for (const node of canvas.nodes) {
+      const groupId = node['x-superboard']?.groupId
+      if (!groupId || !groupIds.has(groupId)) continue
+      delete node['x-superboard']?.groupId
+      released.add(node.id)
+    }
+    applyDocument({
+      ...canvas,
+      nodes: canvas.nodes.filter((node) => !groupIds.has(node.id)),
+      edges: canvas.edges.filter(
+        (edge) => !groupIds.has(edge.fromNode) && !groupIds.has(edge.toNode),
+      ),
+    })
+    const remaining = selectedIds.filter((id) => !groupIds.has(id))
+    setSelectedIds([...new Set([...remaining, ...released])])
+  }
+
+  function toggleGroup() {
+    if (canvas && selectedIds.length === 1) {
+      const node = canvas.nodes.find((item) => item.id === selectedIds[0])
+      if (node?.['x-superboard']?.kind === 'group') {
+        ungroupSelection()
+        return
+      }
+    }
+    groupSelection()
+  }
+
+  function toggleLockSelection() {
+    if (!canvas || selectedIds.length === 0) return
+    const selected = new Set(selectedIds)
+    const targets = canvas.nodes.filter((node) => selected.has(node.id))
+    if (targets.length === 0) return
+    const allLocked = targets.every((node) => node['x-superboard']?.locked)
+    recordHistory()
+    for (const node of targets) {
+      const extension = ensureExtension(node)
+      if (allLocked) delete extension.locked
+      else extension.locked = true
+    }
+    setSaved(false)
+    setSelectedIds(allLocked ? [...selectedIds] : [])
+  }
+
+  function unlockAllLocked() {
+    if (!canvas) return
+    const locked = canvas.nodes.filter((node) => node['x-superboard']?.locked)
+    if (locked.length === 0) return
+    recordHistory()
+    for (const node of locked) delete node['x-superboard']?.locked
+    setSaved(false)
+    setSelectedIds([])
+  }
+
+  function reorderSelection(mode: 'front' | 'back' | 'forward' | 'backward') {
+    if (!canvas || selectedIds.length === 0) return
+    const blocks = collectBlocks(canvas.nodes)
+    const selected = new Set(selectedIds)
+    const isSelected = (block: (typeof blocks)[number]) =>
+      block.nodes.some((node) => selected.has(node.id))
+    const before = blocks.map((block) => block.root.id).join('|')
+    let ordered = [...blocks]
+    if (mode === 'front' || mode === 'back') {
+      const chosen = ordered.filter(isSelected)
+      if (chosen.length === 0) return
+      const rest = ordered.filter((block) => !isSelected(block))
+      ordered = mode === 'front' ? [...rest, ...chosen] : [...chosen, ...rest]
+    } else if (mode === 'forward') {
+      for (let index = ordered.length - 2; index >= 0; index -= 1) {
+        if (isSelected(ordered[index]) && !isSelected(ordered[index + 1])) {
+          const temp = ordered[index]
+          ordered[index] = ordered[index + 1]
+          ordered[index + 1] = temp
+        }
+      }
+    } else {
+      for (let index = 1; index < ordered.length; index += 1) {
+        if (isSelected(ordered[index]) && !isSelected(ordered[index - 1])) {
+          const temp = ordered[index]
+          ordered[index] = ordered[index - 1]
+          ordered[index - 1] = temp
+        }
+      }
+    }
+    const after = ordered.map((block) => block.root.id).join('|')
+    if (before === after) return
+    recordHistory()
+    applyDocument({ ...canvas, nodes: ordered.flatMap((block) => block.nodes) })
+    setSelectedIds(selectedIds)
+  }
+
+  function selectAllUnlocked() {
+    if (!canvas) return
+    const map = nodeMapOf(canvas.nodes)
+    const ids = canvas.nodes
+      .filter((node) => {
+        const groupId = node['x-superboard']?.groupId
+        if (groupId && map.has(groupId)) return false
+        return !isLocked(node, map)
+      })
+      .map((node) => node.id)
+    setSelectedIds(ids)
   }
 
   useEffect(() => {
@@ -297,6 +514,38 @@ export function CanvasEditorApp() {
       if (mod && key === 'd') {
         event.preventDefault()
         duplicateSelection()
+        return
+      }
+      if (mod && key === 'x') {
+        event.preventDefault()
+        copySelection()
+        deleteSelection()
+        return
+      }
+      if (mod && key === 'a') {
+        event.preventDefault()
+        selectAllUnlocked()
+        return
+      }
+      if (mod && key === 'g') {
+        event.preventDefault()
+        if (event.shiftKey) ungroupSelection()
+        else toggleGroup()
+        return
+      }
+      if (!mod && event.shiftKey && key === 'l') {
+        event.preventDefault()
+        toggleLockSelection()
+        return
+      }
+      if (!mod && event.key === ']') {
+        event.preventDefault()
+        reorderSelection(event.altKey ? 'forward' : 'front')
+        return
+      }
+      if (!mod && event.key === '[') {
+        event.preventDefault()
+        reorderSelection(event.altKey ? 'backward' : 'back')
         return
       }
       if (event.key === 'Delete' || event.key === 'Backspace') {
@@ -350,6 +599,18 @@ export function CanvasEditorApp() {
     )
   }
 
+  const nodeMap = nodeMapOf(canvas.nodes)
+  const canGroup =
+    selectedIds.filter((id) => {
+      const node = nodeMap.get(id)
+      return node && !isLocked(node, nodeMap)
+    }).length >= 2
+  const canUngroup = selectedIds.some((id) => {
+    const node = nodeMap.get(id)
+    return node?.['x-superboard']?.kind === 'group' && !isLocked(node, nodeMap)
+  })
+  const hasLocked = canvas.nodes.some((node) => isLocked(node, nodeMap))
+
   return (
     <div className="canvas-editor">
       <header className="canvas-editor-toolbar">
@@ -361,6 +622,24 @@ export function CanvasEditorApp() {
           </button>
           <button type="button" onClick={redo} disabled={!historyState.canRedo}>
             重做
+          </button>
+          <button type="button" onClick={toggleGroup} disabled={!canGroup && !canUngroup} title="Ctrl+G / Ctrl+Shift+G">
+            编组
+          </button>
+          <button type="button" onClick={ungroupSelection} disabled={!canUngroup} title="Ctrl+Shift+G">
+            解组
+          </button>
+          <button type="button" onClick={toggleLockSelection} disabled={selectedIds.length === 0} title="Shift+L">
+            锁定
+          </button>
+          <button type="button" onClick={() => reorderSelection('front')} disabled={selectedIds.length === 0} title="]">
+            置顶
+          </button>
+          <button type="button" onClick={() => reorderSelection('back')} disabled={selectedIds.length === 0} title="[">
+            置底
+          </button>
+          <button type="button" onClick={unlockAllLocked} disabled={!hasLocked} title="解锁全部锁定元素">
+            解锁全部
           </button>
           <button type="button" onClick={() => void save()} disabled={saved}>
             {saved ? '已保存' : '保存'}

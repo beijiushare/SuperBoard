@@ -74,6 +74,8 @@ interface SuperBoardRootExtension {
 ```ts
 interface SuperBoardNodeExtension {
   kind: 'text' | 'markdown' | 'pele' | 'media' | 'shape' | 'drawing' | 'group' | 'frame'
+  rotation?: number
+  locked?: boolean
   style?: Record<string, unknown>
   shape?: 'rect' | 'ellipse' | 'diamond' | 'line'
   media?: {
