@@ -72,6 +72,8 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 	private selectedId?: string;
 	private aborted = false;
 	private eventListeners: Record<string, Array<EventListener | undefined>> = {};
+	private wanted = new Set<string>();
+	private pending = new Set<string>();
 	private readonly DM: DataManager;
 	private readonly SM: StyleManager;
 	private readonly parse: Parser;
@@ -171,36 +173,94 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 
 	private readonly start = () => {
 		this.container.get(InteractionHandler).onClick.subscribe(this.select);
-		this.renderOverlays();
+		this.syncOverlays();
 	};
 
 	private readonly restart = () => {
+		this.wanted.clear();
+		this.pending.clear();
 		this.clearOverlays();
-		this.renderOverlays();
+		this.syncOverlays();
 	};
 
-	private readonly renderOverlays = () => {
-		const overlayMatcher = async ({ ref, fileName }: NodeItem) => {
-			switch (ref.type) {
-				case 'text': {
-					this.createOverlay(ref, await this.parse(ref.text), 'text');
-					break;
-				}
-				case 'file': {
-					for (const type of supportedTypes) {
-						if (!fileName?.match(fileRegex[type])) continue;
-						this.createOverlay(ref, ref.file, type);
-						break;
-					}
-					break;
-				}
-				case 'link': {
-					this.createOverlay(ref, ref.url, 'link');
+	private readonly overlayType = (item: NodeItem) => {
+		const { ref, fileName } = item;
+		if (ref.type === 'text') return 'text' as const;
+		if (ref.type === 'link') return 'link' as const;
+		if (ref.type === 'file') {
+			for (const type of supportedTypes) {
+				if (fileName?.match(fileRegex[type])) return type;
+			}
+		}
+		return null;
+	};
+
+	private readonly createNodeOverlay = async (item: NodeItem) => {
+		if (!this.overlayType(item)) return;
+		const node = item.ref;
+		this.pending.add(node.id);
+		try {
+			if (node.type === 'text') {
+				const content = await this.parse(node.text);
+				if (this.aborted || !this.wanted.has(node.id)) return;
+				this.createOverlay(node, content, 'text');
+				return;
+			}
+			if (this.aborted || !this.wanted.has(node.id)) return;
+			if (node.type === 'link') {
+				this.createOverlay(node, node.url, 'link');
+				return;
+			}
+			if (node.type === 'file') {
+				for (const fileType of supportedTypes) {
+					if (!item.fileName?.match(fileRegex[fileType])) continue;
+					this.createOverlay(node, node.file, fileType);
 					break;
 				}
 			}
-		};
-		Object.values(this.DM.data.nodeMap).forEach(async (node) => await overlayMatcher(node));
+		} finally {
+			this.pending.delete(node.id);
+		}
+	};
+
+	private readonly syncOverlays = () => {
+		if (this.aborted) return;
+		const { offsetX, offsetY, scale, container, nodeMap } = this.DM.data;
+		const width = container.clientWidth;
+		const height = container.clientHeight;
+		const hasViewport = width > 0 && height > 0;
+		const margin = 400 / scale;
+		const left = -offsetX / scale - margin;
+		const top = -offsetY / scale - margin;
+		const right = hasViewport ? left + width / scale + margin * 2 : Infinity;
+		const bottom = hasViewport ? top + height / scale + margin * 2 : Infinity;
+		const wanted = new Set<string>();
+		const candidates: NodeItem[] = [];
+		for (const item of Object.values(nodeMap)) {
+			if (!this.overlayType(item)) continue;
+			const node = item.ref;
+			if (hasViewport) {
+				if (
+					node.x + node.width < left ||
+					node.x > right ||
+					node.y + node.height < top ||
+					node.y > bottom
+				) {
+					continue;
+				}
+			}
+			wanted.add(node.id);
+			candidates.push(item);
+		}
+		this.wanted = wanted;
+		Object.keys(this.overlays).forEach((id) => {
+			if (!wanted.has(id)) this.removeOverlay(id);
+		});
+		for (const item of candidates) {
+			const id = item.ref.id;
+			if (this.overlays[id] || this.pending.has(id)) continue;
+			void this.createNodeOverlay(item);
+		}
 	};
 
 	private readonly themeChanged = () => {
@@ -247,11 +307,13 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 			element.style.transformOrigin = 'center center';
 			element.style.transform = rotation ? `rotate(${rotation}deg)` : '';
 		});
+		this.syncOverlays();
 	};
 
 	private readonly createOverlay = (...args: CreateOverlayArgs) => {
 		if (this.aborted) return;
 		const node = args[0];
+		if (!this.wanted.has(node.id)) return;
 		let element = this.overlays[node.id];
 		if (!element) {
 			element = this.constructOverlay(...args);
@@ -314,23 +376,33 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 		});
 	};
 
+	private readonly removeOverlay = (id: string) => {
+		const overlay = this.overlays[id];
+		if (!overlay) return;
+		const item = this.DM.data.nodeMap[id];
+		item?.onBeforeUnmount?.();
+		if (this.selectedId === id) {
+			this.selectedId = undefined;
+			this.onInteractionEnd();
+			if (item) this.onNodeLosesActive(item.ref);
+		}
+		if (this.eventListeners[id]) {
+			const onStart = this.eventListeners[id][0];
+			const onEnd = this.eventListeners[id][1];
+			if (!onStart || !onEnd) throw destroyError;
+			overlay.removeEventListener('pointerenter', onStart);
+			overlay.removeEventListener('pointerleave', onEnd);
+			overlay.removeEventListener('touchstart', onStart);
+			overlay.removeEventListener('touchend', onEnd);
+			this.eventListeners[id][0] = undefined;
+			this.eventListeners[id][1] = undefined;
+		}
+		overlay.remove();
+		delete this.overlays[id];
+	};
+
 	private readonly clearOverlays = () => {
-		Object.entries(this.overlays).forEach(([id, overlay]) => {
-			this.DM.data.nodeMap[id].onBeforeUnmount?.();
-			if (this.eventListeners[id]) {
-				const onStart = this.eventListeners[id][0];
-				const onEnd = this.eventListeners[id][1];
-				if (!onStart || !onEnd) throw destroyError;
-				overlay.removeEventListener('pointerenter', onStart);
-				overlay.removeEventListener('pointerleave', onEnd);
-				overlay.removeEventListener('touchstart', onStart);
-				overlay.removeEventListener('touchend', onEnd);
-				this.eventListeners[id][0] = undefined;
-				this.eventListeners[id][1] = undefined;
-			}
-			overlay.remove();
-			delete this.overlays[id];
-		});
+		Object.keys(this.overlays).forEach((id) => this.removeOverlay(id));
 	};
 
 	private readonly dispose = () => {
