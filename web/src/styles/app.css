@@ -933,6 +933,26 @@
   pointer-events: none;
 }
 
+.sb-editor-guide {
+  position: absolute;
+  z-index: 3;
+  background: #2f80ed;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.sb-editor-guide-v {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.sb-editor-guide-h {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
 .sb-editor-multi-selection > .sb-editor-rotate {
   pointer-events: auto;
 }

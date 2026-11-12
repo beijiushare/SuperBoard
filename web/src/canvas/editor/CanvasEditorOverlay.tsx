@@ -130,6 +130,7 @@ export function CanvasEditorOverlay({
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
   const [marquee, setMarquee] = useState<Marquee | null>(null)
+  const [guides, setGuides] = useState<{ x?: number; y?: number } | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const dmRef = useRef<DataManager | null>(null)
   const controllerRef = useRef<Controller | null>(null)
@@ -478,9 +479,62 @@ export function CanvasEditorOverlay({
       onBeforeChange?.()
     }
     if (drag.kind === 'move') {
+      const dmNow = dmRef.current
+      let moveX = dx
+      let moveY = dy
+      let nextGuides: { x?: number; y?: number } | null = null
+      if (dmNow && !event.altKey) {
+        const dragged = new Set(drag.nodes.map((item) => item.node.id))
+        let left = Infinity
+        let top = Infinity
+        let right = -Infinity
+        let bottom = -Infinity
+        for (const item of drag.nodes) {
+          left = Math.min(left, item.startX)
+          top = Math.min(top, item.startY)
+          right = Math.max(right, item.startX + item.startWidth)
+          bottom = Math.max(bottom, item.startY + item.startHeight)
+        }
+        const leftEdge = left + dx
+        const rightEdge = right + dx
+        const topEdge = top + dy
+        const bottomEdge = bottom + dy
+        const xAnchors = [leftEdge, (leftEdge + rightEdge) / 2, rightEdge]
+        const yAnchors = [topEdge, (topEdge + bottomEdge) / 2, bottomEdge]
+        const threshold = 8 / drag.scale
+        let bestX = { diff: threshold + 1, target: 0, anchor: 0 }
+        let bestY = { diff: threshold + 1, target: 0, anchor: 0 }
+        for (const item of Object.values(dmNow.data.nodeMap)) {
+          const node = item.ref
+          if (dragged.has(node.id)) continue
+          const xTargets = [node.x, node.x + node.width / 2, node.x + node.width]
+          const yTargets = [node.y, node.y + node.height / 2, node.y + node.height]
+          for (const target of xTargets) {
+            for (const anchor of xAnchors) {
+              const diff = Math.abs(target - anchor)
+              if (diff < bestX.diff) bestX = { diff, target, anchor }
+            }
+          }
+          for (const target of yTargets) {
+            for (const anchor of yAnchors) {
+              const diff = Math.abs(target - anchor)
+              if (diff < bestY.diff) bestY = { diff, target, anchor }
+            }
+          }
+        }
+        if (bestX.diff <= threshold) {
+          moveX += bestX.target - bestX.anchor
+          nextGuides = { ...(nextGuides ?? {}), x: bestX.target }
+        }
+        if (bestY.diff <= threshold) {
+          moveY += bestY.target - bestY.anchor
+          nextGuides = { ...(nextGuides ?? {}), y: bestY.target }
+        }
+      }
+      setGuides(nextGuides)
       for (const item of drag.nodes) {
-        item.node.x = item.startX + dx
-        item.node.y = item.startY + dy
+        item.node.x = item.startX + moveX
+        item.node.y = item.startY + moveY
       }
     } else if (drag.kind === 'rotate' && drag.rotationNodes) {
       const overlay = overlayRef.current
@@ -599,6 +653,7 @@ export function CanvasEditorOverlay({
 
   function endDrag() {
     dragRef.current = null
+    setGuides(null)
   }
 
   const dm = dmRef.current
@@ -746,6 +801,19 @@ export function CanvasEditorOverlay({
             <span className="sb-editor-locked-badge">锁定</span>
           </div>
         ))}
+
+      {guides?.x !== undefined ? (
+        <div
+          className="sb-editor-guide sb-editor-guide-v"
+          style={{ left: offsetX + guides.x * scale }}
+        />
+      ) : null}
+      {guides?.y !== undefined ? (
+        <div
+          className="sb-editor-guide sb-editor-guide-h"
+          style={{ top: offsetY + guides.y * scale }}
+        />
+      ) : null}
 
       {marquee ? <div className="sb-editor-marquee" style={marquee} /> : null}
     </div>
