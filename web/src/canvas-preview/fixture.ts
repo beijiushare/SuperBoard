@@ -87,5 +87,11 @@ export const previewCanvas: CanvasDocument = {
   'x-superboard': {
     version: 1,
     meta: { title: 'Preview', slug: 'preview' },
+    director: {
+      frames: [
+        { id: 'frame-1', order: 1, name: '开场', x: -30, y: -30, width: 600, height: 300 },
+        { id: 'frame-2', order: 2, name: '内容', x: -30, y: 260, width: 1050, height: 300 },
+      ],
+    },
   },
 }
