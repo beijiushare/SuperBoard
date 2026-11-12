@@ -933,6 +933,59 @@
   pointer-events: none;
 }
 
+.sb-md-lock {
+  position: absolute;
+  z-index: 7;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #dedbd2;
+  border-radius: 8px;
+  background: rgba(251, 250, 246, 0.96);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.sb-md-lock:hover {
+  background: #fff;
+}
+
+.sb-md-lock.is-editing {
+  border-color: #2f80ed;
+}
+
+.sb-md-preview {
+  width: 100%;
+  height: 100%;
+  padding: 14px 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: transparent;
+}
+
+.sb-md-editor {
+  position: absolute;
+  z-index: 9;
+  overflow: hidden;
+  border: 2px solid #2f80ed;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+}
+
+.sb-md-editor-inner {
+  overflow: hidden;
+}
+
+.sb-md-editor .vditor {
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
 .sb-editor-guide {
   position: absolute;
   z-index: 3;

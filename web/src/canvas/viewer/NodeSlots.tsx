@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownView } from '../../shared/markdown/MarkdownView'
+import { VditorMarkdownPreview } from '../../shared/markdown/VditorMarkdownPreview'
 import { PeleView } from '../../shared/pele/PeleView'
 import type { SuperBoardMedia, SuperBoardNodeExtension } from '../model'
 import '../../styles/markdown.css'
@@ -39,15 +40,21 @@ export function TextSlot({
   node,
   onActive,
   onSelect,
+  markdownMode = 'default',
 }: {
   node: JSONCanvasTextNode
   onActive?: Hook
   onSelect?: (id: string) => void
+  markdownMode?: 'default' | 'vditor'
 }) {
   useNodeSelection(node.id, onActive, onSelect)
   const ext = extension(node)
   if (ext?.kind === 'markdown') {
-    return <MarkdownView source={node.text} />
+    return markdownMode === 'vditor' ? (
+      <VditorMarkdownPreview source={node.text} />
+    ) : (
+      <MarkdownView source={node.text} />
+    )
   }
   if (ext?.kind === 'pele') {
     return <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />

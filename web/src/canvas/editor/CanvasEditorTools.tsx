@@ -75,6 +75,7 @@ interface CanvasEditorToolsProps {
   onExitTool: () => void
   editRequest?: { id: string; nonce: number } | null
   onEditRequestHandled?: () => void
+  onEditMarkdown?: (id: string) => void
 }
 
 const STROKE_SIZE = 4
@@ -152,6 +153,7 @@ export function CanvasEditorTools({
   onExitTool,
   editRequest,
   onEditRequestHandled,
+  onEditMarkdown,
 }: CanvasEditorToolsProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const previewCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -686,6 +688,10 @@ export function CanvasEditorTools({
     if (!point) return
     if (tool === 'text') {
       const hit = findNodeAt(point.worldX, point.worldY, (node) => editKindOf(node) !== null)
+      if (hit?.['x-superboard']?.kind === 'markdown' && onEditMarkdown) {
+        onEditMarkdown(hit.id)
+        return
+      }
       startEditing(hit, point.worldX, point.worldY)
       return
     }

@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import { boardFsPlugin } from './web/src/dev/boardFs'
 import { canvasFsPlugin } from './web/src/dev/canvasFs/plugin'
 import { gitDeployPlugin } from './web/src/dev/gitDeploy'
+import { vditorAssetsPlugin } from './web/src/dev/vditorAssets/plugin'
 
 function siteBase(value: string) {
   let result = value.trim() || '/SuperBoard/'
@@ -14,7 +15,7 @@ function siteBase(value: string) {
 
 export default defineConfig(({ command, isPreview }) => ({
   base: command === 'build' || isPreview ? siteBase(process.env.BASE_PATH || '') : '/',
-  plugins: [react(), boardFsPlugin(), canvasFsPlugin(), gitDeployPlugin()],
+  plugins: [react(), boardFsPlugin(), canvasFsPlugin(), gitDeployPlugin(), vditorAssetsPlugin()],
   resolve: {
     alias: [
       { find: '@repo/shared', replacement: resolve(process.cwd(), 'web/src/vendor/json-canvas-viewer/shared/index.ts') },
@@ -38,6 +39,7 @@ export default defineConfig(({ command, isPreview }) => ({
   },
   optimizeDeps: {
     entries: ['index.html'],
+    include: ['vditor'],
   },
   server: {
     watch: {

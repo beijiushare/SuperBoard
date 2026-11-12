@@ -35,7 +35,8 @@
     "rehype-sanitize": "^6.0.0",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
-    "unist-util-visit": "^5.0.0"
+    "unist-util-visit": "^5.0.0",
+    "vditor": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "^24.10.0",

@@ -5,6 +5,8 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
+import UseAnimations from 'react-useanimations'
+import lock from 'react-useanimations/lib/lock'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument, CanvasEdge, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
@@ -43,6 +45,8 @@ interface CanvasEditorOverlayProps {
   selectedEdgeId?: string | null
   onSelectEdge?: (id: string | null) => void
   focusedGroupId?: string | null
+  markdownEditingId?: string | null
+  onToggleMarkdownEdit?: (id: string) => void
 }
 
 interface DragNode {
@@ -127,6 +131,8 @@ export function CanvasEditorOverlay({
   selectedEdgeId = null,
   onSelectEdge,
   focusedGroupId = null,
+  markdownEditingId = null,
+  onToggleMarkdownEdit,
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
   const [marquee, setMarquee] = useState<Marquee | null>(null)
@@ -949,6 +955,39 @@ export function CanvasEditorOverlay({
             <span className="sb-editor-locked-badge">锁定</span>
           </div>
         ))}
+
+      {nodes
+        .filter((node) => node['x-superboard']?.kind === 'markdown')
+        .map((node) => {
+          const editing = markdownEditingId === node.id
+          return (
+            <button
+              key={`md-lock-${node.id}`}
+              type="button"
+              className={`sb-md-lock${editing ? ' is-editing' : ''}`}
+              title={editing ? '锁定 Markdown' : '编辑 Markdown'}
+              style={{
+                left: offsetX + (node.x + node.width) * scale + 6,
+                top: offsetY + node.y * scale - 8,
+              }}
+              onPointerDown={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+              }}
+              onClick={(event) => {
+                event.stopPropagation()
+                onToggleMarkdownEdit?.(node.id)
+              }}
+            >
+              <UseAnimations
+                animation={lock}
+                size={32}
+                active={editing}
+                interaction="click-replay"
+              />
+            </button>
+          )
+        })}
 
       {guides?.x !== undefined ? (
         <div

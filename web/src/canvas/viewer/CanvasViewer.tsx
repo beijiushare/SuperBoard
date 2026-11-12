@@ -32,16 +32,25 @@ interface CanvasViewerProps {
   className?: string
   style?: CSSProperties
   onNodeSelect?: (id: string) => void
+  markdownMode?: 'default' | 'vditor'
 }
 
 export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
-  function CanvasViewer({ canvas, theme = 'light', className, style, onNodeSelect }, ref) {
+  function CanvasViewer(
+    { canvas, theme = 'light', className, style, onNodeSelect, markdownMode = 'default' },
+    ref,
+  ) {
     const options = useMemo(() => ({ parser }), [])
     const renderText = useCallback(
       ({ node, onActive }: { node: JSONCanvasTextNode; onActive: Hook }) => (
-        <TextSlot node={node} onActive={onActive} onSelect={onNodeSelect} />
+        <TextSlot
+          node={node}
+          onActive={onActive}
+          onSelect={onNodeSelect}
+          markdownMode={markdownMode}
+        />
       ),
-      [onNodeSelect],
+      [onNodeSelect, markdownMode],
     )
     const renderLink = useCallback(
       ({ node, onActive }: { node: JSONCanvasLinkNode; onActive: Hook }) => (
