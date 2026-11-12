@@ -206,6 +206,8 @@ web/src/
 
 - [x] PNG 导出
 - [x] SVG 导出
+- [x] iframe/视频在导出中显示为链接占位
+- [ ] SVG/PNG 富内容保真（Markdown 渲染、Pele、MathJax、DOM 样式）
 - [ ] 单文件 HTML 导出（后补）
 - [ ] 视口裁剪
 - [ ] 媒体/Markdown 懒加载

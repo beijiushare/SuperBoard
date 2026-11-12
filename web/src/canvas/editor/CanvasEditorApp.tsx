@@ -1,9 +1,38 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+} from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
+import { BoardContextMenu, type BoardContextTarget } from '../../editor/BoardContextMenu'
+import {
+  BoardDialog,
+  DeleteBoardDialog,
+  DeleteFolderDialog,
+  DeployDialog,
+  RenameFolderDialog,
+  type BoardFormValues,
+} from '../../editor/dialogs'
+import { EditorRail } from '../../editor/EditorRail'
+import { BoardTreePanel } from '../../shared/board/BoardTreePanel'
+import type {
+  BoardListItem,
+  BoardScope,
+  BoardTreeFile,
+  BoardTreeFolder,
+} from '../../shared/board/types'
+import { buildBoardTree } from '../../shared/board/tree'
+import { useTreeExpansion } from '../../shared/board/useTreeExpansion'
+import { DirectorHud } from '../../shared/director/DirectorHud'
+import { PresentationOverlay } from '../../shared/director/PresentationOverlay'
 import {
   parseCanvas,
   type CanvasDocument,
   type CanvasEdge,
+  type CanvasFrame,
   type CanvasNode,
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
@@ -22,12 +51,8 @@ import {
   topAncestor,
 } from './hierarchy'
 
-interface CanvasListItem {
-  slug: string
-  title: string
-  scope: 'public' | 'private'
-  path: string
-  updatedAt?: string
+interface CanvasListItem extends BoardListItem {
+  scope: BoardScope
 }
 
 interface Viewport {
@@ -59,6 +84,10 @@ const AUTOSAVE_DELAY = 1200
 
 type SaveState = 'saved' | 'dirty' | 'saving' | 'error'
 
+type BoardDialogState =
+  | { mode: 'create'; folder?: string }
+  | { mode: 'rename'; board: BoardListItem }
+
 function readViewport(handle: CanvasViewerHandle | null): Viewport | null {
   try {
     const viewer = handle?.viewer as ViewerInternals | undefined
@@ -83,6 +112,22 @@ function writeViewport(handle: CanvasViewerHandle | null, viewport: Viewport) {
   } catch {
     // 查看器尚未挂载，忽略
   }
+}
+
+function updateEditorUrl(slug: string | null, scope: BoardScope, tree: boolean) {
+  const params = new URLSearchParams(window.location.search)
+  if (tree) params.set('tree', '1')
+  else params.delete('tree')
+  if (slug) params.set('board', slug)
+  else params.delete('board')
+  if (scope === 'private') params.set('scope', 'private')
+  else params.delete('scope')
+  const query = params.toString()
+  window.history.replaceState(
+    null,
+    '',
+    `${window.location.pathname}${query ? `?${query}` : ''}`,
+  )
 }
 
 function nextId(existing: Set<string>, base: string) {
@@ -110,6 +155,35 @@ export function CanvasEditorApp() {
   const [saveState, setSaveState] = useState<SaveState>('saved')
   const [saveRequest, setSaveRequest] = useState(0)
   const [historyState, setHistoryState] = useState({ canUndo: false, canRedo: false })
+  const [treeMode, setTreeMode] = useState(() =>
+    new URLSearchParams(window.location.search).has('tree'),
+  )
+  const [treeOpen, setTreeOpen] = useState(true)
+  const [scope, setScope] = useState<BoardScope>(() =>
+    new URLSearchParams(window.location.search).get('scope') === 'private'
+      ? 'private'
+      : 'public',
+  )
+  const [stylePanelOpen, setStylePanelOpen] = useState(false)
+  const [menuPanelOpen, setMenuPanelOpen] = useState(false)
+  const [directorMode, setDirectorMode] = useState(false)
+  const [presentation, setPresentation] = useState(false)
+  const [presentationMenu, setPresentationMenu] = useState<{ x: number; y: number } | null>(
+    null,
+  )
+  const [frameIndex, setFrameIndex] = useState(0)
+  const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
+  const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
+  const [pendingDeleteFolder, setPendingDeleteFolder] = useState<BoardTreeFolder | null>(
+    null,
+  )
+  const [deployDialogOpen, setDeployDialogOpen] = useState(false)
+  const [contextMenu, setContextMenu] = useState<{
+    x: number
+    y: number
+    target: BoardContextTarget
+  } | null>(null)
   const viewerRef = useRef<CanvasViewerHandle>(null)
   const shiftRef = useRef(false)
   const historyRef = useRef<{ past: CanvasDocument[]; future: CanvasDocument[] }>({
@@ -121,6 +195,18 @@ export function CanvasEditorApp() {
   const pendingViewportRef = useRef<Viewport | null>(null)
   const revisionRef = useRef(0)
   const savingRef = useRef(false)
+
+  const scopedItems = useMemo(
+    () => items.filter((item) => item.scope === scope),
+    [items, scope],
+  )
+  const treeNodes = useMemo(() => buildBoardTree(scopedItems), [scopedItems])
+  const { expanded, toggleFolder, expandPath, renameExpandedPath } =
+    useTreeExpansion(scopedItems)
+  const directorFrames = useMemo(() => {
+    const frames = canvas?.['x-superboard']?.director?.frames ?? []
+    return [...frames].sort((a, b) => a.order - b.order)
+  }, [canvas])
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -150,37 +236,52 @@ export function CanvasEditorApp() {
 
   useEffect(() => {
     let cancelled = false
-    fetch('/__canvases')
-      .then((response) => response.json())
-      .then((data: { canvases: CanvasListItem[] }) => {
+    void (async () => {
+      try {
+        const response = await fetch('/__canvases')
+        if (!response.ok) throw new Error(`加载失败（${response.status}）`)
+        const data = (await response.json()) as { canvases: CanvasListItem[] }
         if (cancelled) return
         const list = data.canvases ?? []
         setItems(list)
-        const requested = new URLSearchParams(window.location.search).get('board')
-        const first = list.find((item) => item.slug === requested) ?? list[0]
+        const params = new URLSearchParams(window.location.search)
+        const initialScope: BoardScope =
+          params.get('scope') === 'private' ? 'private' : 'public'
+        const initialTree = params.has('tree')
+        setScope(initialScope)
+        setTreeMode(initialTree)
+        const scoped = list.filter((item) => item.scope === initialScope)
+        const requested = params.get('board')
+        const first = scoped.find((item) => item.slug === requested) ?? scoped[0]
         if (!first) {
           setLoading(false)
           return
         }
+        const canvasResponse = await fetch(
+          `/__canvases/${encodeURIComponent(first.slug)}?scope=${first.scope}`,
+        )
+        if (!canvasResponse.ok) throw new Error(`加载失败（${canvasResponse.status}）`)
+        const next = await parseCanvas(await canvasResponse.text())
+        if (cancelled) return
+        historyRef.current = { past: [], future: [] }
+        setHistoryState({ canUndo: false, canRedo: false })
+        clipboardRef.current = null
+        setSelectedIds([])
+        setTool('select')
         setSelectedSlug(first.slug)
-        return fetch(`/__canvases/${encodeURIComponent(first.slug)}?scope=${first.scope}`)
-          .then((response) => response.text())
-          .then((text) => parseCanvas(text))
-          .then((next) => {
-            if (!cancelled) {
-              historyRef.current = { past: [], future: [] }
-              setHistoryState({ canUndo: false, canRedo: false })
-              setCanvas(next)
-              setLoading(false)
-            }
-          })
-      })
-      .catch((loadError) => {
+        setScope(first.scope)
+        setCanvas(next)
+        setSaveState('saved')
+        expandPath(first.path)
+        updateEditorUrl(first.slug, first.scope, initialTree)
+        setLoading(false)
+      } catch (loadError) {
         if (!cancelled) {
           setError(loadError instanceof Error ? loadError.message : String(loadError))
           setLoading(false)
         }
-      })
+      }
+    })()
     return () => {
       cancelled = true
     }
@@ -608,6 +709,11 @@ export function CanvasEditorApp() {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
       if (target?.closest('input, textarea, select, [contenteditable="true"]')) return
+      if (event.key === 'Escape' && presentation) {
+        event.preventDefault()
+        exitPresentation()
+        return
+      }
       const mod = event.ctrlKey || event.metaKey
       const key = event.key.toLowerCase()
       if (mod && key === 's') {
@@ -717,12 +823,15 @@ export function CanvasEditorApp() {
     return () => window.removeEventListener('beforeunload', onBeforeUnload)
   }, [saveState])
 
-  async function save() {
-    if (!canvas || savingRef.current) return
+  async function save(): Promise<boolean> {
+    if (!canvas || savingRef.current) return false
+    if (saveState === 'saved') return true
     const meta = canvas['x-superboard']?.meta
-    if (!meta) return
-    const item = items.find((entry) => entry.slug === selectedSlug)
-    if (!item) return
+    if (!meta) return false
+    const item = items.find(
+      (entry) => entry.slug === selectedSlug && entry.scope === scope,
+    )
+    if (!item) return false
     const revision = revisionRef.current
     savingRef.current = true
     setSaveState('saving')
@@ -737,7 +846,7 @@ export function CanvasEditorApp() {
       )
       if (!response.ok) {
         setSaveState('error')
-        return
+        return false
       }
       if (revisionRef.current === revision) {
         setSaveState('saved')
@@ -745,22 +854,56 @@ export function CanvasEditorApp() {
         setSaveState('dirty')
         setSaveRequest((value) => value + 1)
       }
+      return true
     } catch {
       setSaveState('error')
+      return false
     } finally {
       savingRef.current = false
     }
   }
 
-  async function openBoard(slug: string) {
-    if (!slug || slug === selectedSlug) return
-    const item = items.find((entry) => entry.slug === slug)
+  async function fetchCanvasDocument(item: CanvasListItem) {
+    const response = await fetch(
+      `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}`,
+    )
+    if (!response.ok) throw new Error(`加载失败（${response.status}）`)
+    return parseCanvas(await response.text())
+  }
+
+  function activateCanvas(item: CanvasListItem, next: CanvasDocument) {
+    historyRef.current = { past: [], future: [] }
+    setHistoryState({ canUndo: false, canRedo: false })
+    clipboardRef.current = null
+    setSelectedIds([])
+    setTool('select')
+    setDirectorMode(false)
+    setPresentation(false)
+    setPresentationMenu(null)
+    setSelectedSlug(item.slug)
+    setScope(item.scope)
+    setCanvas(next)
+    setSaveState('saved')
+    expandPath(item.path)
+    updateEditorUrl(item.slug, item.scope, treeMode)
+  }
+
+  async function openBoard(
+    slug: string,
+    targetScope: BoardScope = scope,
+    force = false,
+  ) {
+    if (!slug || (slug === selectedSlug && targetScope === scope)) return
+    const item = items.find(
+      (entry) => entry.slug === slug && entry.scope === targetScope,
+    )
     if (!item) return
     if (savingRef.current) {
       window.alert('正在保存，请稍候再切换白板。')
       return
     }
     if (
+      !force &&
       saveState !== 'saved' &&
       !window.confirm('当前白板有未保存的修改，切换后会丢失，继续？')
     ) {
@@ -769,25 +912,267 @@ export function CanvasEditorApp() {
     setSaveState('saved')
     setLoading(true)
     try {
-      const response = await fetch(
-        `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}`,
-      )
-      if (!response.ok) throw new Error(`加载失败（${response.status}）`)
-      const next = await parseCanvas(await response.text())
-      historyRef.current = { past: [], future: [] }
-      setHistoryState({ canUndo: false, canRedo: false })
-      clipboardRef.current = null
-      setSelectedIds([])
-      setTool('select')
-      setSelectedSlug(item.slug)
-      setCanvas(next)
-      setSaveState('saved')
-      setLoading(false)
+      const next = await fetchCanvasDocument(item)
+      activateCanvas(item, next)
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : String(loadError))
+    } finally {
       setLoading(false)
     }
   }
+
+  async function refreshItems() {
+    const response = await fetch('/__canvases')
+    if (!response.ok) throw new Error(`加载失败（${response.status}）`)
+    const data = (await response.json()) as { canvases: CanvasListItem[] }
+    const list = data.canvases ?? []
+    setItems(list)
+    return list
+  }
+
+  async function switchScope(nextScope: BoardScope) {
+    if (nextScope === scope) return
+    if (saveState !== 'saved' && !savingRef.current) {
+      const ok = await save()
+      if (!ok) return
+    }
+    setTreeOpen(true)
+    setMenuPanelOpen(false)
+    setStylePanelOpen(false)
+    const nextItems = items.filter((item) => item.scope === nextScope)
+    const target =
+      nextItems.find((item) => item.slug === selectedSlug) ?? nextItems[0]
+    if (!target) {
+      setScope(nextScope)
+      setCanvas(null)
+      setSelectedSlug('')
+      setSaveState('saved')
+      setDirectorMode(false)
+      setPresentation(false)
+      updateEditorUrl(null, nextScope, treeMode)
+      return
+    }
+    await openBoard(target.slug, nextScope, true)
+  }
+
+  function toggleTree() {
+    if (treeMode) {
+      setTreeOpen((open) => !open)
+      return
+    }
+    setTreeMode(true)
+    setTreeOpen(true)
+    if (selectedSlug) updateEditorUrl(selectedSlug, scope, true)
+  }
+
+  function openContextMenu(
+    event: ReactMouseEvent<HTMLElement>,
+    target: BoardContextTarget,
+  ) {
+    event.preventDefault()
+    event.stopPropagation()
+    setContextMenu({ x: event.clientX, y: event.clientY, target })
+  }
+
+  function openRootContextMenu(event: ReactMouseEvent<HTMLDivElement>) {
+    if ((event.target as HTMLElement).closest('.sb-tree-row')) return
+    event.preventDefault()
+    setContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      target: { type: 'root' },
+    })
+  }
+
+  async function handleCreate(values: BoardFormValues) {
+    if (saveState !== 'saved') {
+      const ok = await save()
+      if (!ok) throw new Error('当前白板保存失败，无法新建')
+    }
+    const response = await fetch('/__canvases', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: values.title,
+        slug: values.slug,
+        folder: values.folder || undefined,
+        scope,
+      }),
+    })
+    if (!response.ok) {
+      const data = (await response.json().catch(() => null)) as { error?: string } | null
+      throw new Error(data?.error || `创建失败（${response.status}）`)
+    }
+    const data = (await response.json()) as {
+      canvas: CanvasDocument
+      path: string
+      scope: BoardScope
+    }
+    const list = await refreshItems()
+    const item = list.find(
+      (entry) => entry.slug === data.canvas['x-superboard']!.meta.slug && entry.scope === scope,
+    )
+    if (item) {
+      expandPath(item.path)
+      activateCanvas(item, data.canvas)
+    }
+  }
+
+  async function handleRename(values: BoardFormValues) {
+    if (!boardDialog || boardDialog.mode !== 'rename') return
+    const target = boardDialog.board
+    const isCurrent = target.slug === selectedSlug && target.scope === scope
+    if (isCurrent && saveState !== 'saved') {
+      const ok = await save()
+      if (!ok) throw new Error('当前白板保存失败，无法重命名')
+    }
+    const response = await fetch(
+      `/__canvases/${encodeURIComponent(target.slug)}?scope=${target.scope ?? scope}`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: values.title,
+          slug: values.slug,
+          folder: values.folder,
+        }),
+      },
+    )
+    if (!response.ok) {
+      const data = (await response.json().catch(() => null)) as { error?: string } | null
+      throw new Error(data?.error || `重命名失败（${response.status}）`)
+    }
+    const data = (await response.json()) as {
+      canvas: CanvasDocument
+      path: string
+      scope: BoardScope
+    }
+    await refreshItems()
+    expandPath(data.path)
+    if (isCurrent) {
+      setCanvas(data.canvas)
+      setSelectedSlug(data.canvas['x-superboard']!.meta.slug)
+      updateEditorUrl(data.canvas['x-superboard']!.meta.slug, scope, treeMode)
+    }
+  }
+
+  async function handleDelete(slug: string) {
+    if (savingRef.current) throw new Error('正在保存，请稍后再删除')
+    const item = items.find(
+      (entry) => entry.slug === slug && entry.scope === scope,
+    )
+    if (!item) return
+    const isCurrent = slug === selectedSlug
+    if (isCurrent) setSaveState('saved')
+    const response = await fetch(
+      `/__canvases/${encodeURIComponent(slug)}?scope=${item.scope}`,
+      { method: 'DELETE' },
+    )
+    if (!response.ok) throw new Error(`删除失败（${response.status}）`)
+    const list = await refreshItems()
+    if (!isCurrent) return
+    const next = list.find((entry) => entry.scope === scope)
+    if (next) {
+      setLoading(true)
+      try {
+        const doc = await fetchCanvasDocument(next)
+        activateCanvas(next, doc)
+      } finally {
+        setLoading(false)
+      }
+    } else {
+      setCanvas(null)
+      setSelectedSlug('')
+      setSaveState('saved')
+      updateEditorUrl(null, scope, treeMode)
+    }
+  }
+
+  async function handleRenameFolder(name: string) {
+    if (!folderDialog) return
+    if (saveState !== 'saved') {
+      const ok = await save()
+      if (!ok) throw new Error('当前白板保存失败，无法重命名文件夹')
+    }
+    const response = await fetch('/__folders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: folderDialog.path, scope, name }),
+    })
+    if (!response.ok) throw new Error(`重命名失败（${response.status}）`)
+    const data = (await response.json()) as { path: string }
+    await refreshItems()
+    renameExpandedPath(folderDialog.path, data.path)
+  }
+
+  async function handleDeleteFolder(path: string) {
+    if (saveState !== 'saved') {
+      const ok = await save()
+      if (!ok) throw new Error('当前白板保存失败，无法删除文件夹')
+    }
+    const currentPath = activeItem?.path
+    const currentInside = Boolean(
+      currentPath &&
+        (currentPath === path || currentPath.startsWith(`${path}/`)),
+    )
+    const response = await fetch(
+      `/__folders?path=${encodeURIComponent(path)}&scope=${scope}`,
+      { method: 'DELETE' },
+    )
+    if (!response.ok) throw new Error(`删除失败（${response.status}）`)
+    const list = await refreshItems()
+    if (!currentInside) return
+    const next = list.find((entry) => entry.scope === scope)
+    if (next) {
+      setLoading(true)
+      try {
+        const doc = await fetchCanvasDocument(next)
+        activateCanvas(next, doc)
+      } finally {
+        setLoading(false)
+      }
+    } else {
+      setCanvas(null)
+      setSelectedSlug('')
+      setSaveState('saved')
+      updateEditorUrl(null, scope, treeMode)
+    }
+  }
+
+  function startPresentation(startIndex = 0) {
+    if (directorFrames.length === 0) return
+    const index = Math.max(0, Math.min(startIndex, directorFrames.length - 1))
+    setPresentation(true)
+    setPresentationMenu(null)
+    setFrameIndex(index)
+    void viewerRef.current?.viewer?.playDirectorFrame?.(directorFrames[index], true)
+  }
+
+  function advancePresentation() {
+    if (!presentation) return
+    const next = frameIndex + 1
+    if (next >= directorFrames.length) {
+      setPresentation(false)
+      viewerRef.current?.viewer?.restoreDirectorCamera?.()
+      if (directorMode) viewerRef.current?.viewer?.setDirectorVisible?.(true)
+      return
+    }
+    setFrameIndex(next)
+    void viewerRef.current?.viewer?.playDirectorFrame?.(directorFrames[next], true)
+  }
+
+  function exitPresentation() {
+    setPresentation(false)
+    setPresentationMenu(null)
+    viewerRef.current?.viewer?.restoreDirectorCamera?.()
+    if (directorMode) viewerRef.current?.viewer?.setDirectorVisible?.(true)
+  }
+
+  useEffect(() => {
+    const viewer = viewerRef.current?.viewer
+    viewer?.setDirectorVisible?.(directorMode && !presentation)
+    if (!directorMode) viewer?.restoreDirectorCamera?.()
+  }, [directorMode, presentation, canvas])
 
   if (loading) return <div className="sb-screen-message">正在加载画布…</div>
   if (error) {
@@ -798,27 +1183,35 @@ export function CanvasEditorApp() {
       </div>
     )
   }
-  if (!canvas) {
-    return (
-      <div className="sb-screen-message">
-        <h1>还没有 .canvas</h1>
-        <p>先运行 `npm run convert:canvas` 或在 `whiteboards/` 中放入 `.canvas` 文件。</p>
-      </div>
-    )
+  function toggleDirector() {
+    if (directorMode) {
+      setDirectorMode(false)
+      setPresentation(false)
+      setPresentationMenu(null)
+      viewerRef.current?.viewer?.setDirectorVisible?.(false)
+      viewerRef.current?.viewer?.restoreDirectorCamera?.()
+      return
+    }
+    setDirectorMode(true)
   }
 
-  const nodeMap = nodeMapOf(canvas.nodes)
-  const canGroup =
-    selectedIds.filter((id) => {
-      const node = nodeMap.get(id)
-      return node && !isLocked(node, nodeMap)
-    }).length >= 2
+  const nodeMap = canvas ? nodeMapOf(canvas.nodes) : new Map<string, CanvasNode>()
+  const canGroup = canvas
+    ? selectedIds.filter((id) => {
+        const node = nodeMap.get(id)
+        return node && !isLocked(node, nodeMap)
+      }).length >= 2
+    : false
   const canUngroup = selectedIds.some((id) => {
     const node = nodeMap.get(id)
     return node?.['x-superboard']?.kind === 'group' && !isLocked(node, nodeMap)
   })
-  const hasLocked = canvas.nodes.some((node) => isLocked(node, nodeMap))
-  const activeItem = items.find((entry) => entry.slug === selectedSlug)
+  const hasLocked = canvas
+    ? canvas.nodes.some((node) => isLocked(node, nodeMap))
+    : false
+  const activeItem = items.find(
+    (entry) => entry.slug === selectedSlug && entry.scope === scope,
+  )
   const saveLabel =
     saveState === 'saving'
       ? '保存中…'
@@ -827,132 +1220,255 @@ export function CanvasEditorApp() {
         : saveState === 'error'
           ? '重试保存'
           : '已保存'
+  const railSaveLabel =
+    saveState === 'error'
+      ? '保存失败'
+      : saveState === 'dirty'
+        ? '点击保存'
+        : saveState === 'saving'
+          ? '保存中…'
+          : '已保存'
 
   return (
-    <div className="canvas-editor">
-      <header className="canvas-editor-toolbar">
-        <strong>{canvas['x-superboard']?.meta.title}</strong>
-        <select
-          className="canvas-editor-board-select"
-          value={selectedSlug}
-          title="切换白板"
-          onChange={(event) => void openBoard(event.target.value)}
-        >
-          {items.map((item) => (
-            <option key={item.slug} value={item.slug}>
-              {item.title || item.slug}
-              {item.scope === 'private' ? '（私有）' : ''}
-            </option>
-          ))}
-        </select>
-        <span className="canvas-editor-meta">
-          {selectedIds.length > 0
-            ? `已选 ${selectedIds.length} 项`
-            : activeItem?.scope === 'private'
-              ? '私有'
-              : '公开'}
-        </span>
-        <div className="canvas-editor-actions">
-          <button type="button" onClick={undo} disabled={!historyState.canUndo}>
-            撤销
-          </button>
-          <button type="button" onClick={redo} disabled={!historyState.canRedo}>
-            重做
-          </button>
-          <button type="button" onClick={toggleGroup} disabled={!canGroup && !canUngroup} title="Ctrl+G / Ctrl+Shift+G">
-            编组
-          </button>
-          <button type="button" onClick={ungroupSelection} disabled={!canUngroup} title="Ctrl+Shift+G">
-            解组
-          </button>
-          <button type="button" onClick={toggleLockSelection} disabled={selectedIds.length === 0} title="Shift+L">
-            锁定
-          </button>
-          <button type="button" onClick={() => reorderSelection('front')} disabled={selectedIds.length === 0} title="]">
-            置顶
-          </button>
-          <button type="button" onClick={() => reorderSelection('back')} disabled={selectedIds.length === 0} title="[">
-            置底
-          </button>
-          <button type="button" onClick={unlockAllLocked} disabled={!hasLocked} title="解锁全部锁定元素">
-            解锁全部
-          </button>
-          <button type="button" onClick={() => downloadCanvasSvg(canvas)}>
-            导出 SVG
-          </button>
-          <button type="button" onClick={() => downloadCanvasPng(canvas)}>
-            导出 PNG
-          </button>
-          <button
-            type="button"
-            onClick={() => void save()}
-            disabled={saveState === 'saved' || saveState === 'saving'}
-            title="Ctrl+S"
-          >
-            {saveLabel}
-          </button>
-        </div>
-      </header>
-      <div className="canvas-editor-toolstrip">
-        {TOOLS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={tool === item.id ? 'is-active' : undefined}
-            title={`${item.label}（${item.shortcut}）`}
-            onClick={() => setTool(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
-        <span className="canvas-editor-tool-sep" />
-        <button type="button" onClick={() => insertTextBlock('markdown')}>
-          插入 Markdown
-        </button>
-        <button type="button" onClick={() => insertTextBlock('pele')}>
-          插入 Pele
-        </button>
-        <button type="button" onClick={() => setMediaDialogOpen(true)}>
-          插入媒体
-        </button>
+    <div
+      className={`sb-app sb-app-editor${directorMode ? ' is-director-mode' : ''}${presentation ? ' is-presenting' : ''}`}
+    >
+      <EditorRail
+        mode="edit"
+        treeMode={treeMode}
+        treeOpen={treeOpen}
+        sidebarLabel={treeMode && treeOpen ? '收起目录' : '展开目录'}
+        onToggleTree={toggleTree}
+        scopeLabel={scope === 'public' ? '切换到私有白板' : '切换到公开白板'}
+        onSwitchScope={() => void switchScope(scope === 'public' ? 'private' : 'public')}
+        saveLabel={railSaveLabel}
+        saveState={saveState}
+        canSave={Boolean(canvas) && saveState !== 'saving'}
+        onSave={() => void save()}
+        stylePanelOpen={stylePanelOpen}
+        onToggleStylePanel={() => setStylePanelOpen((open) => !open)}
+        menuPanelOpen={menuPanelOpen}
+        menuPanelLabel={menuPanelOpen ? '隐藏顶部操作栏' : '显示顶部操作栏'}
+        onToggleMenuPanel={() => setMenuPanelOpen((open) => !open)}
+        directorMode={directorMode}
+        onToggleDirector={toggleDirector}
+        onDeploy={() => setDeployDialogOpen(true)}
+      />
+
+      <div className="sb-workspace">
+        {treeMode ? (
+          <BoardTreePanel
+            nodes={treeNodes}
+            title={`SuperBoard-${scope}`}
+            collapsed={!treeOpen}
+            selectedSlug={selectedSlug}
+            expanded={expanded}
+            onToggle={toggleFolder}
+            onSelect={(slug) => {
+              void openBoard(slug, scope)
+              if (window.matchMedia('(max-width: 860px)').matches) setTreeOpen(false)
+            }}
+            onContextMenu={(event, target) => openContextMenu(event, target)}
+            onRootContextMenu={openRootContextMenu}
+            emptyLabel="还没有白板，在空白处右键新建"
+          />
+        ) : null}
+
+        <main className="sb-canvas">
+          <div className="canvas-editor">
+            {menuPanelOpen && canvas ? (
+              <header className="canvas-editor-toolbar">
+                <strong>{canvas['x-superboard']?.meta.title}</strong>
+                <select
+                  className="canvas-editor-board-select"
+                  value={selectedSlug}
+                  title="切换白板"
+                  onChange={(event) => void openBoard(event.target.value, scope)}
+                >
+                  {scopedItems.map((item) => (
+                    <option key={item.slug} value={item.slug}>
+                      {item.title || item.slug}
+                    </option>
+                  ))}
+                </select>
+                <span className="canvas-editor-meta">
+                  {selectedIds.length > 0
+                    ? `已选 ${selectedIds.length} 项`
+                    : activeItem?.scope === 'private'
+                      ? '私有'
+                      : '公开'}
+                </span>
+                <div className="canvas-editor-actions">
+                  <button type="button" onClick={undo} disabled={!historyState.canUndo}>
+                    撤销
+                  </button>
+                  <button type="button" onClick={redo} disabled={!historyState.canRedo}>
+                    重做
+                  </button>
+                  <button
+                    type="button"
+                    onClick={toggleGroup}
+                    disabled={!canGroup && !canUngroup}
+                    title="Ctrl+G / Ctrl+Shift+G"
+                  >
+                    编组
+                  </button>
+                  <button
+                    type="button"
+                    onClick={ungroupSelection}
+                    disabled={!canUngroup}
+                    title="Ctrl+Shift+G"
+                  >
+                    解组
+                  </button>
+                  <button
+                    type="button"
+                    onClick={toggleLockSelection}
+                    disabled={selectedIds.length === 0}
+                    title="Shift+L"
+                  >
+                    锁定
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => reorderSelection('front')}
+                    disabled={selectedIds.length === 0}
+                    title="]"
+                  >
+                    置顶
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => reorderSelection('back')}
+                    disabled={selectedIds.length === 0}
+                    title="["
+                  >
+                    置底
+                  </button>
+                  <button
+                    type="button"
+                    onClick={unlockAllLocked}
+                    disabled={!hasLocked}
+                    title="解锁全部锁定元素"
+                  >
+                    解锁全部
+                  </button>
+                  <button type="button" onClick={() => downloadCanvasSvg(canvas)}>
+                    导出 SVG
+                  </button>
+                  <button type="button" onClick={() => downloadCanvasPng(canvas)}>
+                    导出 PNG
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void save()}
+                    disabled={saveState === 'saved' || saveState === 'saving'}
+                    title="Ctrl+S"
+                  >
+                    {saveLabel}
+                  </button>
+                </div>
+              </header>
+            ) : null}
+
+            <div className="canvas-editor-stage">
+              {canvas ? (
+                <>
+                  <CanvasViewer
+                    ref={viewerRef}
+                    canvas={canvas}
+                    onNodeSelect={handleNodeSelect}
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                  <CanvasEditorOverlay
+                    canvas={canvas}
+                    viewerRef={viewerRef}
+                    selectedIds={selectedIds}
+                    onSelect={setSelectedIds}
+                    onChange={markDirty}
+                    onBeforeChange={recordHistory}
+                    interactive={tool === 'select'}
+                  />
+                  <CanvasEditorTools
+                    canvas={canvas}
+                    tool={tool}
+                    viewerRef={viewerRef}
+                    onBeforeChange={recordHistory}
+                    onChange={markDirty}
+                    onApply={applyDocument}
+                    onExitTool={() => setTool('select')}
+                    editRequest={editRequest}
+                    onEditRequestHandled={() => setEditRequest(null)}
+                  />
+                  {stylePanelOpen ? (
+                    <CanvasStylePanel
+                      canvas={canvas}
+                      selectedIds={selectedIds}
+                      onBeforeChange={recordHistory}
+                      onApply={applyDocument}
+                    />
+                  ) : null}
+                  <div className="canvas-editor-toolstrip">
+                    {TOOLS.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={tool === item.id ? 'is-active' : undefined}
+                        title={`${item.label}（${item.shortcut}）`}
+                        onClick={() => setTool(item.id)}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                    <span className="canvas-editor-tool-sep" />
+                    <button type="button" onClick={() => insertTextBlock('markdown')}>
+                      插入 Markdown
+                    </button>
+                    <button type="button" onClick={() => insertTextBlock('pele')}>
+                      插入 Pele
+                    </button>
+                    <button type="button" onClick={() => setMediaDialogOpen(true)}>
+                      插入媒体
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="sb-canvas-empty">
+                  <div>
+                    <h2>还没有白板</h2>
+                    <p>
+                      在左侧目录空白处右键新建白板，或先把 .canvas 放进 whiteboards/{scope}/。
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
       </div>
-      <main className="canvas-editor-stage">
-        <CanvasViewer
-          ref={viewerRef}
-          canvas={canvas}
-          onNodeSelect={handleNodeSelect}
-          style={{ width: '100%', height: '100%' }}
+
+      {directorMode && !presentation ? (
+        <DirectorHud onPlay={() => startPresentation(0)} onExit={toggleDirector} />
+      ) : null}
+
+      {presentation ? (
+        <PresentationOverlay
+          menu={presentationMenu}
+          onMenu={setPresentationMenu}
+          onAdvance={advancePresentation}
+          onExit={exitPresentation}
         />
-        <CanvasEditorOverlay
-          canvas={canvas}
-          viewerRef={viewerRef}
-          selectedIds={selectedIds}
-          onSelect={setSelectedIds}
-          onChange={markDirty}
-          onBeforeChange={recordHistory}
-          interactive={tool === 'select'}
-        />
-        <CanvasEditorTools
-          canvas={canvas}
-          tool={tool}
-          viewerRef={viewerRef}
-          onBeforeChange={recordHistory}
-          onChange={markDirty}
-          onApply={applyDocument}
-          onExitTool={() => setTool('select')}
-          editRequest={editRequest}
-          onEditRequestHandled={() => setEditRequest(null)}
-        />
-        <CanvasStylePanel
-          canvas={canvas}
-          selectedIds={selectedIds}
-          onBeforeChange={recordHistory}
-          onApply={applyDocument}
-        />
-      </main>
+      ) : null}
+
       {mediaDialogOpen ? (
-        <div className="canvas-editor-dialog-backdrop" onClick={() => setMediaDialogOpen(false)}>
-          <div className="canvas-editor-dialog" onClick={(event) => event.stopPropagation()}>
+        <div
+          className="canvas-editor-dialog-backdrop"
+          onClick={() => setMediaDialogOpen(false)}
+        >
+          <div
+            className="canvas-editor-dialog"
+            onClick={(event) => event.stopPropagation()}
+          >
             <h2>插入媒体</h2>
             <p>支持图片、视频链接，以及其他可嵌入的 iframe 地址。</p>
             <input
@@ -975,6 +1491,75 @@ export function CanvasEditorApp() {
             </div>
           </div>
         </div>
+      ) : null}
+
+      {contextMenu ? (
+        <BoardContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          target={contextMenu.target}
+          onClose={() => setContextMenu(null)}
+          onCreate={(folder) => setBoardDialog({ mode: 'create', folder })}
+          onRename={(node) => setBoardDialog({ mode: 'rename', board: node })}
+          onRenameFolder={(folder) => setFolderDialog(folder)}
+          onDelete={(node) => setPendingDelete(node)}
+          onDeleteFolder={(folder) => setPendingDeleteFolder(folder)}
+        />
+      ) : null}
+
+      {boardDialog ? (
+        <BoardDialog
+          key={
+            boardDialog.mode === 'create'
+              ? `create:${boardDialog.folder ?? ''}`
+              : `rename:${boardDialog.board.slug}`
+          }
+          mode={boardDialog.mode}
+          board={boardDialog.mode === 'rename' ? boardDialog.board : undefined}
+          defaultFolder={
+            boardDialog.mode === 'create'
+              ? boardDialog.folder ?? ''
+              : boardDialog.board.path
+          }
+          onClose={() => setBoardDialog(null)}
+          onSubmit={boardDialog.mode === 'create' ? handleCreate : handleRename}
+        />
+      ) : null}
+
+      {folderDialog ? (
+        <RenameFolderDialog
+          key={folderDialog.path}
+          folder={folderDialog}
+          onClose={() => setFolderDialog(null)}
+          onSubmit={handleRenameFolder}
+        />
+      ) : null}
+
+      {pendingDelete ? (
+        <DeleteBoardDialog
+          board={pendingDelete}
+          onClose={() => setPendingDelete(null)}
+          onConfirm={handleDelete}
+        />
+      ) : null}
+
+      {pendingDeleteFolder ? (
+        <DeleteFolderDialog
+          folder={pendingDeleteFolder}
+          scope={scope}
+          onClose={() => setPendingDeleteFolder(null)}
+          onConfirm={handleDeleteFolder}
+        />
+      ) : null}
+
+      {deployDialogOpen ? (
+        <DeployDialog
+          onClose={() => setDeployDialogOpen(false)}
+          onConfirm={() => {
+            setDeployDialogOpen(false)
+            void fetch('/__deploy', { method: 'POST' }).catch(() => {})
+          }}
+        />
       ) : null}
     </div>
   )

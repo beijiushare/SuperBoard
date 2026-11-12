@@ -1,6 +1,8 @@
 import { forwardRef, useCallback, useMemo, type CSSProperties } from 'react'
 import {
+  Controls,
   JSONCanvasViewerComponent,
+  Minimap,
   parser,
   type Hook,
   type JSONCanvas,
@@ -13,7 +15,7 @@ import { DrawingLayer } from './DrawingLayer'
 import { LinkSlot, TextSlot } from './NodeSlots'
 import { ShapeLayer } from './ShapeLayer'
 
-const modules = [ShapeLayer, DrawingLayer, DirectorLayer]
+const modules = [Controls, Minimap, ShapeLayer, DrawingLayer, DirectorLayer]
 
 export interface CanvasViewerHandle {
   viewer?: {
