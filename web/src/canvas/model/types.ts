@@ -145,6 +145,7 @@ export interface SuperBoardNodeExtension {
   locked?: boolean
   style?: SuperBoardStyle
   shape?: SuperBoardShapeKind
+  lineFlip?: { x: boolean; y: boolean }
   media?: SuperBoardMedia
   strokes?: SuperBoardStroke[]
   groupId?: string

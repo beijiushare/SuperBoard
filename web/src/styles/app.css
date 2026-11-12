@@ -552,6 +552,104 @@
   min-height: 0;
 }
 
+.canvas-editor-toolstrip {
+  display: flex;
+  height: 40px;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  padding: 0 14px;
+  border-bottom: 1px solid #dedbd2;
+  background: #f3f1eb;
+  overflow-x: auto;
+}
+
+.canvas-editor-toolstrip button {
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #5c584e;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.canvas-editor-toolstrip button:hover {
+  background: #e9e6dc;
+}
+
+.canvas-editor-toolstrip button.is-active {
+  border-color: #2f80ed;
+  background: #2f80ed;
+  color: #fff;
+}
+
+.sb-editor-tool-surface {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  cursor: crosshair;
+}
+
+.sb-editor-tool-surface[data-tool='text'] {
+  cursor: text;
+}
+
+.sb-editor-tool-surface[data-tool='eraser'] {
+  cursor: cell;
+}
+
+.sb-editor-tool-preview {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.sb-editor-tool-preview line,
+.sb-editor-tool-preview rect,
+.sb-editor-tool-preview ellipse,
+.sb-editor-tool-preview polygon {
+  fill: rgba(47, 128, 237, 0.08);
+  stroke: #2f80ed;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.sb-editor-tool-preview circle {
+  fill: #2f80ed;
+  stroke: none;
+}
+
+.sb-editor-draw-preview {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.sb-editor-text-input {
+  position: absolute;
+  z-index: 7;
+  margin: 0;
+  border: 2px solid #2f80ed;
+  border-radius: 6px;
+  background: #fff;
+  color: #1d1d1d;
+  box-sizing: border-box;
+  line-height: 1.4;
+  overflow: hidden;
+  outline: none;
+  resize: none;
+  white-space: pre-wrap;
+}
+
 .sb-editor-overlay {
   position: absolute;
   z-index: 5;

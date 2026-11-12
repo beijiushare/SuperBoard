@@ -8,6 +8,8 @@ import {
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
+import { CanvasEditorTools } from './CanvasEditorTools'
+import { TOOL_SHORTCUTS, TOOLS, type EditorTool } from './tools'
 import {
   collectBlocks,
   collectDescendants,
@@ -94,6 +96,7 @@ export function CanvasEditorApp() {
   const [selectedSlug, setSelectedSlug] = useState('')
   const [canvas, setCanvas] = useState<CanvasDocument | null>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [tool, setTool] = useState<EditorTool>('select')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(true)
@@ -195,9 +198,9 @@ export function CanvasEditorApp() {
     syncHistoryState()
   }
 
-  function applyDocument(next: CanvasDocument) {
+  function applyDocument(next: CanvasDocument, selection: string[] = []) {
     pendingViewportRef.current = readViewport(viewerRef.current)
-    setSelectedIds([])
+    setSelectedIds(selection)
     setCanvas(next)
     setSaved(false)
   }
@@ -538,6 +541,14 @@ export function CanvasEditorApp() {
         toggleLockSelection()
         return
       }
+      if (!mod && !event.altKey && !event.shiftKey) {
+        const nextTool = TOOL_SHORTCUTS[key]
+        if (nextTool) {
+          event.preventDefault()
+          setTool(nextTool)
+          return
+        }
+      }
       if (!mod && event.key === ']') {
         event.preventDefault()
         reorderSelection(event.altKey ? 'forward' : 'front')
@@ -553,7 +564,10 @@ export function CanvasEditorApp() {
         deleteSelection()
         return
       }
-      if (event.key === 'Escape') setSelectedIds([])
+      if (event.key === 'Escape') {
+        setSelectedIds([])
+        setTool('select')
+      }
     }
 
     window.addEventListener('keydown', onKeyDown)
@@ -646,6 +660,19 @@ export function CanvasEditorApp() {
           </button>
         </div>
       </header>
+      <div className="canvas-editor-toolstrip">
+        {TOOLS.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={tool === item.id ? 'is-active' : undefined}
+            title={`${item.label}（${item.shortcut}）`}
+            onClick={() => setTool(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
       <main className="canvas-editor-stage">
         <CanvasViewer
           ref={viewerRef}
@@ -660,6 +687,15 @@ export function CanvasEditorApp() {
           onSelect={setSelectedIds}
           onChange={() => setSaved(false)}
           onBeforeChange={recordHistory}
+        />
+        <CanvasEditorTools
+          canvas={canvas}
+          tool={tool}
+          viewerRef={viewerRef}
+          onBeforeChange={recordHistory}
+          onChange={() => setSaved(false)}
+          onApply={applyDocument}
+          onExitTool={() => setTool('select')}
         />
       </main>
     </div>

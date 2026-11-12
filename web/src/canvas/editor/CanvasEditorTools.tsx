@@ -1,0 +1,782 @@
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { getStroke } from 'perfect-freehand'
+import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
+import type {
+  CanvasDocument,
+  CanvasEdge,
+  CanvasNode,
+  SuperBoardNodeExtension,
+  SuperBoardStroke,
+} from '../model'
+import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
+import { isLocked, nextFreeId, nodeMapOf, topAncestor } from './hierarchy'
+import type { EditorTool } from './tools'
+
+type DataManager = {
+  data: {
+    offsetX: number
+    offsetY: number
+    scale: number
+    nodeMap: Record<string, { ref: CanvasNode }>
+  }
+}
+
+type Controller = {
+  refresh: () => void
+}
+
+type ViewerInternals = {
+  container?: { get: (key: unknown) => unknown }
+}
+
+interface View {
+  offsetX: number
+  offsetY: number
+  scale: number
+}
+
+interface ShapeDraft {
+  startX: number
+  startY: number
+  currentX: number
+  currentY: number
+}
+
+interface ArrowDraft {
+  fromId: string
+  startX: number
+  startY: number
+  currentX: number
+  currentY: number
+}
+
+interface Editing {
+  id: string | null
+  x: number
+  y: number
+  width: number
+  height: number
+  value: string
+  fontSize: number
+  fontFamily?: string
+  color?: string
+  textAlign?: 'left' | 'center' | 'right'
+}
+
+interface CanvasEditorToolsProps {
+  canvas: CanvasDocument
+  tool: EditorTool
+  viewerRef: React.RefObject<CanvasViewerHandle | null>
+  onBeforeChange: () => void
+  onChange: () => void
+  onApply: (next: CanvasDocument, selection?: string[]) => void
+  onExitTool: () => void
+}
+
+const STROKE_SIZE = 4
+const MIN_DRAG = 6
+
+function distanceToSegment(
+  px: number,
+  py: number,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+) {
+  const dx = bx - ax
+  const dy = by - ay
+  const lengthSquared = dx * dx + dy * dy
+  if (lengthSquared === 0) return Math.hypot(px - ax, py - ay)
+  let t = ((px - ax) * dx + (py - ay) * dy) / lengthSquared
+  t = Math.max(0, Math.min(1, t))
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+}
+
+function strokeHit(
+  stroke: SuperBoardStroke,
+  node: CanvasNode,
+  x: number,
+  y: number,
+  tolerance: number,
+) {
+  const points = stroke.points
+  const radius = stroke.size / 2 + tolerance
+  if (points.length === 1) {
+    return Math.hypot(x - (node.x + points[0][0]), y - (node.y + points[0][1])) <= radius
+  }
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1]
+    const current = points[index]
+    const distance = distanceToSegment(
+      x,
+      y,
+      node.x + previous[0],
+      node.y + previous[1],
+      node.x + current[0],
+      node.y + current[1],
+    )
+    if (distance <= radius) return true
+  }
+  return false
+}
+
+function arrowSides(from: CanvasNode, to: CanvasNode) {
+  const fromX = from.x + from.width / 2
+  const fromY = from.y + from.height / 2
+  const toX = to.x + to.width / 2
+  const toY = to.y + to.height / 2
+  const dx = toX - fromX
+  const dy = toY - fromY
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    return dx >= 0
+      ? ({ fromSide: 'right', toSide: 'left' } as const)
+      : ({ fromSide: 'left', toSide: 'right' } as const)
+  }
+  return dy >= 0
+    ? ({ fromSide: 'bottom', toSide: 'top' } as const)
+    : ({ fromSide: 'top', toSide: 'bottom' } as const)
+}
+
+export function CanvasEditorTools({
+  canvas,
+  tool,
+  viewerRef,
+  onBeforeChange,
+  onChange,
+  onApply,
+  onExitTool,
+}: CanvasEditorToolsProps) {
+  const surfaceRef = useRef<HTMLDivElement>(null)
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const strokeRef = useRef<number[][] | null>(null)
+  const arrowRef = useRef<ArrowDraft | null>(null)
+  const editingRef = useRef<Editing | null>(null)
+  const eraserRef = useRef<{ changed: boolean } | null>(null)
+  const [draft, setDraft] = useState<ShapeDraft | null>(null)
+  const [arrowDraft, setArrowDraft] = useState<ArrowDraft | null>(null)
+  const [editing, setEditing] = useState<Editing | null>(null)
+
+  function internals() {
+    try {
+      const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
+      if (!viewer?.container) return null
+      const dm = viewer.container.get(internal.DataManager as never) as DataManager
+      const controller = viewer.container.get(internal.Controller as never) as Controller
+      return { dm, controller }
+    } catch {
+      return null
+    }
+  }
+
+  function getView(): View | null {
+    const data = internals()
+    if (!data) return null
+    return {
+      offsetX: data.dm.data.offsetX,
+      offsetY: data.dm.data.offsetY,
+      scale: data.dm.data.scale,
+    }
+  }
+
+  function surfacePoint(event: { clientX: number; clientY: number }) {
+    const surface = surfaceRef.current
+    const data = internals()
+    if (!surface || !data) return null
+    const bounds = surface.getBoundingClientRect()
+    const screenX = event.clientX - bounds.left
+    const screenY = event.clientY - bounds.top
+    const { offsetX, offsetY, scale } = data.dm.data
+    return {
+      screenX,
+      screenY,
+      worldX: (screenX - offsetX) / scale,
+      worldY: (screenY - offsetY) / scale,
+    }
+  }
+
+  function updateEditing(next: Editing | null) {
+    editingRef.current = next
+    setEditing(next)
+  }
+
+  useEffect(() => {
+    setDraft(null)
+    setArrowDraft(null)
+    strokeRef.current = null
+    arrowRef.current = null
+    eraserRef.current = null
+    updateEditing(null)
+  }, [tool])
+
+  useEffect(() => {
+    if (!editing) return
+    const textarea = textareaRef.current
+    if (!textarea) return
+    textarea.focus()
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length)
+  }, [editing?.id, editing?.x, editing?.y, editing ? 'open' : 'closed'])
+
+  useEffect(() => {
+    if (tool !== 'draw') return
+    const surface = surfaceRef.current
+    const canvasElement = previewCanvasRef.current
+    if (!surface || !canvasElement) return
+    const dpr = window.devicePixelRatio || 1
+    canvasElement.width = Math.max(1, Math.round(surface.clientWidth * dpr))
+    canvasElement.height = Math.max(1, Math.round(surface.clientHeight * dpr))
+    const ctx = canvasElement.getContext('2d')
+    if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  }, [tool])
+
+  function redrawStrokePreview() {
+    const canvasElement = previewCanvasRef.current
+    const points = strokeRef.current
+    if (!canvasElement) return
+    const ctx = canvasElement.getContext('2d')
+    if (!ctx) return
+    const dpr = window.devicePixelRatio || 1
+    const width = canvasElement.width / dpr
+    const height = canvasElement.height / dpr
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.clearRect(0, 0, width, height)
+    if (!points || points.length < 2) return
+    const scale = internals()?.dm.data.scale ?? 1
+    const outline = getStroke(points, { size: STROKE_SIZE * scale, simulatePressure: true })
+    if (outline.length < 3) return
+    ctx.beginPath()
+    ctx.moveTo(outline[0][0], outline[0][1])
+    for (let index = 1; index < outline.length; index += 1) {
+      ctx.lineTo(outline[index][0], outline[index][1])
+    }
+    ctx.closePath()
+    ctx.fillStyle = '#1d1d1d'
+    ctx.fill()
+  }
+
+  function clearStrokePreview() {
+    const canvasElement = previewCanvasRef.current
+    const ctx = canvasElement?.getContext('2d')
+    if (!canvasElement || !ctx) return
+    const dpr = window.devicePixelRatio || 1
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.clearRect(0, 0, canvasElement.width / dpr, canvasElement.height / dpr)
+  }
+
+  function existingIds() {
+    return new Set<string>([
+      ...canvas.nodes.map((node) => node.id),
+      ...canvas.edges.map((edge) => edge.id),
+    ])
+  }
+
+  function findNodeAt(x: number, y: number, predicate?: (node: CanvasNode) => boolean) {
+    const data = internals()
+    if (!data) return null
+    const nodes = Object.values(data.dm.data.nodeMap).map((item) => item.ref)
+    const map = nodeMapOf(nodes)
+    for (let index = nodes.length - 1; index >= 0; index -= 1) {
+      const node = nodes[index]
+      if (predicate && !predicate(node)) continue
+      const root = predicate ? node : topAncestor(node, map)
+      if (isLocked(root, map)) continue
+      if (
+        x < root.x ||
+        x > root.x + root.width ||
+        y < root.y ||
+        y > root.y + root.height
+      ) {
+        continue
+      }
+      return root
+    }
+    return null
+  }
+
+  function startEditing(node: CanvasNode | null, x: number, y: number) {
+    if (node && node.type === 'text') {
+      const style = node['x-superboard']?.style
+      updateEditing({
+        id: node.id,
+        x: node.x,
+        y: node.y,
+        width: node.width,
+        height: node.height,
+        value: node.text,
+        fontSize: style?.fontSize ?? 16,
+        fontFamily: style?.fontFamily,
+        color: style?.color,
+        textAlign: style?.textAlign,
+      })
+      return
+    }
+    updateEditing({
+      id: null,
+      x,
+      y,
+      width: 260,
+      height: 120,
+      value: '',
+      fontSize: 16,
+    })
+  }
+
+  function commitEditing() {
+    const current = editingRef.current
+    if (!current) return
+    const textarea = textareaRef.current
+    const scale = internals()?.dm.data.scale ?? 1
+    const measured = Math.max(40, (textarea?.scrollHeight ?? current.height * scale) / scale)
+    updateEditing(null)
+    if (current.id) {
+      const node = canvas.nodes.find((item) => item.id === current.id)
+      if (!node || node.type !== 'text') return
+      if (current.value === '') {
+        onBeforeChange()
+        onApply(
+          { ...canvas, nodes: canvas.nodes.filter((item) => item.id !== current.id) },
+          [],
+        )
+        return
+      }
+      onBeforeChange()
+      onApply(
+        {
+          ...canvas,
+          nodes: canvas.nodes.map((item) =>
+            item.id === current.id
+              ? { ...item, text: current.value, height: measured }
+              : item,
+          ),
+        },
+        [current.id],
+      )
+      return
+    }
+    if (current.value.trim() === '') return
+    const id = nextFreeId(existingIds(), 'text')
+    const node: CanvasNode = {
+      id,
+      type: 'text',
+      x: current.x,
+      y: current.y,
+      width: current.width,
+      height: measured,
+      text: current.value,
+      'x-superboard': { kind: 'text' },
+    }
+    onBeforeChange()
+    onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    onExitTool()
+  }
+
+  function cancelEditing() {
+    updateEditing(null)
+  }
+
+  function hitStroke(
+    node: CanvasNode,
+    x: number,
+    y: number,
+    tolerance: number,
+  ) {
+    const strokes = node['x-superboard']?.strokes
+    if (!strokes?.length) return false
+    return strokes.some((stroke) => strokeHit(stroke, node, x, y, tolerance))
+  }
+
+  function eraseAt(x: number, y: number) {
+    const data = internals()
+    const gesture = eraserRef.current
+    if (!data || !gesture) return
+    const { dm, controller } = data
+    const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
+    const map = nodeMapOf(nodes)
+    const tolerance = 4 / dm.data.scale
+    const removals: Array<{ node: CanvasNode; hit: Set<string> }> = []
+    for (const node of nodes) {
+      if (node['x-superboard']?.kind !== 'drawing' || isLocked(node, map)) continue
+      if (!hitStroke(node, x, y, tolerance)) continue
+      const hit = new Set<string>()
+      for (const stroke of node['x-superboard']?.strokes ?? []) {
+        if (strokeHit(stroke, node, x, y, tolerance)) hit.add(stroke.id)
+      }
+      if (hit.size > 0) removals.push({ node, hit })
+    }
+    if (removals.length === 0) return
+    if (!gesture.changed) {
+      gesture.changed = true
+      onBeforeChange()
+    }
+    const removedNodes = new Set<string>()
+    for (const removal of removals) {
+      const extension = removal.node['x-superboard']
+      if (!extension?.strokes) continue
+      extension.strokes = extension.strokes.filter((stroke) => !removal.hit.has(stroke.id))
+      if (extension.strokes.length > 0) continue
+      removedNodes.add(removal.node.id)
+      const index = canvas.nodes.findIndex((node) => node.id === removal.node.id)
+      if (index >= 0) canvas.nodes.splice(index, 1)
+      delete dm.data.nodeMap[removal.node.id]
+    }
+    if (removedNodes.size > 0) {
+      canvas.edges = canvas.edges.filter(
+        (edge) => !removedNodes.has(edge.fromNode) && !removedNodes.has(edge.toNode),
+      )
+    }
+    controller.refresh()
+    onChange()
+  }
+
+  function commitShape(shape: 'rect' | 'ellipse' | 'diamond' | 'line') {
+    const current = draft
+    if (!current) return
+    const scale = internals()?.dm.data.scale ?? 1
+    const width = Math.abs(current.currentX - current.startX)
+    const height = Math.abs(current.currentY - current.startY)
+    if (Math.max(width, height) * scale < MIN_DRAG) {
+      setDraft(null)
+      return
+    }
+    const x = Math.min(current.startX, current.currentX)
+    const y = Math.min(current.startY, current.currentY)
+    const id = nextFreeId(existingIds(), shape)
+    const extension: SuperBoardNodeExtension = {
+      kind: 'shape',
+      shape,
+      style:
+        shape === 'line'
+          ? { fill: 'none', stroke: '#1d1d1d', strokeWidth: 2 }
+          : { fill: '#ffffff', stroke: '#1d1d1d', strokeWidth: 2 },
+    }
+    if (shape === 'line') {
+      extension.lineFlip = {
+        x: current.currentX < current.startX,
+        y: current.currentY < current.startY,
+      }
+    }
+    const node: CanvasNode = {
+      id,
+      type: 'group',
+      x,
+      y,
+      width: Math.max(1, width),
+      height: Math.max(1, height),
+      'x-superboard': extension,
+    }
+    setDraft(null)
+    onBeforeChange()
+    onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+  }
+
+  function commitStroke() {
+    const points = strokeRef.current
+    strokeRef.current = null
+    clearStrokePreview()
+    if (!points || points.length < 2) return
+    const data = internals()
+    if (!data) return
+    const { offsetX, offsetY, scale } = data.dm.data
+    const world = points.map(([x, y]) => [(x - offsetX) / scale, (y - offsetY) / scale])
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+    for (const [x, y] of world) {
+      minX = Math.min(minX, x)
+      minY = Math.min(minY, y)
+      maxX = Math.max(maxX, x)
+      maxY = Math.max(maxY, y)
+    }
+    const pad = STROKE_SIZE / 2 + 1
+    minX -= pad
+    minY -= pad
+    maxX += pad
+    maxY += pad
+    const id = nextFreeId(existingIds(), 'draw')
+    const local = world.map(([x, y]) => [x - minX, y - minY] as [number, number])
+    const node: CanvasNode = {
+      id,
+      type: 'group',
+      x: minX,
+      y: minY,
+      width: Math.max(1, maxX - minX),
+      height: Math.max(1, maxY - minY),
+      'x-superboard': {
+        kind: 'drawing',
+        strokes: [
+          {
+            id: `${id}-1`,
+            color: '#1d1d1d',
+            size: STROKE_SIZE,
+            points: local,
+          },
+        ],
+      },
+    }
+    onBeforeChange()
+    onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+  }
+
+  function commitArrow() {
+    const current = arrowRef.current
+    arrowRef.current = null
+    setArrowDraft(null)
+    if (!current) return
+    const target = findNodeAt(current.currentX, current.currentY)
+    if (!target || target.id === current.fromId) return
+    const data = internals()
+    if (!data) return
+    const from = data.dm.data.nodeMap[current.fromId]?.ref
+    if (!from) return
+    const sides = arrowSides(from, target)
+    const edge: CanvasEdge = {
+      id: nextFreeId(existingIds(), 'edge'),
+      fromNode: from.id,
+      toNode: target.id,
+      fromSide: sides.fromSide,
+      toSide: sides.toSide,
+      fromEnd: 'none',
+      toEnd: 'arrow',
+    }
+    onBeforeChange()
+    onApply({ ...canvas, edges: [...canvas.edges, edge] }, [])
+  }
+
+  function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.button !== 0) return
+    if (editingRef.current) {
+      commitEditing()
+      return
+    }
+    const point = surfacePoint(event)
+    if (!point) return
+    if (tool === 'text') {
+      const hit = findNodeAt(
+        point.worldX,
+        point.worldY,
+        (node) => node.type === 'text' && node['x-superboard']?.kind === 'text',
+      )
+      startEditing(hit, point.worldX, point.worldY)
+      return
+    }
+    if (tool === 'rect' || tool === 'ellipse' || tool === 'diamond' || tool === 'line') {
+      setDraft({
+        startX: point.worldX,
+        startY: point.worldY,
+        currentX: point.worldX,
+        currentY: point.worldY,
+      })
+      event.currentTarget.setPointerCapture(event.pointerId)
+      return
+    }
+    if (tool === 'draw') {
+      strokeRef.current = [[point.screenX, point.screenY]]
+      redrawStrokePreview()
+      event.currentTarget.setPointerCapture(event.pointerId)
+      return
+    }
+    if (tool === 'arrow') {
+      const from = findNodeAt(point.worldX, point.worldY)
+      if (!from) return
+      const draftValue: ArrowDraft = {
+        fromId: from.id,
+        startX: from.x + from.width / 2,
+        startY: from.y + from.height / 2,
+        currentX: point.worldX,
+        currentY: point.worldY,
+      }
+      arrowRef.current = draftValue
+      setArrowDraft(draftValue)
+      event.currentTarget.setPointerCapture(event.pointerId)
+      return
+    }
+    if (tool === 'eraser') {
+      eraserRef.current = { changed: false }
+      eraseAt(point.worldX, point.worldY)
+      event.currentTarget.setPointerCapture(event.pointerId)
+    }
+  }
+
+  function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (tool === 'draw' && strokeRef.current) {
+      const surface = surfaceRef.current
+      if (!surface) return
+      const bounds = surface.getBoundingClientRect()
+      const point = [event.clientX - bounds.left, event.clientY - bounds.top]
+      const points = strokeRef.current
+      const last = points[points.length - 1]
+      if (Math.hypot(point[0] - last[0], point[1] - last[1]) < 1) return
+      points.push(point)
+      redrawStrokePreview()
+      return
+    }
+    if (tool === 'eraser' && eraserRef.current) {
+      const point = surfacePoint(event)
+      if (point) eraseAt(point.worldX, point.worldY)
+      return
+    }
+    const point = surfacePoint(event)
+    if (!point) return
+    if (draft) {
+      setDraft({ ...draft, currentX: point.worldX, currentY: point.worldY })
+    } else if (arrowRef.current) {
+      const next = { ...arrowRef.current, currentX: point.worldX, currentY: point.worldY }
+      arrowRef.current = next
+      setArrowDraft(next)
+    }
+  }
+
+  function handlePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.button !== 0) return
+    if (tool === 'rect' || tool === 'ellipse' || tool === 'diamond' || tool === 'line') {
+      commitShape(tool)
+      return
+    }
+    if (tool === 'draw') {
+      commitStroke()
+      return
+    }
+    if (tool === 'arrow') {
+      commitArrow()
+      return
+    }
+    if (tool === 'eraser') {
+      eraserRef.current = null
+    }
+  }
+
+  if (tool === 'select') return null
+
+  const view = getView()
+
+  function screenRect(startX: number, startY: number, endX: number, endY: number) {
+    if (!view) return null
+    const left = view.offsetX + Math.min(startX, endX) * view.scale
+    const top = view.offsetY + Math.min(startY, endY) * view.scale
+    return {
+      left,
+      top,
+      width: Math.abs(endX - startX) * view.scale,
+      height: Math.abs(endY - startY) * view.scale,
+    }
+  }
+
+  const shapePreview = draft && view ? screenRect(draft.startX, draft.startY, draft.currentX, draft.currentY) : null
+  const arrowPreview =
+    arrowDraft && view
+      ? {
+          startX: view.offsetX + arrowDraft.startX * view.scale,
+          startY: view.offsetY + arrowDraft.startY * view.scale,
+          endX: view.offsetX + arrowDraft.currentX * view.scale,
+          endY: view.offsetY + arrowDraft.currentY * view.scale,
+        }
+      : null
+  const textPreview = editing
+    ? (() => {
+        const scale = view?.scale ?? 1
+        return {
+          left: (view?.offsetX ?? 0) + editing.x * scale,
+          top: (view?.offsetY ?? 0) + editing.y * scale,
+          width: editing.width * scale,
+          height: editing.height * scale,
+          fontSize: editing.fontSize * scale,
+          padding: `${14 * scale}px ${16 * scale}px`,
+          color: editing.color,
+          fontFamily: editing.fontFamily,
+          textAlign: editing.textAlign,
+        }
+      })()
+    : null
+
+  return (
+    <>
+      <div
+        ref={surfaceRef}
+        className="sb-editor-tool-surface"
+        data-tool={tool}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+      />
+      {tool === 'draw' ? (
+        <canvas ref={previewCanvasRef} className="sb-editor-draw-preview" />
+      ) : null}
+      {shapePreview || arrowPreview ? (
+        <svg className="sb-editor-tool-preview">
+          {shapePreview && draft ? (
+            tool === 'line' ? (
+              <line
+                x1={shapePreview.left + (draft.currentX <= draft.startX ? shapePreview.width : 0)}
+                y1={shapePreview.top + (draft.currentY <= draft.startY ? shapePreview.height : 0)}
+                x2={shapePreview.left + (draft.currentX <= draft.startX ? 0 : shapePreview.width)}
+                y2={shapePreview.top + (draft.currentY <= draft.startY ? 0 : shapePreview.height)}
+              />
+            ) : tool === 'ellipse' ? (
+              <ellipse
+                cx={shapePreview.left + shapePreview.width / 2}
+                cy={shapePreview.top + shapePreview.height / 2}
+                rx={shapePreview.width / 2}
+                ry={shapePreview.height / 2}
+              />
+            ) : tool === 'diamond' ? (
+              <polygon
+                points={[
+                  `${shapePreview.left + shapePreview.width / 2},${shapePreview.top}`,
+                  `${shapePreview.left + shapePreview.width},${shapePreview.top + shapePreview.height / 2}`,
+                  `${shapePreview.left + shapePreview.width / 2},${shapePreview.top + shapePreview.height}`,
+                  `${shapePreview.left},${shapePreview.top + shapePreview.height / 2}`,
+                ].join(' ')}
+              />
+            ) : (
+              <rect
+                x={shapePreview.left}
+                y={shapePreview.top}
+                width={shapePreview.width}
+                height={shapePreview.height}
+              />
+            )
+          ) : null}
+          {arrowPreview ? (
+            <>
+              <line
+                x1={arrowPreview.startX}
+                y1={arrowPreview.startY}
+                x2={arrowPreview.endX}
+                y2={arrowPreview.endY}
+              />
+              <circle cx={arrowPreview.startX} cy={arrowPreview.startY} r={4} />
+            </>
+          ) : null}
+        </svg>
+      ) : null}
+      {editing && textPreview ? (
+        <textarea
+          ref={textareaRef}
+          className="sb-editor-text-input"
+          style={textPreview}
+          value={editing.value}
+          onChange={(event) => {
+            const current = editingRef.current
+            if (current) updateEditing({ ...current, value: event.target.value })
+          }}
+          onBlur={commitEditing}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault()
+              event.stopPropagation()
+              cancelEditing()
+              return
+            }
+            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+              event.preventDefault()
+              commitEditing()
+            }
+          }}
+        />
+      ) : null}
+    </>
+  )
+}

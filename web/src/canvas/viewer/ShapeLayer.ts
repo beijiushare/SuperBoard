@@ -152,9 +152,14 @@ export class ShapeLayer extends BaseModule {
         this.ctx.fill()
         this.ctx.stroke()
       } else if (shape === 'line') {
+        const flip = ext.lineFlip
+        const startX = node.x + (flip?.x ? node.width : 0)
+        const startY = node.y + (flip?.y ? node.height : 0)
+        const endX = node.x + (flip?.x ? 0 : node.width)
+        const endY = node.y + (flip?.y ? 0 : node.height)
         this.ctx.beginPath()
-        this.ctx.moveTo(node.x, node.y)
-        this.ctx.lineTo(node.x + node.width, node.y + node.height)
+        this.ctx.moveTo(startX, startY)
+        this.ctx.lineTo(endX, endY)
         this.ctx.stroke()
       } else {
         roundedRect(this.ctx, node.x, node.y, node.width, node.height, style.cornerRadius ?? 8)
