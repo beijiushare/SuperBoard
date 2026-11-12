@@ -1,6 +1,10 @@
-import type { TLStoreSnapshot } from 'tldraw'
-
 export type BoardScope = 'public' | 'private'
+
+export interface BoardDocument {
+  store: Record<string, unknown>
+  schema?: Record<string, unknown>
+  [key: string]: unknown
+}
 
 export const BOARD_SCOPES: BoardScope[] = ['public', 'private']
 
@@ -35,7 +39,7 @@ export interface DirectorData {
 export interface BoardFile {
   version: 1
   meta: BoardMeta
-  document: TLStoreSnapshot
+  document: BoardDocument
   director?: DirectorData
 }
 

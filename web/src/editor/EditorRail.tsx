@@ -6,7 +6,7 @@ import film from 'react-useanimations/lib/film'
 import gitBranch from 'react-useanimations/lib/gitBranch'
 import sidebar from 'react-useanimations/lib/sidebar'
 import uploadCloud from 'react-useanimations/lib/uploadCloud'
-import type { SaveState } from './useAutoSave'
+import type { SaveState } from './saveState'
 
 interface EditorRailProps {
   mode?: 'edit' | 'view'

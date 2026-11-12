@@ -4,9 +4,9 @@
 
 文件驱动的个人白板系统：本地用浏览器编辑，画布保存为 Git 友好的 `.tldr.json`，推送到 GitHub 后自动构建成只读静态站点。
 
-> **迁移中**：正在从 tldraw 迁移到 JSON Canvas（`.canvas`）+ 自建轻量编辑器 + fork 查看器。
+> **迁移状态**：编辑器、查看器和主数据格式已切换到 JSON Canvas（`.canvas`）+ 自建轻量编辑器 + fork 查看器。
+> 旧 `.tldr.json` 仍可读取，首次保存时会生成对应的 `.canvas`。
 > 目标、格式和阶段见 [`docs/PLAN.md`](docs/PLAN.md)，目标架构见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)。
-> 当前 README 的“技术栈”和命令仍描述迁移前的 tldraw 实现，迁移完成后再更新。
 
 - 一个白板一个文件，无数据库、无后端存储
 - 本地编辑器直接读写 `whiteboards/public/` 和 `whiteboards/private/`
@@ -44,7 +44,6 @@ npm run convert:canvas
 | `npm run build:viewer` | 只打包只读端前端资源到 `dist/` |
 | `npm run build:site` | 打包并生成完整静态站（每个白板一个 HTML） |
 | `npm run preview:site` | 本地预览构建产物 |
-| `npm run seed` | 生成示例白板 |
 | `npm run mathjax` | 复制 MathJax 静态资源到 `public/mathjax/` |
 
 ### build:viewer 和 build:site 的区别
@@ -124,7 +123,7 @@ whiteboards/
 
 | 用途 | 项目 |
 | --- | --- |
-| 画布底座 | [tldraw](https://github.com/tldraw/tldraw) |
+| 画布底座 | 自建编辑器 + JSON Canvas（`.canvas`） |
 | 图表渲染 | [Pele](https://pele.run/) |
 | Markdown 渲染 | [react-markdown](https://github.com/remarkjs/react-markdown) + [remark-gfm](https://github.com/remarkjs/remark-gfm) + [rehype-sanitize](https://github.com/rehypejs/rehype-sanitize) + [rehype-highlight](https://github.com/rehypejs/rehype-highlight) |
 | 公式语法 | [AsciiMath](https://asciimath.org/) |
@@ -146,9 +145,7 @@ Markdown 使用标准 Markdown/GFM 语法；公式使用行内 `$...$`、块级 
 | --- | --- |
 | `BASE_PATH` | 站点路径，默认 `/SuperBoard/` |
 | `SUPERBOARD_CNAME` | 生成 `CNAME`，可选 |
-| `VITE_TLDRAW_LICENSE_KEY` | tldraw 生产授权 key，可选 |
 
-生产部署请遵守 tldraw 授权要求；未提供 license key 时会保留右下角水印。
 
 ## 文档
 
