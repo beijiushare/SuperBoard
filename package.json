@@ -11,7 +11,8 @@
     "preview:site": "vite preview --outDir dist",
     "prepare:canvas": "tsx scripts/prepare-canvas.ts",
     "typecheck": "tsc --noEmit",
-    "test:model": "tsx scripts/test-canvas-model.ts"
+    "test:model": "tsx scripts/test-canvas-model.ts",
+    "test:editor": "tsx scripts/test-canvas-editor.ts"
   },
   "dependencies": {
     "@ahmedsemih/color-fns": "^1.3.0",

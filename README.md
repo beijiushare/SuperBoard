@@ -28,6 +28,7 @@ npm run dev
 
 ```bash
 npm run test:model
+npm run test:editor
 ```
 
 ## 命令
@@ -36,6 +37,7 @@ npm run test:model
 | --- | --- |
 | `npm run dev` | 启动本地编辑器，读写 `whiteboards/public/`、`whiteboards/private/` |
 | `npm run typecheck` | TypeScript 类型检查 |
+| `npm run test:editor` | 编辑器层级、连线、导出核心测试 |
 | `npm run build:viewer` | 只打包只读端前端资源到 `dist/` |
 | `npm run build:site` | 打包并生成完整静态站（每个白板一个 HTML） |
 | `npm run preview:site` | 本地预览构建产物 |
