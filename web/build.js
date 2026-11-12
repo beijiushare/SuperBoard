@@ -3,7 +3,7 @@ import path from 'node:path'
 
 const root = process.cwd()
 const distDir = path.join(root, 'dist')
-const boardsDir = path.join(root, 'whiteboards', 'public')
+const canvasesDir = path.join(root, '.preview', 'canvas')
 const manifestPath = path.join(distDir, '.vite', 'manifest.json')
 const templatePath = path.join(root, 'web', 'template.html')
 
@@ -41,24 +41,26 @@ function assertSlug(slug) {
   }
 }
 
-function validateBoard(board, file) {
-  if (!board || typeof board !== 'object') throw new Error(`${file}: 不是对象`)
-  if (board.version !== 1) throw new Error(`${file}: 只支持 version 1`)
-  if (!board.meta || typeof board.meta !== 'object') throw new Error(`${file}: 缺少 meta`)
-  if (typeof board.meta.title !== 'string' || !board.meta.title.trim()) {
+function validateCanvas(canvas, file) {
+  if (!canvas || typeof canvas !== 'object') throw new Error(`${file}: 不是对象`)
+  if (!Array.isArray(canvas.nodes)) throw new Error(`${file}: nodes 必须是数组`)
+  if (canvas.edges !== undefined && !Array.isArray(canvas.edges)) {
+    throw new Error(`${file}: edges 必须是数组`)
+  }
+  const meta = canvas['x-superboard']?.meta
+  if (!meta || typeof meta !== 'object') throw new Error(`${file}: 缺少 x-superboard.meta`)
+  if (typeof meta.title !== 'string' || !meta.title.trim()) {
     throw new Error(`${file}: meta.title 不能为空`)
   }
-  assertSlug(board.meta.slug)
-  if (!board.document || typeof board.document !== 'object' || !board.document.store) {
-    throw new Error(`${file}: document 必须是 tldraw 文档 snapshot`)
+  assertSlug(meta.slug)
+  if (meta.aliases) {
+    if (!Array.isArray(meta.aliases)) throw new Error(`${file}: meta.aliases 必须是数组`)
+    for (const alias of meta.aliases) assertSlug(alias)
   }
-  if (board.meta.aliases) {
-    if (!Array.isArray(board.meta.aliases)) throw new Error(`${file}: meta.aliases 必须是数组`)
-    for (const alias of board.meta.aliases) assertSlug(alias)
-  }
+  return meta
 }
 
-async function readBoards() {
+async function readCanvases() {
   const files = []
 
   async function visit(dir, folder) {
@@ -76,42 +78,42 @@ async function readBoards() {
         await visit(fullPath, folder ? `${folder}/${entry.name}` : entry.name)
         continue
       }
-      if (entry.isFile() && entry.name.endsWith('.tldr.json')) {
+      if (entry.isFile() && entry.name.endsWith('.canvas')) {
         files.push({
           file: fullPath,
           folder,
-          relative: path.relative(boardsDir, fullPath).split(path.sep).join('/'),
+          relative: path.relative(canvasesDir, fullPath).split(path.sep).join('/'),
         })
       }
     }
   }
 
-  await visit(boardsDir, '')
+  await visit(canvasesDir, '')
 
-  const boards = []
+  const canvases = []
   const seenSlugs = new Map()
 
   for (const item of files.sort((a, b) => a.relative.localeCompare(b.relative, 'en'))) {
     const raw = await fs.readFile(item.file, 'utf8')
-    let board
+    let canvas
     try {
-      board = JSON.parse(raw)
+      canvas = JSON.parse(raw)
     } catch (error) {
       throw new Error(`${item.relative}: JSON 解析失败: ${error.message}`)
     }
-    validateBoard(board, item.relative)
-    if (seenSlugs.has(board.meta.slug)) {
-      throw new Error(`slug 重复: ${board.meta.slug}（${seenSlugs.get(board.meta.slug)} 和 ${item.relative}）`)
+    const meta = validateCanvas(canvas, item.relative)
+    if (seenSlugs.has(meta.slug)) {
+      throw new Error(`slug 重复: ${meta.slug}（${seenSlugs.get(meta.slug)} 和 ${item.relative}）`)
     }
-    seenSlugs.set(board.meta.slug, item.relative)
-    boards.push({ ...item, board })
+    seenSlugs.set(meta.slug, item.relative)
+    canvases.push({ ...item, canvas, meta })
   }
 
-  return boards.sort((a, b) => {
-    const ai = a.board.meta.order ?? Number.MAX_SAFE_INTEGER
-    const bi = b.board.meta.order ?? Number.MAX_SAFE_INTEGER
+  return canvases.sort((a, b) => {
+    const ai = a.meta.order ?? Number.MAX_SAFE_INTEGER
+    const bi = b.meta.order ?? Number.MAX_SAFE_INTEGER
     if (ai !== bi) return ai - bi
-    return a.board.meta.title.localeCompare(b.board.meta.title, 'zh-CN')
+    return a.meta.title.localeCompare(b.meta.title, 'zh-CN')
   })
 }
 
@@ -133,9 +135,9 @@ function renderIndex() {
 </html>`
 }
 
-function renderBoardPage(board, entry, cssFiles, template) {
-  const title = board.meta.title
-  const data = `window.__SUPERBOARD__ = ${escapeJsonForHtml({ board, base })};`
+function renderBoardPage(canvas, meta, entry, cssFiles, template) {
+  const title = meta.title
+  const data = `window.__SUPERBOARD__ = ${escapeJsonForHtml({ canvas, base })};`
   const css = cssFiles
     .map((file) => `<link rel="stylesheet" href="${base}${escapeHtml(file)}">`)
     .join('\n    ')
@@ -146,18 +148,18 @@ function renderBoardPage(board, entry, cssFiles, template) {
     .replace('__ENTRY__', () => `${base}${escapeHtml(entry.file)}`)
 }
 
-function renderTreePage(boards, entry, cssFiles, template) {
-  const treeBoards = boards
-    .filter(({ board }) => !board.meta.draft)
-    .map(({ folder, board }) => ({
-      slug: board.meta.slug,
-      title: board.meta.title,
-      summary: board.meta.summary,
-      order: board.meta.order,
-      updatedAt: board.meta.updatedAt,
+function renderTreePage(canvases, entry, cssFiles, template) {
+  const treeBoards = canvases
+    .filter(({ meta }) => !meta.draft)
+    .map(({ folder, meta }) => ({
+      slug: meta.slug,
+      title: meta.title,
+      summary: meta.summary,
+      order: meta.order,
+      updatedAt: meta.updatedAt,
       path: folder,
     }))
-  const data = `window.__SUPERBOARD__ = ${escapeJsonForHtml({ mode: 'tree', boards: treeBoards, base })};`
+  const data = `window.__SUPERBOARD__ = ${escapeJsonForHtml({ mode: 'tree', canvases: treeBoards, base })};`
   const css = cssFiles
     .map((file) => `<link rel="stylesheet" href="${base}${escapeHtml(file)}">`)
     .join('\n    ')
@@ -174,10 +176,10 @@ function renderAliasPage(target) {
 }
 
 async function main() {
-  const [template, manifest, boards] = await Promise.all([
+  const [template, manifest, canvases] = await Promise.all([
     fs.readFile(templatePath, 'utf8'),
     fs.readFile(manifestPath, 'utf8').then(JSON.parse),
-    readBoards(),
+    readCanvases(),
   ])
 
   const entry = Object.values(manifest).find((item) => item.isEntry)
@@ -191,25 +193,25 @@ async function main() {
 
   await fs.mkdir(path.join(distDir, 'boards'), { recursive: true })
   await fs.writeFile(path.join(distDir, '.nojekyll'), '')
-  await fs.writeFile(path.join(distDir, 'index.html'), renderIndex(boards))
-  await fs.writeFile(path.join(distDir, 'tree.html'), renderTreePage(boards, entry, [...cssFiles], template))
+  await fs.writeFile(path.join(distDir, 'index.html'), renderIndex(canvases))
+  await fs.writeFile(path.join(distDir, 'tree.html'), renderTreePage(canvases, entry, [...cssFiles], template))
 
   const generated = new Set()
 
-  for (const { board } of boards) {
-    const page = renderBoardPage(board, entry, [...cssFiles], template)
-    const file = path.join(distDir, 'boards', `${board.meta.slug}.html`)
+  for (const { canvas, meta } of canvases) {
+    const page = renderBoardPage(canvas, meta, entry, [...cssFiles], template)
+    const file = path.join(distDir, 'boards', `${meta.slug}.html`)
     await fs.writeFile(file, page)
     await fs.writeFile(
-      path.join(distDir, 'boards', `${board.meta.slug}.json`),
-      `${JSON.stringify(board)}\n`,
+      path.join(distDir, 'boards', `${meta.slug}.json`),
+      `${JSON.stringify(canvas)}\n`,
       'utf8',
     )
-    generated.add(board.meta.slug)
+    generated.add(meta.slug)
 
-    for (const alias of board.meta.aliases || []) {
+    for (const alias of meta.aliases || []) {
       if (generated.has(alias)) throw new Error(`别名冲突: ${alias}`)
-      await fs.writeFile(path.join(distDir, 'boards', `${alias}.html`), renderAliasPage(board.meta.slug))
+      await fs.writeFile(path.join(distDir, 'boards', `${alias}.html`), renderAliasPage(meta.slug))
       generated.add(alias)
     }
   }
@@ -223,7 +225,7 @@ async function main() {
     `<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>页面不存在</title></head><body style="font-family:system-ui,sans-serif;padding:48px"><h1>404</h1><p>这个页面不存在。</p><p><a href="${base}">返回首页</a></p></body></html>`,
   )
 
-  console.log(`SuperBoard: 已生成 ${boards.length} 个白板到 dist/`)
+  console.log(`SuperBoard: 已生成 ${canvases.length} 个白板到 dist/`)
 }
 
 main().catch((error) => {

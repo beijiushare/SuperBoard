@@ -1,13 +1,22 @@
-import type { BoardFile, BoardListItem } from './types'
+import type { CanvasDocument } from '../../canvas/model'
+
+export interface CanvasTreeItem {
+  slug: string
+  title: string
+  summary?: string
+  order?: number
+  updatedAt?: string
+  path: string
+}
 
 export interface SuperBoardBoardData {
-  board: BoardFile
+  canvas: CanvasDocument
   base: string
 }
 
 export interface SuperBoardTreeData {
   mode: 'tree'
-  boards: BoardListItem[]
+  canvases: CanvasTreeItem[]
   base: string
 }
 
