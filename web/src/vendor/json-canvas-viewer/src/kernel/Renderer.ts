@@ -54,8 +54,8 @@ export default class Renderer extends BaseModule {
 		const currentViewport = this.getCurrentViewport(offsetX, offsetY, scale);
 		this.canvas.style.transform = '';
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		this.applyGridBackground(scale, offsetX, offsetY);
 		this.ctx.save();
-		this.drawGridDots(scale, offsetX, offsetY);
 		this.ctx.translate(offsetX, offsetY);
 		this.ctx.scale(scale, scale);
 		Object.values(this.DM.data.nodeMap).forEach((item) => {
@@ -323,6 +323,20 @@ export default class Renderer extends BaseModule {
 			}
 		}
 		return [startControlX, startControlY, endControlX, endControlY];
+	};
+
+	private readonly applyGridBackground = (
+		scale: number,
+		offsetX: number,
+		offsetY: number,
+	) => {
+		const scaleLevel = -Math.floor(Math.log2(scale));
+		const gap = DOT_BASE_GAP * 2 ** scaleLevel * scale;
+		const container = this.DM.data.container;
+		const color = this.SM.getNamedColor('dots');
+		container.style.backgroundImage = `radial-gradient(circle, ${color} ${DOT_RADIUS}px, transparent ${DOT_RADIUS}px)`;
+		container.style.backgroundSize = `${gap}px ${gap}px`;
+		container.style.backgroundPosition = `${offsetX % gap}px ${offsetY % gap}px`;
 	};
 
 	private readonly drawGridDots = (scale: number, offsetX: number, offsetY: number) => {

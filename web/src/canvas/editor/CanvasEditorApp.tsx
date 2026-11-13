@@ -4,6 +4,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type MouseEvent as ReactMouseEvent,
 } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
@@ -182,8 +183,10 @@ export function CanvasEditorApp() {
   const [markdownEditingId, setMarkdownEditingId] = useState<string | null>(null)
   const [canvasRotate, setCanvasRotate] = useState<{
     angle: number
-    x: number
-    y: number
+    worldX: number
+    worldY: number
+    screenX: number
+    screenY: number
   } | null>(null)
   const [textEditingId, setTextEditingId] = useState<string | null>(null)
   const [tool, setTool] = useState<EditorTool>('select')
@@ -1145,15 +1148,23 @@ export function CanvasEditorApp() {
     if (!viewer?.container) return
     try {
       const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
+      const worldX = node.x + node.width / 2
+      const worldY = node.y + node.height / 2
       setCanvasRotate({
         angle: -normalized,
-        x: dm.data.offsetX + (node.x + node.width / 2) * dm.data.scale,
-        y: dm.data.offsetY + (node.y + node.height / 2) * dm.data.scale,
+        worldX,
+        worldY,
+        screenX: dm.data.offsetX + worldX * dm.data.scale,
+        screenY: dm.data.offsetY + worldY * dm.data.scale,
       })
     } catch {
       setCanvasRotate(null)
     }
   }, [markdownEditingId])
+
+  useEffect(() => {
+    viewerRef.current?.viewer?.refresh?.()
+  }, [canvasRotate])
 
   useEffect(() => {
     const stage = stageRef.current
@@ -1832,15 +1843,15 @@ export function CanvasEditorApp() {
                 <>
                   <div
                     className={`canvas-viewer-wrap${canvasRotate ? ' is-rotating' : ''}`}
-                    style={{
-                      transform: canvasRotate
-                        ? `rotate(${canvasRotate.angle}deg)`
-                        : undefined,
-                      transformOrigin: canvasRotate
-                        ? `${canvasRotate.x}px ${canvasRotate.y}px`
-                        : undefined,
-                      transition: 'transform 240ms ease',
-                    }}
+                    style={
+                      {
+                        '--sb-canvas-rotation': `${canvasRotate?.angle ?? 0}deg`,
+                        '--sb-rot-x': `${canvasRotate?.screenX ?? 0}px`,
+                        '--sb-rot-y': `${canvasRotate?.screenY ?? 0}px`,
+                        '--sb-rot-world-x': `${canvasRotate?.worldX ?? 0}px`,
+                        '--sb-rot-world-y': `${canvasRotate?.worldY ?? 0}px`,
+                      } as CSSProperties
+                    }
                   >
                     <CanvasViewer
                       ref={viewerRef}

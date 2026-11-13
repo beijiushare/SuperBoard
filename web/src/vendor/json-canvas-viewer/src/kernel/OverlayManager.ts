@@ -293,7 +293,23 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 
 	private readonly updateOverlays = () => {
 		const data = this.DM.data;
-		this.overlaysLayer.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) scale(${data.scale})`;
+		let rotation = '';
+		const wrapper = this.overlaysLayer.closest('.canvas-viewer-wrap') as HTMLElement | null;
+		if (wrapper) {
+			const angle = Number.parseFloat(
+				wrapper.style.getPropertyValue('--sb-canvas-rotation') || '0',
+			);
+			if (Number.isFinite(angle) && angle !== 0) {
+				const worldX = Number.parseFloat(
+					wrapper.style.getPropertyValue('--sb-rot-world-x') || '0',
+				);
+				const worldY = Number.parseFloat(
+					wrapper.style.getPropertyValue('--sb-rot-world-y') || '0',
+				);
+				rotation = ` translate(${worldX}px, ${worldY}px) rotate(${angle}deg) translate(${-worldX}px, ${-worldY}px)`;
+			}
+		}
+		this.overlaysLayer.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) scale(${data.scale})${rotation}`;
 		Object.entries(this.overlays).forEach(([id, element]) => {
 			const item = data.nodeMap[id];
 			if (!item) return;

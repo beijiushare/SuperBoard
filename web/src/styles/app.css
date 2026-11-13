@@ -578,6 +578,14 @@
   pointer-events: none;
 }
 
+.canvas-viewer-wrap.is-rotating .JCV-main-canvas,
+.canvas-viewer-wrap.is-rotating .sb-canvas-shape-layer,
+.canvas-viewer-wrap.is-rotating .sb-canvas-drawing-layer,
+.canvas-viewer-wrap.is-rotating .sb-canvas-director-layer {
+  transform: rotate(var(--sb-canvas-rotation));
+  transform-origin: var(--sb-rot-x) var(--sb-rot-y);
+}
+
 .canvas-editor-stage {
   position: relative;
   flex: 1;
