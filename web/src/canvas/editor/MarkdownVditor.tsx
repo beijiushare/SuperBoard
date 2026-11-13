@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type Vditor from 'vditor'
+import { loadMathJax } from '../../shared/markdown/mathjax'
 
 interface MarkdownVditorProps {
   value: string
@@ -35,6 +36,11 @@ export function MarkdownVditor({
     dirtyRef.current = false
     void import('vditor').then(async ({ default: VditorClass }) => {
       await import('vditor/dist/index.css')
+      try {
+        await loadMathJax()
+      } catch (error) {
+        console.error('[SuperBoard] 加载 MathJax 失败', error)
+      }
       if (cancelled || !element) return
       const vditor = new VditorClass(element, {
         cdn: '/__vditor',
@@ -47,9 +53,10 @@ export function MarkdownVditor({
         cache: { enable: false },
         outline: { enable: false, position: 'left' },
         preview: {
+          math: { engine: 'MathJax' },
           markdown: {
-            inlineMath: false,
-            mathBlockPreview: false,
+            inlineMath: true,
+            mathBlockPreview: true,
           },
         },
         input: (nextValue) => {
