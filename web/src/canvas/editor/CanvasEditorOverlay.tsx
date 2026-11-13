@@ -980,7 +980,6 @@ export function CanvasEditorOverlay({
         >
           {selectionBoxNodes.length === 1 ? (
             <>
-              <span className="sb-editor-selection-label">{node.id}</span>
               {['nw', 'ne', 'sw', 'se'].map((corner) => (
                 <span
                   key={corner}
@@ -1025,9 +1024,6 @@ export function CanvasEditorOverlay({
             height: (selectedBounds.bottom - selectedBounds.top) * scale,
           }}
         >
-          <span className="sb-editor-selection-label">
-            已选 {selectedNodes.length} 项
-          </span>
           {['nw', 'ne', 'sw', 'se'].map((corner) => (
             <span
               key={corner}

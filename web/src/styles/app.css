@@ -1042,12 +1042,6 @@
   background: #fff;
 }
 
-.sb-md-editor-label {
-  position: absolute;
-  z-index: 10;
-  pointer-events: none;
-}
-
 .sb-md-editing-hidden {
   display: none !important;
 }
@@ -1224,19 +1218,6 @@
   right: -18px;
   bottom: -18px;
   cursor: nwse-resize;
-}
-
-.sb-editor-selection-label {
-  position: absolute;
-  top: -22px;
-  left: -2px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: #2f80ed;
-  color: #fff;
-  font-size: 11px;
-  white-space: nowrap;
-  pointer-events: none;
 }
 
 .sb-editor-handle {

@@ -37,6 +37,7 @@ export function MarkdownEditorOverlay({
   onCommit,
   onRequestClose,
 }: MarkdownEditorOverlayProps) {
+  const node = canvas.nodes.find((item) => item.id === nodeId)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const editorRef = useRef<HTMLDivElement>(null)
   const vditorRef = useRef<Vditor | null>(null)
@@ -47,12 +48,13 @@ export function MarkdownEditorOverlay({
   const commitRef = useRef(onCommit)
   const [view, setView] = useState({ offsetX: 0, offsetY: 0, scale: 1 })
   const [tick, setTick] = useState(0)
+  const [frameRotation, setFrameRotation] = useState(
+    () => node?.['x-superboard']?.rotation ?? 0,
+  )
 
   closeRef.current = onRequestClose
   inputRef.current = onInput
   commitRef.current = onCommit
-
-  const node = canvas.nodes.find((item) => item.id === nodeId)
 
   useEffect(() => {
     let disposed = false
@@ -94,6 +96,20 @@ export function MarkdownEditorOverlay({
       unsubscribe?.()
     }
   }, [viewerRef, canvas])
+
+  useEffect(() => {
+    const rotation = node?.['x-superboard']?.rotation ?? 0
+    setFrameRotation(rotation)
+    if (rotation === 0) return
+    let inner = 0
+    const outer = window.requestAnimationFrame(() => {
+      inner = window.requestAnimationFrame(() => setFrameRotation(0))
+    })
+    return () => {
+      window.cancelAnimationFrame(outer)
+      window.cancelAnimationFrame(inner)
+    }
+  }, [nodeId])
 
   useEffect(() => {
     if (!node || node.type !== 'text' || !editorRef.current) return
@@ -189,22 +205,18 @@ export function MarkdownEditorOverlay({
   const top = centerY - screenHeight / 2
 
   return (
-    <>
-      <span
-        className="sb-editor-selection-label sb-md-editor-label"
-        style={{ left: left - 2, top: top - 22 }}
-      >
-        {node.id}
-      </span>
-      <div
-        ref={wrapperRef}
-        className="sb-md-editor"
-        data-tick={tick}
+    <div
+      ref={wrapperRef}
+      className="sb-md-editor"
+      data-tick={tick}
       style={{
         left,
         top,
         width: screenWidth,
         height: screenHeight,
+        transform: `rotate(${frameRotation}deg)`,
+        transformOrigin: 'center center',
+        transition: 'transform 240ms cubic-bezier(0.22, 1, 0.36, 1)',
       }}
       onPointerDown={(event) => event.stopPropagation()}
       onContextMenu={(event) => {
@@ -225,7 +237,6 @@ export function MarkdownEditorOverlay({
       >
         <div ref={editorRef} style={{ height: '100%' }} />
       </div>
-      </div>
-    </>
+    </div>
   )
 }
