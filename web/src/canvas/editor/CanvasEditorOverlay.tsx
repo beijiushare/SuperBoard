@@ -159,6 +159,11 @@ export function CanvasEditorOverlay({
     x: number
     y: number
   } | null>(null)
+  const canShowGuides = !activeEditingId && !selectionSuppressedId
+
+  useEffect(() => {
+    if (!canShowGuides) setGuides(null)
+  }, [canShowGuides])
   const edgeDragRef = useRef<{
     edge: CanvasEdge
     point: 'from' | 'to'
@@ -684,7 +689,7 @@ export function CanvasEditorOverlay({
           nextGuides = { ...(nextGuides ?? {}), y: bestY.target }
         }
       }
-      setGuides(nextGuides)
+      setGuides(canShowGuides ? nextGuides : null)
       for (const item of drag.nodes) {
         item.node.x = item.startX + moveX
         item.node.y = item.startY + moveY
@@ -1143,13 +1148,13 @@ export function CanvasEditorOverlay({
           )
         })}
 
-      {guides?.x !== undefined ? (
+      {canShowGuides && guides?.x !== undefined ? (
         <div
           className="sb-editor-guide sb-editor-guide-v"
           style={{ left: offsetX + guides.x * scale }}
         />
       ) : null}
-      {guides?.y !== undefined ? (
+      {canShowGuides && guides?.y !== undefined ? (
         <div
           className="sb-editor-guide sb-editor-guide-h"
           style={{ top: offsetY + guides.y * scale }}
