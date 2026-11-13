@@ -590,11 +590,18 @@ export function CanvasEditorApp() {
     viewerRef.current?.viewer?.refresh?.()
   }
 
+  function setMarkdownOverlayHidden(id: string, hidden: boolean) {
+    const overlay = document.getElementById(id)
+    overlay?.classList.toggle('sb-md-editing-hidden', hidden)
+  }
+
   function openMarkdownEditor(id: string) {
     const document = canvasRef.current
     const node = document?.nodes.find((item) => item.id === id)
     if (!node || node['x-superboard']?.kind !== 'markdown') return
     if (markdownEditingId === id) return
+    if (markdownEditingId) closeMarkdownEditor()
+    setMarkdownOverlayHidden(id, true)
     const extension = ensureExtension(node)
     extension.markdownLocked = false
     markDirty()
@@ -605,6 +612,7 @@ export function CanvasEditorApp() {
 
   function closeMarkdownEditor() {
     if (!markdownEditingId) return
+    setMarkdownOverlayHidden(markdownEditingId, false)
     const document = canvasRef.current
     const node = document?.nodes.find((item) => item.id === markdownEditingId)
     if (node) {
