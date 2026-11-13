@@ -302,8 +302,25 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 			element.style.top = `${node.y}px`;
 			element.style.width = `${node.width}px`;
 			element.style.height = `${node.height}px`;
-			const rotation = (node as { 'x-superboard'?: { rotation?: number } })['x-superboard']
-				?.rotation;
+			const extension = (
+				node as {
+					'x-superboard'?: {
+						rotation?: number
+						kind?: string
+						contentScale?: number
+					}
+				}
+			)['x-superboard'];
+			const rotation = extension?.rotation;
+			const scalable =
+				extension?.kind === 'text' ||
+				extension?.kind === 'markdown' ||
+				extension?.kind === 'pele' ||
+				(extension?.contentScale !== undefined && extension?.kind === undefined);
+			const contentScale = scalable ? extension?.contentScale ?? 1 : 1;
+			element.style.setProperty('--sb-content-scale', String(contentScale));
+			element.style.setProperty('--sb-content-width', `${100 / contentScale}%`);
+			element.style.setProperty('--sb-content-height', `${100 / contentScale}%`);
 			element.style.transformOrigin = 'center center';
 			element.style.transform = rotation ? `rotate(${rotation}deg)` : '';
 		});
@@ -383,8 +400,10 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 		item?.onBeforeUnmount?.();
 		if (this.selectedId === id) {
 			this.selectedId = undefined;
-			this.onInteractionEnd();
-			if (item) this.onNodeLosesActive(item.ref);
+			if (!this.aborted) {
+				this.onInteractionEnd();
+				if (item) this.onNodeLosesActive(item.ref);
+			}
 		}
 		if (this.eventListeners[id]) {
 			const onStart = this.eventListeners[id][0];

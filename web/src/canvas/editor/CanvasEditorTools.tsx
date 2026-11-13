@@ -262,6 +262,37 @@ export function CanvasEditorTools({
   }, [editing?.id, editing?.x, editing?.y, editing ? 'open' : 'closed'])
 
   useEffect(() => {
+    if (tool === 'select') return
+    const surface = surfaceRef.current
+    if (!surface) return
+    const onWheel = (event: WheelEvent) => {
+      const data = internals()
+      if (!data) return
+      event.preventDefault()
+      const bounds = surface.getBoundingClientRect()
+      if (event.ctrlKey || event.metaKey) {
+        const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1
+        const nextScale = Math.min(20, Math.max(0.05, data.dm.data.scale * factor))
+        const originX = event.clientX - bounds.left
+        const originY = event.clientY - bounds.top
+        const worldX = (originX - data.dm.data.offsetX) / data.dm.data.scale
+        const worldY = (originY - data.dm.data.offsetY) / data.dm.data.scale
+        data.dm.data.offsetX = originX - worldX * nextScale
+        data.dm.data.offsetY = originY - worldY * nextScale
+        data.dm.data.scale = nextScale
+      } else {
+        const deltaX = event.shiftKey ? -event.deltaY : -event.deltaX
+        const deltaY = event.shiftKey ? 0 : -event.deltaY
+        data.dm.data.offsetX += deltaX
+        data.dm.data.offsetY += deltaY
+      }
+      data.controller.refresh()
+    }
+    surface.addEventListener('wheel', onWheel, { passive: false })
+    return () => surface.removeEventListener('wheel', onWheel)
+  }, [tool])
+
+  useEffect(() => {
     if (tool !== 'draw') return
     const surface = surfaceRef.current
     const canvasElement = previewCanvasRef.current

@@ -78,8 +78,10 @@ export default class InteractionHandler extends BaseModule<Options, Augmentation
 			.start();
 	};
 
+	private disposed = false;
+
 	private readonly startInteract = () => {
-		this.pointeract.start();
+		if (!this.disposed) this.pointeract.start();
 	};
 	private readonly stopInteract = () => {
 		this.pointeract.stop();
@@ -156,5 +158,8 @@ export default class InteractionHandler extends BaseModule<Options, Augmentation
 		return ele.id;
 	};
 
-	private readonly dispose = () => this.pointeract.dispose();
+	private readonly dispose = () => {
+		this.disposed = true;
+		this.pointeract.dispose();
+	};
 }

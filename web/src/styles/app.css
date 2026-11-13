@@ -933,6 +933,12 @@
   pointer-events: none;
 }
 
+.sb-block-scale {
+  width: var(--sb-content-width, 100%);
+  height: var(--sb-content-height, 100%);
+  zoom: var(--sb-content-scale, 1);
+}
+
 .sb-block-actions {
   position: absolute;
   z-index: 8;

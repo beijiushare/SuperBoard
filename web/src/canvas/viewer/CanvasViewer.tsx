@@ -36,7 +36,15 @@ interface CanvasViewerProps {
 
 export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
   function CanvasViewer({ canvas, theme = 'light', className, style, onNodeSelect }, ref) {
-    const options = useMemo(() => ({ parser }), [])
+    const options = useMemo(
+      () => ({
+        parser,
+        pointeract: {
+          proControlSchema: true,
+        },
+      }),
+      [],
+    )
     const renderText = useCallback(
       ({ node, onActive }: { node: JSONCanvasTextNode; onActive: Hook }) => (
         <TextSlot node={node} onActive={onActive} onSelect={onNodeSelect} />

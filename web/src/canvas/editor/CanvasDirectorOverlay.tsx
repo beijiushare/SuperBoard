@@ -127,21 +127,27 @@ export function CanvasDirectorOverlay({
     const node = overlayRef.current
     if (!node) return
     const onWheel = (event: WheelEvent) => {
-      if (!event.ctrlKey && !event.metaKey) return
       const dm = dmRef.current
       if (!dm) return
       event.preventDefault()
       event.stopPropagation()
       const bounds = node.getBoundingClientRect()
-      const originX = event.clientX - bounds.left
-      const originY = event.clientY - bounds.top
-      const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1
-      const nextScale = Math.min(20, Math.max(0.05, dm.data.scale * factor))
-      const worldX = (originX - dm.data.offsetX) / dm.data.scale
-      const worldY = (originY - dm.data.offsetY) / dm.data.scale
-      dm.data.offsetX = originX - worldX * nextScale
-      dm.data.offsetY = originY - worldY * nextScale
-      dm.data.scale = nextScale
+      if (event.ctrlKey || event.metaKey) {
+        const originX = event.clientX - bounds.left
+        const originY = event.clientY - bounds.top
+        const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1
+        const nextScale = Math.min(20, Math.max(0.05, dm.data.scale * factor))
+        const worldX = (originX - dm.data.offsetX) / dm.data.scale
+        const worldY = (originY - dm.data.offsetY) / dm.data.scale
+        dm.data.offsetX = originX - worldX * nextScale
+        dm.data.offsetY = originY - worldY * nextScale
+        dm.data.scale = nextScale
+      } else {
+        const deltaX = event.shiftKey ? -event.deltaY : -event.deltaX
+        const deltaY = event.shiftKey ? 0 : -event.deltaY
+        dm.data.offsetX += deltaX
+        dm.data.offsetY += deltaY
+      }
       controllerRef.current?.refresh()
     }
     node.addEventListener('wheel', onWheel, { passive: false })

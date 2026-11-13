@@ -10,16 +10,6 @@ function extension(node: object) {
   return (node as { 'x-superboard'?: SuperBoardNodeExtension })['x-superboard']
 }
 
-function blockScaleStyle(extension?: SuperBoardNodeExtension) {
-  const scale = extension?.contentScale ?? 1
-  if (scale === 1) return undefined
-  return {
-    zoom: scale,
-    width: `${100 / scale}%`,
-    height: `${100 / scale}%`,
-  }
-}
-
 function textStyle(node: JSONCanvasTextNode) {
   const style = extension(node)?.style
   return {
@@ -56,7 +46,6 @@ export function TextSlot({
 }) {
   useNodeSelection(node.id, onActive, onSelect)
   const ext = extension(node)
-  const scaleStyle = blockScaleStyle(ext)
   const content =
     ext?.kind === 'markdown' ? (
       <MarkdownView source={node.text} />
@@ -65,7 +54,7 @@ export function TextSlot({
     ) : (
       <div style={textStyle(node)}>{node.text}</div>
     )
-  return scaleStyle ? <div style={scaleStyle}>{content}</div> : content
+  return <div className="sb-block-scale">{content}</div>
 }
 
 function clampPercent(value: number | undefined, fallback: number) {

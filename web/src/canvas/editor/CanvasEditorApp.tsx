@@ -556,6 +556,7 @@ export function CanvasEditorApp() {
     extension.ratioLocked = !wasLocked
     if (wasLocked) extension.contentScale = 1
     markDirty()
+    viewerRef.current?.viewer?.refresh?.()
   }
 
   function openMarkdownEditor(id: string) {
