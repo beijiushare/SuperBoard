@@ -19,10 +19,12 @@ import { edgeGeometry, edgePath } from './edges'
 import {
   SELECTION_CORNERS,
   SELECTION_SIDES,
+  canShowSelectionRotate,
   selectionChromeStyle,
   selectionEdgeStyle,
   selectionHandleStyle,
   selectionRotateStyle,
+  visibleSelectionCorners,
 } from './selectionChrome'
 import {
   collectDescendants,
@@ -1052,7 +1054,10 @@ export function CanvasEditorOverlay({
         >
           {selectionBoxNodes.length === 1 ? (
             <>
-              {SELECTION_CORNERS.map((corner) => (
+              {visibleSelectionCorners(
+                node.width * scale,
+                node.height * scale,
+              ).map((corner) => (
                 <span
                   key={corner}
                   className="sb-editor-handle"
@@ -1072,7 +1077,8 @@ export function CanvasEditorOverlay({
                   onPointerUp={endDrag}
                 />
               ))}
-              {node['x-superboard']?.kind !== 'group'
+              {node['x-superboard']?.kind !== 'group' &&
+              canShowSelectionRotate(node.width * scale, node.height * scale)
                 ? SELECTION_CORNERS.map((corner) => (
                     <span
                       key={corner}

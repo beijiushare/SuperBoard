@@ -14,6 +14,22 @@ export const selectionRotateOffset = 18
 export const selectionRotateHitInset = 6
 export const selectionEdgeHitSize = 14
 export const selectionEdgeInset = '22%'
+export const selectionTinySize = 18
+
+export function visibleSelectionCorners(
+  width: number,
+  height: number,
+): SelectionCorner[] {
+  const tinyX = width < selectionTinySize
+  const tinyY = height < selectionTinySize
+  if (tinyX && tinyY) return ['nw']
+  if (tinyX || tinyY) return ['nw', 'se']
+  return [...SELECTION_CORNERS]
+}
+
+export function canShowSelectionRotate(width: number, height: number) {
+  return width >= selectionTinySize && height >= selectionTinySize
+}
 
 const cornerCursor: Record<SelectionCorner, CSSProperties['cursor']> = {
   nw: 'nwse-resize',
