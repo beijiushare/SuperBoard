@@ -708,6 +708,10 @@ export function CanvasEditorOverlay({
       extension.rotation = Math.round(degree * 10) / 10
     } else {
       const corner = drag.corner ?? 'se'
+      const hasEast = corner.includes('e')
+      const hasWest = corner.includes('w')
+      const hasSouth = corner.includes('s')
+      const hasNorth = corner.includes('n')
       const rotation = drag.primary['x-superboard']?.rotation ?? 0
       const overlay = overlayRef.current
       const dm = dmRef.current
@@ -726,8 +730,8 @@ export function CanvasEditorOverlay({
           x: x * cos + y * sin,
           y: -x * sin + y * cos,
         })
-        const signX = corner.includes('e') ? 1 : -1
-        const signY = corner.includes('s') ? 1 : -1
+        const signX = hasEast ? 1 : hasWest ? -1 : 0
+        const signY = hasSouth ? 1 : hasNorth ? -1 : 0
         const centerX = drag.startX + drag.startWidth / 2
         const centerY = drag.startY + drag.startHeight / 2
         const anchorOffset = rotate(
@@ -735,15 +739,14 @@ export function CanvasEditorOverlay({
           (-signY * drag.startHeight) / 2,
         )
         const anchor = { x: centerX + anchorOffset.x, y: centerY + anchorOffset.y }
-        const local = inverseRotate(
-          pointerX - anchor.x,
-          pointerY - anchor.y,
-        )
-        let width = Math.max(40, signX * local.x)
-        let height = Math.max(40, signY * local.y)
+        const local = inverseRotate(pointerX - anchor.x, pointerY - anchor.y)
+        let width = signX === 0 ? drag.startWidth : Math.max(40, signX * local.x)
+        let height = signY === 0 ? drag.startHeight : Math.max(40, signY * local.y)
         let ratioScale = 1
         if (drag.ratioLocked) {
-          ratioScale = Math.max(width / drag.startWidth, height / drag.startHeight)
+          if (signX === 0) ratioScale = height / drag.startHeight
+          else if (signY === 0) ratioScale = width / drag.startWidth
+          else ratioScale = Math.max(width / drag.startWidth, height / drag.startHeight)
           width = drag.startWidth * ratioScale
           height = drag.startHeight * ratioScale
         }
@@ -755,16 +758,26 @@ export function CanvasEditorOverlay({
         drag.primary.height = height
         applyContentScale(drag, ratioScale)
       } else {
-        let width = Math.max(40, drag.startWidth + (corner.includes('e') ? dx : -dx))
-        let height = Math.max(40, drag.startHeight + (corner.includes('s') ? dy : -dy))
+        let width = hasEast
+          ? Math.max(40, drag.startWidth + dx)
+          : hasWest
+            ? Math.max(40, drag.startWidth - dx)
+            : drag.startWidth
+        let height = hasSouth
+          ? Math.max(40, drag.startHeight + dy)
+          : hasNorth
+            ? Math.max(40, drag.startHeight - dy)
+            : drag.startHeight
         let ratioScale = 1
         if (drag.ratioLocked) {
-          ratioScale = Math.max(width / drag.startWidth, height / drag.startHeight)
+          if (!hasEast && !hasWest) ratioScale = height / drag.startHeight
+          else if (!hasSouth && !hasNorth) ratioScale = width / drag.startWidth
+          else ratioScale = Math.max(width / drag.startWidth, height / drag.startHeight)
           width = drag.startWidth * ratioScale
           height = drag.startHeight * ratioScale
         }
-        const nextX = corner.includes('w') ? drag.startX + drag.startWidth - width : drag.startX
-        const nextY = corner.includes('n') ? drag.startY + drag.startHeight - height : drag.startY
+        const nextX = hasWest ? drag.startX + drag.startWidth - width : drag.startX
+        const nextY = hasNorth ? drag.startY + drag.startHeight - height : drag.startY
         const scaleX = drag.startWidth === 0 ? 1 : width / drag.startWidth
         const scaleY = drag.startHeight === 0 ? 1 : height / drag.startHeight
         for (const item of drag.nodes) {
@@ -931,14 +944,6 @@ export function CanvasEditorOverlay({
           {selectedNodes.length === 1 ? (
             <>
               <span className="sb-editor-selection-label">{node.id}</span>
-              {node['x-superboard']?.kind !== 'group' ? (
-                <span
-                  className="sb-editor-rotate"
-                  onPointerDown={(event) => beginRotate(event, node)}
-                  onPointerMove={movePointer}
-                  onPointerUp={endDrag}
-                />
-              ) : null}
               {['nw', 'ne', 'sw', 'se'].map((corner) => (
                 <span
                   key={corner}
@@ -948,6 +953,26 @@ export function CanvasEditorOverlay({
                   onPointerUp={endDrag}
                 />
               ))}
+              {(['n', 'e', 's', 'w'] as const).map((side) => (
+                <span
+                  key={side}
+                  className={`sb-editor-edge-handle sb-editor-edge-handle-${side}`}
+                  onPointerDown={(event) => beginResize(event, node, side)}
+                  onPointerMove={movePointer}
+                  onPointerUp={endDrag}
+                />
+              ))}
+              {node['x-superboard']?.kind !== 'group'
+                ? ['nw', 'ne', 'sw', 'se'].map((corner) => (
+                    <span
+                      key={corner}
+                      className={`sb-editor-rotate sb-editor-rotate-${corner}`}
+                      onPointerDown={(event) => beginRotate(event, node)}
+                      onPointerMove={movePointer}
+                      onPointerUp={endDrag}
+                    />
+                  ))
+                : null}
             </>
           ) : null}
         </div>
@@ -966,12 +991,15 @@ export function CanvasEditorOverlay({
           <span className="sb-editor-selection-label">
             已选 {selectedNodes.length} 项
           </span>
-          <span
-            className="sb-editor-rotate"
-            onPointerDown={(event) => beginMultiRotate(event, selectedNodes)}
-            onPointerMove={movePointer}
-            onPointerUp={endDrag}
-          />
+          {['nw', 'ne', 'sw', 'se'].map((corner) => (
+            <span
+              key={corner}
+              className={`sb-editor-rotate sb-editor-rotate-${corner}`}
+              onPointerDown={(event) => beginMultiRotate(event, selectedNodes)}
+              onPointerMove={movePointer}
+              onPointerUp={endDrag}
+            />
+          ))}
         </div>
       ) : null}
 
