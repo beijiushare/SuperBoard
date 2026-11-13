@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
-import { MarkdownView } from '../../shared/markdown/MarkdownView'
+import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import { PeleView } from '../../shared/pele/PeleView'
 import type { SuperBoardMedia, SuperBoardNodeExtension } from '../model'
 import '../../styles/markdown.css'
@@ -49,8 +49,8 @@ export function TextSlot({
   const content =
     ext?.kind === 'markdown' && ext.markdownLocked === false ? (
       <div className="sb-md-editing-placeholder" />
-    ) : ext?.kind === 'markdown' ? (
-      <MarkdownView source={node.text} />
+    ) :     ext?.kind === 'markdown' ? (
+      <MarkdownVditorPreview source={node.text} />
     ) : ext?.kind === 'pele' ? (
       <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />
     ) : (

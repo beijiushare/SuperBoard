@@ -175,6 +175,16 @@ function renderAliasPage(target) {
   return `<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0; url=${href}"><title>跳转中</title></head><body><p>正在跳转到 <a href="${href}">${escapeHtml(target)}</a>…</p></body></html>`
 }
 
+async function copyVditorAssets() {
+  const source = path.join(root, 'node_modules', 'vditor', 'dist')
+  const target = path.join(distDir, '__vditor', 'dist')
+  for (const folder of ['js/lute', 'js/i18n', 'js/icons', 'css/content-theme', 'images/emoji']) {
+    await fs.cp(path.join(source, folder), path.join(target, folder), {
+      recursive: true,
+    })
+  }
+}
+
 async function main() {
   const [template, manifest, canvases] = await Promise.all([
     fs.readFile(templatePath, 'utf8'),
@@ -192,6 +202,7 @@ async function main() {
   }
 
   await fs.mkdir(path.join(distDir, 'boards'), { recursive: true })
+  await copyVditorAssets()
   await fs.writeFile(path.join(distDir, '.nojekyll'), '')
   await fs.writeFile(path.join(distDir, 'index.html'), renderIndex(canvases))
   await fs.writeFile(path.join(distDir, 'tree.html'), renderTreePage(canvases, entry, [...cssFiles], template))

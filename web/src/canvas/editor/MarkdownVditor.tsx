@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type Vditor from 'vditor'
 import { loadMathJax } from '../../shared/markdown/mathjax'
+import { vditorCdn } from '../../shared/markdown/vditorAssets'
 
 interface MarkdownVditorProps {
   value: string
@@ -43,7 +44,7 @@ export function MarkdownVditor({
       }
       if (cancelled || !element) return
       const vditor = new VditorClass(element, {
-        cdn: '/__vditor',
+        cdn: vditorCdn,
         mode: 'ir',
         value,
         height: '100%',
