@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -249,6 +250,7 @@ export function CanvasEditorApp() {
   const savingRef = useRef(false)
   const canvasRef = useRef<CanvasDocument | null>(null)
   const markdownHistoryRef = useRef(false)
+  const rotationTimerRef = useRef<number | null>(null)
 
   const scopedItems = useMemo(
     () => items.filter((item) => item.scope === scope),
@@ -1130,8 +1132,18 @@ export function CanvasEditorApp() {
   })
 
   useEffect(() => {
+    if (rotationTimerRef.current) {
+      window.clearTimeout(rotationTimerRef.current)
+      rotationTimerRef.current = null
+    }
     if (!markdownEditingId) {
-      setCanvasRotate(null)
+      if (canvasRotate) {
+        setCanvasRotate({ ...canvasRotate, angle: 0 })
+        rotationTimerRef.current = window.setTimeout(() => {
+          setCanvasRotate(null)
+          rotationTimerRef.current = null
+        }, 260)
+      }
       return
     }
     const document = canvasRef.current
@@ -1163,6 +1175,15 @@ export function CanvasEditorApp() {
   }, [markdownEditingId])
 
   useEffect(() => {
+    return () => {
+      if (rotationTimerRef.current) {
+        window.clearTimeout(rotationTimerRef.current)
+        rotationTimerRef.current = null
+      }
+    }
+  }, [])
+
+  useLayoutEffect(() => {
     viewerRef.current?.viewer?.refresh?.()
   }, [canvasRotate])
 
