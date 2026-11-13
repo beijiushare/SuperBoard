@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -162,6 +163,8 @@ export function CanvasEditorOverlay({
   const [marquee, setMarquee] = useState<Marquee | null>(null)
   const [guides, setGuides] = useState<{ x?: number; y?: number } | null>(null)
   const [actionsVisible, setActionsVisible] = useState(true)
+  const [actionsSize, setActionsSize] = useState({ width: 0, height: 0 })
+  const actionsRef = useRef<HTMLDivElement>(null)
   const [edgePreview, setEdgePreview] = useState<{
     fromX: number
     fromY: number
@@ -173,6 +176,18 @@ export function CanvasEditorOverlay({
   useEffect(() => {
     if (!canShowGuides) setGuides(null)
   }, [canShowGuides])
+
+  useLayoutEffect(() => {
+    const element = actionsRef.current
+    if (!element) return
+    const width = element.offsetWidth
+    const height = element.offsetHeight
+    setActionsSize((current) =>
+      current.width === width && current.height === height
+        ? current
+        : { width, height },
+    )
+  })
 
   useEffect(() => {
     const clearGuides = () => setGuides(null)
@@ -1125,6 +1140,7 @@ export function CanvasEditorOverlay({
           return (
             <div
               key={`block-actions-${node.id}`}
+              ref={actionsRef}
               className="sb-block-actions"
               style={(() => {
                 const centerX = offsetX + (node.x + node.width / 2) * scale
@@ -1132,9 +1148,39 @@ export function CanvasEditorOverlay({
                 const displayRotation = node['x-superboard']?.rotation ?? 0
                 const radians = (displayRotation * Math.PI) / 180
                 const distance = (node.height / 2) * scale + 32
+                let left = centerX + Math.sin(radians) * distance
+                let top = Math.max(8, centerY - Math.cos(radians) * distance)
+                const container = dm.data.container
+                const stageWidth = container.clientWidth
+                const stageHeight = container.clientHeight
+                if (actionsSize.width > 0 && stageWidth > 0 && stageHeight > 0) {
+                  const margin = 8
+                  const cos = Math.cos(radians)
+                  const sin = Math.sin(radians)
+                  const halfWidth =
+                    (Math.abs(actionsSize.width * cos) +
+                      Math.abs(actionsSize.height * sin)) /
+                    2
+                  const halfHeight =
+                    (Math.abs(actionsSize.width * sin) +
+                      Math.abs(actionsSize.height * cos)) /
+                    2
+                  const centerBarX = left
+                  const centerBarY = top + actionsSize.height / 2
+                  left = Math.min(
+                    Math.max(centerBarX, margin + halfWidth),
+                    stageWidth - margin - halfWidth,
+                  )
+                  top =
+                    Math.min(
+                      Math.max(centerBarY, margin + halfHeight),
+                      stageHeight - margin - halfHeight,
+                    ) -
+                    actionsSize.height / 2
+                }
                 return {
-                  left: centerX + Math.sin(radians) * distance,
-                  top: Math.max(8, centerY - Math.cos(radians) * distance),
+                  left,
+                  top,
                   transform: `translateX(-50%) rotate(${displayRotation}deg)`,
                 }
               })()}
