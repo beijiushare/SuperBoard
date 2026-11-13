@@ -189,10 +189,17 @@ export function MarkdownEditorOverlay({
   const top = centerY - screenHeight / 2
 
   return (
-    <div
-      ref={wrapperRef}
-      className="sb-md-editor"
-      data-tick={tick}
+    <>
+      <span
+        className="sb-editor-selection-label sb-md-editor-label"
+        style={{ left: left - 2, top: top - 22 }}
+      >
+        {node.id}
+      </span>
+      <div
+        ref={wrapperRef}
+        className="sb-md-editor"
+        data-tick={tick}
       style={{
         left,
         top,
@@ -218,6 +225,7 @@ export function MarkdownEditorOverlay({
       >
         <div ref={editorRef} style={{ height: '100%' }} />
       </div>
-    </div>
+      </div>
+    </>
   )
 }
