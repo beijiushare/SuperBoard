@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
@@ -41,11 +41,12 @@ export function MarkdownEditorOverlay({
   const wrapperRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef(onRequestClose)
   const [view, setView] = useState({ offsetX: 0, offsetY: 0, scale: 1 })
+  const [viewReady, setViewReady] = useState(false)
   const [tick, setTick] = useState(0)
 
   closeRef.current = onRequestClose
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let disposed = false
     let timer: number | undefined
     let unsubscribe: (() => void) | undefined
@@ -74,6 +75,7 @@ export function MarkdownEditorOverlay({
           offsetY: dm.data.offsetY,
           scale: dm.data.scale,
         })
+        setViewReady(true)
       } catch {
         timer = window.setTimeout(attach, 100)
       }
@@ -122,6 +124,7 @@ export function MarkdownEditorOverlay({
         top,
         width: screenWidth,
         height: screenHeight,
+        visibility: viewReady ? 'visible' : 'hidden',
         transform: rotation ? `rotate(${rotation}deg)` : undefined,
         transformOrigin: 'center center',
       }}

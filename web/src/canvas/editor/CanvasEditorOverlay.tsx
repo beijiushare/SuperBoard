@@ -1124,10 +1124,7 @@ export function CanvasEditorOverlay({
               style={(() => {
                 const centerX = offsetX + (node.x + node.width / 2) * scale
                 const centerY = offsetY + (node.y + node.height / 2) * scale
-                const displayRotation =
-                  node.id === activeEditingId
-                    ? 0
-                    : node['x-superboard']?.rotation ?? 0
+                const displayRotation = node['x-superboard']?.rotation ?? 0
                 const radians = (displayRotation * Math.PI) / 180
                 const distance = (node.height / 2) * scale + 32
                 return {
