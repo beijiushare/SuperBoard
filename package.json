@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "postinstall": "patch-package",
+    "postinstall": "patch-package && node scripts/clear-vite-cache.mjs",
+    "clear:vite": "node scripts/clear-vite-cache.mjs",
     "mathjax": "node scripts/copy-mathjax.mjs",
     "dev": "npm run mathjax && vite",
     "build:viewer": "npm run mathjax && vite build",

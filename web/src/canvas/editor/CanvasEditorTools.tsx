@@ -5,6 +5,7 @@ import type {
   CanvasDocument,
   CanvasEdge,
   CanvasNode,
+  CanvasSide,
   SuperBoardNodeExtension,
   SuperBoardStroke,
 } from '../model'
@@ -125,6 +126,18 @@ function strokeHit(
     if (distance <= radius) return true
   }
   return false
+}
+
+function closestSide(node: CanvasNode, x: number, y: number): CanvasSide {
+  const distances = {
+    top: Math.abs(y - node.y),
+    right: Math.abs(x - (node.x + node.width)),
+    bottom: Math.abs(y - (node.y + node.height)),
+    left: Math.abs(x - node.x),
+  }
+  return (Object.keys(distances) as CanvasSide[]).reduce((best, side) =>
+    distances[side] < distances[best] ? side : best,
+  )
 }
 
 function arrowSides(from: CanvasNode, to: CanvasNode) {
@@ -692,7 +705,7 @@ export function CanvasEditorTools({
       fromNode: from.id,
       toNode: target.id,
       fromSide: sides.fromSide,
-      toSide: sides.toSide,
+      toSide: closestSide(target, current.currentX, current.currentY),
       fromEnd: 'none',
       toEnd: 'arrow',
     }
@@ -865,8 +878,10 @@ export function CanvasEditorTools({
   const arrowTarget = arrowDraft
     ? findNodeAt(arrowDraft.currentX, arrowDraft.currentY, (node) => node.id !== arrowDraft.fromId)
     : null
-  const arrowTargetSides =
-    arrowFrom && arrowTarget ? arrowSides(arrowFrom, arrowTarget) : null
+  const arrowTargetSide =
+    arrowDraft && arrowTarget
+      ? closestSide(arrowTarget, arrowDraft.currentX, arrowDraft.currentY)
+      : null
   const arrowTargetBox =
     arrowTarget && view
       ? {
@@ -979,11 +994,11 @@ export function CanvasEditorTools({
                         <circle
                           key={side}
                           className={`sb-editor-arrow-target-handle${
-                            arrowTargetSides?.toSide === side ? ' is-active' : ''
+                            arrowTargetSide === side ? ' is-active' : ''
                           }`}
                           cx={arrowTargetHandles[side].x}
                           cy={arrowTargetHandles[side].y}
-                          r={arrowTargetSides?.toSide === side ? 5 : 3.5}
+                          r={arrowTargetSide === side ? 5 : 3.5}
                         />
                       ))
                     : null}
