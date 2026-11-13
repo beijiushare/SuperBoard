@@ -24,8 +24,6 @@ npm run dev
 
 打开终端输出的本地地址（默认 `http://127.0.0.1:5173/`）。
 
-迁移验证页：启动 dev 后访问 `/canvas-preview.html`，使用上游 `json-canvas-viewer` 渲染 JSON Canvas 测试数据。
-
 ```bash
 npm run test:model
 npm run test:editor

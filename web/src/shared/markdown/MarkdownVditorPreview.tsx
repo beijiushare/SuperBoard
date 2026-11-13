@@ -63,6 +63,17 @@ export function MarkdownVditorPreview({
         if (cancelled) return
         host.innerHTML = html
         host.classList.add('vditor-reset', 'sb-markdown')
+        Vditor.highlightRender(
+          {
+            enable: true,
+            style:
+              theme === 'orange' || theme === 'mint'
+                ? 'atom-one-dark'
+                : 'github',
+          },
+          host,
+          vditorCdn,
+        )
         Vditor.mathRender(host, {
           cdn: vditorCdn,
           math: { engine: 'MathJax' },

@@ -3,7 +3,9 @@ import path from 'node:path'
 import { parseCanvas, serializeCanvas } from '../web/src/canvas/model'
 
 const sourceDir = path.resolve(process.argv[2] ?? 'whiteboards/public')
-const outputDir = path.resolve(process.argv[3] ?? '.preview/canvas')
+const outputDir = path.resolve(
+  process.argv[3] ?? 'node_modules/.cache/superboard/canvas',
+)
 
 async function walk(dir: string): Promise<string[]> {
   const files: string[] = []

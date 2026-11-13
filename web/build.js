@@ -3,7 +3,13 @@ import path from 'node:path'
 
 const root = process.cwd()
 const distDir = path.join(root, 'dist')
-const canvasesDir = path.join(root, '.preview', 'canvas')
+const canvasesDir = path.join(
+  root,
+  'node_modules',
+  '.cache',
+  'superboard',
+  'canvas',
+)
 const manifestPath = path.join(distDir, '.vite', 'manifest.json')
 const templatePath = path.join(root, 'web', 'template.html')
 
@@ -178,7 +184,14 @@ function renderAliasPage(target) {
 async function copyVditorAssets() {
   const source = path.join(root, 'node_modules', 'vditor', 'dist')
   const target = path.join(distDir, '__vditor', 'dist')
-  for (const folder of ['js/lute', 'js/i18n', 'js/icons', 'css/content-theme', 'images/emoji']) {
+  for (const folder of [
+    'js/lute',
+    'js/i18n',
+    'js/icons',
+    'js/highlight.js',
+    'css/content-theme',
+    'images/emoji',
+  ]) {
     await fs.cp(path.join(source, folder), path.join(target, folder), {
       recursive: true,
     })
