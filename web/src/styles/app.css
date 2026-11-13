@@ -567,6 +567,17 @@
   cursor: default;
 }
 
+.canvas-viewer-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas-viewer-wrap.is-rotating .JCV-controls,
+.canvas-viewer-wrap.is-rotating .JCV-minimap-container {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .canvas-editor-stage {
   position: relative;
   flex: 1;
