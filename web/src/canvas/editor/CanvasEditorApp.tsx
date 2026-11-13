@@ -836,20 +836,23 @@ export function CanvasEditorApp() {
     pasteClipboard()
   }
 
-  function deleteSelection() {
+  function deleteSelection(
+    ids: string[] = selectedIds,
+    edgeId: string | null = selectedEdgeId,
+  ) {
     if (!canvas) return
-    if (selectedEdgeId) {
+    if (edgeId) {
       recordHistory()
       applyDocument({
         ...canvas,
-        edges: canvas.edges.filter((edge) => edge.id !== selectedEdgeId),
+        edges: canvas.edges.filter((edge) => edge.id !== edgeId),
       })
       setSelectedEdgeId(null)
       return
     }
-    if (selectedIds.length === 0) return
+    if (ids.length === 0) return
     const map = nodeMapOf(canvas.nodes)
-    const selected = new Set(selectedIds)
+    const selected = new Set(ids)
     const deleted = new Set<string>()
     for (const node of canvas.nodes) {
       if (!selected.has(node.id) || isLocked(node, map)) continue
@@ -870,6 +873,12 @@ export function CanvasEditorApp() {
         (edge) => !deleted.has(edge.fromNode) && !deleted.has(edge.toNode),
       ),
     })
+  }
+
+  function deleteBlock(id: string) {
+    if (markdownEditingId === id) closeMarkdownEditor()
+    if (markdownFocusId === id) closeMarkdownFocus()
+    deleteSelection([id], null)
   }
 
   function ensureExtension(node: CanvasNode) {
@@ -1866,6 +1875,7 @@ export function CanvasEditorApp() {
                     activeEditingId={markdownEditingId ?? textEditingId}
                     onToggleBlockEdit={toggleBlockEdit}
                     onFocusBlockEdit={openMarkdownFocus}
+                    onDeleteBlock={deleteBlock}
                     onToggleRatioLock={toggleRatioLock}
                   />
                   <CanvasEditorTools

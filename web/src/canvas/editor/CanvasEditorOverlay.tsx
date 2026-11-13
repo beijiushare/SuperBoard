@@ -8,6 +8,7 @@ import {
 import UseAnimations from 'react-useanimations'
 import hash from 'react-useanimations/lib/hash'
 import lock from 'react-useanimations/lib/lock'
+import trash2 from 'react-useanimations/lib/trash2'
 import typeIcon from 'react-useanimations/lib/type'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument, CanvasEdge, CanvasNode } from '../model'
@@ -60,6 +61,7 @@ interface CanvasEditorOverlayProps {
   selectionSuppressedId?: string | null
   onToggleBlockEdit?: (id: string) => void
   onFocusBlockEdit?: (id: string) => void
+  onDeleteBlock?: (id: string) => void
   onToggleRatioLock?: (id: string) => void
 }
 
@@ -153,6 +155,7 @@ export function CanvasEditorOverlay({
   selectionSuppressedId = null,
   onToggleBlockEdit,
   onFocusBlockEdit,
+  onDeleteBlock,
   onToggleRatioLock,
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
@@ -1193,6 +1196,21 @@ export function CanvasEditorOverlay({
                   />
                 </button>
               ) : null}
+              <button
+                type="button"
+                className="sb-block-action"
+                title="删除"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onDeleteBlock?.(node.id)
+                }}
+              >
+                <UseAnimations
+                  animation={trash2}
+                  size={32}
+                  interaction="click-replay"
+                />
+              </button>
             </div>
           )
         })}
