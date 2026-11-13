@@ -161,6 +161,7 @@ export function CanvasEditorOverlay({
   const [tick, setTick] = useState(0)
   const [marquee, setMarquee] = useState<Marquee | null>(null)
   const [guides, setGuides] = useState<{ x?: number; y?: number } | null>(null)
+  const [actionsVisible, setActionsVisible] = useState(true)
   const [edgePreview, setEdgePreview] = useState<{
     fromX: number
     fromY: number
@@ -195,6 +196,7 @@ export function CanvasEditorOverlay({
     const clearDrag = () => {
       dragRef.current = null
       setGuides(null)
+      setActionsVisible(true)
     }
     window.addEventListener('pointerup', clearDrag, true)
     window.addEventListener('pointercancel', clearDrag, true)
@@ -664,6 +666,7 @@ export function CanvasEditorOverlay({
     const dy = (event.clientY - drag.startClientY) / drag.scale
     if (!drag.changed && (dx !== 0 || dy !== 0)) {
       drag.changed = true
+      setActionsVisible(false)
       onBeforeChange?.()
     }
     if (drag.kind === 'move') {
@@ -875,6 +878,7 @@ export function CanvasEditorOverlay({
   function endDrag() {
     dragRef.current = null
     setGuides(null)
+    setActionsVisible(true)
   }
 
   const dm = dmRef.current
@@ -1108,6 +1112,7 @@ export function CanvasEditorOverlay({
       {nodes
         .filter(
           (node) =>
+            actionsVisible &&
             isBlockNode(node) &&
             ((selectedIds.length === 1 && selectedIds[0] === node.id) ||
               activeEditingId === node.id) &&
