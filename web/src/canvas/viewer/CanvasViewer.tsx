@@ -39,6 +39,8 @@ export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
     const options = useMemo(
       () => ({
         parser,
+        controlsCollapsed: true,
+        minimapCollapsed: true,
         pointeract: {
           proControlSchema: true,
         },
