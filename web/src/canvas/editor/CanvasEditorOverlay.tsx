@@ -48,6 +48,7 @@ interface CanvasEditorOverlayProps {
   onSelectEdge?: (id: string | null) => void
   focusedGroupId?: string | null
   activeEditingId?: string | null
+  selectionSuppressedId?: string | null
   onToggleBlockEdit?: (id: string) => void
   onToggleRatioLock?: (id: string) => void
 }
@@ -137,6 +138,7 @@ export function CanvasEditorOverlay({
   onSelectEdge,
   focusedGroupId = null,
   activeEditingId = null,
+  selectionSuppressedId = null,
   onToggleBlockEdit,
   onToggleRatioLock,
 }: CanvasEditorOverlayProps) {
@@ -834,7 +836,8 @@ export function CanvasEditorOverlay({
   const map = nodeMapOf(nodes)
   const selectedNodes = nodes.filter((node) => selectedIds.includes(node.id))
   const selectionBoxNodes = selectedNodes.filter(
-    (node) => node.id !== activeEditingId,
+    (node) =>
+      node.id !== activeEditingId && node.id !== selectionSuppressedId,
   )
   const focusedNode = focusedGroupId ? map.get(focusedGroupId) ?? null : null
   const selectedEdge = selectedEdgeId
@@ -1054,6 +1057,8 @@ export function CanvasEditorOverlay({
           (node) =>
             isBlockNode(node) &&
             ((selectedIds.length === 1 && selectedIds[0] === node.id) ||
+              activeEditingId === node.id) &&
+            (node.id !== selectionSuppressedId ||
               activeEditingId === node.id),
         )
         .map((node) => {

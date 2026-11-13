@@ -182,6 +182,9 @@ export function CanvasEditorApp() {
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
   const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
   const [markdownEditingId, setMarkdownEditingId] = useState<string | null>(null)
+  const [rotationSelectionId, setRotationSelectionId] = useState<string | null>(
+    null,
+  )
   const [canvasRotate, setCanvasRotate] = useState<{
     angle: number
     worldX: number
@@ -338,6 +341,7 @@ export function CanvasEditorApp() {
         setCanvas(next)
         setMarkdownEditingId(null)
         setTextEditingId(null)
+        setRotationSelectionId(null)
         setSaveState('saved')
         expandPath(first.path)
         updateEditorUrl(first.slug, first.scope, initialTree)
@@ -595,6 +599,7 @@ export function CanvasEditorApp() {
     extension.markdownLocked = false
     markDirty()
     markdownHistoryRef.current = false
+    setRotationSelectionId(id)
     setMarkdownEditingId(id)
   }
 
@@ -1183,6 +1188,10 @@ export function CanvasEditorApp() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!canvasRotate && !markdownEditingId) setRotationSelectionId(null)
+  }, [canvasRotate, markdownEditingId])
+
   useLayoutEffect(() => {
     viewerRef.current?.viewer?.refresh?.()
   }, [canvasRotate])
@@ -1328,6 +1337,7 @@ export function CanvasEditorApp() {
     setFocusedGroupId(null)
     setMarkdownEditingId(null)
     setTextEditingId(null)
+    setRotationSelectionId(null)
     setTool('select')
     setDirectorMode(false)
     setPresentation(false)
@@ -1896,6 +1906,7 @@ export function CanvasEditorApp() {
                     }}
                     focusedGroupId={focusedGroupId}
                     activeEditingId={markdownEditingId ?? textEditingId}
+                    selectionSuppressedId={rotationSelectionId}
                     onToggleBlockEdit={toggleBlockEdit}
                     onToggleRatioLock={toggleRatioLock}
                   />
