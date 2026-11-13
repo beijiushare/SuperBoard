@@ -1081,6 +1081,7 @@
 }
 
 .sb-editor-edge-hit {
+  fill: none;
   stroke: transparent;
   stroke-width: 14;
   pointer-events: stroke;
@@ -1088,6 +1089,7 @@
 }
 
 .sb-editor-edge-selected {
+  fill: none;
   stroke: #2f80ed;
   stroke-width: 3;
   stroke-dasharray: 6 4;

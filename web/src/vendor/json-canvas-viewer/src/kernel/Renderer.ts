@@ -173,22 +173,9 @@ export default class Renderer extends BaseModule {
 		const toNode = this.DM.data.nodeMap[edge.toNode].ref;
 		const { x: startX, y: startY } = getAnchorCoord(fromNode, edge.fromSide);
 		const { x: endX, y: endY } = getAnchorCoord(toNode, edge.toSide);
-		const color = this.SM.getColor(edge.color);
-		let startControlX;
-		let startControlY;
-		let endControlX;
-		let endControlY: number;
-		if (!item.controlPoints) {
-			[startControlX, startControlY, endControlX, endControlY] = this.getControlPoints(
-				startX,
-				startY,
-				endX,
-				endY,
-				edge.fromSide,
-				edge.toSide,
-			);
-			item.controlPoints = [startControlX, startControlY, endControlX, endControlY];
-		} else [startControlX, startControlY, endControlX, endControlY] = item.controlPoints;
+		const color = this.SM.getColor(edge.color ?? '#1d1d1d');
+		const [startControlX, startControlY, endControlX, endControlY] =
+			this.getControlPoints(startX, startY, endX, endY, edge.fromSide, edge.toSide);
 		this.drawCurvedPath(
 			startX,
 			startY,

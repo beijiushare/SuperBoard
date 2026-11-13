@@ -160,6 +160,7 @@ export function CanvasEditorOverlay({
   const controllerRef = useRef<Controller | null>(null)
   const dragRef = useRef<DragState | null>(null)
   const marqueeStartRef = useRef<{ x: number; y: number } | null>(null)
+  const marqueeAdditiveRef = useRef(false)
 
   useEffect(() => {
     let disposed = false
@@ -198,11 +199,16 @@ export function CanvasEditorOverlay({
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
       if (!interactive) return
-      if (!event.shiftKey || event.button !== 0) return
+      if (event.button !== 0) return
       const overlay = overlayRef.current
       const dm = dmRef.current
       if (!overlay || !dm) return
-      if ((event.target as HTMLElement | null)?.closest('.sb-editor-selection, .sb-editor-hitbox')) {
+      const target = event.target as HTMLElement | null
+      if (
+        target?.closest(
+          '.sb-editor-selection, .sb-editor-hitbox, .sb-editor-edge-endpoint, .sb-block-actions, .sb-md-editor, .sb-style-panel, .canvas-editor-toolstrip, .JCV-overlay-container, .JCV-controls, .JCV-minimap-container, .sb-frame-controller, button, a, input, textarea',
+        )
+      ) {
         return
       }
       const bounds = overlay.getBoundingClientRect()
@@ -216,6 +222,7 @@ export function CanvasEditorOverlay({
       }
       event.preventDefault()
       event.stopPropagation()
+      marqueeAdditiveRef.current = event.shiftKey
       marqueeStartRef.current = { x: event.clientX, y: event.clientY }
       setMarquee({ left: event.clientX - bounds.left, top: event.clientY - bounds.top, width: 0, height: 0 })
     }
@@ -267,6 +274,10 @@ export function CanvasEditorOverlay({
         if (!intersects(box, screenRect(node, offsetX, offsetY, scale))) continue
         ids.add(selectableAncestor(node, map, focusedGroupId).id)
       }
+      if (marqueeAdditiveRef.current) {
+        for (const id of selectedIds) ids.add(id)
+      }
+      marqueeAdditiveRef.current = false
       onSelect([...ids])
       setMarquee(null)
     }
@@ -279,7 +290,7 @@ export function CanvasEditorOverlay({
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
     }
-  }, [onSelect, onSelectEdge, interactive, focusedGroupId])
+  }, [onSelect, onSelectEdge, interactive, focusedGroupId, selectedIds])
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
@@ -859,6 +870,7 @@ export function CanvasEditorOverlay({
                 <path
                   className="sb-editor-edge-hit"
                   d={path}
+                  fill="none"
                   vectorEffect="non-scaling-stroke"
                   onPointerDown={(event) => {
                     if (event.button !== 0) return
@@ -872,6 +884,7 @@ export function CanvasEditorOverlay({
                   <path
                     className="sb-editor-edge-selected"
                     d={path}
+                    fill="none"
                     vectorEffect="non-scaling-stroke"
                   />
                 ) : null}

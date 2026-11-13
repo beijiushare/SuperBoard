@@ -228,6 +228,7 @@ export function CanvasEditorApp() {
   } | null>(null)
   const viewerRef = useRef<CanvasViewerHandle>(null)
   const shiftRef = useRef(false)
+  const rightDragRef = useRef<{ x: number; y: number } | null>(null)
   const historyRef = useRef<{ past: CanvasDocument[]; future: CanvasDocument[] }>({
     past: [],
     future: [],
@@ -257,6 +258,9 @@ export function CanvasEditorApp() {
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
       shiftRef.current = event.shiftKey
+      if (event.button === 2) {
+        rightDragRef.current = { x: event.clientX, y: event.clientY }
+      }
     }
     window.addEventListener('pointerdown', onPointerDown, true)
     return () => window.removeEventListener('pointerdown', onPointerDown, true)
@@ -471,6 +475,18 @@ export function CanvasEditorApp() {
   }
 
   function openCanvasMenu(event: ReactMouseEvent<HTMLDivElement>) {
+    if (rightDragRef.current) {
+      const distance = Math.hypot(
+        event.clientX - rightDragRef.current.x,
+        event.clientY - rightDragRef.current.y,
+      )
+      rightDragRef.current = null
+      if (distance > 4) {
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+    }
     if (!canvas || directorMode) return
     const target = event.target as HTMLElement
     if (

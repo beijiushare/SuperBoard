@@ -69,10 +69,48 @@ export default class InteractionHandler extends BaseModule<Options, Augmentation
 		this.onDispose(this.dispose);
 	}
 
+	private dragButton = 0;
+	private dragPointerType = 'mouse';
+	private spacePressed = false;
+	private detachDragModifiers?: () => void;
+
+	private readonly bindDragModifiers = () => {
+		if (this.detachDragModifiers) return;
+		const win = this.DM.data.container.ownerDocument.defaultView;
+		if (!win) return;
+		const onPointerDown = (event: PointerEvent) => {
+			this.dragButton = event.button;
+			this.dragPointerType = event.pointerType;
+		};
+		const onPointerUp = () => {
+			this.dragButton = 0;
+			this.dragPointerType = 'mouse';
+		};
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (event.code === 'Space') this.spacePressed = true;
+		};
+		const onKeyUp = (event: KeyboardEvent) => {
+			if (event.code === 'Space') this.spacePressed = false;
+		};
+		win.addEventListener('pointerdown', onPointerDown, true);
+		win.addEventListener('pointerup', onPointerUp, true);
+		win.addEventListener('pointercancel', onPointerUp, true);
+		win.addEventListener('keydown', onKeyDown);
+		win.addEventListener('keyup', onKeyUp);
+		this.detachDragModifiers = () => {
+			win.removeEventListener('pointerdown', onPointerDown, true);
+			win.removeEventListener('pointerup', onPointerUp, true);
+			win.removeEventListener('pointercancel', onPointerUp, true);
+			win.removeEventListener('keydown', onKeyDown);
+			win.removeEventListener('keyup', onKeyUp);
+		};
+	};
+
 	private readonly start = () => {
+		this.bindDragModifiers();
 		this.pointeract
-			.on('pan', this.onPan)
-			.on('drag', this.onPan)
+			.on('pan', this.onWheelPan)
+			.on('drag', this.onDragPan)
 			.on('zoom', this.onZoom)
 			.on('trueClick', this.onTrueClick)
 			.start();
@@ -87,7 +125,20 @@ export default class InteractionHandler extends BaseModule<Options, Augmentation
 		this.pointeract.stop();
 	};
 
-	private readonly onPan = (event: LoadedEvents['pan']) => {
+	private readonly onWheelPan = (event: LoadedEvents['pan']) => {
+		this.truePan({
+			x: event.deltaX,
+			y: event.deltaY,
+		});
+	};
+
+	private readonly onDragPan = (event: LoadedEvents['drag']) => {
+		const canPan =
+			this.dragPointerType === 'touch' ||
+			this.dragButton === 1 ||
+			this.dragButton === 2 ||
+			(this.dragButton === 0 && this.spacePressed);
+		if (!canPan) return;
 		this.truePan({
 			x: event.deltaX,
 			y: event.deltaY,
@@ -160,6 +211,8 @@ export default class InteractionHandler extends BaseModule<Options, Augmentation
 
 	private readonly dispose = () => {
 		this.disposed = true;
+		this.detachDragModifiers?.();
+		this.detachDragModifiers = undefined;
 		this.pointeract.dispose();
 	};
 }

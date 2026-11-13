@@ -312,7 +312,7 @@ export function CanvasStylePanel({
                   key={item.value}
                   type="button"
                   title={item.label}
-                  className={(edge.color ?? '#6b7280') === item.value ? 'is-active' : undefined}
+                  className={(edge.color ?? '#1d1d1d') === item.value ? 'is-active' : undefined}
                   style={{ background: item.value }}
                   onClick={() => updateEdge({ color: item.value })}
                 />

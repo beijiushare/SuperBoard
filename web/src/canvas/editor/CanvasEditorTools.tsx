@@ -701,7 +701,11 @@ export function CanvasEditorTools({
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-    if (event.button === 1 || (event.button === 0 && panModeRef.current)) {
+    if (
+      event.button === 1 ||
+      event.button === 2 ||
+      (event.button === 0 && panModeRef.current)
+    ) {
       const data = internals()
       if (!data) return
       panGestureRef.current = {

@@ -289,7 +289,7 @@ function edgeMarkup(edge: CanvasEdge, nodes: Map<string, CanvasNode>) {
   const geometry = edgeGeometry(edge, nodes)
   if (!geometry) return ''
   const { start, end, controlA, controlB } = geometry
-  const color = svgColor(edge.color, '#6b7280')
+  const color = svgColor(edge.color, '#1d1d1d')
   const line = `<path d="M ${start.x} ${start.y} C ${controlA.x} ${controlA.y} ${controlB.x} ${controlB.y} ${end.x} ${end.y}" fill="none" stroke="${color}" stroke-width="1.8"/>`
   let markup = line
   if (edge.toEnd !== 'none') markup += arrowHead(end, controlB, color)
