@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import type Vditor from 'vditor'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
+import { MarkdownVditor } from './MarkdownVditor'
 
 type DataManager = {
   data: {
@@ -39,22 +39,11 @@ export function MarkdownEditorOverlay({
 }: MarkdownEditorOverlayProps) {
   const node = canvas.nodes.find((item) => item.id === nodeId)
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const editorRef = useRef<HTMLDivElement>(null)
-  const vditorRef = useRef<Vditor | null>(null)
-  const valueRef = useRef('')
-  const dirtyRef = useRef(false)
   const closeRef = useRef(onRequestClose)
-  const inputRef = useRef(onInput)
-  const commitRef = useRef(onCommit)
   const [view, setView] = useState({ offsetX: 0, offsetY: 0, scale: 1 })
   const [tick, setTick] = useState(0)
-  const [frameRotation, setFrameRotation] = useState(
-    () => node?.['x-superboard']?.rotation ?? 0,
-  )
 
   closeRef.current = onRequestClose
-  inputRef.current = onInput
-  commitRef.current = onCommit
 
   useEffect(() => {
     let disposed = false
@@ -98,88 +87,6 @@ export function MarkdownEditorOverlay({
   }, [viewerRef, canvas])
 
   useEffect(() => {
-    const rotation = node?.['x-superboard']?.rotation ?? 0
-    setFrameRotation(rotation)
-    if (rotation === 0) return
-    let inner = 0
-    const outer = window.requestAnimationFrame(() => {
-      inner = window.requestAnimationFrame(() => setFrameRotation(0))
-    })
-    return () => {
-      window.cancelAnimationFrame(outer)
-      window.cancelAnimationFrame(inner)
-    }
-  }, [nodeId])
-
-  useEffect(() => {
-    if (!node || node.type !== 'text' || !editorRef.current) return
-    let debounce: number | undefined
-    let cancelled = false
-    const element = editorRef.current
-    valueRef.current = node.text
-    dirtyRef.current = false
-    void import('vditor').then(async ({ default: VditorClass }) => {
-      await import('vditor/dist/index.css')
-      if (cancelled || !element) return
-      const vditor = new VditorClass(element, {
-        cdn: '/__vditor',
-        mode: 'ir',
-        value: node.text,
-        height: '100%',
-        minHeight: 40,
-        toolbar: [],
-        counter: { enable: false },
-        cache: { enable: false },
-        outline: { enable: false, position: 'left' },
-        preview: {
-          markdown: {
-            inlineMath: false,
-            mathBlockPreview: false,
-          },
-        },
-        input: (value) => {
-          valueRef.current = value
-          dirtyRef.current = true
-          if (debounce) window.clearTimeout(debounce)
-          debounce = window.setTimeout(() => {
-            inputRef.current(nodeId, value)
-          }, 350)
-        },
-        after: () => {
-          window.setTimeout(() => {
-            vditorRef.current?.focus()
-            const ir = element.querySelector('.vditor-ir') as HTMLElement | null
-            if (ir) ir.scrollTop = 0
-          }, 0)
-        },
-      })
-      vditorRef.current = vditor
-    })
-    return () => {
-      cancelled = true
-      if (debounce) window.clearTimeout(debounce)
-      const value = valueRef.current
-      const dirty = dirtyRef.current
-      const vditor = vditorRef.current
-      vditorRef.current = null
-      try {
-        vditor?.destroy()
-      } catch (error) {
-        console.error('[SuperBoard] 销毁 Vditor 失败', error)
-      }
-      if (dirty) {
-        window.setTimeout(() => {
-          try {
-            commitRef.current(nodeId, value)
-          } catch (error) {
-            console.error('[SuperBoard] 提交 Markdown 失败', error)
-          }
-        }, 0)
-      }
-    }
-  }, [nodeId])
-
-  useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as HTMLElement | null
       if (!target) return
@@ -192,7 +99,7 @@ export function MarkdownEditorOverlay({
     return () => document.removeEventListener('pointerdown', onPointerDown, true)
   }, [])
 
-  if (!node) return null
+  if (!node || node.type !== 'text') return null
 
   const width = Math.max(160, node.width)
   const height = Math.max(140, node.height)
@@ -203,6 +110,7 @@ export function MarkdownEditorOverlay({
   const centerY = view.offsetY + (node.y + node.height / 2) * view.scale
   const left = centerX - screenWidth / 2
   const top = centerY - screenHeight / 2
+  const rotation = node['x-superboard']?.rotation ?? 0
 
   return (
     <div
@@ -214,9 +122,8 @@ export function MarkdownEditorOverlay({
         top,
         width: screenWidth,
         height: screenHeight,
-        transform: `rotate(${frameRotation}deg)`,
+        transform: rotation ? `rotate(${rotation}deg)` : undefined,
         transformOrigin: 'center center',
-        transition: 'transform 240ms cubic-bezier(0.22, 1, 0.36, 1)',
       }}
       onPointerDown={(event) => event.stopPropagation()}
       onContextMenu={(event) => {
@@ -235,7 +142,12 @@ export function MarkdownEditorOverlay({
           transformOrigin: 'top left',
         }}
       >
-        <div ref={editorRef} style={{ height: '100%' }} />
+        <MarkdownVditor
+          key={nodeId}
+          value={node.text}
+          onInput={(value) => onInput(nodeId, value)}
+          onCommit={(value) => onCommit(nodeId, value)}
+        />
       </div>
     </div>
   )

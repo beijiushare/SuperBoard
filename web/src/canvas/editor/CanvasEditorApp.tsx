@@ -1,11 +1,9 @@
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type MouseEvent as ReactMouseEvent,
 } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
@@ -42,6 +40,7 @@ import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
+import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { blockKind, isRatioLocked } from './blocks'
 import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
@@ -182,16 +181,7 @@ export function CanvasEditorApp() {
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
   const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
   const [markdownEditingId, setMarkdownEditingId] = useState<string | null>(null)
-  const [rotationSelectionId, setRotationSelectionId] = useState<string | null>(
-    null,
-  )
-  const [canvasRotate, setCanvasRotate] = useState<{
-    angle: number
-    worldX: number
-    worldY: number
-    screenX: number
-    screenY: number
-  } | null>(null)
+  const [markdownFocusId, setMarkdownFocusId] = useState<string | null>(null)
   const [textEditingId, setTextEditingId] = useState<string | null>(null)
   const [tool, setTool] = useState<EditorTool>('select')
   const [editRequest, setEditRequest] = useState<{ id: string; nonce: number } | null>(null)
@@ -253,7 +243,6 @@ export function CanvasEditorApp() {
   const savingRef = useRef(false)
   const canvasRef = useRef<CanvasDocument | null>(null)
   const markdownHistoryRef = useRef(false)
-  const rotationTimerRef = useRef<number | null>(null)
 
   const scopedItems = useMemo(
     () => items.filter((item) => item.scope === scope),
@@ -268,6 +257,11 @@ export function CanvasEditorApp() {
     const frames = canvas?.['x-superboard']?.director?.frames ?? []
     return [...frames].sort((a, b) => a.order - b.order)
   }, [canvas, directorTick])
+  const markdownFocusNode = (() => {
+    if (!canvas || !markdownFocusId) return null
+    const node = canvas.nodes.find((item) => item.id === markdownFocusId)
+    return node?.type === 'text' ? node : null
+  })()
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -340,8 +334,8 @@ export function CanvasEditorApp() {
         setScope(first.scope)
         setCanvas(next)
         setMarkdownEditingId(null)
+        setMarkdownFocusId(null)
         setTextEditingId(null)
-        setRotationSelectionId(null)
         setSaveState('saved')
         expandPath(first.path)
         updateEditorUrl(first.slug, first.scope, initialTree)
@@ -506,7 +500,7 @@ export function CanvasEditorApp() {
     const target = event.target as HTMLElement
     if (
       target.closest(
-        'button, input, textarea, select, .sb-style-panel, .canvas-editor-toolstrip, .sb-director-overlay, .sb-frame-controller, .canvas-editor-toolbar, .JCV-controls, .JCV-minimap-container',
+        'button, input, textarea, select, .sb-style-panel, .sb-modal-backdrop, .canvas-editor-toolstrip, .sb-director-overlay, .sb-frame-controller, .canvas-editor-toolbar, .JCV-controls, .JCV-minimap-container',
       )
     ) {
       return
@@ -601,13 +595,29 @@ export function CanvasEditorApp() {
     if (!node || node['x-superboard']?.kind !== 'markdown') return
     if (markdownEditingId === id) return
     if (markdownEditingId) closeMarkdownEditor()
+    setMarkdownFocusId(null)
     setMarkdownOverlayHidden(id, true)
     const extension = ensureExtension(node)
     extension.markdownLocked = false
     markDirty()
     markdownHistoryRef.current = false
-    setRotationSelectionId(id)
     setMarkdownEditingId(id)
+  }
+
+  function openMarkdownFocus(id: string) {
+    const document = canvasRef.current
+    const node = document?.nodes.find((item) => item.id === id)
+    if (!node || node['x-superboard']?.kind !== 'markdown') return
+    closeTextEditing()
+    if (markdownEditingId) closeMarkdownEditor()
+    setSelectedIds([id])
+    setSelectedEdgeId(null)
+    markdownHistoryRef.current = false
+    setMarkdownFocusId(id)
+  }
+
+  function closeMarkdownFocus() {
+    setMarkdownFocusId(null)
   }
 
   function closeMarkdownEditor() {
@@ -636,7 +646,18 @@ export function CanvasEditorApp() {
       recordHistory()
       markdownHistoryRef.current = true
     }
-    node.text = value
+    setCanvas((current) =>
+      current
+        ? {
+            ...current,
+            nodes: current.nodes.map((item) =>
+              item.id === id && item.type === 'text'
+                ? { ...item, text: value }
+                : item,
+            ),
+          }
+        : current,
+    )
     markDirty()
   }
 
@@ -1145,66 +1166,6 @@ export function CanvasEditorApp() {
   })
 
   useEffect(() => {
-    if (rotationTimerRef.current) {
-      window.clearTimeout(rotationTimerRef.current)
-      rotationTimerRef.current = null
-    }
-    if (!markdownEditingId) {
-      if (canvasRotate) {
-        setCanvasRotate({ ...canvasRotate, angle: 0 })
-        rotationTimerRef.current = window.setTimeout(() => {
-          setCanvasRotate(null)
-          rotationTimerRef.current = null
-        }, 260)
-      }
-      return
-    }
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === markdownEditingId)
-    if (!node) return
-    const rotation = node['x-superboard']?.rotation ?? 0
-    let normalized = ((rotation % 360) + 360) % 360
-    if (normalized > 180) normalized -= 360
-    if (Math.abs(normalized) < 0.01) {
-      setCanvasRotate(null)
-      return
-    }
-    const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
-    if (!viewer?.container) return
-    try {
-      const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
-      const worldX = node.x + node.width / 2
-      const worldY = node.y + node.height / 2
-      setCanvasRotate({
-        angle: -normalized,
-        worldX,
-        worldY,
-        screenX: dm.data.offsetX + worldX * dm.data.scale,
-        screenY: dm.data.offsetY + worldY * dm.data.scale,
-      })
-    } catch {
-      setCanvasRotate(null)
-    }
-  }, [markdownEditingId])
-
-  useEffect(() => {
-    return () => {
-      if (rotationTimerRef.current) {
-        window.clearTimeout(rotationTimerRef.current)
-        rotationTimerRef.current = null
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!canvasRotate && !markdownEditingId) setRotationSelectionId(null)
-  }, [canvasRotate, markdownEditingId])
-
-  useLayoutEffect(() => {
-    viewerRef.current?.viewer?.refresh?.()
-  }, [canvasRotate])
-
-  useEffect(() => {
     const stage = stageRef.current
     if (!stage) return
     const onWheel = (event: WheelEvent) => {
@@ -1212,7 +1173,7 @@ export function CanvasEditorApp() {
       if (!target) return
       if (
         target.closest(
-          '.sb-style-panel, .canvas-editor-toolstrip, .JCV-controls, .JCV-minimap-container',
+          '.sb-style-panel, .sb-modal-backdrop, .canvas-editor-toolstrip, .JCV-controls, .JCV-minimap-container',
         )
       ) {
         return
@@ -1344,8 +1305,8 @@ export function CanvasEditorApp() {
     setSelectedEdgeId(null)
     setFocusedGroupId(null)
     setMarkdownEditingId(null)
+    setMarkdownFocusId(null)
     setTextEditingId(null)
-    setRotationSelectionId(null)
     setTool('select')
     setDirectorMode(false)
     setPresentation(false)
@@ -1880,18 +1841,7 @@ export function CanvasEditorApp() {
             >
               {canvas ? (
                 <>
-                  <div
-                    className={`canvas-viewer-wrap${canvasRotate ? ' is-rotating' : ''}`}
-                    style={
-                      {
-                        '--sb-canvas-rotation': `${canvasRotate?.angle ?? 0}deg`,
-                        '--sb-rot-x': `${canvasRotate?.screenX ?? 0}px`,
-                        '--sb-rot-y': `${canvasRotate?.screenY ?? 0}px`,
-                        '--sb-rot-world-x': `${canvasRotate?.worldX ?? 0}px`,
-                        '--sb-rot-world-y': `${canvasRotate?.worldY ?? 0}px`,
-                      } as CSSProperties
-                    }
-                  >
+                  <div className="canvas-viewer-wrap">
                     <CanvasViewer
                       ref={viewerRef}
                       canvas={canvas}
@@ -1914,8 +1864,8 @@ export function CanvasEditorApp() {
                     }}
                     focusedGroupId={focusedGroupId}
                     activeEditingId={markdownEditingId ?? textEditingId}
-                    selectionSuppressedId={rotationSelectionId}
                     onToggleBlockEdit={toggleBlockEdit}
+                    onFocusBlockEdit={openMarkdownFocus}
                     onToggleRatioLock={toggleRatioLock}
                   />
                   <CanvasEditorTools
@@ -1939,6 +1889,19 @@ export function CanvasEditorApp() {
                       onInput={handleMarkdownInput}
                       onCommit={handleMarkdownCommit}
                       onRequestClose={closeMarkdownEditor}
+                    />
+                  ) : null}
+                  {markdownFocusId && markdownFocusNode ? (
+                    <MarkdownFocusDialog
+                      nodeId={markdownFocusNode.id}
+                      value={markdownFocusNode.text}
+                      onInput={(value) =>
+                        handleMarkdownInput(markdownFocusNode.id, value)
+                      }
+                      onCommit={(value) =>
+                        handleMarkdownCommit(markdownFocusNode.id, value)
+                      }
+                      onClose={closeMarkdownFocus}
                     />
                   ) : null}
                   {stylePanelOpen ? (

@@ -6,6 +6,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import UseAnimations from 'react-useanimations'
+import edit3 from 'react-useanimations/lib/edit3'
 import lock from 'react-useanimations/lib/lock'
 import typeIcon from 'react-useanimations/lib/type'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
@@ -58,6 +59,7 @@ interface CanvasEditorOverlayProps {
   activeEditingId?: string | null
   selectionSuppressedId?: string | null
   onToggleBlockEdit?: (id: string) => void
+  onFocusBlockEdit?: (id: string) => void
   onToggleRatioLock?: (id: string) => void
 }
 
@@ -150,6 +152,7 @@ export function CanvasEditorOverlay({
   activeEditingId = null,
   selectionSuppressedId = null,
   onToggleBlockEdit,
+  onFocusBlockEdit,
   onToggleRatioLock,
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
@@ -244,7 +247,7 @@ export function CanvasEditorOverlay({
       const target = event.target as HTMLElement | null
       if (
         target?.closest(
-          '.sb-editor-selection, .sb-editor-hitbox, .sb-editor-edge-hit, .sb-editor-edge-endpoint, .sb-block-actions, .sb-md-editor, .sb-style-panel, .canvas-editor-toolstrip, .JCV-overlay-container, .JCV-controls, .JCV-minimap-container, .sb-frame-controller, button, a, input, textarea',
+          '.sb-editor-selection, .sb-editor-hitbox, .sb-editor-edge-hit, .sb-editor-edge-endpoint, .sb-block-actions, .sb-md-editor, .sb-style-panel, .sb-modal-backdrop, .canvas-editor-toolstrip, .JCV-overlay-container, .JCV-controls, .JCV-minimap-container, .sb-frame-controller, button, a, input, textarea, [contenteditable="true"]',
         )
       ) {
         return
@@ -338,7 +341,8 @@ export function CanvasEditorOverlay({
       if (!dm.data.container.contains(target)) return
       if (
         target.closest('.JCV-overlay-container') ||
-        target.closest('button, a, input, textarea, select')
+        target.closest('.sb-modal-backdrop') ||
+        target.closest('button, a, input, textarea, select, [contenteditable="true"]')
       ) {
         return
       }
@@ -1149,12 +1153,29 @@ export function CanvasEditorOverlay({
               >
                 <span className={`sb-block-check${editing ? ' is-checked' : ''}`} />
                 <UseAnimations
-                  animation={typeIcon}
-                  size={16}
+                  animation={edit3}
+                  size={32}
                   active={editing}
                   interaction="click-replay"
                 />
               </button>
+              {blockKind(node) === 'markdown' ? (
+                <button
+                  type="button"
+                  className="sb-block-action"
+                  title="专注编辑"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onFocusBlockEdit?.(node.id)
+                  }}
+                >
+                  <UseAnimations
+                    animation={typeIcon}
+                    size={16}
+                    interaction="click-replay"
+                  />
+                </button>
+              ) : null}
               <button
                 type="button"
                 className={`sb-block-action${ratioLocked ? ' is-active' : ''}`}

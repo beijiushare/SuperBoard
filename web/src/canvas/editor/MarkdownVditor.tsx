@@ -1,0 +1,99 @@
+import { useEffect, useRef } from 'react'
+import type Vditor from 'vditor'
+
+interface MarkdownVditorProps {
+  value: string
+  onInput: (value: string) => void
+  onCommit: (value: string) => void
+  className?: string
+  autoFocus?: boolean
+}
+
+export function MarkdownVditor({
+  value,
+  onInput,
+  onCommit,
+  className,
+  autoFocus = true,
+}: MarkdownVditorProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const vditorRef = useRef<Vditor | null>(null)
+  const valueRef = useRef(value)
+  const dirtyRef = useRef(false)
+  const inputRef = useRef(onInput)
+  const commitRef = useRef(onCommit)
+
+  inputRef.current = onInput
+  commitRef.current = onCommit
+
+  useEffect(() => {
+    const element = containerRef.current
+    if (!element) return
+    let cancelled = false
+    let debounce: number | undefined
+    valueRef.current = value
+    dirtyRef.current = false
+    void import('vditor').then(async ({ default: VditorClass }) => {
+      await import('vditor/dist/index.css')
+      if (cancelled || !element) return
+      const vditor = new VditorClass(element, {
+        cdn: '/__vditor',
+        mode: 'ir',
+        value,
+        height: '100%',
+        minHeight: 40,
+        toolbar: [],
+        counter: { enable: false },
+        cache: { enable: false },
+        outline: { enable: false, position: 'left' },
+        preview: {
+          markdown: {
+            inlineMath: false,
+            mathBlockPreview: false,
+          },
+        },
+        input: (nextValue) => {
+          valueRef.current = nextValue
+          dirtyRef.current = true
+          if (debounce) window.clearTimeout(debounce)
+          debounce = window.setTimeout(() => {
+            inputRef.current(nextValue)
+          }, 350)
+        },
+        after: () => {
+          if (!autoFocus) return
+          window.setTimeout(() => {
+            vditorRef.current?.focus()
+            const ir = element.querySelector('.vditor-ir') as HTMLElement | null
+            if (ir) ir.scrollTop = 0
+          }, 0)
+        },
+      })
+      vditorRef.current = vditor
+    })
+    return () => {
+      cancelled = true
+      if (debounce) window.clearTimeout(debounce)
+      const currentValue = valueRef.current
+      const dirty = dirtyRef.current
+      const vditor = vditorRef.current
+      vditorRef.current = null
+      try {
+        vditor?.destroy()
+      } catch (error) {
+        console.error('[SuperBoard] 销毁 Vditor 失败', error)
+      }
+      if (dirty) {
+        window.setTimeout(() => {
+          try {
+            commitRef.current(currentValue)
+          } catch (error) {
+            console.error('[SuperBoard] 提交 Markdown 失败', error)
+          }
+        }, 0)
+      }
+    }
+  }, [])
+
+  return <div ref={containerRef} className={className} style={{ height: '100%' }} />
+}
