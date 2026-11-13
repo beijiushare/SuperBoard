@@ -1685,7 +1685,6 @@ export function CanvasEditorApp() {
                     ref={viewerRef}
                     canvas={canvas}
                     onNodeSelect={handleNodeSelect}
-                    markdownMode="vditor"
                     style={{ width: '100%', height: '100%' }}
                   />
                   <CanvasEditorOverlay

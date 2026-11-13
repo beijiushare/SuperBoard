@@ -115,6 +115,12 @@ export function MarkdownEditorOverlay({
         counter: { enable: false },
         cache: { enable: false },
         outline: { enable: false, position: 'left' },
+        preview: {
+          markdown: {
+            inlineMath: false,
+            mathBlockPreview: false,
+          },
+        },
         input: (value) => {
           valueRef.current = value
           dirtyRef.current = true
@@ -136,8 +142,20 @@ export function MarkdownEditorOverlay({
       const dirty = dirtyRef.current
       const vditor = vditorRef.current
       vditorRef.current = null
-      vditor?.destroy()
-      if (dirty) commitRef.current(nodeId, value)
+      try {
+        vditor?.destroy()
+      } catch (error) {
+        console.error('[SuperBoard] 销毁 Vditor 失败', error)
+      }
+      if (dirty) {
+        window.setTimeout(() => {
+          try {
+            commitRef.current(nodeId, value)
+          } catch (error) {
+            console.error('[SuperBoard] 提交 Markdown 失败', error)
+          }
+        }, 0)
+      }
     }
   }, [nodeId])
 
