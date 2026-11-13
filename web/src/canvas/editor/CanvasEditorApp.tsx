@@ -227,6 +227,7 @@ export function CanvasEditorApp() {
     target: BoardContextTarget
   } | null>(null)
   const viewerRef = useRef<CanvasViewerHandle>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
   const shiftRef = useRef(false)
   const rightDragRef = useRef<{ x: number; y: number } | null>(null)
   const historyRef = useRef<{ past: CanvasDocument[]; future: CanvasDocument[] }>({
@@ -1121,6 +1122,57 @@ export function CanvasEditorApp() {
   })
 
   useEffect(() => {
+    const stage = stageRef.current
+    if (!stage) return
+    const onWheel = (event: WheelEvent) => {
+      const target = event.target as HTMLElement | null
+      if (!target) return
+      if (
+        target.closest(
+          '.sb-style-panel, .canvas-editor-toolstrip, .JCV-controls, .JCV-minimap-container',
+        )
+      ) {
+        return
+      }
+      const zooming = event.ctrlKey || event.metaKey
+      if (!zooming && target.closest('.sb-md-editor')) return
+      const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
+      if (!viewer?.container) return
+      let dm: DataManagerLike
+      let controller: ControllerLike
+      try {
+        dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
+        controller = viewer.container.get(
+          internal.Controller as never,
+        ) as ControllerLike
+      } catch {
+        return
+      }
+      event.preventDefault()
+      event.stopPropagation()
+      const bounds = stage.getBoundingClientRect()
+      if (zooming) {
+        const clamped = Math.max(-120, Math.min(120, event.deltaY))
+        const factor = 1.08 ** (-clamped / 100)
+        const nextScale = Math.min(20, Math.max(0.05, dm.data.scale * factor))
+        const originX = event.clientX - bounds.left
+        const originY = event.clientY - bounds.top
+        const worldX = (originX - dm.data.offsetX) / dm.data.scale
+        const worldY = (originY - dm.data.offsetY) / dm.data.scale
+        dm.data.offsetX = originX - worldX * nextScale
+        dm.data.offsetY = originY - worldY * nextScale
+        dm.data.scale = nextScale
+      } else {
+        dm.data.offsetX += event.shiftKey ? -event.deltaY : -event.deltaX
+        dm.data.offsetY += event.shiftKey ? 0 : -event.deltaY
+      }
+      controller.refresh()
+    }
+    stage.addEventListener('wheel', onWheel, { passive: false, capture: true })
+    return () => stage.removeEventListener('wheel', onWheel, { capture: true })
+  }, [canvas])
+
+  useEffect(() => {
     if (!canvasMenu) return
     const onPointerDown = (event: PointerEvent) => {
       if ((event.target as HTMLElement | null)?.closest('.sb-canvas-context-menu')) return
@@ -1737,7 +1789,11 @@ export function CanvasEditorApp() {
               </header>
             ) : null}
 
-            <div className="canvas-editor-stage" onContextMenu={openCanvasMenu}>
+            <div
+              ref={stageRef}
+              className="canvas-editor-stage"
+              onContextMenu={openCanvasMenu}
+            >
               {canvas ? (
                 <>
                   <CanvasViewer

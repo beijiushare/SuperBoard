@@ -206,7 +206,7 @@ export function CanvasEditorOverlay({
       const target = event.target as HTMLElement | null
       if (
         target?.closest(
-          '.sb-editor-selection, .sb-editor-hitbox, .sb-editor-edge-endpoint, .sb-block-actions, .sb-md-editor, .sb-style-panel, .canvas-editor-toolstrip, .JCV-overlay-container, .JCV-controls, .JCV-minimap-container, .sb-frame-controller, button, a, input, textarea',
+          '.sb-editor-selection, .sb-editor-hitbox, .sb-editor-edge-hit, .sb-editor-edge-endpoint, .sb-block-actions, .sb-md-editor, .sb-style-panel, .canvas-editor-toolstrip, .JCV-overlay-container, .JCV-controls, .JCV-minimap-container, .sb-frame-controller, button, a, input, textarea',
         )
       ) {
         return
@@ -945,6 +945,24 @@ export function CanvasEditorOverlay({
           />
         ))}
 
+      {nodes
+        .filter((node) => isBlockNode(node) && !isLocked(node, map))
+        .map((node) => (
+          <div
+            key={`block-hit-${node.id}`}
+            className="sb-editor-hitbox sb-editor-block-hitbox"
+            style={screenStyle(node, offsetX, offsetY, scale)}
+            onPointerDown={(event) => beginMove(event, node)}
+            onPointerMove={movePointer}
+            onPointerUp={endDrag}
+            onDoubleClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              onToggleBlockEdit?.(node.id)
+            }}
+          />
+        ))}
+
       {selectedNodes.map((node) => (
         <div
           key={node.id}
@@ -1042,10 +1060,16 @@ export function CanvasEditorOverlay({
             <div
               key={`block-actions-${node.id}`}
               className="sb-block-actions"
-              style={{
-                left: offsetX + (node.x + node.width / 2) * scale,
-                top: Math.max(8, offsetY + node.y * scale - 84),
-              }}
+              style={(() => {
+                const centerX = offsetX + (node.x + node.width / 2) * scale
+                const centerY = offsetY + (node.y + node.height / 2) * scale
+                const radians = ((node['x-superboard']?.rotation ?? 0) * Math.PI) / 180
+                const distance = (node.height / 2) * scale + 32
+                return {
+                  left: centerX + Math.sin(radians) * distance,
+                  top: Math.max(8, centerY - Math.cos(radians) * distance),
+                }
+              })()}
               onPointerDown={(event) => {
                 event.preventDefault()
                 event.stopPropagation()
@@ -1067,7 +1091,7 @@ export function CanvasEditorOverlay({
                 <span className={`sb-block-check${editing ? ' is-checked' : ''}`} />
                 <UseAnimations
                   animation={typeIcon}
-                  size={32}
+                  size={16}
                   active={editing}
                   interaction="click-replay"
                 />
@@ -1084,7 +1108,7 @@ export function CanvasEditorOverlay({
                 <span className={`sb-block-check${ratioLocked ? ' is-checked' : ''}`} />
                 <UseAnimations
                   animation={lock}
-                  size={32}
+                  size={16}
                   active={ratioLocked}
                   interaction="click-replay"
                 />
