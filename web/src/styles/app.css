@@ -937,6 +937,11 @@
   pointer-events: none;
 }
 
+.sb-md-editing-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
 .sb-block-scale {
   width: var(--sb-content-width, 100%);
   height: var(--sb-content-height, 100%);

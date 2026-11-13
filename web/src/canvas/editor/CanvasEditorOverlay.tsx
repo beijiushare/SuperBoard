@@ -833,6 +833,9 @@ export function CanvasEditorOverlay({
   const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
   const map = nodeMapOf(nodes)
   const selectedNodes = nodes.filter((node) => selectedIds.includes(node.id))
+  const selectionBoxNodes = selectedNodes.filter(
+    (node) => node.id !== activeEditingId,
+  )
   const focusedNode = focusedGroupId ? map.get(focusedGroupId) ?? null : null
   const selectedEdge = selectedEdgeId
     ? canvas.edges.find((edge) => edge.id === selectedEdgeId) ?? null
@@ -963,7 +966,7 @@ export function CanvasEditorOverlay({
           />
         ))}
 
-      {selectedNodes.map((node) => (
+      {selectionBoxNodes.map((node) => (
         <div
           key={node.id}
           className="sb-editor-selection"
@@ -972,7 +975,7 @@ export function CanvasEditorOverlay({
           onPointerMove={movePointer}
           onPointerUp={endDrag}
         >
-          {selectedNodes.length === 1 ? (
+          {selectionBoxNodes.length === 1 ? (
             <>
               <span className="sb-editor-selection-label">{node.id}</span>
               {['nw', 'ne', 'sw', 'se'].map((corner) => (
@@ -1068,6 +1071,7 @@ export function CanvasEditorOverlay({
                 return {
                   left: centerX + Math.sin(radians) * distance,
                   top: Math.max(8, centerY - Math.cos(radians) * distance),
+                  transform: `translateX(-50%) rotate(${node['x-superboard']?.rotation ?? 0}deg)`,
                 }
               })()}
               onPointerDown={(event) => {

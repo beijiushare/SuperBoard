@@ -180,6 +180,11 @@ export function CanvasEditorApp() {
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
   const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
   const [markdownEditingId, setMarkdownEditingId] = useState<string | null>(null)
+  const [stageRotate, setStageRotate] = useState<{
+    angle: number
+    x: number
+    y: number
+  } | null>(null)
   const [textEditingId, setTextEditingId] = useState<string | null>(null)
   const [tool, setTool] = useState<EditorTool>('select')
   const [editRequest, setEditRequest] = useState<{ id: string; nonce: number } | null>(null)
@@ -1122,6 +1127,35 @@ export function CanvasEditorApp() {
   })
 
   useEffect(() => {
+    if (!markdownEditingId) {
+      setStageRotate(null)
+      return
+    }
+    const document = canvasRef.current
+    const node = document?.nodes.find((item) => item.id === markdownEditingId)
+    if (!node) return
+    const rotation = node['x-superboard']?.rotation ?? 0
+    let normalized = ((rotation % 360) + 360) % 360
+    if (normalized > 180) normalized -= 360
+    if (Math.abs(normalized) < 0.01) {
+      setStageRotate(null)
+      return
+    }
+    const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
+    if (!viewer?.container) return
+    try {
+      const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
+      setStageRotate({
+        angle: -normalized,
+        x: dm.data.offsetX + (node.x + node.width / 2) * dm.data.scale,
+        y: dm.data.offsetY + (node.y + node.height / 2) * dm.data.scale,
+      })
+    } catch {
+      setStageRotate(null)
+    }
+  }, [markdownEditingId])
+
+  useEffect(() => {
     const stage = stageRef.current
     if (!stage) return
     const onWheel = (event: WheelEvent) => {
@@ -1792,6 +1826,13 @@ export function CanvasEditorApp() {
             <div
               ref={stageRef}
               className="canvas-editor-stage"
+              style={{
+                transform: stageRotate ? `rotate(${stageRotate.angle}deg)` : undefined,
+                transformOrigin: stageRotate
+                  ? `${stageRotate.x}px ${stageRotate.y}px`
+                  : undefined,
+                transition: 'transform 240ms ease',
+              }}
               onContextMenu={openCanvasMenu}
             >
               {canvas ? (

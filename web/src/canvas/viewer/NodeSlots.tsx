@@ -47,7 +47,9 @@ export function TextSlot({
   useNodeSelection(node.id, onActive, onSelect)
   const ext = extension(node)
   const content =
-    ext?.kind === 'markdown' ? (
+    ext?.kind === 'markdown' && ext.markdownLocked === false ? (
+      <div className="sb-md-editing-placeholder" />
+    ) : ext?.kind === 'markdown' ? (
       <MarkdownView source={node.text} />
     ) : ext?.kind === 'pele' ? (
       <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />
