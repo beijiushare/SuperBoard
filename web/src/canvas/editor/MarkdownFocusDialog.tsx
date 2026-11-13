@@ -1,9 +1,11 @@
+import type { MarkdownTheme } from '../model'
 import { useDialogEscape } from '../../editor/dialogs/useDialogEscape'
 import { MarkdownVditor } from './MarkdownVditor'
 
 interface MarkdownFocusDialogProps {
   nodeId: string
   value: string
+  theme?: MarkdownTheme
   onInput: (value: string) => void
   onCommit: (value: string) => void
   onClose: () => void
@@ -12,6 +14,7 @@ interface MarkdownFocusDialogProps {
 export function MarkdownFocusDialog({
   nodeId,
   value,
+  theme,
   onInput,
   onCommit,
   onClose,
@@ -26,7 +29,9 @@ export function MarkdownFocusDialog({
       }}
     >
       <div
-        className="sb-modal sb-md-focus-modal"
+        className={`sb-modal sb-md-focus-modal${
+          theme ? ` sb-md-theme-${theme}` : ''
+        }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="sb-md-focus-title"

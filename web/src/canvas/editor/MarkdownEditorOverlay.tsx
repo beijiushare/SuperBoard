@@ -115,7 +115,11 @@ export function MarkdownEditorOverlay({
   return (
     <div
       ref={wrapperRef}
-      className="sb-md-editor"
+      className={`sb-md-editor${
+        node['x-superboard']?.markdownTheme
+          ? ` sb-md-theme-${node['x-superboard'].markdownTheme}`
+          : ''
+      }`}
       data-tick={tick}
       style={{
         left,

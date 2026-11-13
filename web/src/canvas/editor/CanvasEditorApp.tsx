@@ -35,6 +35,7 @@ import {
   type CanvasEdge,
   type CanvasFrame,
   type CanvasNode,
+  type MarkdownTheme,
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
@@ -571,6 +572,33 @@ export function CanvasEditorApp() {
     active?.blur()
   }
 
+  function setMarkdownTheme(id: string, theme: MarkdownTheme) {
+    const document = canvasRef.current
+    const node = document?.nodes.find((item) => item.id === id)
+    if (!document || !node || node['x-superboard']?.kind !== 'markdown') return
+    recordHistory()
+    const nodes = document.nodes.map((item) => {
+      if (item.id !== id) return item
+      return {
+        ...item,
+        'x-superboard': {
+          ...ensureExtension(item),
+          markdownTheme: theme,
+        },
+      }
+    })
+    const root = document['x-superboard']
+    setCanvas({
+      ...document,
+      nodes,
+      'x-superboard': root
+        ? { ...root, markdownDefaultTheme: theme }
+        : root,
+    })
+    markDirty()
+    viewerRef.current?.viewer?.refresh?.()
+  }
+
   function toggleRatioLock(id: string) {
     const document = canvasRef.current
     const node = document?.nodes.find((item) => item.id === id)
@@ -685,6 +713,7 @@ export function CanvasEditorApp() {
       ? { x: Math.round(point.x - 180), y: Math.round(point.y - 110) }
       : viewportCenter(360, 220)
     const code = 'flowchart LR\n    A[开始] --> B[结束]'
+    const defaultTheme = canvas['x-superboard']?.markdownDefaultTheme
     const node: CanvasNode =
       kind === 'markdown'
         ? {
@@ -695,7 +724,11 @@ export function CanvasEditorApp() {
             width: 360,
             height: 220,
             text: '# 新 Markdown\n\n在这里输入内容。',
-            'x-superboard': { kind: 'markdown', markdownLocked: false },
+            'x-superboard': {
+              kind: 'markdown',
+              markdownLocked: false,
+              ...(defaultTheme ? { markdownTheme: defaultTheme } : {}),
+            },
           }
         : {
             id,
@@ -1876,6 +1909,7 @@ export function CanvasEditorApp() {
                     onToggleBlockEdit={toggleBlockEdit}
                     onFocusBlockEdit={openMarkdownFocus}
                     onDeleteBlock={deleteBlock}
+                    onSetMarkdownTheme={setMarkdownTheme}
                     onToggleRatioLock={toggleRatioLock}
                   />
                   <CanvasEditorTools
@@ -1905,6 +1939,7 @@ export function CanvasEditorApp() {
                     <MarkdownFocusDialog
                       nodeId={markdownFocusNode.id}
                       value={markdownFocusNode.text}
+                      theme={markdownFocusNode['x-superboard']?.markdownTheme}
                       onInput={(value) =>
                         handleMarkdownInput(markdownFocusNode.id, value)
                       }

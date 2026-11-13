@@ -12,10 +12,16 @@ import lock from 'react-useanimations/lib/lock'
 import trash2 from 'react-useanimations/lib/trash2'
 import typeIcon from 'react-useanimations/lib/type'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
-import type { CanvasDocument, CanvasEdge, CanvasNode } from '../model'
+import type {
+  CanvasDocument,
+  CanvasEdge,
+  CanvasNode,
+  MarkdownTheme,
+} from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { blockKind, contentScale, isBlockNode, isRatioLocked } from './blocks'
 import { edgeGeometry, edgePath } from './edges'
+import { MarkdownThemeIcon } from './MarkdownThemeIcon'
 import {
   SELECTION_CORNERS,
   SELECTION_SIDES,
@@ -65,7 +71,15 @@ interface CanvasEditorOverlayProps {
   onToggleBlockEdit?: (id: string) => void
   onFocusBlockEdit?: (id: string) => void
   onDeleteBlock?: (id: string) => void
+  onSetMarkdownTheme?: (id: string, theme: MarkdownTheme) => void
   onToggleRatioLock?: (id: string) => void
+}
+
+const MARKDOWN_THEMES: MarkdownTheme[] = ['purple', 'orange', 'mint']
+const MARKDOWN_THEME_COLORS: Record<MarkdownTheme, string> = {
+  purple: '#8064a9',
+  orange: '#ef7060',
+  mint: '#4eb289',
 }
 
 interface DragNode {
@@ -159,6 +173,7 @@ export function CanvasEditorOverlay({
   onToggleBlockEdit,
   onFocusBlockEdit,
   onDeleteBlock,
+  onSetMarkdownTheme,
   onToggleRatioLock,
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
@@ -166,6 +181,7 @@ export function CanvasEditorOverlay({
   const [guides, setGuides] = useState<{ x?: number; y?: number } | null>(null)
   const [actionsVisible, setActionsVisible] = useState(true)
   const [actionsSize, setActionsSize] = useState({ width: 0, height: 0 })
+  const [themeMenuNodeId, setThemeMenuNodeId] = useState<string | null>(null)
   const actionsRef = useRef<HTMLDivElement>(null)
   const [edgePreview, setEdgePreview] = useState<{
     fromX: number
@@ -178,6 +194,23 @@ export function CanvasEditorOverlay({
   useEffect(() => {
     if (!canShowGuides) setGuides(null)
   }, [canShowGuides])
+
+  useEffect(() => {
+    if (!themeMenuNodeId) return
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null
+      if (target?.closest('.sb-md-theme-popover, .sb-md-theme-action')) return
+      setThemeMenuNodeId(null)
+    }
+    window.addEventListener('pointerdown', onPointerDown, true)
+    return () => window.removeEventListener('pointerdown', onPointerDown, true)
+  }, [themeMenuNodeId])
+
+  useEffect(() => {
+    if (themeMenuNodeId && !selectedIds.includes(themeMenuNodeId)) {
+      setThemeMenuNodeId(null)
+    }
+  }, [selectedIds, themeMenuNodeId])
 
   useLayoutEffect(() => {
     const element = actionsRef.current
@@ -1143,6 +1176,8 @@ export function CanvasEditorOverlay({
         .map((node) => {
           const editing = activeEditingId === node.id
           const ratioLocked = isRatioLocked(node)
+          const markdownBlock = blockKind(node) === 'markdown'
+          const markdownTheme = node['x-superboard']?.markdownTheme
           return (
             <div
               key={`block-actions-${node.id}`}
@@ -1233,7 +1268,7 @@ export function CanvasEditorOverlay({
                   interaction="click-replay"
                 />
               </button>
-              {blockKind(node) === 'markdown' ? (
+              {markdownBlock ? (
                 <button
                   type="button"
                   className="sb-block-action"
@@ -1248,6 +1283,23 @@ export function CanvasEditorOverlay({
                     size={16}
                     interaction="click-replay"
                   />
+                </button>
+              ) : null}
+              {markdownBlock ? (
+                <button
+                  type="button"
+                  className={`sb-block-action sb-md-theme-action${
+                    themeMenuNodeId === node.id ? ' is-active' : ''
+                  }`}
+                  title="设置颜色"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setThemeMenuNodeId((current) =>
+                      current === node.id ? null : node.id,
+                    )
+                  }}
+                >
+                  <MarkdownThemeIcon />
                 </button>
               ) : null}
               <button
@@ -1265,6 +1317,36 @@ export function CanvasEditorOverlay({
                   interaction="click-replay"
                 />
               </button>
+              {markdownBlock && themeMenuNodeId === node.id ? (
+                <div
+                  className="sb-md-theme-popover"
+                  onPointerDown={(event) => event.stopPropagation()}
+                >
+                  {MARKDOWN_THEMES.map((theme) => (
+                    <button
+                      key={theme}
+                      type="button"
+                      className={`sb-md-theme-option${
+                        markdownTheme === theme ? ' is-active' : ''
+                      }`}
+                      style={
+                        {
+                          '--sb-theme-color': MARKDOWN_THEME_COLORS[theme],
+                        } as CSSProperties
+                      }
+                      title={theme}
+                      aria-label={theme}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onSetMarkdownTheme?.(node.id, theme)
+                        setThemeMenuNodeId(null)
+                      }}
+                    >
+                      <span />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
           )
         })}

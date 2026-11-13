@@ -126,7 +126,8 @@ whiteboards/
 | 画布底座 | 自建编辑器 + JSON Canvas（`.canvas`） |
 | 图表渲染 | [Pele](https://pele.run/) |
 | Markdown 编辑器 | [Vditor](https://github.com/Vanessa219/vditor)（IR 模式） |
-| Markdown 查看器 | [react-markdown](https://github.com/remarkjs/react-markdown) + [remark-gfm](https://github.com/remarkjs/remark-gfm) + [rehype-sanitize](https://github.com/rehypejs/rehype-sanitize) + [rehype-highlight](https://github.com/rehypejs/rehype-highlight) |
+| Markdown 查看器 | Vditor 静态渲染 + [react-markdown](https://github.com/remarkjs/react-markdown) 回退 |
+| Markdown 主题 | Typora Purple / Orange Heart / Mint 配色参考 |
 | 公式语法 | [AsciiMath](https://asciimath.org/) |
 | 公式渲染 | [MathJax](https://www.mathjax.org/) |
 | SVG 清洗 | [DOMPurify](https://github.com/cure53/DOMPurify) |
@@ -174,5 +175,8 @@ SuperBoard 建立在以下优秀开源项目之上：
 - [MathJax](https://www.mathjax.org/)：AsciiMath 到 SVG 的渲染
 - [DOMPurify](https://github.com/cure53/DOMPurify)：SVG 安全清洗
 - [dnd-kit](https://github.com/clauderic/dnd-kit)：控制帧拖拽排序
+- [Typora Purple Theme](https://github.com/hliu202/typora-purple-theme)：紫色 Markdown 主题，使用 `purple.css`
+- [Typora Orange Heart](https://gitee.com/golikang/typora-theme-orange-heart)：橙色 Markdown 主题
+- [Typora Mint Theme](https://github.com/Y1chenYao/typora-mint-theme)：薄荷 Markdown 主题
 
 感谢这些项目的作者与维护者。

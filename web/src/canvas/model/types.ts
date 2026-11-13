@@ -91,6 +91,7 @@ export type SuperBoardNodeKind =
 
 export type SuperBoardShapeKind = 'rect' | 'ellipse' | 'diamond' | 'line'
 export type SuperBoardMediaKind = 'image' | 'video' | 'iframe'
+export type MarkdownTheme = 'purple' | 'orange' | 'mint'
 
 export interface SuperBoardStyle {
   backgroundColor?: string
@@ -145,6 +146,7 @@ export interface SuperBoardNodeExtension {
   rotation?: number
   locked?: boolean
   markdownLocked?: boolean
+  markdownTheme?: MarkdownTheme
   ratioLocked?: boolean
   contentScale?: number
   style?: SuperBoardStyle
@@ -161,6 +163,7 @@ export interface SuperBoardRootExtension {
   version: 1
   meta: CanvasMeta
   director?: CanvasDirector
+  markdownDefaultTheme?: MarkdownTheme
 }
 
 export interface CanvasDocument {

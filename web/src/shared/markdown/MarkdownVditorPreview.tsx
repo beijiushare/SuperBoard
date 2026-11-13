@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { MarkdownTheme } from '../../canvas/model'
 import { MarkdownView } from './MarkdownView'
 import { loadMathJax } from './mathjax'
 import { vditorCdn } from './vditorAssets'
@@ -30,11 +31,13 @@ async function renderHtml(source: string) {
 interface MarkdownVditorPreviewProps {
   source: string
   className?: string
+  theme?: MarkdownTheme
 }
 
 export function MarkdownVditorPreview({
   source,
   className = '',
+  theme,
 }: MarkdownVditorPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
@@ -84,13 +87,19 @@ export function MarkdownVditorPreview({
   }
 
   if (useLegacyRenderer || failed) {
-    return <MarkdownView source={source} />
+    return (
+      <div className={theme ? `sb-md-theme-${theme}` : undefined}>
+        <MarkdownView source={source} />
+      </div>
+    )
   }
 
   return (
     <div
       ref={hostRef}
-      className={`sb-markdown-vditor ${className}`.trim()}
+      className={`sb-markdown-vditor ${
+        theme ? `sb-md-theme-${theme}` : ''
+      } ${className}`.trim()}
       style={{ visibility: ready ? 'visible' : 'hidden' }}
     />
   )
