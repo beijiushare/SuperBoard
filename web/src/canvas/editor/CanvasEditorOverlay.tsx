@@ -198,7 +198,7 @@ export function CanvasEditorOverlay({
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
-      if (!interactive) return
+      if (!interactive || activeEditingId) return
       if (event.button !== 0) return
       const overlay = overlayRef.current
       const dm = dmRef.current
@@ -290,7 +290,7 @@ export function CanvasEditorOverlay({
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
     }
-  }, [onSelect, onSelectEdge, interactive, focusedGroupId, selectedIds])
+  }, [onSelect, onSelectEdge, interactive, focusedGroupId, selectedIds, activeEditingId])
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
@@ -1066,12 +1066,16 @@ export function CanvasEditorOverlay({
               style={(() => {
                 const centerX = offsetX + (node.x + node.width / 2) * scale
                 const centerY = offsetY + (node.y + node.height / 2) * scale
-                const radians = ((node['x-superboard']?.rotation ?? 0) * Math.PI) / 180
+                const displayRotation =
+                  node.id === activeEditingId
+                    ? 0
+                    : node['x-superboard']?.rotation ?? 0
+                const radians = (displayRotation * Math.PI) / 180
                 const distance = (node.height / 2) * scale + 32
                 return {
                   left: centerX + Math.sin(radians) * distance,
                   top: Math.max(8, centerY - Math.cos(radians) * distance),
-                  transform: `translateX(-50%) rotate(${node['x-superboard']?.rotation ?? 0}deg)`,
+                  transform: `translateX(-50%) rotate(${displayRotation}deg)`,
                 }
               })()}
               onPointerDown={(event) => {

@@ -298,33 +298,42 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 			const item = data.nodeMap[id];
 			if (!item) return;
 			const node = item.ref;
-			element.style.left = `${node.x}px`;
-			element.style.top = `${node.y}px`;
-			element.style.width = `${node.width}px`;
-			element.style.height = `${node.height}px`;
-			const extension = (
-				node as {
-					'x-superboard'?: {
-						rotation?: number
-						kind?: string
-						contentScale?: number
-					}
-				}
-			)['x-superboard'];
-			const rotation = extension?.rotation;
-			const scalable =
-				extension?.kind === 'text' ||
-				extension?.kind === 'markdown' ||
-				extension?.kind === 'pele' ||
-				(extension?.contentScale !== undefined && extension?.kind === undefined);
-			const contentScale = scalable ? extension?.contentScale ?? 1 : 1;
-			element.style.setProperty('--sb-content-scale', String(contentScale));
-			element.style.setProperty('--sb-content-width', `${100 / contentScale}%`);
-			element.style.setProperty('--sb-content-height', `${100 / contentScale}%`);
-			element.style.transformOrigin = 'center center';
-			element.style.transform = rotation ? `rotate(${rotation}deg)` : '';
+			this.applyNodeTransform(element, node);
 		});
 		this.syncOverlays();
+	};
+
+	private readonly applyNodeTransform = (
+		element: HTMLDivElement,
+		node: {
+			x: number;
+			y: number;
+			width: number;
+			height: number;
+			'x-superboard'?: {
+				rotation?: number;
+				kind?: string;
+				contentScale?: number;
+			};
+		},
+	) => {
+		element.style.left = `${node.x}px`;
+		element.style.top = `${node.y}px`;
+		element.style.width = `${node.width}px`;
+		element.style.height = `${node.height}px`;
+		const extension = node['x-superboard'];
+		const rotation = extension?.rotation;
+		const scalable =
+			extension?.kind === 'text' ||
+			extension?.kind === 'markdown' ||
+			extension?.kind === 'pele' ||
+			(extension?.contentScale !== undefined && extension?.kind === undefined);
+		const contentScale = scalable ? extension?.contentScale ?? 1 : 1;
+		element.style.setProperty('--sb-content-scale', String(contentScale));
+		element.style.setProperty('--sb-content-width', `${100 / contentScale}%`);
+		element.style.setProperty('--sb-content-height', `${100 / contentScale}%`);
+		element.style.transformOrigin = 'center center';
+		element.style.transform = rotation ? `rotate(${rotation}deg)` : '';
 	};
 
 	private readonly createOverlay = (...args: CreateOverlayArgs) => {
@@ -337,10 +346,7 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 			if (this.aborted) return;
 			this.overlaysLayer.appendChild(element);
 			this.overlays[node.id] = element;
-			element.style.left = `${node.x}px`;
-			element.style.top = `${node.y}px`;
-			element.style.width = `${node.width}px`;
-			element.style.height = `${node.height}px`;
+			this.applyNodeTransform(element, node);
 		}
 	};
 

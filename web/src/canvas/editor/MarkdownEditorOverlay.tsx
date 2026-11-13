@@ -181,7 +181,6 @@ export function MarkdownEditorOverlay({
   const width = Math.max(160, node.width)
   const height = Math.max(140, node.height)
   const contentScale = node['x-superboard']?.contentScale ?? 1
-  const rotation = node['x-superboard']?.rotation ?? 0
   const screenWidth = width * view.scale
   const screenHeight = height * view.scale
   const centerX = view.offsetX + (node.x + node.width / 2) * view.scale
@@ -199,8 +198,6 @@ export function MarkdownEditorOverlay({
         top,
         width: screenWidth,
         height: screenHeight,
-        transform: rotation ? `rotate(${rotation}deg)` : undefined,
-        transformOrigin: 'center center',
       }}
       onPointerDown={(event) => event.stopPropagation()}
       onContextMenu={(event) => {
