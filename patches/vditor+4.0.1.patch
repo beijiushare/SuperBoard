@@ -1,8 +1,8 @@
 diff --git a/node_modules/vditor/dist/index.js b/node_modules/vditor/dist/index.js
-index 10b7ec1..cffbf55 100644
+index 10b7ec1..c9503b0 100644
 --- a/node_modules/vditor/dist/index.js
 +++ b/node_modules/vditor/dist/index.js
-@@ -3579,18 +3579,17 @@ var mathRender = function (element, options) {
+@@ -3579,18 +3579,25 @@ var mathRender = function (element, options) {
              // https://github.com/Vanessa219/vditor/issues/1453
              Object.assign(window.MathJax, options.math.mathJaxOptions);
          }
@@ -10,7 +10,16 @@ index 10b7ec1..cffbf55 100644
 -        (0,_util_addScript__WEBPACK_IMPORTED_MODULE_3__/* .addScriptSync */ .J)("".concat(options.cdn, "/dist/js/mathjax/tex-svg-full.js"), "protyleMathJaxScript");
          var renderMath_1 = function (mathElement, next) {
              var math = (0,_util_code160to32__WEBPACK_IMPORTED_MODULE_4__/* .code160to32 */ .X)(mathElement.textContent).trim();
-             var mathOptions = window.MathJax.getMetricsFor(mathElement);
+-            var mathOptions = window.MathJax.getMetricsFor(mathElement);
++            if (!window.MathJax.asciimath2svgPromise && !window.MathJax.asciimath2svg) {
++                if (next) {
++                    next();
++                }
++                return;
++            }
++            var mathOptions = window.MathJax.getMetricsFor
++                ? window.MathJax.getMetricsFor(mathElement)
++                : {};
              mathOptions.display = mathElement.tagName === "DIV";
 -            window.MathJax.tex2svgPromise(math, mathOptions).then(function (node) {
 +            var mathPromise = window.MathJax.asciimath2svgPromise
