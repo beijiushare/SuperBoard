@@ -130,7 +130,11 @@ export function MarkdownEditorOverlay({
           }, 350)
         },
         after: () => {
-          window.setTimeout(() => vditorRef.current?.focus(), 0)
+          window.setTimeout(() => {
+            vditorRef.current?.focus()
+            const ir = element.querySelector('.vditor-ir') as HTMLElement | null
+            if (ir) ir.scrollTop = 0
+          }, 0)
         },
       })
       vditorRef.current = vditor
@@ -176,6 +180,7 @@ export function MarkdownEditorOverlay({
 
   const width = Math.max(160, node.width)
   const height = Math.max(140, node.height)
+  const contentScale = node['x-superboard']?.contentScale ?? 1
   const left = view.offsetX + node.x * view.scale
   const top = view.offsetY + node.y * view.scale
 
@@ -200,8 +205,9 @@ export function MarkdownEditorOverlay({
       <div
         className="sb-md-editor-inner"
         style={{
-          width,
-          height,
+          width: width / contentScale,
+          height: height / contentScale,
+          zoom: contentScale,
           transform: `scale(${view.scale})`,
           transformOrigin: 'top left',
         }}

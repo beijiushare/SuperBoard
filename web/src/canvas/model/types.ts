@@ -145,6 +145,8 @@ export interface SuperBoardNodeExtension {
   rotation?: number
   locked?: boolean
   markdownLocked?: boolean
+  ratioLocked?: boolean
+  contentScale?: number
   style?: SuperBoardStyle
   shape?: SuperBoardShapeKind
   lineFlip?: { x: boolean; y: boolean }

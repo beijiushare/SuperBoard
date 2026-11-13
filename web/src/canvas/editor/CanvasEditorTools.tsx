@@ -76,6 +76,7 @@ interface CanvasEditorToolsProps {
   editRequest?: { id: string; nonce: number } | null
   onEditRequestHandled?: () => void
   onEditMarkdown?: (id: string) => void
+  onEditingChange?: (id: string | null) => void
 }
 
 const STROKE_SIZE = 4
@@ -154,6 +155,7 @@ export function CanvasEditorTools({
   editRequest,
   onEditRequestHandled,
   onEditMarkdown,
+  onEditingChange,
 }: CanvasEditorToolsProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const previewCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -217,6 +219,10 @@ export function CanvasEditorTools({
     editingRef.current = next
     setEditing(next)
   }
+
+  useEffect(() => {
+    onEditingChange?.(editing?.id ?? null)
+  }, [editing?.id, onEditingChange])
 
   useEffect(() => {
     setDraft(null)

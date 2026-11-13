@@ -40,6 +40,7 @@ import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
+import { blockKind, isRatioLocked } from './blocks'
 import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
 import { CanvasStylePanel } from './CanvasStylePanel'
@@ -179,6 +180,7 @@ export function CanvasEditorApp() {
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
   const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
   const [markdownEditingId, setMarkdownEditingId] = useState<string | null>(null)
+  const [textEditingId, setTextEditingId] = useState<string | null>(null)
   const [tool, setTool] = useState<EditorTool>('select')
   const [editRequest, setEditRequest] = useState<{ id: string; nonce: number } | null>(null)
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false)
@@ -320,6 +322,7 @@ export function CanvasEditorApp() {
         setScope(first.scope)
         setCanvas(next)
         setMarkdownEditingId(null)
+        setTextEditingId(null)
         setSaveState('saved')
         expandPath(first.path)
         updateEditorUrl(first.slug, first.scope, initialTree)
@@ -515,6 +518,44 @@ export function CanvasEditorApp() {
     } catch {
       // ignore
     }
+  }
+
+  function toggleBlockEdit(id: string) {
+    const document = canvasRef.current
+    const node = document?.nodes.find((item) => item.id === id)
+    if (!node) return
+    const kind = blockKind(node)
+    if (!kind) return
+    if (kind === 'markdown') {
+      closeTextEditing()
+      toggleMarkdownEdit(id)
+      return
+    }
+    if (textEditingId === id) {
+      closeTextEditing()
+      return
+    }
+    closeMarkdownEditor()
+    setSelectedIds([id])
+    setTool('text')
+    setEditRequest({ id, nonce: Date.now() })
+  }
+
+  function closeTextEditing() {
+    const active = document.activeElement as HTMLElement | null
+    active?.blur()
+  }
+
+  function toggleRatioLock(id: string) {
+    const document = canvasRef.current
+    const node = document?.nodes.find((item) => item.id === id)
+    if (!document || !node || !blockKind(node)) return
+    recordHistory()
+    const extension = ensureExtension(node)
+    const wasLocked = isRatioLocked(node)
+    extension.ratioLocked = !wasLocked
+    if (wasLocked) extension.contentScale = 1
+    markDirty()
   }
 
   function openMarkdownEditor(id: string) {
@@ -1151,6 +1192,7 @@ export function CanvasEditorApp() {
     setSelectedEdgeId(null)
     setFocusedGroupId(null)
     setMarkdownEditingId(null)
+    setTextEditingId(null)
     setTool('select')
     setDirectorMode(false)
     setPresentation(false)
@@ -1701,8 +1743,9 @@ export function CanvasEditorApp() {
                       if (id) setSelectedIds([])
                     }}
                     focusedGroupId={focusedGroupId}
-                    markdownEditingId={markdownEditingId}
-                    onToggleMarkdownEdit={toggleMarkdownEdit}
+                    activeEditingId={markdownEditingId ?? textEditingId}
+                    onToggleBlockEdit={toggleBlockEdit}
+                    onToggleRatioLock={toggleRatioLock}
                   />
                   <CanvasEditorTools
                     canvas={canvas}
@@ -1715,6 +1758,7 @@ export function CanvasEditorApp() {
                     editRequest={editRequest}
                     onEditRequestHandled={() => setEditRequest(null)}
                     onEditMarkdown={openMarkdownEditor}
+                    onEditingChange={setTextEditingId}
                   />
                   {markdownEditingId ? (
                     <MarkdownEditorOverlay

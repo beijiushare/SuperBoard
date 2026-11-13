@@ -7,9 +7,11 @@ import {
 } from 'react'
 import UseAnimations from 'react-useanimations'
 import lock from 'react-useanimations/lib/lock'
+import typeIcon from 'react-useanimations/lib/type'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument, CanvasEdge, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
+import { blockKind, contentScale, isBlockNode, isRatioLocked } from './blocks'
 import { edgeGeometry, edgePath } from './edges'
 import {
   collectDescendants,
@@ -45,8 +47,9 @@ interface CanvasEditorOverlayProps {
   selectedEdgeId?: string | null
   onSelectEdge?: (id: string | null) => void
   focusedGroupId?: string | null
-  markdownEditingId?: string | null
-  onToggleMarkdownEdit?: (id: string) => void
+  activeEditingId?: string | null
+  onToggleBlockEdit?: (id: string) => void
+  onToggleRatioLock?: (id: string) => void
 }
 
 interface DragNode {
@@ -74,6 +77,8 @@ interface DragState {
   changed?: boolean
   centerX?: number
   centerY?: number
+  ratioLocked?: boolean
+  startContentScale?: number
   rotationNodes?: Array<{
     node: CanvasNode
     startRotation: number
@@ -131,8 +136,9 @@ export function CanvasEditorOverlay({
   selectedEdgeId = null,
   onSelectEdge,
   focusedGroupId = null,
-  markdownEditingId = null,
-  onToggleMarkdownEdit,
+  activeEditingId = null,
+  onToggleBlockEdit,
+  onToggleRatioLock,
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
   const [marquee, setMarquee] = useState<Marquee | null>(null)
@@ -378,6 +384,8 @@ export function CanvasEditorOverlay({
       startHeight: target.height,
       scale: dm.data.scale,
       corner,
+      ratioLocked: isBlockNode(target) && isRatioLocked(target),
+      startContentScale: contentScale(target),
     }
     event.currentTarget.setPointerCapture(event.pointerId)
   }
@@ -572,6 +580,15 @@ export function CanvasEditorOverlay({
     node.height = Math.max(40, Math.round(lines * fontSize * 1.45 + 28))
   }
 
+  function applyContentScale(drag: DragState, ratioScale: number) {
+    if (!drag.ratioLocked || drag.nodes.length !== 1) return
+    const kind = blockKind(drag.primary)
+    if (!kind || kind === 'media') return
+    const extension = ensureExtension(drag.primary)
+    extension.contentScale =
+      Math.round((drag.startContentScale ?? 1) * ratioScale * 1000) / 1000
+  }
+
   function movePointer(event: ReactPointerEvent) {
     if (edgeDragRef.current) {
       const point = edgeWorldPoint(event)
@@ -722,17 +739,30 @@ export function CanvasEditorOverlay({
           pointerX - anchor.x,
           pointerY - anchor.y,
         )
-        const width = Math.max(40, signX * local.x)
-        const height = Math.max(40, signY * local.y)
+        let width = Math.max(40, signX * local.x)
+        let height = Math.max(40, signY * local.y)
+        let ratioScale = 1
+        if (drag.ratioLocked) {
+          ratioScale = Math.max(width / drag.startWidth, height / drag.startHeight)
+          width = drag.startWidth * ratioScale
+          height = drag.startHeight * ratioScale
+        }
         const centerOffset = rotate((signX * width) / 2, (signY * height) / 2)
         const nextCenter = { x: anchor.x + centerOffset.x, y: anchor.y + centerOffset.y }
         drag.primary.x = nextCenter.x - width / 2
         drag.primary.y = nextCenter.y - height / 2
         drag.primary.width = width
         drag.primary.height = height
+        applyContentScale(drag, ratioScale)
       } else {
-        const width = Math.max(40, drag.startWidth + (corner.includes('e') ? dx : -dx))
-        const height = Math.max(40, drag.startHeight + (corner.includes('s') ? dy : -dy))
+        let width = Math.max(40, drag.startWidth + (corner.includes('e') ? dx : -dx))
+        let height = Math.max(40, drag.startHeight + (corner.includes('s') ? dy : -dy))
+        let ratioScale = 1
+        if (drag.ratioLocked) {
+          ratioScale = Math.max(width / drag.startWidth, height / drag.startHeight)
+          width = drag.startWidth * ratioScale
+          height = drag.startHeight * ratioScale
+        }
         const nextX = corner.includes('w') ? drag.startX + drag.startWidth - width : drag.startX
         const nextY = corner.includes('n') ? drag.startY + drag.startHeight - height : drag.startY
         const scaleX = drag.startWidth === 0 ? 1 : width / drag.startWidth
@@ -743,8 +773,9 @@ export function CanvasEditorOverlay({
           item.node.width = Math.max(1, item.startWidth * scaleX)
           item.node.height = Math.max(1, item.startHeight * scaleY)
         }
+        applyContentScale(drag, ratioScale)
       }
-      if (drag.nodes.length === 1) reflowTextHeight(drag.primary)
+      if (drag.nodes.length === 1 && !drag.ratioLocked) reflowTextHeight(drag.primary)
     }
     const dmNow = dmRef.current
     if (focusedGroupId && dmNow) {
@@ -957,35 +988,67 @@ export function CanvasEditorOverlay({
         ))}
 
       {nodes
-        .filter((node) => node['x-superboard']?.kind === 'markdown')
+        .filter(
+          (node) =>
+            isBlockNode(node) &&
+            ((selectedIds.length === 1 && selectedIds[0] === node.id) ||
+              activeEditingId === node.id),
+        )
         .map((node) => {
-          const editing = markdownEditingId === node.id
+          const editing = activeEditingId === node.id
+          const ratioLocked = isRatioLocked(node)
           return (
-            <button
-              key={`md-lock-${node.id}`}
-              type="button"
-              className={`sb-md-lock${editing ? ' is-editing' : ''}`}
-              title={editing ? '锁定 Markdown' : '编辑 Markdown'}
+            <div
+              key={`block-actions-${node.id}`}
+              className="sb-block-actions"
               style={{
-                left: offsetX + (node.x + node.width) * scale + 6,
-                top: offsetY + node.y * scale - 8,
+                left: offsetX + (node.x + node.width / 2) * scale,
+                top: Math.max(8, offsetY + node.y * scale - 84),
               }}
               onPointerDown={(event) => {
                 event.preventDefault()
                 event.stopPropagation()
               }}
-              onClick={(event) => {
+              onContextMenu={(event) => {
+                event.preventDefault()
                 event.stopPropagation()
-                onToggleMarkdownEdit?.(node.id)
               }}
             >
-              <UseAnimations
-                animation={lock}
-                size={32}
-                active={editing}
-                interaction="click-replay"
-              />
-            </button>
+              <button
+                type="button"
+                className={`sb-block-action${editing ? ' is-active' : ''}`}
+                title={editing ? '退出编辑' : '编辑'}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onToggleBlockEdit?.(node.id)
+                }}
+              >
+                <span className={`sb-block-check${editing ? ' is-checked' : ''}`} />
+                <UseAnimations
+                  animation={typeIcon}
+                  size={32}
+                  active={editing}
+                  interaction="click-replay"
+                />
+              </button>
+              <button
+                type="button"
+                className={`sb-block-action${ratioLocked ? ' is-active' : ''}`}
+                title={ratioLocked ? '解锁比例' : '锁定比例'}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onToggleRatioLock?.(node.id)
+                }}
+              >
+                <span className={`sb-block-check${ratioLocked ? ' is-checked' : ''}`} />
+                <UseAnimations
+                  animation={lock}
+                  size={32}
+                  active={ratioLocked}
+                  interaction="click-replay"
+                />
+              </button>
+            </div>
           )
         })}
 
