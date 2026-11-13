@@ -969,7 +969,9 @@
 
 .sb-block-action {
   display: flex;
+  min-width: 33px;
   align-items: center;
+  justify-content: center;
   gap: 2px;
   padding: 1px 3px;
   border: 0;

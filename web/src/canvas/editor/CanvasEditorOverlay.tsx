@@ -1174,7 +1174,7 @@ export function CanvasEditorOverlay({
                 <span className={`sb-block-check${editing ? ' is-checked' : ''}`} />
                 <UseAnimations
                   animation={typeIcon}
-                  size={32}
+                  size={16}
                   active={editing}
                   interaction="click-replay"
                 />
@@ -1191,7 +1191,7 @@ export function CanvasEditorOverlay({
                 >
                   <UseAnimations
                     animation={hash}
-                    size={32}
+                    size={16}
                     interaction="click-replay"
                   />
                 </button>
@@ -1207,7 +1207,7 @@ export function CanvasEditorOverlay({
               >
                 <UseAnimations
                   animation={trash2}
-                  size={32}
+                  size={16}
                   interaction="click-replay"
                 />
               </button>
