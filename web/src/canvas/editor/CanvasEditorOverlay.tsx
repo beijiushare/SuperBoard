@@ -14,6 +14,14 @@ import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { blockKind, contentScale, isBlockNode, isRatioLocked } from './blocks'
 import { edgeGeometry, edgePath } from './edges'
 import {
+  SELECTION_CORNERS,
+  SELECTION_SIDES,
+  selectionChromeStyle,
+  selectionEdgeStyle,
+  selectionHandleStyle,
+  selectionRotateStyle,
+} from './selectionChrome'
+import {
   collectDescendants,
   isInsideGroup,
   isLocked,
@@ -865,7 +873,12 @@ export function CanvasEditorOverlay({
   })
 
   return (
-    <div ref={overlayRef} className="sb-editor-overlay" data-tick={tick}>
+    <div
+      ref={overlayRef}
+      className="sb-editor-overlay"
+      data-tick={tick}
+      style={selectionChromeStyle}
+    >
       <svg className="sb-editor-edge-layer">
         <g transform={`translate(${offsetX} ${offsetY}) scale(${scale})`}>
           {canvas.edges.map((edge) => {
@@ -980,29 +993,32 @@ export function CanvasEditorOverlay({
         >
           {selectionBoxNodes.length === 1 ? (
             <>
-              {['nw', 'ne', 'sw', 'se'].map((corner) => (
+              {SELECTION_CORNERS.map((corner) => (
                 <span
                   key={corner}
-                  className={`sb-editor-handle sb-editor-handle-${corner}`}
+                  className="sb-editor-handle"
+                  style={selectionHandleStyle(corner)}
                   onPointerDown={(event) => beginResize(event, node, corner)}
                   onPointerMove={movePointer}
                   onPointerUp={endDrag}
                 />
               ))}
-              {(['n', 'e', 's', 'w'] as const).map((side) => (
+              {SELECTION_SIDES.map((side) => (
                 <span
                   key={side}
-                  className={`sb-editor-edge-handle sb-editor-edge-handle-${side}`}
+                  className="sb-editor-edge-handle"
+                  style={selectionEdgeStyle(side)}
                   onPointerDown={(event) => beginResize(event, node, side)}
                   onPointerMove={movePointer}
                   onPointerUp={endDrag}
                 />
               ))}
               {node['x-superboard']?.kind !== 'group'
-                ? ['nw', 'ne', 'sw', 'se'].map((corner) => (
+                ? SELECTION_CORNERS.map((corner) => (
                     <span
                       key={corner}
-                      className={`sb-editor-rotate sb-editor-rotate-${corner}`}
+                      className="sb-editor-rotate"
+                      style={selectionRotateStyle(corner)}
                       onPointerDown={(event) => beginRotate(event, node)}
                       onPointerMove={movePointer}
                       onPointerUp={endDrag}
@@ -1024,10 +1040,11 @@ export function CanvasEditorOverlay({
             height: (selectedBounds.bottom - selectedBounds.top) * scale,
           }}
         >
-          {['nw', 'ne', 'sw', 'se'].map((corner) => (
+          {SELECTION_CORNERS.map((corner) => (
             <span
               key={corner}
-              className={`sb-editor-rotate sb-editor-rotate-${corner}`}
+              className="sb-editor-rotate"
+              style={selectionRotateStyle(corner)}
               onPointerDown={(event) => beginMultiRotate(event, selectedNodes)}
               onPointerMove={movePointer}
               onPointerUp={endDrag}
