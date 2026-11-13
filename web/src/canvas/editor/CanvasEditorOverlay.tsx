@@ -1,16 +1,10 @@
 import {
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import UseAnimations from 'react-useanimations'
-import hash from 'react-useanimations/lib/hash'
-import lock from 'react-useanimations/lib/lock'
-import trash2 from 'react-useanimations/lib/trash2'
-import typeIcon from 'react-useanimations/lib/type'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type {
   CanvasDocument,
@@ -20,8 +14,8 @@ import type {
 } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { blockKind, contentScale, isBlockNode, isRatioLocked } from './blocks'
+import { BlockActions } from './BlockActions'
 import { edgeGeometry, edgePath } from './edges'
-import { MarkdownThemeIcon } from './MarkdownThemeIcon'
 import {
   SELECTION_CORNERS,
   SELECTION_SIDES,
@@ -73,13 +67,6 @@ interface CanvasEditorOverlayProps {
   onDeleteBlock?: (id: string) => void
   onSetMarkdownTheme?: (id: string, theme: MarkdownTheme) => void
   onToggleRatioLock?: (id: string) => void
-}
-
-const MARKDOWN_THEMES: MarkdownTheme[] = ['purple', 'orange', 'mint']
-const MARKDOWN_THEME_COLORS: Record<MarkdownTheme, string> = {
-  purple: '#8064a9',
-  orange: '#ef7060',
-  mint: '#4eb289',
 }
 
 interface DragNode {
@@ -180,9 +167,6 @@ export function CanvasEditorOverlay({
   const [marquee, setMarquee] = useState<Marquee | null>(null)
   const [guides, setGuides] = useState<{ x?: number; y?: number } | null>(null)
   const [actionsVisible, setActionsVisible] = useState(true)
-  const [actionsSize, setActionsSize] = useState({ width: 0, height: 0 })
-  const [themeMenuNodeId, setThemeMenuNodeId] = useState<string | null>(null)
-  const actionsRef = useRef<HTMLDivElement>(null)
   const [edgePreview, setEdgePreview] = useState<{
     fromX: number
     fromY: number
@@ -194,35 +178,6 @@ export function CanvasEditorOverlay({
   useEffect(() => {
     if (!canShowGuides) setGuides(null)
   }, [canShowGuides])
-
-  useEffect(() => {
-    if (!themeMenuNodeId) return
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as HTMLElement | null
-      if (target?.closest('.sb-md-theme-popover, .sb-md-theme-action')) return
-      setThemeMenuNodeId(null)
-    }
-    window.addEventListener('pointerdown', onPointerDown, true)
-    return () => window.removeEventListener('pointerdown', onPointerDown, true)
-  }, [themeMenuNodeId])
-
-  useEffect(() => {
-    if (themeMenuNodeId && !selectedIds.includes(themeMenuNodeId)) {
-      setThemeMenuNodeId(null)
-    }
-  }, [selectedIds, themeMenuNodeId])
-
-  useLayoutEffect(() => {
-    const element = actionsRef.current
-    if (!element) return
-    const width = element.offsetWidth
-    const height = element.offsetHeight
-    setActionsSize((current) =>
-      current.width === width && current.height === height
-        ? current
-        : { width, height },
-    )
-  })
 
   useEffect(() => {
     const clearGuides = () => setGuides(null)
@@ -1173,183 +1128,23 @@ export function CanvasEditorOverlay({
             (node.id !== selectionSuppressedId ||
               activeEditingId === node.id),
         )
-        .map((node) => {
-          const editing = activeEditingId === node.id
-          const ratioLocked = isRatioLocked(node)
-          const markdownBlock = blockKind(node) === 'markdown'
-          const markdownTheme = node['x-superboard']?.markdownTheme
-          return (
-            <div
-              key={`block-actions-${node.id}`}
-              ref={actionsRef}
-              className="sb-block-actions"
-              style={(() => {
-                const centerX = offsetX + (node.x + node.width / 2) * scale
-                const centerY = offsetY + (node.y + node.height / 2) * scale
-                const displayRotation = node['x-superboard']?.rotation ?? 0
-                const radians = (displayRotation * Math.PI) / 180
-                const distance = (node.height / 2) * scale + 32
-                let left = centerX + Math.sin(radians) * distance
-                let top = Math.max(8, centerY - Math.cos(radians) * distance)
-                const container = dm.data.container
-                const stageWidth = container.clientWidth
-                const stageHeight = container.clientHeight
-                if (actionsSize.width > 0 && stageWidth > 0 && stageHeight > 0) {
-                  const margin = 8
-                  const cos = Math.cos(radians)
-                  const sin = Math.sin(radians)
-                  const halfWidth =
-                    (Math.abs(actionsSize.width * cos) +
-                      Math.abs(actionsSize.height * sin)) /
-                    2
-                  const halfHeight =
-                    (Math.abs(actionsSize.width * sin) +
-                      Math.abs(actionsSize.height * cos)) /
-                    2
-                  const centerBarX = left
-                  const centerBarY = top + actionsSize.height / 2
-                  left = Math.min(
-                    Math.max(centerBarX, margin + halfWidth),
-                    stageWidth - margin - halfWidth,
-                  )
-                  top =
-                    Math.min(
-                      Math.max(centerBarY, margin + halfHeight),
-                      stageHeight - margin - halfHeight,
-                    ) -
-                    actionsSize.height / 2
-                }
-                return {
-                  left,
-                  top,
-                  transform: `translateX(-50%) rotate(${displayRotation}deg)`,
-                }
-              })()}
-              onPointerDown={(event) => {
-                event.preventDefault()
-                event.stopPropagation()
-              }}
-              onContextMenu={(event) => {
-                event.preventDefault()
-                event.stopPropagation()
-              }}
-            >
-              <button
-                type="button"
-                className={`sb-block-action${ratioLocked ? ' is-active' : ''}`}
-                title={ratioLocked ? '解锁比例' : '锁定比例'}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  onToggleRatioLock?.(node.id)
-                }}
-              >
-                <span className={`sb-block-check${ratioLocked ? ' is-checked' : ''}`} />
-                <UseAnimations
-                  animation={lock}
-                  size={16}
-                  active={ratioLocked}
-                  interaction="click-replay"
-                />
-              </button>
-              <button
-                type="button"
-                className={`sb-block-action${editing ? ' is-active' : ''}`}
-                title={editing ? '退出编辑' : '编辑'}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  onToggleBlockEdit?.(node.id)
-                }}
-              >
-                <span className={`sb-block-check${editing ? ' is-checked' : ''}`} />
-                <UseAnimations
-                  animation={typeIcon}
-                  size={16}
-                  active={editing}
-                  interaction="click-replay"
-                />
-              </button>
-              {markdownBlock ? (
-                <button
-                  type="button"
-                  className="sb-block-action"
-                  title="专注编辑"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    onFocusBlockEdit?.(node.id)
-                  }}
-                >
-                  <UseAnimations
-                    animation={hash}
-                    size={16}
-                    interaction="click-replay"
-                  />
-                </button>
-              ) : null}
-              {markdownBlock ? (
-                <button
-                  type="button"
-                  className={`sb-block-action sb-md-theme-action${
-                    themeMenuNodeId === node.id ? ' is-active' : ''
-                  }`}
-                  title="设置颜色"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    setThemeMenuNodeId((current) =>
-                      current === node.id ? null : node.id,
-                    )
-                  }}
-                >
-                  <MarkdownThemeIcon />
-                </button>
-              ) : null}
-              <button
-                type="button"
-                className="sb-block-action"
-                title="删除"
-                onClick={(event) => {
-                  event.stopPropagation()
-                  onDeleteBlock?.(node.id)
-                }}
-              >
-                <UseAnimations
-                  animation={trash2}
-                  size={16}
-                  interaction="click-replay"
-                />
-              </button>
-              {markdownBlock && themeMenuNodeId === node.id ? (
-                <div
-                  className="sb-md-theme-popover"
-                  onPointerDown={(event) => event.stopPropagation()}
-                >
-                  {MARKDOWN_THEMES.map((theme) => (
-                    <button
-                      key={theme}
-                      type="button"
-                      className={`sb-md-theme-option${
-                        markdownTheme === theme ? ' is-active' : ''
-                      }`}
-                      style={
-                        {
-                          '--sb-theme-color': MARKDOWN_THEME_COLORS[theme],
-                        } as CSSProperties
-                      }
-                      title={theme}
-                      aria-label={theme}
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        onSetMarkdownTheme?.(node.id, theme)
-                        setThemeMenuNodeId(null)
-                      }}
-                    >
-                      <span />
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          )
-        })}
+        .map((node) => (
+          <BlockActions
+            key={`block-actions-${node.id}`}
+            node={node}
+            offsetX={offsetX}
+            offsetY={offsetY}
+            scale={scale}
+            stageWidth={dm.data.container.clientWidth}
+            stageHeight={dm.data.container.clientHeight}
+            editing={activeEditingId === node.id}
+            onToggleBlockEdit={onToggleBlockEdit}
+            onFocusBlockEdit={onFocusBlockEdit}
+            onDeleteBlock={onDeleteBlock}
+            onSetMarkdownTheme={onSetMarkdownTheme}
+            onToggleRatioLock={onToggleRatioLock}
+          />
+        ))}
 
       {canShowGuides && guides?.x !== undefined ? (
         <div

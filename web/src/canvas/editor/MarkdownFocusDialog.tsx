@@ -56,6 +56,7 @@ export function MarkdownFocusDialog({
             value={value}
             onInput={onInput}
             onCommit={onCommit}
+            onRequestClose={onClose}
             className="sb-md-focus-editor"
           />
         </div>

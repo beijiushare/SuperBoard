@@ -152,6 +152,7 @@ export function MarkdownEditorOverlay({
           value={node.text}
           onInput={(value) => onInput(nodeId, value)}
           onCommit={(value) => onCommit(nodeId, value)}
+          onRequestClose={onRequestClose}
         />
       </div>
     </div>

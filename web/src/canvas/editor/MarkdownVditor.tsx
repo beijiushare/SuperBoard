@@ -7,6 +7,7 @@ interface MarkdownVditorProps {
   value: string
   onInput: (value: string) => void
   onCommit: (value: string) => void
+  onRequestClose?: () => void
   className?: string
   autoFocus?: boolean
 }
@@ -15,6 +16,7 @@ export function MarkdownVditor({
   value,
   onInput,
   onCommit,
+  onRequestClose,
   className,
   autoFocus = true,
 }: MarkdownVditorProps) {
@@ -24,9 +26,11 @@ export function MarkdownVditor({
   const dirtyRef = useRef(false)
   const inputRef = useRef(onInput)
   const commitRef = useRef(onCommit)
+  const closeRef = useRef(onRequestClose)
 
   inputRef.current = onInput
   commitRef.current = onCommit
+  closeRef.current = onRequestClose
 
   useEffect(() => {
     const element = containerRef.current
@@ -35,6 +39,19 @@ export function MarkdownVditor({
     let debounce: number | undefined
     valueRef.current = value
     dirtyRef.current = false
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Enter' || (!event.ctrlKey && !event.metaKey)) return
+      event.preventDefault()
+      event.stopPropagation()
+      if (debounce) window.clearTimeout(debounce)
+      const currentValue = valueRef.current
+      if (dirtyRef.current) {
+        dirtyRef.current = false
+        commitRef.current(currentValue)
+      }
+      closeRef.current?.()
+    }
+    element.addEventListener('keydown', onKeyDown, true)
     void import('vditor').then(async ({ default: VditorClass }) => {
       await import('vditor/dist/index.css')
       try {
@@ -81,6 +98,7 @@ export function MarkdownVditor({
     })
     return () => {
       cancelled = true
+      element.removeEventListener('keydown', onKeyDown, true)
       if (debounce) window.clearTimeout(debounce)
       const currentValue = valueRef.current
       const dirty = dirtyRef.current

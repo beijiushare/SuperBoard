@@ -38,6 +38,27 @@ import {
   type MarkdownTheme,
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
+import {
+  AUTOSAVE_DELAY,
+  HISTORY_LIMIT,
+  PASTE_OFFSET,
+  nextId,
+  normalizeMarkdownLocks,
+  normalizeMediaUrl,
+  readViewport,
+  updateEditorUrl,
+  writeViewport,
+  type BoardDialogState,
+  type CanvasListItem,
+  type CanvasMenuState,
+  type Clipboard,
+  type ControllerLike,
+  type DataManagerLike,
+  type SaveState,
+  type ViewerInternals,
+  type Viewport,
+} from './appUtils'
+import { useMarkdownEditingSession } from './useMarkdownEditingSession'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
@@ -59,121 +80,6 @@ import {
   selectableAncestor,
 } from './hierarchy'
 
-interface CanvasListItem extends BoardListItem {
-  scope: BoardScope
-}
-
-interface Viewport {
-  offsetX: number
-  offsetY: number
-  scale: number
-}
-
-interface Clipboard {
-  nodes: CanvasNode[]
-  edges: CanvasEdge[]
-}
-
-type ViewerInternals = {
-  container?: { get: (key: unknown) => unknown }
-}
-
-type DataManagerLike = {
-  data: Viewport & {
-    container: HTMLDivElement
-    nodeMap: Record<string, { ref: CanvasNode }>
-  }
-}
-
-type ControllerLike = {
-  refresh: () => void
-}
-
-const HISTORY_LIMIT = 100
-const PASTE_OFFSET = 24
-const AUTOSAVE_DELAY = 1200
-
-type SaveState = 'saved' | 'dirty' | 'saving' | 'error'
-
-type BoardDialogState =
-  | { mode: 'create'; folder?: string }
-  | { mode: 'rename'; board: BoardListItem }
-
-interface CanvasMenuState {
-  x: number
-  y: number
-  worldX: number
-  worldY: number
-  nodeId: string | null
-  edgeId?: string | null
-}
-
-function readViewport(handle: CanvasViewerHandle | null): Viewport | null {
-  try {
-    const viewer = handle?.viewer as ViewerInternals | undefined
-    if (!viewer?.container) return null
-    const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
-    return { offsetX: dm.data.offsetX, offsetY: dm.data.offsetY, scale: dm.data.scale }
-  } catch {
-    return null
-  }
-}
-
-function writeViewport(handle: CanvasViewerHandle | null, viewport: Viewport) {
-  try {
-    const viewer = handle?.viewer as ViewerInternals | undefined
-    if (!viewer?.container) return
-    const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
-    const controller = viewer.container.get(internal.Controller as never) as ControllerLike
-    dm.data.offsetX = viewport.offsetX
-    dm.data.offsetY = viewport.offsetY
-    dm.data.scale = viewport.scale
-    controller.refresh()
-  } catch {
-    // 查看器尚未挂载，忽略
-  }
-}
-
-function updateEditorUrl(slug: string | null, scope: BoardScope, tree: boolean) {
-  const params = new URLSearchParams(window.location.search)
-  if (tree) params.set('tree', '1')
-  else params.delete('tree')
-  if (slug) params.set('board', slug)
-  else params.delete('board')
-  if (scope === 'private') params.set('scope', 'private')
-  else params.delete('scope')
-  const query = params.toString()
-  window.history.replaceState(
-    null,
-    '',
-    `${window.location.pathname}${query ? `?${query}` : ''}`,
-  )
-}
-
-function normalizeMarkdownLocks(document: CanvasDocument) {
-  for (const node of document.nodes) {
-    const extension = node['x-superboard']
-    if (extension?.kind === 'markdown') extension.markdownLocked = true
-  }
-}
-
-function normalizeMediaUrl(input: string) {
-  const iframe = input.match(/<iframe[^>]*\bsrc\s*=\s*["']([^"']+)["']/i)
-  const raw = (iframe?.[1] ?? input).trim()
-  return raw.replaceAll('&amp;', '&')
-}
-
-function nextId(existing: Set<string>, base: string) {
-  let id = `${base}-copy`
-  let index = 1
-  while (existing.has(id)) {
-    index += 1
-    id = `${base}-copy-${index}`
-  }
-  existing.add(id)
-  return id
-}
-
 export function CanvasEditorApp() {
   const [items, setItems] = useState<CanvasListItem[]>([])
   const [selectedSlug, setSelectedSlug] = useState('')
@@ -181,8 +87,6 @@ export function CanvasEditorApp() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
   const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
-  const [markdownEditingId, setMarkdownEditingId] = useState<string | null>(null)
-  const [markdownFocusId, setMarkdownFocusId] = useState<string | null>(null)
   const [textEditingId, setTextEditingId] = useState<string | null>(null)
   const [tool, setTool] = useState<EditorTool>('select')
   const [editRequest, setEditRequest] = useState<{ id: string; nonce: number } | null>(null)
@@ -243,7 +147,31 @@ export function CanvasEditorApp() {
   const revisionRef = useRef(0)
   const savingRef = useRef(false)
   const canvasRef = useRef<CanvasDocument | null>(null)
-  const markdownHistoryRef = useRef(false)
+  const {
+    markdownEditingId,
+    markdownFocusId,
+    markdownFocusNode,
+    openMarkdownEditor,
+    openMarkdownFocus,
+    closeMarkdownEditor,
+    closeMarkdownFocus,
+    toggleMarkdownEdit,
+    startMarkdownEditing,
+    handleMarkdownInput,
+    setMarkdownTheme,
+    resetMarkdownEditing,
+  } = useMarkdownEditingSession({
+    canvas,
+    canvasRef,
+    setCanvas,
+    markDirty,
+    recordHistory,
+    viewerRef,
+    setSelectedIds,
+    setSelectedEdgeId,
+    closeTextEditing,
+    ensureExtension,
+  })
 
   const scopedItems = useMemo(
     () => items.filter((item) => item.scope === scope),
@@ -258,11 +186,6 @@ export function CanvasEditorApp() {
     const frames = canvas?.['x-superboard']?.director?.frames ?? []
     return [...frames].sort((a, b) => a.order - b.order)
   }, [canvas, directorTick])
-  const markdownFocusNode = (() => {
-    if (!canvas || !markdownFocusId) return null
-    const node = canvas.nodes.find((item) => item.id === markdownFocusId)
-    return node?.type === 'text' ? node : null
-  })()
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -334,8 +257,7 @@ export function CanvasEditorApp() {
         setSelectedSlug(first.slug)
         setScope(first.scope)
         setCanvas(next)
-        setMarkdownEditingId(null)
-        setMarkdownFocusId(null)
+        resetMarkdownEditing()
         setTextEditingId(null)
         setSaveState('saved')
         expandPath(first.path)
@@ -572,33 +494,6 @@ export function CanvasEditorApp() {
     active?.blur()
   }
 
-  function setMarkdownTheme(id: string, theme: MarkdownTheme) {
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === id)
-    if (!document || !node || node['x-superboard']?.kind !== 'markdown') return
-    recordHistory()
-    const nodes = document.nodes.map((item) => {
-      if (item.id !== id) return item
-      return {
-        ...item,
-        'x-superboard': {
-          ...ensureExtension(item),
-          markdownTheme: theme,
-        },
-      }
-    })
-    const root = document['x-superboard']
-    setCanvas({
-      ...document,
-      nodes,
-      'x-superboard': root
-        ? { ...root, markdownDefaultTheme: theme }
-        : root,
-    })
-    markDirty()
-    viewerRef.current?.viewer?.refresh?.()
-  }
-
   function toggleRatioLock(id: string) {
     const document = canvasRef.current
     const node = document?.nodes.find((item) => item.id === id)
@@ -610,83 +505,6 @@ export function CanvasEditorApp() {
     if (wasLocked) extension.contentScale = 1
     markDirty()
     viewerRef.current?.viewer?.refresh?.()
-  }
-
-  function setMarkdownOverlayHidden(id: string, hidden: boolean) {
-    const overlay = document.getElementById(id)
-    overlay?.classList.toggle('sb-md-editing-hidden', hidden)
-  }
-
-  function openMarkdownEditor(id: string) {
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === id)
-    if (!node || node['x-superboard']?.kind !== 'markdown') return
-    if (markdownEditingId === id) return
-    if (markdownEditingId) closeMarkdownEditor()
-    setMarkdownFocusId(null)
-    setMarkdownOverlayHidden(id, true)
-    const extension = ensureExtension(node)
-    extension.markdownLocked = false
-    markDirty()
-    markdownHistoryRef.current = false
-    setMarkdownEditingId(id)
-  }
-
-  function openMarkdownFocus(id: string) {
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === id)
-    if (!node || node['x-superboard']?.kind !== 'markdown') return
-    closeTextEditing()
-    if (markdownEditingId) closeMarkdownEditor()
-    setSelectedIds([id])
-    setSelectedEdgeId(null)
-    markdownHistoryRef.current = false
-    setMarkdownFocusId(id)
-  }
-
-  function closeMarkdownFocus() {
-    setMarkdownFocusId(null)
-  }
-
-  function closeMarkdownEditor() {
-    if (!markdownEditingId) return
-    setMarkdownOverlayHidden(markdownEditingId, false)
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === markdownEditingId)
-    if (node) {
-      const extension = ensureExtension(node)
-      extension.markdownLocked = true
-      markDirty()
-    }
-    setMarkdownEditingId(null)
-  }
-
-  function toggleMarkdownEdit(id: string) {
-    if (markdownEditingId === id) closeMarkdownEditor()
-    else openMarkdownEditor(id)
-  }
-
-  function handleMarkdownInput(id: string, value: string) {
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === id)
-    if (!node || node.type !== 'text') return
-    if (!markdownHistoryRef.current) {
-      recordHistory()
-      markdownHistoryRef.current = true
-    }
-    setCanvas((current) =>
-      current
-        ? {
-            ...current,
-            nodes: current.nodes.map((item) =>
-              item.id === id && item.type === 'text'
-                ? { ...item, text: value }
-                : item,
-            ),
-          }
-        : current,
-    )
-    markDirty()
   }
 
   function handleMarkdownCommit(id: string, value: string) {
@@ -743,9 +561,8 @@ export function CanvasEditorApp() {
     recordHistory()
     applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
     if (kind === 'markdown') {
-      markdownHistoryRef.current = false
       setTool('select')
-      setMarkdownEditingId(id)
+      startMarkdownEditing(id)
       return
     }
     setTool('text')
@@ -1346,8 +1163,7 @@ export function CanvasEditorApp() {
     setSelectedIds([])
     setSelectedEdgeId(null)
     setFocusedGroupId(null)
-    setMarkdownEditingId(null)
-    setMarkdownFocusId(null)
+    resetMarkdownEditing()
     setTextEditingId(null)
     setTool('select')
     setDirectorMode(false)
