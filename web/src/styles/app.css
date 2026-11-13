@@ -887,6 +887,20 @@
   stroke: none;
 }
 
+.sb-editor-tool-preview .sb-editor-arrow-target {
+  fill: rgba(47, 128, 237, 0.05);
+}
+
+.sb-editor-tool-preview .sb-editor-arrow-target-handle {
+  fill: #fff;
+  stroke: #2f80ed;
+  stroke-width: 1.5;
+}
+
+.sb-editor-tool-preview .sb-editor-arrow-target-handle.is-active {
+  fill: #2f80ed;
+}
+
 .sb-editor-draw-preview {
   position: absolute;
   z-index: 6;

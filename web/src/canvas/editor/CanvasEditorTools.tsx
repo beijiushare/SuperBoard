@@ -859,6 +859,43 @@ export function CanvasEditorTools({
           endY: view.offsetY + arrowDraft.currentY * view.scale,
         }
       : null
+  const arrowFrom = arrowDraft
+    ? canvas.nodes.find((node) => node.id === arrowDraft.fromId) ?? null
+    : null
+  const arrowTarget = arrowDraft
+    ? findNodeAt(arrowDraft.currentX, arrowDraft.currentY, (node) => node.id !== arrowDraft.fromId)
+    : null
+  const arrowTargetSides =
+    arrowFrom && arrowTarget ? arrowSides(arrowFrom, arrowTarget) : null
+  const arrowTargetBox =
+    arrowTarget && view
+      ? {
+          left: view.offsetX + arrowTarget.x * view.scale,
+          top: view.offsetY + arrowTarget.y * view.scale,
+          width: arrowTarget.width * view.scale,
+          height: arrowTarget.height * view.scale,
+        }
+      : null
+  const arrowTargetHandles = arrowTargetBox
+    ? {
+        top: {
+          x: arrowTargetBox.left + arrowTargetBox.width / 2,
+          y: arrowTargetBox.top,
+        },
+        bottom: {
+          x: arrowTargetBox.left + arrowTargetBox.width / 2,
+          y: arrowTargetBox.top + arrowTargetBox.height,
+        },
+        left: {
+          x: arrowTargetBox.left,
+          y: arrowTargetBox.top + arrowTargetBox.height / 2,
+        },
+        right: {
+          x: arrowTargetBox.left + arrowTargetBox.width,
+          y: arrowTargetBox.top + arrowTargetBox.height / 2,
+        },
+      }
+    : null
   const textPreview = editing
     ? (() => {
         const scale = view?.scale ?? 1
@@ -927,6 +964,31 @@ export function CanvasEditorTools({
           ) : null}
           {arrowPreview ? (
             <>
+              {arrowTargetBox ? (
+                <>
+                  <rect
+                    className="sb-editor-arrow-target"
+                    x={arrowTargetBox.left}
+                    y={arrowTargetBox.top}
+                    width={arrowTargetBox.width}
+                    height={arrowTargetBox.height}
+                    rx={6}
+                  />
+                  {arrowTargetHandles
+                    ? (['top', 'right', 'bottom', 'left'] as const).map((side) => (
+                        <circle
+                          key={side}
+                          className={`sb-editor-arrow-target-handle${
+                            arrowTargetSides?.toSide === side ? ' is-active' : ''
+                          }`}
+                          cx={arrowTargetHandles[side].x}
+                          cy={arrowTargetHandles[side].y}
+                          r={arrowTargetSides?.toSide === side ? 5 : 3.5}
+                        />
+                      ))
+                    : null}
+                </>
+              ) : null}
               <line
                 x1={arrowPreview.startX}
                 y1={arrowPreview.startY}
