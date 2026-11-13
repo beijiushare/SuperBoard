@@ -93,8 +93,6 @@ export function MarkdownEditorOverlay({
       const target = event.target as HTMLElement | null
       if (!target) return
       if (target.closest('.sb-md-editor, .sb-block-actions')) return
-      event.preventDefault()
-      event.stopPropagation()
       closeRef.current()
     }
     document.addEventListener('pointerdown', onPointerDown, true)
