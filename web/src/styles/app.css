@@ -628,6 +628,15 @@
 .canvas-editor-stage .JCV-controls,
 .canvas-editor-stage .JCV-minimap-container {
   z-index: 7;
+  scale: 0.7;
+}
+
+.canvas-editor-stage .JCV-controls {
+  transform-origin: top right;
+}
+
+.canvas-editor-stage .JCV-minimap-container {
+  transform-origin: bottom right;
 }
 
 .sb-app-editor.is-director-mode .canvas-editor-toolstrip,
@@ -1078,6 +1087,26 @@
   margin: 0 !important;
   padding: 14px 16px !important;
   box-sizing: border-box;
+}
+
+.sb-md-editor
+  .vditor-ir__node[data-type='math-block']:not(.vditor-ir__node--expand)
+  .vditor-ir__marker,
+.sb-md-focus-body
+  .vditor-ir__node[data-type='math-block']:not(.vditor-ir__node--expand)
+  .vditor-ir__marker {
+  display: none !important;
+}
+
+.sb-md-editor
+  .vditor-ir__node[data-type='math-block']:not(.vditor-ir__node--expand)::before,
+.sb-md-editor
+  .vditor-ir__node[data-type='math-block']:not(.vditor-ir__node--expand)::after,
+.sb-md-focus-body
+  .vditor-ir__node[data-type='math-block']:not(.vditor-ir__node--expand)::before,
+.sb-md-focus-body
+  .vditor-ir__node[data-type='math-block']:not(.vditor-ir__node--expand)::after {
+  content: none !important;
 }
 
 .sb-editor-guide {
