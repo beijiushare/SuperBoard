@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type Vditor from 'vditor'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument } from '../model'
@@ -53,6 +53,16 @@ export function MarkdownEditorOverlay({
   commitRef.current = onCommit
 
   const node = canvas.nodes.find((item) => item.id === nodeId)
+
+  useLayoutEffect(() => {
+    const overlay = document.getElementById(nodeId)
+    overlay?.classList.add('sb-md-editing-hidden')
+    return () => {
+      window.setTimeout(() => {
+        overlay?.classList.remove('sb-md-editing-hidden')
+      }, 320)
+    }
+  }, [nodeId])
 
   useEffect(() => {
     let disposed = false
