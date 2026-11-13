@@ -69,6 +69,8 @@ interface DragNode {
   startHeight: number
 }
 
+const GUIDE_DISTANCE_THRESHOLD_PX = 3
+
 interface DragState {
   kind: 'move' | 'resize' | 'rotate'
   nodes: DragNode[]
@@ -164,6 +166,12 @@ export function CanvasEditorOverlay({
   useEffect(() => {
     if (!canShowGuides) setGuides(null)
   }, [canShowGuides])
+
+  useEffect(() => {
+    const clearGuides = () => setGuides(null)
+    window.addEventListener('pointerdown', clearGuides, true)
+    return () => window.removeEventListener('pointerdown', clearGuides, true)
+  }, [])
   const edgeDragRef = useRef<{
     edge: CanvasEdge
     point: 'from' | 'to'
@@ -176,6 +184,21 @@ export function CanvasEditorOverlay({
   const dragRef = useRef<DragState | null>(null)
   const marqueeStartRef = useRef<{ x: number; y: number } | null>(null)
   const marqueeAdditiveRef = useRef(false)
+
+  useEffect(() => {
+    const clearDrag = () => {
+      dragRef.current = null
+      setGuides(null)
+    }
+    window.addEventListener('pointerup', clearDrag, true)
+    window.addEventListener('pointercancel', clearDrag, true)
+    window.addEventListener('blur', clearDrag)
+    return () => {
+      window.removeEventListener('pointerup', clearDrag, true)
+      window.removeEventListener('pointercancel', clearDrag, true)
+      window.removeEventListener('blur', clearDrag)
+    }
+  }, [])
 
   useEffect(() => {
     let disposed = false
@@ -638,10 +661,15 @@ export function CanvasEditorOverlay({
     }
     if (drag.kind === 'move') {
       const dmNow = dmRef.current
+      const dragDistance = Math.hypot(
+        event.clientX - drag.startClientX,
+        event.clientY - drag.startClientY,
+      )
+      const showGuides = canShowGuides && dragDistance >= GUIDE_DISTANCE_THRESHOLD_PX
       let moveX = dx
       let moveY = dy
       let nextGuides: { x?: number; y?: number } | null = null
-      if (dmNow && !event.altKey) {
+      if (dmNow && !event.altKey && showGuides) {
         const dragged = new Set(drag.nodes.map((item) => item.node.id))
         let left = Infinity
         let top = Infinity
@@ -689,7 +717,7 @@ export function CanvasEditorOverlay({
           nextGuides = { ...(nextGuides ?? {}), y: bestY.target }
         }
       }
-      setGuides(canShowGuides ? nextGuides : null)
+      setGuides(showGuides ? nextGuides : null)
       for (const item of drag.nodes) {
         item.node.x = item.startX + moveX
         item.node.y = item.startY + moveY
