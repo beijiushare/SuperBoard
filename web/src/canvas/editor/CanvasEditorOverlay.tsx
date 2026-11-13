@@ -6,7 +6,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import UseAnimations from 'react-useanimations'
-import edit3 from 'react-useanimations/lib/edit3'
+import hash from 'react-useanimations/lib/hash'
 import lock from 'react-useanimations/lib/lock'
 import typeIcon from 'react-useanimations/lib/type'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
@@ -1144,6 +1144,23 @@ export function CanvasEditorOverlay({
             >
               <button
                 type="button"
+                className={`sb-block-action${ratioLocked ? ' is-active' : ''}`}
+                title={ratioLocked ? '解锁比例' : '锁定比例'}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onToggleRatioLock?.(node.id)
+                }}
+              >
+                <span className={`sb-block-check${ratioLocked ? ' is-checked' : ''}`} />
+                <UseAnimations
+                  animation={lock}
+                  size={16}
+                  active={ratioLocked}
+                  interaction="click-replay"
+                />
+              </button>
+              <button
+                type="button"
                 className={`sb-block-action${editing ? ' is-active' : ''}`}
                 title={editing ? '退出编辑' : '编辑'}
                 onClick={(event) => {
@@ -1153,7 +1170,7 @@ export function CanvasEditorOverlay({
               >
                 <span className={`sb-block-check${editing ? ' is-checked' : ''}`} />
                 <UseAnimations
-                  animation={edit3}
+                  animation={typeIcon}
                   size={32}
                   active={editing}
                   interaction="click-replay"
@@ -1170,29 +1187,12 @@ export function CanvasEditorOverlay({
                   }}
                 >
                   <UseAnimations
-                    animation={typeIcon}
-                    size={16}
+                    animation={hash}
+                    size={32}
                     interaction="click-replay"
                   />
                 </button>
               ) : null}
-              <button
-                type="button"
-                className={`sb-block-action${ratioLocked ? ' is-active' : ''}`}
-                title={ratioLocked ? '解锁比例' : '锁定比例'}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  onToggleRatioLock?.(node.id)
-                }}
-              >
-                <span className={`sb-block-check${ratioLocked ? ' is-checked' : ''}`} />
-                <UseAnimations
-                  animation={lock}
-                  size={16}
-                  active={ratioLocked}
-                  interaction="click-replay"
-                />
-              </button>
             </div>
           )
         })}
