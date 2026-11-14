@@ -1249,6 +1249,55 @@
   pointer-events: auto;
 }
 
+.sb-editor-selection.is-interactive {
+  pointer-events: none;
+}
+
+.sb-editor-selection.is-interactive > .sb-editor-handle,
+.sb-editor-selection.is-interactive > .sb-editor-edge-handle,
+.sb-editor-selection.is-interactive > .sb-editor-rotate,
+.sb-editor-selection.is-interactive > .sb-editor-drag-edge {
+  pointer-events: auto;
+}
+
+.sb-editor-hitbox.is-interactive {
+  pointer-events: none;
+}
+
+.sb-editor-drag-edge {
+  position: absolute;
+  z-index: 1;
+  cursor: move;
+}
+
+.sb-editor-drag-edge-n {
+  top: -6px;
+  right: 0;
+  left: 0;
+  height: 12px;
+}
+
+.sb-editor-drag-edge-s {
+  right: 0;
+  bottom: -6px;
+  left: 0;
+  height: 12px;
+}
+
+.sb-editor-drag-edge-e {
+  top: 0;
+  right: -6px;
+  bottom: 0;
+  width: 12px;
+}
+
+.sb-editor-drag-edge-w {
+  top: 0;
+  bottom: 0;
+  left: -6px;
+  width: 12px;
+}
+
 .sb-editor-marquee {
   position: absolute;
   border: 1px dashed #2f80ed;

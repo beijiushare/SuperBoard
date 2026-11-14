@@ -79,6 +79,11 @@ interface DragNode {
 
 const GUIDE_DISTANCE_THRESHOLD_PX = 3
 
+function hasIframeContent(node: CanvasNode) {
+  if (node['x-superboard']?.media?.kind === 'iframe') return true
+  return node.type === 'text' && /<iframe\b/i.test(node.text)
+}
+
 interface DragState {
   kind: 'move' | 'resize' | 'rotate'
   nodes: DragNode[]
@@ -1018,7 +1023,11 @@ export function CanvasEditorOverlay({
         .map((node) => (
           <div
             key={`block-hit-${node.id}`}
-            className="sb-editor-hitbox sb-editor-block-hitbox"
+            className={`sb-editor-hitbox sb-editor-block-hitbox${
+              selectedIds.includes(node.id) && hasIframeContent(node)
+                ? ' is-interactive'
+                : ''
+            }`}
             style={screenStyle(node, offsetX, offsetY, scale)}
             onPointerDown={(event) => beginMove(event, node)}
             onPointerMove={movePointer}
@@ -1034,7 +1043,9 @@ export function CanvasEditorOverlay({
       {selectionBoxNodes.map((node) => (
         <div
           key={node.id}
-          className="sb-editor-selection"
+          className={`sb-editor-selection${
+            hasIframeContent(node) ? ' is-interactive' : ''
+          }`}
           style={screenStyle(node, offsetX, offsetY, scale)}
           onPointerDown={(event) => beginMove(event, node)}
           onPointerMove={movePointer}
@@ -1042,6 +1053,17 @@ export function CanvasEditorOverlay({
         >
           {selectionBoxNodes.length === 1 ? (
             <>
+              {hasIframeContent(node)
+                ? SELECTION_SIDES.map((side) => (
+                    <span
+                      key={`drag-${side}`}
+                      className={`sb-editor-drag-edge sb-editor-drag-edge-${side}`}
+                      onPointerDown={(event) => beginMove(event, node)}
+                      onPointerMove={movePointer}
+                      onPointerUp={endDrag}
+                    />
+                  ))
+                : null}
               {visibleSelectionCorners(
                 node.width * scale,
                 node.height * scale,
