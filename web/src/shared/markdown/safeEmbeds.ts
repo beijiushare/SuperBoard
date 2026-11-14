@@ -14,19 +14,31 @@ const ALLOWED_EMBED_HOSTS = new Set([
   'www.youtube-nocookie.com',
   'youtube-nocookie.com',
   'player.bilibili.com',
+  'www.bilibili.com',
+  'bilibili.com',
   'player.vimeo.com',
   'vimeo.com',
-  'www.bilibili.com',
 ])
 
-function isAllowedEmbed(value: unknown) {
-  if (typeof value !== 'string') return false
+function normalizeEmbedSrc(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  const candidate = trimmed.startsWith('//') ? `https:${trimmed}` : trimmed
   try {
-    const url = new URL(value, window.location.href)
-    return url.protocol === 'https:' && ALLOWED_EMBED_HOSTS.has(url.hostname)
+    const url = new URL(candidate, window.location.href)
+    if (!ALLOWED_EMBED_HOSTS.has(url.hostname)) return null
+    if (url.protocol === 'http:') {
+      url.protocol = 'https:'
+    }
+    return url.protocol === 'https:' ? url.href : null
   } catch {
-    return false
+    return null
   }
+}
+
+function isAllowedEmbed(value: unknown) {
+  return normalizeEmbedSrc(value) !== null
 }
 
 export function rehypeSafeEmbeds() {
@@ -36,7 +48,8 @@ export function rehypeSafeEmbeds() {
 
       if (node.tagName === 'iframe') {
         const src = node.properties?.src
-        if (!isAllowedEmbed(src)) {
+        const normalizedSrc = normalizeEmbedSrc(src)
+        if (!normalizedSrc) {
           node.tagName = 'a'
           node.properties = {
             href: typeof src === 'string' ? src : '#',
@@ -48,6 +61,7 @@ export function rehypeSafeEmbeds() {
         }
         node.properties = {
           ...node.properties,
+          src: normalizedSrc,
           loading: 'lazy',
           referrerPolicy: 'strict-origin-when-cross-origin',
           sandbox: 'allow-scripts allow-same-origin allow-presentation allow-popups',
