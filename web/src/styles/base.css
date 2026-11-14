@@ -4,7 +4,7 @@
     'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --sb-canvas-bg: #fafafa;
+  --sb-canvas-bg: #ffffff;
   --sb-canvas-grid: #dddddd;
   --sb-card-bg: #ffffff;
   --sb-card-border: #dddddd;
