@@ -56,7 +56,15 @@ export function TextSlot({
     ) : (
       <div style={textStyle(node)}>{node.text}</div>
     )
-  return <div className="sb-block-scale">{content}</div>
+  return (
+    <div
+      className={`sb-block-scale${
+        ext?.kind === 'markdown' ? ' sb-markdown-block-scale' : ''
+      }`}
+    >
+      {content}
+    </div>
+  )
 }
 
 function clampPercent(value: number | undefined, fallback: number) {

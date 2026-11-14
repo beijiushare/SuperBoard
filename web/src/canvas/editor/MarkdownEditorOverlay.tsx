@@ -129,6 +129,8 @@ export function MarkdownEditorOverlay({
         visibility: viewReady ? 'visible' : 'hidden',
         transform: rotation ? `rotate(${rotation}deg)` : undefined,
         transformOrigin: 'center center',
+        ['--sb-content-scale' as string]: String(contentScale),
+        ['--sb-markdown-font-size' as string]: `${14 * contentScale}px`,
       }}
       onPointerDown={(event) => event.stopPropagation()}
       onContextMenu={(event) => {
@@ -140,9 +142,8 @@ export function MarkdownEditorOverlay({
       <div
         className="sb-md-editor-inner"
         style={{
-          width: width / contentScale,
-          height: height / contentScale,
-          zoom: contentScale,
+          width,
+          height,
           transform: `scale(${view.scale})`,
           transformOrigin: 'top left',
         }}

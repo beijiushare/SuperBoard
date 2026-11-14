@@ -659,12 +659,13 @@ export function CanvasEditorOverlay({
     return Math.abs(scaleX - 1) >= Math.abs(scaleY - 1) ? scaleX : scaleY
   }
 
-  function resetContentScaleOnRatioResize(drag: DragState) {
+  function applyContentScale(drag: DragState, ratioScale: number) {
     if (!drag.ratioLocked || drag.nodes.length !== 1) return
     const kind = blockKind(drag.primary)
     if (!kind || kind === 'media') return
     const extension = ensureExtension(drag.primary)
-    extension.contentScale = 1
+    extension.contentScale =
+      Math.round((drag.startContentScale ?? 1) * ratioScale * 1000) / 1000
   }
 
   function movePointer(event: ReactPointerEvent) {
@@ -840,7 +841,7 @@ export function CanvasEditorOverlay({
         drag.primary.y = nextCenter.y - height / 2
         drag.primary.width = width
         drag.primary.height = height
-        resetContentScaleOnRatioResize(drag)
+        applyContentScale(drag, ratioScale)
       } else {
         let width = hasEast
           ? Math.max(40, drag.startWidth + dx)
@@ -870,7 +871,7 @@ export function CanvasEditorOverlay({
           item.node.width = Math.max(1, item.startWidth * scaleX)
           item.node.height = Math.max(1, item.startHeight * scaleY)
         }
-        resetContentScaleOnRatioResize(drag)
+        applyContentScale(drag, ratioScale)
       }
       if (drag.nodes.length === 1 && !drag.ratioLocked) reflowTextHeight(drag.primary)
     }
