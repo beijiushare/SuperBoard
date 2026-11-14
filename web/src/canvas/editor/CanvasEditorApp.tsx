@@ -63,6 +63,7 @@ import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
 import { MarkdownFocusDialog } from './MarkdownFocusDialog'
+import { PeleCreateDialog } from './PeleCreateDialog'
 import { blockKind, isRatioLocked } from './blocks'
 import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
@@ -90,6 +91,9 @@ export function CanvasEditorApp() {
   const [textEditingId, setTextEditingId] = useState<string | null>(null)
   const [tool, setTool] = useState<EditorTool>('select')
   const [editRequest, setEditRequest] = useState<{ id: string; nonce: number } | null>(null)
+  const [peleDialog, setPeleDialog] = useState<{
+    point?: { x: number; y: number }
+  } | null>(null)
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false)
   const [mediaUrl, setMediaUrl] = useState('')
   const [mediaInsertPoint, setMediaInsertPoint] = useState<{ x: number; y: number } | null>(
@@ -567,6 +571,39 @@ export function CanvasEditorApp() {
     }
     setTool('text')
     setEditRequest({ id, nonce: Date.now() })
+  }
+
+  function openPeleDialog(point?: { x: number; y: number }) {
+    setPeleDialog({ point })
+  }
+
+  function insertPele({ code, diagram }: { code: string; diagram: string }) {
+    if (!canvas) return
+    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'pele')
+    const offset = (canvas.nodes.length % 6) * 24
+    const position = peleDialog?.point
+      ? {
+          x: Math.round(peleDialog.point.x - 290),
+          y: Math.round(peleDialog.point.y - 190),
+        }
+      : (() => {
+          const center = viewportCenter(580, 380)
+          return { x: center.x + offset, y: center.y + offset }
+        })()
+    const node: CanvasNode = {
+      id,
+      type: 'text',
+      x: position.x,
+      y: position.y,
+      width: 580,
+      height: 380,
+      text: `\`\`\`mermaid\n${code}\n\`\`\``,
+      'x-superboard': { kind: 'pele', diagram, code },
+    }
+    recordHistory()
+    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    setTool('select')
+    setPeleDialog(null)
   }
 
   function insertMedia() {
@@ -1836,7 +1873,7 @@ export function CanvasEditorApp() {
                     <button type="button" onClick={() => insertTextBlock('markdown')}>
                       插入 Markdown
                     </button>
-                    <button type="button" onClick={() => insertTextBlock('pele')}>
+                    <button type="button" onClick={() => openPeleDialog()}>
                       插入 Pele
                     </button>
                     <button type="button" onClick={() => openMediaDialog()}>
@@ -1997,7 +2034,7 @@ export function CanvasEditorApp() {
           <button
             type="button"
             onClick={() => {
-              insertTextBlock('pele', {
+              openPeleDialog({
                 x: canvasMenu.worldX,
                 y: canvasMenu.worldY,
               })
@@ -2047,6 +2084,13 @@ export function CanvasEditorApp() {
             </button>
           ) : null}
         </div>
+      ) : null}
+
+      {peleDialog ? (
+        <PeleCreateDialog
+          onClose={() => setPeleDialog(null)}
+          onSave={insertPele}
+        />
       ) : null}
 
       {mediaDialogOpen ? (

@@ -52,7 +52,9 @@ export function TextSlot({
     ) :     ext?.kind === 'markdown' ? (
       <MarkdownVditorPreview source={node.text} theme={ext.markdownTheme} />
     ) : ext?.kind === 'pele' ? (
-      <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />
+      <div className="sb-card sb-card-pele">
+        <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />
+      </div>
     ) : (
       <div style={textStyle(node)}>{node.text}</div>
     )
