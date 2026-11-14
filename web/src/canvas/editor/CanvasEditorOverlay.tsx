@@ -648,6 +648,17 @@ export function CanvasEditorOverlay({
     node.height = Math.max(40, Math.round(lines * fontSize * 1.45 + 28))
   }
 
+  function cornerRatioScale(
+    width: number,
+    height: number,
+    startWidth: number,
+    startHeight: number,
+  ) {
+    const scaleX = width / startWidth
+    const scaleY = height / startHeight
+    return Math.abs(scaleX - 1) >= Math.abs(scaleY - 1) ? scaleX : scaleY
+  }
+
   function applyContentScale(drag: DragState, ratioScale: number) {
     if (!drag.ratioLocked || drag.nodes.length !== 1) return
     const kind = blockKind(drag.primary)
@@ -820,7 +831,7 @@ export function CanvasEditorOverlay({
         if (drag.ratioLocked) {
           if (signX === 0) ratioScale = height / drag.startHeight
           else if (signY === 0) ratioScale = width / drag.startWidth
-          else ratioScale = Math.max(width / drag.startWidth, height / drag.startHeight)
+          else ratioScale = cornerRatioScale(width, height, drag.startWidth, drag.startHeight)
           width = drag.startWidth * ratioScale
           height = drag.startHeight * ratioScale
         }
@@ -846,7 +857,7 @@ export function CanvasEditorOverlay({
         if (drag.ratioLocked) {
           if (!hasEast && !hasWest) ratioScale = height / drag.startHeight
           else if (!hasSouth && !hasNorth) ratioScale = width / drag.startWidth
-          else ratioScale = Math.max(width / drag.startWidth, height / drag.startHeight)
+          else ratioScale = cornerRatioScale(width, height, drag.startWidth, drag.startHeight)
           width = drag.startWidth * ratioScale
           height = drag.startHeight * ratioScale
         }
