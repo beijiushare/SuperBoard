@@ -10,16 +10,36 @@ import { PeleExampleGallery, PeleTypeGallery } from './PeleGalleries'
 type PeleStep = 'types' | 'examples' | 'editor'
 
 interface PeleCreateDialogProps {
+  mode?: 'create' | 'edit'
+  initialCode?: string
+  initialDiagram?: string
   onClose: () => void
   onSave: (payload: { code: string; diagram: string }) => void
 }
 
-export function PeleCreateDialog({ onClose, onSave }: PeleCreateDialogProps) {
-  const [peleStep, setPeleStep] = useState<PeleStep>('types')
+export function PeleCreateDialog({
+  mode = 'create',
+  initialCode = '',
+  initialDiagram = 'flowchart',
+  onClose,
+  onSave,
+}: PeleCreateDialogProps) {
+  const editing = mode === 'edit'
+  const [peleStep, setPeleStep] = useState<PeleStep>(editing ? 'editor' : 'types')
   const [activeGroup, setActiveGroup] = useState<PeleExampleGroup | null>(null)
-  const [code, setCode] = useState('')
-  const [diagram, setDiagram] = useState('flowchart')
+  const [code, setCode] = useState(initialCode)
+  const [diagram, setDiagram] = useState(initialDiagram)
+  const [previewCode, setPreviewCode] = useState(initialCode)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+
+  useEffect(() => {
+    if (peleStep !== 'editor') {
+      setPreviewCode(code)
+      return
+    }
+    const timer = window.setTimeout(() => setPreviewCode(code), 300)
+    return () => window.clearTimeout(timer)
+  }, [code, peleStep])
 
   useEffect(() => {
     if (peleStep === 'editor') textareaRef.current?.focus()
@@ -48,18 +68,21 @@ export function PeleCreateDialog({ onClose, onSave }: PeleCreateDialogProps) {
   function selectExample(example: PeleExample) {
     if (activeGroup) setDiagram(activeGroup.type)
     setCode(example.source)
+    setPreviewCode(example.source)
     setPeleStep('editor')
   }
 
-  const title =
-    peleStep === 'types'
+  const title = editing
+    ? '编辑图表'
+    : peleStep === 'types'
       ? '新建图表'
       : peleStep === 'examples' && activeGroup
         ? `${activeGroup.label}（${activeGroup.title}）`
         : '编辑图表'
 
-  const description =
-    peleStep === 'types'
+  const description = editing
+    ? '编辑 Mermaid 源码，右侧实时预览'
+    : peleStep === 'types'
       ? `从 ${PELE_EXAMPLE_GROUPS.length} 种 Pele 官方图表中选择一种`
       : peleStep === 'examples' && activeGroup
         ? '选择一个官方示例进入编辑'
@@ -120,14 +143,14 @@ export function PeleCreateDialog({ onClose, onSave }: PeleCreateDialogProps) {
                 className="sb-card sb-card-pele sb-preview-card"
                 style={{ width: 580, height: 380 }}
               >
-                <PeleView code={code} />
+                <PeleView code={previewCode} />
               </div>
             </div>
           </div>
         ) : null}
 
         <footer className="sb-modal-footer">
-          {peleStep === 'editor' ? (
+          {!editing && peleStep === 'editor' ? (
             <button
               className="sb-button sb-button-ghost"
               type="button"
@@ -137,9 +160,11 @@ export function PeleCreateDialog({ onClose, onSave }: PeleCreateDialogProps) {
             </button>
           ) : (
             <span className="sb-shortcut">
-              {peleStep === 'types'
-                ? '选择类型后浏览该类型的全部官方示例'
-                : `${activeGroup?.examples.length ?? 0} 个示例，点选后进入编辑`}
+              {editing
+                ? 'Esc 关闭 · Ctrl/⌘ + Enter 保存'
+                : peleStep === 'types'
+                  ? '选择类型后浏览该类型的全部官方示例'
+                  : `${activeGroup?.examples.length ?? 0} 个示例，点选后进入编辑`}
             </span>
           )}
           <div className="sb-modal-actions">

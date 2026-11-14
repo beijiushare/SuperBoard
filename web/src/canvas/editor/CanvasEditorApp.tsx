@@ -91,9 +91,11 @@ export function CanvasEditorApp() {
   const [textEditingId, setTextEditingId] = useState<string | null>(null)
   const [tool, setTool] = useState<EditorTool>('select')
   const [editRequest, setEditRequest] = useState<{ id: string; nonce: number } | null>(null)
-  const [peleDialog, setPeleDialog] = useState<{
-    point?: { x: number; y: number }
-  } | null>(null)
+  const [peleDialog, setPeleDialog] = useState<
+    | { mode: 'create'; point?: { x: number; y: number } }
+    | { mode: 'edit'; nodeId: string }
+    | null
+  >(null)
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false)
   const [mediaUrl, setMediaUrl] = useState('')
   const [mediaInsertPoint, setMediaInsertPoint] = useState<{ x: number; y: number } | null>(
@@ -306,6 +308,10 @@ export function CanvasEditorApp() {
         openMarkdownEditor(node.id)
         return
       }
+      if (node?.['x-superboard']?.kind === 'pele') {
+        openPeleEditor(node.id)
+        return
+      }
       setSelectedIds([element.id])
       setTool('text')
       setEditRequest({ id: element.id, nonce: Date.now() })
@@ -483,6 +489,10 @@ export function CanvasEditorApp() {
       toggleMarkdownEdit(id)
       return
     }
+    if (kind === 'pele') {
+      openPeleEditor(id)
+      return
+    }
     if (textEditingId === id) {
       closeTextEditing()
       return
@@ -574,14 +584,52 @@ export function CanvasEditorApp() {
   }
 
   function openPeleDialog(point?: { x: number; y: number }) {
-    setPeleDialog({ point })
+    setPeleDialog({ mode: 'create', point })
+  }
+
+  function openPeleEditor(id: string) {
+    const node = canvasRef.current?.nodes.find((item) => item.id === id)
+    if (node?.['x-superboard']?.kind !== 'pele') return
+    closeTextEditing()
+    closeMarkdownEditor()
+    setSelectedIds([id])
+    setTool('select')
+    setPeleDialog({ mode: 'edit', nodeId: id })
   }
 
   function insertPele({ code, diagram }: { code: string; diagram: string }) {
-    if (!canvas) return
+    if (!canvas || !peleDialog) return
+    const text = `\`\`\`mermaid\n${code}\n\`\`\``
+    if (peleDialog.mode === 'edit') {
+      const target = canvas.nodes.find((node) => node.id === peleDialog.nodeId)
+      if (!target) return
+      recordHistory()
+      applyDocument(
+        {
+          ...canvas,
+          nodes: canvas.nodes.map((node) =>
+            node.id === target.id
+              ? {
+                  ...node,
+                  text,
+                  'x-superboard': {
+                    ...ensureExtension(node),
+                    kind: 'pele',
+                    code,
+                    diagram,
+                  },
+                }
+              : node,
+          ),
+        },
+        [target.id],
+      )
+      setPeleDialog(null)
+      return
+    }
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'pele')
     const offset = (canvas.nodes.length % 6) * 24
-    const position = peleDialog?.point
+    const position = peleDialog.point
       ? {
           x: Math.round(peleDialog.point.x - 290),
           y: Math.round(peleDialog.point.y - 190),
@@ -597,7 +645,7 @@ export function CanvasEditorApp() {
       y: position.y,
       width: 580,
       height: 380,
-      text: `\`\`\`mermaid\n${code}\n\`\`\``,
+      text,
       'x-superboard': { kind: 'pele', diagram, code },
     }
     recordHistory()
@@ -1536,6 +1584,20 @@ export function CanvasEditorApp() {
   }
 
   const nodeMap = canvas ? nodeMapOf(canvas.nodes) : new Map<string, CanvasNode>()
+  const peleEditNode =
+    peleDialog?.mode === 'edit'
+      ? canvas?.nodes.find((node) => node.id === peleDialog.nodeId) ?? null
+      : null
+  const peleInitialCode =
+    peleEditNode && peleEditNode.type === 'text'
+      ? typeof peleEditNode['x-superboard']?.code === 'string'
+        ? peleEditNode['x-superboard'].code
+        : peleEditNode.text
+      : ''
+  const peleInitialDiagram =
+    typeof peleEditNode?.['x-superboard']?.diagram === 'string'
+      ? peleEditNode['x-superboard'].diagram
+      : 'flowchart'
   const canGroup = canvas
     ? selectedIds.filter((id) => {
         const node = nodeMap.get(id)
@@ -1941,6 +2003,8 @@ export function CanvasEditorApp() {
                   onClick={() => {
                     if (menuNode['x-superboard']?.kind === 'markdown') {
                       openMarkdownEditor(menuNode.id)
+                    } else if (menuNode['x-superboard']?.kind === 'pele') {
+                      openPeleEditor(menuNode.id)
                     } else {
                       setSelectedIds([menuNode.id])
                       setTool('text')
@@ -2088,6 +2152,14 @@ export function CanvasEditorApp() {
 
       {peleDialog ? (
         <PeleCreateDialog
+          key={
+            peleDialog.mode === 'edit'
+              ? `edit:${peleDialog.nodeId}`
+              : 'create'
+          }
+          mode={peleDialog.mode}
+          initialCode={peleInitialCode}
+          initialDiagram={peleInitialDiagram}
           onClose={() => setPeleDialog(null)}
           onSave={insertPele}
         />
