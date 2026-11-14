@@ -149,8 +149,52 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.sb-gallery-grid--pele {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.sb-gallery-grid--pele .sb-type-card {
+  height: 248px;
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+
+.sb-gallery-grid--pele .sb-type-card-meta {
+  flex: 1;
+}
+
 .sb-example-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: start;
+}
+
+.sb-example-card--complex {
+  grid-column: span 6;
+}
+
+.sb-example-card--normal {
+  grid-column: span 3;
+}
+
+.sb-example-card--simple {
+  grid-column: span 2;
+}
+
+.sb-example-grid .sb-example-card--complex .sb-example-preview {
+  height: 320px;
+  flex-basis: 320px;
+}
+
+.sb-example-grid .sb-example-card--normal .sb-example-preview {
+  height: 220px;
+  flex-basis: 220px;
+}
+
+.sb-example-grid .sb-example-card--simple .sb-example-preview {
+  height: 150px;
+  flex-basis: 150px;
 }
 
 .sb-type-card,
@@ -200,6 +244,14 @@
 .sb-example-card .sb-example-preview {
   height: 220px;
   flex-basis: 220px;
+}
+
+.sb-example-thumb {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
 }
 
 .sb-example-preview .sb-pele {

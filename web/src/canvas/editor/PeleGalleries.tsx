@@ -5,6 +5,34 @@ import {
   type PeleExampleGroup,
 } from '../../shared/pele/examples'
 import { PeleView } from '../../shared/pele/PeleView'
+import {
+  PELE_EXAMPLE_SIZES,
+  PELE_THUMBNAILS,
+  type PeleExampleSize,
+  type PeleThumbnail,
+} from '../../shared/pele/thumbnails.generated'
+
+const TYPE_PREVIEW_HEIGHT = 180
+const TYPE_CARD_MIN_WIDTH = 220
+const TYPE_CARD_MAX_WIDTH = 420
+
+type ExampleSizeClass = 'complex' | 'normal' | 'simple'
+
+function typeCardWidth(thumb: PeleThumbnail | undefined) {
+  if (!thumb || thumb.height <= 0) return 300
+  const width = (thumb.width / thumb.height) * TYPE_PREVIEW_HEIGHT
+  return Math.round(
+    Math.min(TYPE_CARD_MAX_WIDTH, Math.max(TYPE_CARD_MIN_WIDTH, width)),
+  )
+}
+
+function exampleSizeClass(size: PeleExampleSize | null | undefined): ExampleSizeClass {
+  if (!size) return 'normal'
+  const ratio = size.width / Math.max(1, size.height)
+  if (size.width >= 1000 || size.height >= 520 || ratio >= 2.6) return 'complex'
+  if (size.width >= 620 || size.height >= 300 || ratio >= 1.8) return 'normal'
+  return 'simple'
+}
 
 function LazyPelePreview({ code }: { code: string }) {
   const ref = useRef<HTMLDivElement | null>(null)
@@ -44,17 +72,31 @@ export function PeleTypeGallery({
 }) {
   return (
     <div className="sb-gallery-body">
-      <div className="sb-gallery-grid">
+      <div className="sb-gallery-grid sb-gallery-grid--pele">
         {PELE_EXAMPLE_GROUPS.map((group) => {
           const example = group.examples[group.representativeIndex] ?? group.examples[0]
+          const thumb = PELE_THUMBNAILS[group.type]
           return (
             <button
               key={group.type}
               className="sb-type-card"
               type="button"
+              style={{ width: typeCardWidth(thumb) }}
               onClick={() => onSelect(group)}
             >
-              <LazyPelePreview code={example.source} />
+              {thumb ? (
+                <div className="sb-example-preview sb-pele-theme">
+                  <img
+                    className="sb-example-thumb"
+                    src={`${import.meta.env.BASE_URL}${thumb.src}`}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              ) : (
+                <LazyPelePreview code={example.source} />
+              )}
               <span className="sb-type-card-meta">
                 <span className="sb-type-card-title">
                   {group.label}
@@ -82,6 +124,7 @@ export function PeleExampleGallery({
   onBack: () => void
   onSelect: (example: PeleExample) => void
 }) {
+  const sizes = PELE_EXAMPLE_SIZES[group.type] ?? []
   return (
     <div className="sb-gallery-body">
       <div className="sb-gallery-toolbar">
@@ -93,20 +136,23 @@ export function PeleExampleGallery({
         </span>
       </div>
       <div className="sb-example-grid">
-        {group.examples.map((example, index) => (
-          <button
-            key={`${group.type}-${index}`}
-            className="sb-example-card"
-            type="button"
-            onClick={() => onSelect(example)}
-          >
-            <LazyPelePreview code={example.source} />
-            <span className="sb-example-card-meta">
-              <span className="sb-example-card-label">{example.label}</span>
-              <span className="sb-example-card-action">使用此示例</span>
-            </span>
-          </button>
-        ))}
+        {group.examples.map((example, index) => {
+          const sizeClass = exampleSizeClass(sizes[index])
+          return (
+            <button
+              key={`${group.type}-${index}`}
+              className={`sb-example-card sb-example-card--${sizeClass}`}
+              type="button"
+              onClick={() => onSelect(example)}
+            >
+              <LazyPelePreview code={example.source} />
+              <span className="sb-example-card-meta">
+                <span className="sb-example-card-label">{example.label}</span>
+                <span className="sb-example-card-action">使用此示例</span>
+              </span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )

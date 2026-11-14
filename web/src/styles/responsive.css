@@ -65,7 +65,25 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .sb-example-card .sb-example-preview {
+  .sb-gallery-grid--pele {
+    flex-direction: column;
+  }
+
+  .sb-gallery-grid--pele .sb-type-card {
+    width: 100% !important;
+    height: auto;
+  }
+
+  .sb-example-card--complex,
+  .sb-example-card--normal,
+  .sb-example-card--simple {
+    grid-column: auto;
+  }
+
+  .sb-example-card .sb-example-preview,
+  .sb-example-card--complex .sb-example-preview,
+  .sb-example-card--normal .sb-example-preview,
+  .sb-example-card--simple .sb-example-preview {
     height: 180px;
     flex-basis: 180px;
   }
