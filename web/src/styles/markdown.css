@@ -916,3 +916,17 @@
 .sb-md-theme-purple.sb-markdown-vditor strong {
   font-weight: 700;
 }
+
+.sb-md-editor .vditor-ir pre:not(:has(> code)),
+.sb-md-focus-body .vditor-ir pre:not(:has(> code)) {
+  border-color: transparent !important;
+  background: transparent !important;
+  color: inherit !important;
+}
+
+.sb-md-editor .vditor-ir__node[data-type='math-block'] .vditor-ir__preview,
+.sb-md-editor .vditor-ir__node[data-type='html-block'] .vditor-ir__preview,
+.sb-md-focus-body .vditor-ir__node[data-type='math-block'] .vditor-ir__preview,
+.sb-md-focus-body .vditor-ir__node[data-type='html-block'] .vditor-ir__preview {
+  background: transparent !important;
+}

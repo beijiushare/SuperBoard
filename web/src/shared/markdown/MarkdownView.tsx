@@ -2,6 +2,7 @@ import { defaultSchema } from 'hast-util-sanitize'
 import type { Components } from 'react-markdown'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
+import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -69,7 +70,12 @@ export function MarkdownView({ source, className = '' }: MarkdownViewProps) {
     <div className={`sb-markdown ${className}`.trim()}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath, remarkAsciiMath]}
-        rehypePlugins={[rehypeSafeEmbeds, [rehypeSanitize, sanitizeSchema], rehypeHighlight]}
+        rehypePlugins={[
+          rehypeRaw,
+          rehypeSafeEmbeds,
+          [rehypeSanitize, sanitizeSchema],
+          rehypeHighlight,
+        ]}
         components={components}
       >
         {source}
