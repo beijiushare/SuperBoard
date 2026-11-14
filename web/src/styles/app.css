@@ -1095,6 +1095,14 @@
   background: #fff;
 }
 
+.sb-md-editor .vditor,
+.sb-md-editor .vditor-content,
+.sb-md-editor .vditor-ir,
+.sb-md-editor .vditor-ir pre.vditor-reset,
+.sb-md-editor .vditor-ir pre.vditor-reset:focus {
+  background: #fff !important;
+}
+
 .sb-md-editing-hidden {
   display: none !important;
 }
@@ -1127,18 +1135,21 @@
   box-sizing: border-box;
 }
 
-.sb-md-editor .vditor-ir pre.vditor-reset {
+.sb-md-editor .vditor-ir pre.vditor-reset,
+.sb-md-editor .vditor-ir pre.vditor-reset:focus,
+.sb-md-focus-body .vditor-ir pre.vditor-reset,
+.sb-md-focus-body .vditor-ir pre.vditor-reset:focus {
   width: 100% !important;
   min-height: 100%;
   max-width: none !important;
   margin: 0 !important;
   padding: 18px 20px !important;
-  background: transparent;
+  background: transparent !important;
   box-sizing: border-box;
 }
 
-.sb-md-focus-body .vditor-ir pre.vditor-reset {
-  background: transparent;
+.sb-md-focus-body {
+  background: #fff;
 }
 
 .sb-md-editor

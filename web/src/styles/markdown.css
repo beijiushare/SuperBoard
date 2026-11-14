@@ -151,7 +151,7 @@
   min-height: 280px;
   border: 0;
   border-radius: 9px;
-  background: #000;
+  background: #fff;
 }
 
 .sb-markdown input[type='checkbox'] {
@@ -390,7 +390,7 @@
   min-height: 280px;
   border: 0;
   border-radius: 9px;
-  background: #000;
+  background: #fff;
 }
 
 .sb-markdown-vditor.vditor-reset input[type='checkbox'] {
@@ -400,10 +400,13 @@
 /* Markdown themes */
 
 .sb-md-theme-purple,
-.sb-md-theme-orange,
 .sb-md-theme-mint {
   font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Noto Sans SC',
     sans-serif;
+}
+
+.sb-md-theme-orange {
+  font-family: 'SimSun', '宋体', 'Songti SC', 'Microsoft YaHei', serif;
 }
 
 .sb-md-theme-purple {
@@ -855,4 +858,61 @@
   background: transparent !important;
   color: #777 !important;
   font-size: 0.9rem !important;
+}
+
+/* Theme typography and editor colors */
+
+.sb-md-theme-purple :is(.vditor-reset, .sb-markdown),
+.sb-md-theme-purple.sb-markdown-vditor {
+  color: #444 !important;
+}
+
+.sb-md-theme-orange :is(.vditor-reset, .sb-markdown),
+.sb-md-theme-orange.sb-markdown-vditor {
+  color: #1f1e1c !important;
+}
+
+.sb-md-theme-mint :is(.vditor-reset, .sb-markdown),
+.sb-md-theme-mint.sb-markdown-vditor {
+  color: #2f3437 !important;
+}
+
+.sb-md-theme-orange :is(.vditor-reset, .sb-markdown) h2,
+.sb-md-theme-orange.sb-markdown-vditor h2 {
+  position: relative !important;
+  border-left-width: 0.9em !important;
+  padding-left: 0.8em !important;
+}
+
+.sb-md-theme-orange :is(.vditor-reset, .sb-markdown) h2::after,
+.sb-md-theme-orange.sb-markdown-vditor h2::after {
+  position: absolute;
+  bottom: -8px;
+  left: -0.9em;
+  border-top: 8px solid var(--sb-md-accent);
+  border-right: 8px solid transparent;
+  content: '';
+}
+
+.sb-md-theme-mint :is(.vditor-reset, .sb-markdown) h1,
+.sb-md-theme-mint :is(.vditor-reset, .sb-markdown) h2,
+.sb-md-theme-mint :is(.vditor-reset, .sb-markdown) h3,
+.sb-md-theme-mint :is(.vditor-reset, .sb-markdown) h4,
+.sb-md-theme-mint.sb-markdown-vditor h1,
+.sb-md-theme-mint.sb-markdown-vditor h2,
+.sb-md-theme-mint.sb-markdown-vditor h3,
+.sb-md-theme-mint.sb-markdown-vditor h4 {
+  color: #2f3437 !important;
+  border-bottom: 0 !important;
+}
+
+.sb-md-theme-mint :is(.vditor-reset, .sb-markdown) h2,
+.sb-md-theme-mint.sb-markdown-vditor h2 {
+  padding-bottom: 0 !important;
+  border-bottom: 0 !important;
+}
+
+.sb-md-theme-purple :is(.vditor-reset, .sb-markdown) strong,
+.sb-md-theme-purple.sb-markdown-vditor strong {
+  font-weight: 700;
 }
