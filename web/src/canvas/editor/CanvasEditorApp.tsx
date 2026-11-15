@@ -143,7 +143,6 @@ export function CanvasEditorApp() {
   const viewerRef = useRef<CanvasViewerHandle>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const shiftRef = useRef(false)
-  const selectedIdsRef = useRef<string[]>([])
   const rightDragRef = useRef<{ x: number; y: number } | null>(null)
   const historyRef = useRef<{ past: CanvasDocument[]; future: CanvasDocument[] }>({
     past: [],
@@ -187,7 +186,6 @@ export function CanvasEditorApp() {
   const { expanded, toggleFolder, expandPath, renameExpandedPath } =
     useTreeExpansion(scopedItems)
   canvasRef.current = canvas
-  selectedIdsRef.current = selectedIds
 
   const directorFrames = useMemo(() => {
     const frames = canvas?.['x-superboard']?.director?.frames ?? []
@@ -1181,9 +1179,11 @@ export function CanvasEditorApp() {
         return
       }
       if (event.altKey && !event.ctrlKey && !event.metaKey) {
-        const overlay = target.closest<HTMLElement>('.JCV-overlay-container')
-        if (overlay && selectedIdsRef.current.includes(overlay.id)) {
-          const candidates = [overlay, ...overlay.querySelectorAll<HTMLElement>('*')]
+        const host =
+          target.closest<HTMLElement>('.sb-md-editor') ??
+          target.closest<HTMLElement>('.JCV-overlay-container')
+        if (host) {
+          const candidates = [host, ...host.querySelectorAll<HTMLElement>('*')]
           const scroller = candidates.find((element) => {
             if (element.scrollHeight <= element.clientHeight + 1) return false
             const overflowY = getComputedStyle(element).overflowY

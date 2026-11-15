@@ -90,16 +90,17 @@ export function MarkdownVditorPreview({
 
   if (useLegacyRenderer || failed) {
     return (
-      <div className={className}>
-        <MarkdownView source={source} />
-      </div>
+      <MarkdownView
+        source={source}
+        className={`sb-md-docs ${className}`.trim()}
+      />
     )
   }
 
   return (
     <div
       ref={hostRef}
-      className={`sb-markdown-vditor ${className}`.trim()}
+      className={`sb-markdown-vditor sb-md-docs ${className}`.trim()}
       style={{ visibility: ready ? 'visible' : 'hidden' }}
     />
   )

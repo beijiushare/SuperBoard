@@ -26,7 +26,7 @@ export function MarkdownFocusDialog({
       }}
     >
       <div
-        className="sb-modal sb-md-focus-modal"
+        className="sb-modal sb-md-focus-modal sb-md-docs"
         role="dialog"
         aria-modal="true"
         aria-labelledby="sb-md-focus-title"

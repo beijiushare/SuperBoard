@@ -115,7 +115,7 @@ export function MarkdownEditorOverlay({
   return (
     <div
       ref={wrapperRef}
-      className="sb-md-editor"
+      className="sb-md-editor sb-md-docs"
       data-tick={tick}
       style={{
         left,
