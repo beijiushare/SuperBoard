@@ -1,5 +1,10 @@
 import 'temporal-polyfill/global'
-import { Calendar, type DateClickInfo } from '@fullcalendar/react'
+import {
+  Calendar,
+  type DateClickInfo,
+  type EventChangeInfo,
+  type EventClickInfo,
+} from '@fullcalendar/react'
 import themePlugin from '@fullcalendar/react/themes/forma'
 import timeGridPlugin from '@fullcalendar/react/timegrid'
 import listPlugin from '@fullcalendar/react/list'
@@ -46,6 +51,35 @@ export function ScheduleBlock({
     addEvent(new Date(info.dateStr))
   }
 
+  function handleEventClick(info: EventClickInfo) {
+    const event = info.event
+    const title = window.prompt('编辑日程（留空删除）', event.title)
+    if (title === null) return
+    onEventsChange?.(
+      title.trim()
+        ? events.map((item) =>
+            item.id === event.id ? { ...item, title: title.trim() } : item,
+          )
+        : events.filter((item) => item.id !== event.id),
+    )
+  }
+
+  function handleEventChange(info: EventChangeInfo) {
+    const event = info.event
+    onEventsChange?.(
+      events.map((item) =>
+        item.id === event.id
+          ? {
+              ...item,
+              start: event.startStr,
+              end: event.endStr ?? item.end,
+              allDay: event.allDay,
+            }
+          : item,
+      ),
+    )
+  }
+
   const buttons = {
     add: {
       text: 'Add Event',
@@ -63,7 +97,10 @@ export function ScheduleBlock({
         initialView="timeGridWeek"
         height="100%"
         events={events}
+        editable
         dateClick={handleDateClick}
+        eventClick={handleEventClick}
+        eventChange={handleEventChange}
       />
     </div>
   )
