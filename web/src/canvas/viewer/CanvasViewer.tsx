@@ -9,7 +9,11 @@ import {
   type JSONCanvasLinkNode,
   type JSONCanvasTextNode,
 } from '../../vendor/json-canvas-viewer/react/index.ts'
-import type { CanvasDocument, CanvasFrame } from '../model'
+import type {
+  CanvasDocument,
+  CanvasFrame,
+  SuperBoardScheduleEvent,
+} from '../model'
 import { DirectorLayer } from './DirectorLayer'
 import { DrawingLayer } from './DrawingLayer'
 import { LinkSlot, TextSlot } from './NodeSlots'
@@ -32,10 +36,21 @@ interface CanvasViewerProps {
   className?: string
   style?: CSSProperties
   onNodeSelect?: (id: string) => void
+  onScheduleEventsChange?: (
+    id: string,
+    events: SuperBoardScheduleEvent[],
+  ) => void
 }
 
 export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
-  function CanvasViewer({ canvas, theme = 'light', className, style, onNodeSelect }, ref) {
+  function CanvasViewer({
+    canvas,
+    theme = 'light',
+    className,
+    style,
+    onNodeSelect,
+    onScheduleEventsChange,
+  }, ref) {
     const options = useMemo(
       () => ({
         parser,
@@ -49,9 +64,18 @@ export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
     )
     const renderText = useCallback(
       ({ node, onActive }: { node: JSONCanvasTextNode; onActive: Hook }) => (
-        <TextSlot node={node} onActive={onActive} onSelect={onNodeSelect} />
+        <TextSlot
+          node={node}
+          onActive={onActive}
+          onSelect={onNodeSelect}
+          onScheduleEventsChange={
+            onScheduleEventsChange
+              ? (events) => onScheduleEventsChange(node.id, events)
+              : undefined
+          }
+        />
       ),
-      [onNodeSelect],
+      [onNodeSelect, onScheduleEventsChange],
     )
     const renderLink = useCallback(
       ({ node, onActive }: { node: JSONCanvasLinkNode; onActive: Hook }) => (

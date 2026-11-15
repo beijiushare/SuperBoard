@@ -3,7 +3,11 @@ import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import { PeleView } from '../../shared/pele/PeleView'
 import { ScheduleBlock } from '../../shared/schedule/ScheduleBlock'
-import type { SuperBoardMedia, SuperBoardNodeExtension } from '../model'
+import type {
+  SuperBoardMedia,
+  SuperBoardNodeExtension,
+  SuperBoardScheduleEvent,
+} from '../model'
 import '../../styles/markdown.css'
 import '../../styles/pele.css'
 
@@ -40,10 +44,12 @@ export function TextSlot({
   node,
   onActive,
   onSelect,
+  onScheduleEventsChange,
 }: {
   node: JSONCanvasTextNode
   onActive?: Hook
   onSelect?: (id: string) => void
+  onScheduleEventsChange?: (events: SuperBoardScheduleEvent[]) => void
 }) {
   useNodeSelection(node.id, onActive, onSelect)
   const ext = extension(node)
@@ -57,7 +63,10 @@ export function TextSlot({
         <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />
       </div>
     ) : ext?.kind === 'schedule' ? (
-      <ScheduleBlock events={ext.scheduleEvents} />
+      <ScheduleBlock
+        events={ext.scheduleEvents}
+        onEventsChange={onScheduleEventsChange}
+      />
     ) : (
       <div style={textStyle(node)}>{node.text}</div>
     )

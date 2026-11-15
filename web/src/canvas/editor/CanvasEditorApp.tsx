@@ -36,6 +36,7 @@ import {
   type CanvasFrame,
   type CanvasNode,
   type MarkdownTheme,
+  type SuperBoardScheduleEvent,
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
@@ -223,6 +224,35 @@ export function CanvasEditorApp() {
       })
     },
     [canvas, focusedGroupId],
+  )
+
+  const updateScheduleEvents = useCallback(
+    (id: string, events: SuperBoardScheduleEvent[]) => {
+      const document = canvasRef.current
+      const node = document?.nodes.find((item) => item.id === id)
+      if (!document || !node) return
+      recordHistory()
+      pendingViewportRef.current = readViewport(viewerRef.current)
+      const next: CanvasDocument = {
+        ...document,
+        nodes: document.nodes.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                'x-superboard': {
+                  ...ensureExtension(item),
+                  kind: 'schedule',
+                  scheduleEvents: events,
+                },
+              }
+            : item,
+        ),
+      }
+      setSelectedIds([id])
+      setCanvas(next)
+      markDirty()
+    },
+    [canvas],
   )
 
   useEffect(() => {
@@ -1830,10 +1860,11 @@ export function CanvasEditorApp() {
                 <>
                   <div className="canvas-viewer-wrap">
                     <CanvasViewer
-                      ref={viewerRef}
-                      canvas={canvas}
-                      onNodeSelect={handleNodeSelect}
-                      style={{ width: '100%', height: '100%' }}
+                    ref={viewerRef}
+                    canvas={canvas}
+                    onNodeSelect={handleNodeSelect}
+                    onScheduleEventsChange={updateScheduleEvents}
+                    style={{ width: '100%', height: '100%' }}
                     />
                   </div>
                   <CanvasEditorOverlay
