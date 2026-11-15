@@ -1028,6 +1028,7 @@ export function CanvasEditorOverlay({
         .map((node) => (
           <div
             key={`block-hit-${node.id}`}
+            data-node-id={node.id}
             className={`sb-editor-hitbox sb-editor-block-hitbox${
               selectedIds.includes(node.id) && hasIframeContent(node)
                 ? ' is-interactive'

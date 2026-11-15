@@ -1179,9 +1179,15 @@ export function CanvasEditorApp() {
         return
       }
       if (event.altKey && !event.ctrlKey && !event.metaKey) {
+        const hitbox = target.closest<HTMLElement>(
+          '.sb-editor-block-hitbox[data-node-id]',
+        )
         const host =
           target.closest<HTMLElement>('.sb-md-editor') ??
-          target.closest<HTMLElement>('.JCV-overlay-container')
+          target.closest<HTMLElement>('.JCV-overlay-container') ??
+          (hitbox?.dataset.nodeId
+            ? document.getElementById(hitbox.dataset.nodeId)
+            : null)
         if (host) {
           const candidates = [host, ...host.querySelectorAll<HTMLElement>('*')]
           const scroller = candidates.find((element) => {
