@@ -2167,51 +2167,55 @@ export function CanvasEditorApp() {
               <div className="sb-canvas-menu-sep" />
             </>
           ) : null}
-          <button
-            type="button"
-            onClick={() => {
-              insertTextBlock('markdown', {
-                x: canvasMenu.worldX,
-                y: canvasMenu.worldY,
-              })
-              setCanvasMenu(null)
-            }}
-          >
-            插入 Markdown
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              openPeleDialog({
-                x: canvasMenu.worldX,
-                y: canvasMenu.worldY,
-              })
-              setCanvasMenu(null)
-            }}
-          >
-            插入 Pele
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              insertScheduleBlock({
-                x: canvasMenu.worldX,
-                y: canvasMenu.worldY,
-              })
-              setCanvasMenu(null)
-            }}
-          >
-            插入日程表
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              openMediaDialog({ x: canvasMenu.worldX, y: canvasMenu.worldY })
-              setCanvasMenu(null)
-            }}
-          >
-            插入媒体
-          </button>
+          {!menuNode ? (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  insertTextBlock('markdown', {
+                    x: canvasMenu.worldX,
+                    y: canvasMenu.worldY,
+                  })
+                  setCanvasMenu(null)
+                }}
+              >
+                插入 Markdown
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  openPeleDialog({
+                    x: canvasMenu.worldX,
+                    y: canvasMenu.worldY,
+                  })
+                  setCanvasMenu(null)
+                }}
+              >
+                插入 Pele
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  insertScheduleBlock({
+                    x: canvasMenu.worldX,
+                    y: canvasMenu.worldY,
+                  })
+                  setCanvasMenu(null)
+                }}
+              >
+                插入日程表
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  openMediaDialog({ x: canvasMenu.worldX, y: canvasMenu.worldY })
+                  setCanvasMenu(null)
+                }}
+              >
+                插入媒体
+              </button>
+            </>
+          ) : null}
           {clipboardRef.current ? (
             <button
               type="button"

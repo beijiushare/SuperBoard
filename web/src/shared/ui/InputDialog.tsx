@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 interface InputDialogProps {
@@ -23,8 +23,15 @@ export function InputDialog({
   onClose,
 }: InputDialogProps) {
   const [value, setValue] = useState(initialValue)
-  const inputRef = useRef<HTMLInputElement | null>(null)
+  const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const canConfirm = allowEmpty || value.trim().length > 0
+
+  useLayoutEffect(() => {
+    const input = inputRef.current
+    if (!input) return
+    input.style.height = 'auto'
+    input.style.height = `${input.scrollHeight}px`
+  }, [value])
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -59,13 +66,17 @@ export function InputDialog({
       >
         <h2>{title}</h2>
         {description ? <p>{description}</p> : null}
-        <input
+        <textarea
           ref={inputRef}
+          rows={1}
           value={value}
           placeholder={placeholder}
           onChange={(event) => setValue(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter') confirm()
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault()
+              confirm()
+            }
           }}
         />
         <div className="canvas-editor-dialog-actions">

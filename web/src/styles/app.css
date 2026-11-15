@@ -809,6 +809,8 @@
 
 .canvas-editor-dialog {
   width: min(420px, calc(100vw - 40px));
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
   padding: 18px;
   border-radius: 12px;
   background: #fff;
@@ -824,15 +826,34 @@
   margin: 0 0 12px;
   color: #8b877d;
   font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
-.canvas-editor-dialog input {
+.canvas-editor-dialog input,
+.canvas-editor-dialog textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 8px 10px;
   border: 1px solid #dedbd2;
   border-radius: 7px;
+  font: inherit;
   font-size: 13px;
+  line-height: 1.5;
+}
+
+.canvas-editor-dialog input {
+  height: 34px;
+}
+
+.canvas-editor-dialog textarea {
+  display: block;
+  min-height: 34px;
+  max-height: 40vh;
+  resize: none;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .canvas-editor-dialog-actions {
@@ -980,12 +1001,16 @@
 .sb-block-scale.sb-markdown-block-scale {
   width: 100%;
   height: 100%;
+  overflow: hidden;
   zoom: 1;
   container-type: size;
 }
 
 .sb-markdown-block-scale .sb-markdown,
 .sb-markdown-block-scale .sb-markdown-vditor.vditor-reset {
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
   font-size: var(--sb-markdown-font-size, 14px);
 }
 
