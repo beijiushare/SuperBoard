@@ -65,6 +65,7 @@ import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
 import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { PeleCreateDialog } from './PeleCreateDialog'
+import { InputDialog } from '../../shared/ui/InputDialog'
 import { blockKind, isRatioLocked } from './blocks'
 import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
@@ -143,6 +144,7 @@ export function CanvasEditorApp() {
   const viewerRef = useRef<CanvasViewerHandle>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const shiftRef = useRef(false)
+  const selectedIdsRef = useRef<string[]>([])
   const rightDragRef = useRef<{ x: number; y: number } | null>(null)
   const historyRef = useRef<{ past: CanvasDocument[]; future: CanvasDocument[] }>({
     past: [],
@@ -188,6 +190,7 @@ export function CanvasEditorApp() {
   const { expanded, toggleFolder, expandPath, renameExpandedPath } =
     useTreeExpansion(scopedItems)
   canvasRef.current = canvas
+  selectedIdsRef.current = selectedIds
 
   const directorFrames = useMemo(() => {
     const frames = canvas?.['x-superboard']?.director?.frames ?? []
@@ -714,9 +717,9 @@ export function CanvasEditorApp() {
     setTool('select')
   }
 
-  function insertMedia() {
+  function insertMedia(value = mediaUrl) {
     if (!canvas) return
-    const url = normalizeMediaUrl(mediaUrl)
+    const url = normalizeMediaUrl(value)
     if (!url) return
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'media')
     const position = mediaInsertPoint
@@ -1181,6 +1184,23 @@ export function CanvasEditorApp() {
         )
       ) {
         return
+      }
+      if (event.altKey && !event.ctrlKey && !event.metaKey) {
+        const overlay = target.closest<HTMLElement>('.JCV-overlay-container')
+        if (overlay && selectedIdsRef.current.includes(overlay.id)) {
+          const candidates = [overlay, ...overlay.querySelectorAll<HTMLElement>('*')]
+          const scroller = candidates.find((element) => {
+            if (element.scrollHeight <= element.clientHeight + 1) return false
+            const overflowY = getComputedStyle(element).overflowY
+            return overflowY === 'auto' || overflowY === 'scroll'
+          })
+          if (scroller) {
+            event.preventDefault()
+            event.stopPropagation()
+            scroller.scrollBy({ top: event.deltaY })
+            return
+          }
+        }
       }
       const zooming = event.ctrlKey || event.metaKey
       if (!zooming && target.closest('.sb-md-editor')) return
@@ -2242,48 +2262,18 @@ export function CanvasEditorApp() {
       ) : null}
 
       {mediaDialogOpen ? (
-        <div
-          className="canvas-editor-dialog-backdrop"
-          onClick={() => {
+        <InputDialog
+          title="插入媒体"
+          description="支持图片、视频链接，以及其他可嵌入的 iframe 地址。"
+          initialValue={mediaUrl}
+          placeholder="https://..."
+          confirmText="插入"
+          onConfirm={(value) => insertMedia(value)}
+          onClose={() => {
             setMediaDialogOpen(false)
             setMediaInsertPoint(null)
           }}
-        >
-          <div
-            className="canvas-editor-dialog"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h2>插入媒体</h2>
-            <p>支持图片、视频链接，以及其他可嵌入的 iframe 地址。</p>
-            <input
-              autoFocus
-              value={mediaUrl}
-              placeholder="https://..."
-              onChange={(event) => setMediaUrl(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') insertMedia()
-                if (event.key === 'Escape') {
-                  setMediaDialogOpen(false)
-                  setMediaInsertPoint(null)
-                }
-              }}
-            />
-            <div className="canvas-editor-dialog-actions">
-              <button
-                type="button"
-                onClick={() => {
-                  setMediaDialogOpen(false)
-                  setMediaInsertPoint(null)
-                }}
-              >
-                取消
-              </button>
-              <button type="button" onClick={insertMedia} disabled={!mediaUrl.trim()}>
-                插入
-              </button>
-            </div>
-          </div>
-        </div>
+        />
       ) : null}
 
       {contextMenu ? (
