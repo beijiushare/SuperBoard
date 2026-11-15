@@ -871,6 +871,13 @@
   cursor: pointer;
 }
 
+.canvas-editor-dialog-actions button.is-danger {
+  margin-right: auto;
+  border-color: #d9534f;
+  background: #fff;
+  color: #b52b27;
+}
+
 .canvas-editor-dialog-actions button:last-child {
   border-color: #2f80ed;
   background: #2f80ed;

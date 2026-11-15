@@ -8,6 +8,7 @@ interface InputDialogProps {
   placeholder?: string
   confirmText?: string
   allowEmpty?: boolean
+  onDelete?: () => void
   onConfirm: (value: string) => void
   onClose: () => void
 }
@@ -19,6 +20,7 @@ export function InputDialog({
   placeholder,
   confirmText = '确定',
   allowEmpty = false,
+  onDelete,
   onConfirm,
   onClose,
 }: InputDialogProps) {
@@ -80,6 +82,15 @@ export function InputDialog({
           }}
         />
         <div className="canvas-editor-dialog-actions">
+          {onDelete ? (
+            <button
+              type="button"
+              className="is-danger"
+              onClick={onDelete}
+            >
+              删除
+            </button>
+          ) : null}
           <button type="button" onClick={onClose}>
             取消
           </button>
