@@ -80,6 +80,7 @@ interface DragNode {
 const GUIDE_DISTANCE_THRESHOLD_PX = 3
 
 function hasIframeContent(node: CanvasNode) {
+  if (node['x-superboard']?.kind === 'schedule') return true
   if (node['x-superboard']?.media?.kind === 'iframe') return true
   return node.type === 'text' && /<iframe\b/i.test(node.text)
 }

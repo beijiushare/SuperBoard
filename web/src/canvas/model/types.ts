@@ -83,6 +83,7 @@ export type SuperBoardNodeKind =
   | 'text'
   | 'markdown'
   | 'pele'
+  | 'schedule'
   | 'media'
   | 'shape'
   | 'drawing'
@@ -127,6 +128,16 @@ export interface SuperBoardMedia {
   cropCorner?: number
 }
 
+export interface SuperBoardScheduleEvent {
+  id: string
+  title: string
+  start: string
+  end?: string
+  allDay?: boolean
+  backgroundColor?: string
+  borderColor?: string
+}
+
 export interface SuperBoardStroke {
   id: string
   color: string
@@ -156,6 +167,7 @@ export interface SuperBoardNodeExtension {
   strokes?: SuperBoardStroke[]
   groupId?: string
   diagram?: string
+  scheduleEvents?: SuperBoardScheduleEvent[]
   [key: string]: unknown
 }
 

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import { PeleView } from '../../shared/pele/PeleView'
+import { ScheduleBlock } from '../../shared/schedule/ScheduleBlock'
 import type { SuperBoardMedia, SuperBoardNodeExtension } from '../model'
 import '../../styles/markdown.css'
 import '../../styles/pele.css'
@@ -55,6 +56,8 @@ export function TextSlot({
       <div className="sb-card sb-card-pele">
         <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />
       </div>
+    ) : ext?.kind === 'schedule' ? (
+      <ScheduleBlock events={ext.scheduleEvents} />
     ) : (
       <div style={textStyle(node)}>{node.text}</div>
     )

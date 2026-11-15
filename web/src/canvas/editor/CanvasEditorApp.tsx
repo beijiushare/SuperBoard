@@ -312,6 +312,10 @@ export function CanvasEditorApp() {
         openPeleEditor(node.id)
         return
       }
+      if (node?.['x-superboard']?.kind === 'schedule') {
+        setSelectedIds([node.id])
+        return
+      }
       setSelectedIds([element.id])
       setTool('text')
       setEditRequest({ id: element.id, nonce: Date.now() })
@@ -493,6 +497,11 @@ export function CanvasEditorApp() {
       openPeleEditor(id)
       return
     }
+    if (kind === 'schedule') {
+      setSelectedIds([id])
+      setTool('select')
+      return
+    }
     if (textEditingId === id) {
       closeTextEditing()
       return
@@ -652,6 +661,27 @@ export function CanvasEditorApp() {
     applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
     setTool('select')
     setPeleDialog(null)
+  }
+
+  function insertScheduleBlock(point?: { x: number; y: number }) {
+    if (!canvas) return
+    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'schedule')
+    const position = point
+      ? { x: Math.round(point.x - 450), y: Math.round(point.y - 300) }
+      : viewportCenter(900, 600)
+    const node: CanvasNode = {
+      id,
+      type: 'text',
+      x: position.x,
+      y: position.y,
+      width: 900,
+      height: 600,
+      text: '',
+      'x-superboard': { kind: 'schedule', scheduleEvents: [] },
+    }
+    recordHistory()
+    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    setTool('select')
   }
 
   function insertMedia() {
@@ -1938,6 +1968,9 @@ export function CanvasEditorApp() {
                     <button type="button" onClick={() => openPeleDialog()}>
                       插入 Pele
                     </button>
+                    <button type="button" onClick={() => insertScheduleBlock()}>
+                      插入日程表
+                    </button>
                     <button type="button" onClick={() => openMediaDialog()}>
                       插入媒体
                     </button>
@@ -2106,6 +2139,18 @@ export function CanvasEditorApp() {
             }}
           >
             插入 Pele
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              insertScheduleBlock({
+                x: canvasMenu.worldX,
+                y: canvasMenu.worldY,
+              })
+              setCanvasMenu(null)
+            }}
+          >
+            插入日程表
           </button>
           <button
             type="button"

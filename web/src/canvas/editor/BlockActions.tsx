@@ -55,6 +55,7 @@ export function BlockActions({
   const actionsRef = useRef<HTMLDivElement>(null)
   const ratioLocked = isRatioLocked(node)
   const markdownBlock = blockKind(node) === 'markdown'
+  const scheduleBlock = blockKind(node) === 'schedule'
   const markdownTheme = node['x-superboard']?.markdownTheme
 
   useEffect(() => {
@@ -149,23 +150,25 @@ export function BlockActions({
           interaction="click-replay"
         />
       </button>
-      <button
-        type="button"
-        className={`sb-block-action${editing ? ' is-active' : ''}`}
-        title={editing ? '退出编辑' : '编辑'}
-        onClick={(event) => {
-          event.stopPropagation()
-          onToggleBlockEdit?.(node.id)
-        }}
-      >
-        <span className={`sb-block-check${editing ? ' is-checked' : ''}`} />
-        <UseAnimations
-          animation={typeIcon}
-          size={16}
-          active={editing}
-          interaction="click-replay"
-        />
-      </button>
+      {!scheduleBlock ? (
+        <button
+          type="button"
+          className={`sb-block-action${editing ? ' is-active' : ''}`}
+          title={editing ? '退出编辑' : '编辑'}
+          onClick={(event) => {
+            event.stopPropagation()
+            onToggleBlockEdit?.(node.id)
+          }}
+        >
+          <span className={`sb-block-check${editing ? ' is-checked' : ''}`} />
+          <UseAnimations
+            animation={typeIcon}
+            size={16}
+            active={editing}
+            interaction="click-replay"
+          />
+        </button>
+      ) : null}
       {markdownBlock ? (
         <button
           type="button"
