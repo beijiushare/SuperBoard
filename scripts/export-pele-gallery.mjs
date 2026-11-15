@@ -119,9 +119,80 @@ function cardSvg({ source, title, key, id, maxChars, fontSize }) {
 `
 }
 
-await fs.rm(level1Dir, { recursive: true, force: true })
+const LEVEL1_SOURCE_OVERRIDES = {
+  block: `block
+  columns 3
+  a:3
+  block:group1:2
+    columns 2
+    h i j k
+  end
+  g
+  block:group2:3
+    %% columns auto (default)
+    l m n o p q r
+  end`,
+  quadrant: `quadrantChart
+    title Reach and engagement of campaigns
+    x-axis Low Reach --> High Reach
+    y-axis Low Engagement --> High Engagement
+    quadrant-1 We should expand
+    quadrant-2 Need to promote
+    quadrant-3 Re-evaluate
+    quadrant-4 May be improved
+    Campaign A: [0.3, 0.6]
+    Campaign B: [0.45, 0.23]
+    Campaign C: [0.57, 0.69]
+    Campaign D: [0.78, 0.34]
+    Campaign E: [0.40, 0.34]
+    Campaign F: [0.35, 0.78]`,
+  sequence: `sequenceDiagram
+  autonumber
+  actor Customer
+  participant Web as Web app
+  participant API as API gateway
+  participant Bank
+  Customer->>Web: Place order
+  Web->>API: POST /orders
+  activate API
+  API->>Bank: Authorise payment
+  Bank-->>API: Approved
+  API-->>Web: 201 Created
+  deactivate API
+  Web-->>Customer: Order confirmed
+  Note over Customer,Bank: One order, one transaction`,
+  wardley: `wardley-beta
+
+anchor Business [0.95, 0.63]
+component Cup of Tea [0.79, 0.61]
+component Tea [0.63, 0.81]
+component Hot Water [0.52, 0.80]
+component Kettle [0.43, 0.35]
+component Power [0.10, 0.70]
+
+Business -> Cup of Tea
+Cup of Tea -> Tea
+Cup of Tea -> Hot Water
+Hot Water -> Kettle
+Kettle -> Power
+
+evolve Kettle 0.62
+evolve Power 0.89
+
+note "Standardizing power allows Kettles to evolve faster" [0.30, 0.49]`,
+}
+
+async function removeDir(dir) {
+  try {
+    await fs.rm(dir, { recursive: true, force: true })
+  } catch {
+    // The folder may be open in Explorer or an editor; overwrite files in place.
+  }
+}
+
+await removeDir(level1Dir)
 for (const group of groups) {
-  await fs.rm(path.join(outputRoot, group.label), { recursive: true, force: true })
+  await removeDir(path.join(outputRoot, group.label))
 }
 await fs.mkdir(level1Dir, { recursive: true })
 
@@ -130,7 +201,7 @@ for (const group of groups) {
   await fs.writeFile(
     path.join(level1Dir, `${group.label}.svg`),
     cardSvg({
-      source: example.source,
+      source: LEVEL1_SOURCE_OVERRIDES[group.type] ?? example.source,
       title: group.label,
       key: `pele:type:${group.type}`,
       id: `l1-${group.type}`,

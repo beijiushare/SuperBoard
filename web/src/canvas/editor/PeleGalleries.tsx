@@ -7,24 +7,10 @@ import {
 import { PeleView } from '../../shared/pele/PeleView'
 import {
   PELE_EXAMPLE_SIZES,
-  PELE_THUMBNAILS,
   type PeleExampleSize,
-  type PeleThumbnail,
-} from '../../shared/pele/thumbnails.generated'
-
-const TYPE_PREVIEW_HEIGHT = 180
-const TYPE_CARD_MIN_WIDTH = 220
-const TYPE_CARD_MAX_WIDTH = 420
+} from '../../shared/pele/sizes.generated'
 
 type ExampleSizeClass = 'complex' | 'normal' | 'simple'
-
-function typeCardWidth(thumb: PeleThumbnail | undefined) {
-  if (!thumb || thumb.height <= 0) return 300
-  const width = (thumb.width / thumb.height) * TYPE_PREVIEW_HEIGHT
-  return Math.round(
-    Math.min(TYPE_CARD_MAX_WIDTH, Math.max(TYPE_CARD_MIN_WIDTH, width)),
-  )
-}
 
 function exampleSizeClass(size: PeleExampleSize | null | undefined): ExampleSizeClass {
   if (!size) return 'normal'
@@ -65,52 +51,81 @@ function LazyPelePreview({ code }: { code: string }) {
   )
 }
 
+function resolveSvgHrefs(svg: SVGSVGElement, baseUrl: string) {
+  for (const element of svg.querySelectorAll('image, use')) {
+    for (const attribute of ['href', 'xlink:href']) {
+      const value = element.getAttribute(attribute)
+      if (!value || /^(?:[a-z]+:|\/|#)/i.test(value)) continue
+      element.setAttribute(attribute, new URL(value, baseUrl).href)
+    }
+  }
+}
+
 export function PeleTypeGallery({
   onSelect,
 }: {
   onSelect: (group: PeleExampleGroup) => void
 }) {
+  const hostRef = useRef<HTMLDivElement | null>(null)
+  const onSelectRef = useRef(onSelect)
+  const [status, setStatus] = useState('加载一级画廊…')
+  onSelectRef.current = onSelect
+
+  useEffect(() => {
+    const host = hostRef.current
+    if (!host) return
+    const controller = new AbortController()
+    let cancelled = false
+    const sourceUrl = new URL(
+      `${import.meta.env.BASE_URL}pele-gallery/level1.svg`,
+      window.location.href,
+    )
+
+    fetch(sourceUrl, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        return response.text()
+      })
+      .then((text) => {
+        if (cancelled) return
+        const doc = new DOMParser().parseFromString(text, 'image/svg+xml')
+        const svg = doc.documentElement as unknown as SVGSVGElement
+        if (!svg || svg.nodeName.toLowerCase() !== 'svg') {
+          throw new Error('level1.svg 不是有效的 SVG')
+        }
+        resolveSvgHrefs(svg, sourceUrl.href)
+        svg.classList.add('sb-level1-svg')
+        const onClick = (event: MouseEvent) => {
+          const target = (event.target as Element | null)?.closest('[data-sb-key]')
+          if (!target) return
+          const key = target.getAttribute('data-sb-key') ?? ''
+          const match = /^pele:type:(.+)$/.exec(key)
+          if (!match) return
+          const group = PELE_EXAMPLE_GROUPS.find((item) => item.type === match[1])
+          if (group) onSelectRef.current(group)
+        }
+        svg.addEventListener('click', onClick)
+        host.replaceChildren(svg)
+        setStatus('')
+      })
+      .catch((error: unknown) => {
+        if (cancelled || controller.signal.aborted) return
+        setStatus(
+          `一级画廊加载失败：${error instanceof Error ? error.message : String(error)}`,
+        )
+      })
+
+    return () => {
+      cancelled = true
+      controller.abort()
+      host.replaceChildren()
+    }
+  }, [])
+
   return (
-    <div className="sb-gallery-body">
-      <div className="sb-gallery-grid sb-gallery-grid--pele">
-        {PELE_EXAMPLE_GROUPS.map((group) => {
-          const example = group.examples[group.representativeIndex] ?? group.examples[0]
-          const thumb = PELE_THUMBNAILS[group.type]
-          return (
-            <button
-              key={group.type}
-              className="sb-type-card"
-              type="button"
-              style={{ width: typeCardWidth(thumb) }}
-              onClick={() => onSelect(group)}
-            >
-              {thumb ? (
-                <div className="sb-example-preview sb-pele-theme">
-                  <img
-                    className="sb-example-thumb"
-                    src={`${import.meta.env.BASE_URL}${thumb.src}`}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              ) : (
-                <LazyPelePreview code={example.source} />
-              )}
-              <span className="sb-type-card-meta">
-                <span className="sb-type-card-title">
-                  {group.label}
-                  <span className="sb-type-card-en">（{group.title}）</span>
-                </span>
-                <span className="sb-type-card-sub">
-                  {group.examples.length} 个官方示例
-                  {group.beta ? ' · Beta' : ''}
-                </span>
-              </span>
-            </button>
-          )
-        })}
-      </div>
+    <div className="sb-gallery-body sb-gallery-body--level1">
+      <div ref={hostRef} className="sb-level1-gallery" />
+      {status ? <p className="sb-gallery-status">{status}</p> : null}
     </div>
   )
 }

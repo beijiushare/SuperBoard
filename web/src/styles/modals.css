@@ -126,6 +126,31 @@
   touch-action: pan-y;
 }
 
+.sb-gallery-body--level1 {
+  background: #ffffff;
+}
+
+.sb-level1-gallery {
+  width: 100%;
+}
+
+.sb-level1-gallery svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sb-level1-gallery [data-sb-key] {
+  cursor: pointer;
+}
+
+.sb-gallery-status {
+  margin: 0;
+  padding: 16px 4px;
+  color: #7a776f;
+  font-size: 12px;
+}
+
 .sb-gallery-toolbar {
   display: flex;
   align-items: center;
