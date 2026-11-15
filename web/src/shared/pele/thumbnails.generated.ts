@@ -24,12 +24,12 @@ export const PELE_THUMBNAILS: Record<string, PeleThumbnail> = {
   "c4": {
     "src": "pele-thumbs/c4.svg",
     "width": 776,
-    "height": 1399
+    "height": 1363
   },
   "class": {
     "src": "pele-thumbs/class.svg",
     "width": 597,
-    "height": 383
+    "height": 347
   },
   "er": {
     "src": "pele-thumbs/er.svg",
@@ -44,7 +44,7 @@ export const PELE_THUMBNAILS: Record<string, PeleThumbnail> = {
   "gantt": {
     "src": "pele-thumbs/gantt.svg",
     "width": 407,
-    "height": 242
+    "height": 202
   },
   "git": {
     "src": "pele-thumbs/git.svg",
@@ -64,12 +64,12 @@ export const PELE_THUMBNAILS: Record<string, PeleThumbnail> = {
   "packet": {
     "src": "pele-thumbs/packet.svg",
     "width": 1035,
-    "height": 455
+    "height": 419
   },
   "pie": {
     "src": "pele-thumbs/pie.svg",
     "width": 484,
-    "height": 352
+    "height": 312
   },
   "quadrant": {
     "src": "pele-thumbs/quadrant.svg",
@@ -99,12 +99,12 @@ export const PELE_THUMBNAILS: Record<string, PeleThumbnail> = {
   "timeline": {
     "src": "pele-thumbs/timeline.svg",
     "width": 800,
-    "height": 404
+    "height": 364
   },
   "journey": {
     "src": "pele-thumbs/journey.svg",
     "width": 808,
-    "height": 327
+    "height": 287
   },
   "xychart": {
     "src": "pele-thumbs/xychart.svg",
@@ -124,7 +124,7 @@ export const PELE_THUMBNAILS: Record<string, PeleThumbnail> = {
   "cynefin": {
     "src": "pele-thumbs/cynefin.svg",
     "width": 656,
-    "height": 492
+    "height": 456
   },
   "ishikawa": {
     "src": "pele-thumbs/ishikawa.svg",
@@ -134,12 +134,12 @@ export const PELE_THUMBNAILS: Record<string, PeleThumbnail> = {
   "radar": {
     "src": "pele-thumbs/radar.svg",
     "width": 600,
-    "height": 438
+    "height": 406
   },
   "railroad": {
     "src": "pele-thumbs/railroad.svg",
     "width": 342,
-    "height": 1012
+    "height": 972
   },
   "swimlane": {
     "src": "pele-thumbs/swimlane.svg",
@@ -164,12 +164,12 @@ export const PELE_THUMBNAILS: Record<string, PeleThumbnail> = {
   "venn": {
     "src": "pele-thumbs/venn.svg",
     "width": 438,
-    "height": 452
+    "height": 416
   },
   "wardley": {
     "src": "pele-thumbs/wardley.svg",
     "width": 1125,
-    "height": 810
+    "height": 774
   }
 }
 
@@ -180,11 +180,11 @@ export const PELE_EXAMPLE_SIZES: Record<
   "flowchart": [
     {
       "width": 65,
-      "height": 100
+      "height": 64
     },
     {
       "width": 229,
-      "height": 100
+      "height": 64
     },
     {
       "width": 160,
@@ -760,33 +760,33 @@ export const PELE_EXAMPLE_SIZES: Record<
   "c4": [
     {
       "width": 1016,
-      "height": 1382
+      "height": 1346
     },
     {
       "width": 1016,
-      "height": 1382
+      "height": 1346
     },
     {
       "width": 1392,
-      "height": 748
+      "height": 712
     },
     {
       "width": 1296,
-      "height": 558
+      "height": 522
     },
     {
       "width": 624,
-      "height": 531
+      "height": 495
     },
     {
       "width": 776,
-      "height": 1399
+      "height": 1363
     }
   ],
   "class": [
     {
       "width": 597,
-      "height": 383
+      "height": 347
     },
     {
       "width": 294,
@@ -798,7 +798,7 @@ export const PELE_EXAMPLE_SIZES: Record<
     },
     {
       "width": 171,
-      "height": 200
+      "height": 164
     },
     {
       "width": 214,
@@ -940,7 +940,7 @@ export const PELE_EXAMPLE_SIZES: Record<
   "er": [
     {
       "width": 368,
-      "height": 374
+      "height": 338
     },
     {
       "width": 190,
@@ -1036,7 +1036,7 @@ export const PELE_EXAMPLE_SIZES: Record<
     },
     {
       "width": 368,
-      "height": 374
+      "height": 338
     }
   ],
   "eventmodeling": [
@@ -1092,11 +1092,11 @@ export const PELE_EXAMPLE_SIZES: Record<
   "gantt": [
     {
       "width": 800,
-      "height": 197
+      "height": 157
     },
     {
       "width": 800,
-      "height": 587
+      "height": 547
     },
     {
       "width": 800,
@@ -1104,7 +1104,7 @@ export const PELE_EXAMPLE_SIZES: Record<
     },
     {
       "width": 800,
-      "height": 137
+      "height": 97
     },
     {
       "width": 800,
@@ -1120,25 +1120,25 @@ export const PELE_EXAMPLE_SIZES: Record<
     },
     {
       "width": 800,
-      "height": 137
+      "height": 97
     },
     {
       "width": 800,
-      "height": 197
+      "height": 157
     },
     {
       "width": 800,
-      "height": 227
+      "height": 187
     },
     {
       "width": 407,
-      "height": 242
+      "height": 202
     }
   ],
   "git": [
     {
       "width": 386,
-      "height": 216
+      "height": 176
     },
     {
       "width": 191,
@@ -1348,11 +1348,11 @@ export const PELE_EXAMPLE_SIZES: Record<
   "packet": [
     {
       "width": 1035,
-      "height": 455
+      "height": 419
     },
     {
       "width": 1035,
-      "height": 200
+      "height": 164
     },
     {
       "width": 523,
@@ -1366,11 +1366,11 @@ export const PELE_EXAMPLE_SIZES: Record<
   "pie": [
     {
       "width": 397,
-      "height": 352
+      "height": 312
     },
     {
       "width": 484,
-      "height": 352
+      "height": 312
     }
   ],
   "quadrant": [
@@ -1615,8 +1615,8 @@ export const PELE_EXAMPLE_SIZES: Record<
   ],
   "state": [
     {
-      "width": 129,
-      "height": 392
+      "width": 128,
+      "height": 356
     },
     {
       "width": 128,
@@ -1706,65 +1706,65 @@ export const PELE_EXAMPLE_SIZES: Record<
   "timeline": [
     {
       "width": 800,
-      "height": 218
+      "height": 178
     },
     {
       "width": 800,
-      "height": 218
+      "height": 178
     },
     {
       "width": 996,
-      "height": 254
+      "height": 214
     },
     {
       "width": 800,
-      "height": 404
+      "height": 364
     },
     {
       "width": 800,
-      "height": 344
+      "height": 304
     },
     {
       "width": 528,
-      "height": 624
+      "height": 584
     },
     {
       "width": 800,
-      "height": 218
+      "height": 178
     },
     {
       "width": 800,
-      "height": 218
+      "height": 178
     },
     {
       "width": 1388,
-      "height": 218
+      "height": 178
     },
     {
       "width": 1388,
-      "height": 218
+      "height": 178
     },
     {
       "width": 1388,
-      "height": 218
+      "height": 178
     },
     {
       "width": 1388,
-      "height": 218
+      "height": 178
     },
     {
       "width": 1388,
-      "height": 218
+      "height": 178
     },
     {
       "width": 1388,
-      "height": 218
+      "height": 178
     }
   ],
   "journey": [
     {
       "width": 808,
-      "height": 327
+      "height": 287
     }
   ],
   "xychart": [
@@ -1835,8 +1835,8 @@ export const PELE_EXAMPLE_SIZES: Record<
       "height": 430
     },
     {
-      "width": 416,
-      "height": 152
+      "width": 196,
+      "height": 240
     },
     {
       "width": 472,
@@ -1880,15 +1880,15 @@ export const PELE_EXAMPLE_SIZES: Record<
   "cynefin": [
     {
       "width": 656,
-      "height": 628
+      "height": 592
     },
     {
       "width": 656,
-      "height": 492
+      "height": 456
     },
     {
       "width": 656,
-      "height": 492
+      "height": 456
     }
   ],
   "ishikawa": [
@@ -1900,11 +1900,11 @@ export const PELE_EXAMPLE_SIZES: Record<
   "radar": [
     {
       "width": 511,
-      "height": 438
+      "height": 406
     },
     {
       "width": 600,
-      "height": 438
+      "height": 406
     },
     {
       "width": 427,
@@ -1914,7 +1914,7 @@ export const PELE_EXAMPLE_SIZES: Record<
   "railroad": [
     {
       "width": 130,
-      "height": 476
+      "height": 436
     },
     {
       "width": 130,
@@ -1930,11 +1930,11 @@ export const PELE_EXAMPLE_SIZES: Record<
     },
     {
       "width": 232,
-      "height": 717
+      "height": 677
     },
     {
       "width": 284,
-      "height": 637
+      "height": 597
     },
     {
       "width": 326,
@@ -1942,31 +1942,31 @@ export const PELE_EXAMPLE_SIZES: Record<
     },
     {
       "width": 342,
-      "height": 1012
+      "height": 972
     },
     {
       "width": 474,
-      "height": 777
+      "height": 737
     },
     {
       "width": 290,
-      "height": 634
+      "height": 594
     },
     {
       "width": 358,
-      "height": 411
+      "height": 371
     },
     {
       "width": 350,
-      "height": 1012
+      "height": 972
     },
     {
       "width": 374,
-      "height": 517
+      "height": 477
     },
     {
       "width": 342,
-      "height": 1012
+      "height": 972
     }
   ],
   "swimlane": [
@@ -2212,15 +2212,15 @@ export const PELE_EXAMPLE_SIZES: Record<
   "venn": [
     {
       "width": 438,
-      "height": 452
+      "height": 416
     },
     {
       "width": 438,
-      "height": 452
+      "height": 416
     },
     {
       "width": 343,
-      "height": 252
+      "height": 216
     },
     {
       "width": 343,
@@ -2246,79 +2246,79 @@ export const PELE_EXAMPLE_SIZES: Record<
   "wardley": [
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 1046,
-      "height": 610
+      "height": 574
     },
     {
       "width": 876,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 866,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 616
+      "height": 580
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 846,
-      "height": 610
+      "height": 574
     },
     {
       "width": 746,
-      "height": 1010
+      "height": 974
     },
     {
       "width": 1125,
-      "height": 810
+      "height": 774
     }
   ]
 }

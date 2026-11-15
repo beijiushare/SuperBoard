@@ -1,6 +1,7 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { render } from 'pele'
+import { stripDiagramTitle } from './strip-diagram-title.mjs'
 
 const root = process.cwd()
 const sourcePath = path.join(root, 'web', 'src', 'shared', 'pele', 'officialExamples.json')
@@ -62,7 +63,7 @@ for (const group of groups) {
   sizes[group.type] = []
   for (const example of group.examples) {
     try {
-      const result = render(example.source)
+      const result = render(stripDiagramTitle(example.source))
       sizes[group.type].push({ width: result.width, height: result.height })
     } catch {
       sizes[group.type].push(null)
@@ -72,7 +73,7 @@ for (const group of groups) {
   const example = representative(group)
   if (!example) continue
   try {
-    const result = render(example.source)
+    const result = render(stripDiagramTitle(example.source))
     const file = `${group.type}.svg`
     await fs.writeFile(path.join(outputDir, file), withTheme(result.svg), 'utf8')
     thumbnails[group.type] = {

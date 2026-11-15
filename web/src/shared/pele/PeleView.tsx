@@ -1,6 +1,7 @@
 import DOMPurify from 'dompurify'
 import { useEffect, useState } from 'react'
 import { renderAsync } from 'pele/lazy'
+import { stripDiagramTitle } from './stripTitle'
 
 const SVG_SANITIZE_OPTIONS = {
   USE_PROFILES: { svg: true, svgFilters: true },
@@ -26,7 +27,7 @@ export function PeleView({ code, className = '' }: PeleViewProps) {
 
     if (!code.trim()) return
 
-    renderAsync(code)
+    renderAsync(stripDiagramTitle(code))
       .then((result) => {
         if (cancelled) return
         setSvg(DOMPurify.sanitize(result.svg, SVG_SANITIZE_OPTIONS))
