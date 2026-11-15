@@ -8,13 +8,19 @@ import {
 import themePlugin from '@fullcalendar/react/themes/forma'
 import timeGridPlugin from '@fullcalendar/react/timegrid'
 import listPlugin from '@fullcalendar/react/list'
+import interactionPlugin from '@fullcalendar/react/interaction'
 import '@fullcalendar/react/skeleton.css'
 import '@fullcalendar/react/themes/forma/theme.css'
 import '@fullcalendar/react/themes/forma/palettes/red.css'
 import './schedule.css'
 import type { SuperBoardScheduleEvent } from '../../canvas/model'
 
-const PLUGINS = [themePlugin, timeGridPlugin, listPlugin]
+const PLUGINS = [
+  themePlugin,
+  timeGridPlugin,
+  listPlugin,
+  interactionPlugin,
+]
 
 const HEADER_TOOLBAR = {
   start: 'add today prev,next title',
@@ -98,6 +104,8 @@ export function ScheduleBlock({
         height="100%"
         events={events}
         editable
+        eventStartEditable
+        eventDurationEditable
         dateClick={handleDateClick}
         eventClick={handleEventClick}
         eventChange={handleEventChange}
