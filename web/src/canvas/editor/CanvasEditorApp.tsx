@@ -35,7 +35,6 @@ import {
   type CanvasEdge,
   type CanvasFrame,
   type CanvasNode,
-  type MarkdownTheme,
   type SuperBoardScheduleEvent,
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
@@ -167,7 +166,6 @@ export function CanvasEditorApp() {
     toggleMarkdownEdit,
     startMarkdownEditing,
     handleMarkdownInput,
-    setMarkdownTheme,
     resetMarkdownEditing,
   } = useMarkdownEditingSession({
     canvas,
@@ -175,7 +173,6 @@ export function CanvasEditorApp() {
     setCanvas,
     markDirty,
     recordHistory,
-    viewerRef,
     setSelectedIds,
     setSelectedEdgeId,
     closeTextEditing,
@@ -587,7 +584,6 @@ export function CanvasEditorApp() {
       ? { x: Math.round(point.x - 180), y: Math.round(point.y - 110) }
       : viewportCenter(360, 220)
     const code = 'flowchart LR\n    A[开始] --> B[结束]'
-    const defaultTheme = canvas['x-superboard']?.markdownDefaultTheme
     const node: CanvasNode =
       kind === 'markdown'
         ? {
@@ -601,7 +597,6 @@ export function CanvasEditorApp() {
             'x-superboard': {
               kind: 'markdown',
               markdownLocked: false,
-              ...(defaultTheme ? { markdownTheme: defaultTheme } : {}),
             },
           }
         : {
@@ -1905,7 +1900,6 @@ export function CanvasEditorApp() {
                     onToggleBlockEdit={toggleBlockEdit}
                     onFocusBlockEdit={openMarkdownFocus}
                     onDeleteBlock={deleteBlock}
-                    onSetMarkdownTheme={setMarkdownTheme}
                     onToggleRatioLock={toggleRatioLock}
                   />
                   <CanvasEditorTools
@@ -1935,7 +1929,6 @@ export function CanvasEditorApp() {
                     <MarkdownFocusDialog
                       nodeId={markdownFocusNode.id}
                       value={markdownFocusNode.text}
-                      theme={markdownFocusNode['x-superboard']?.markdownTheme}
                       onInput={(value) =>
                         handleMarkdownInput(markdownFocusNode.id, value)
                       }

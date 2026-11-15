@@ -6,12 +6,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
-import type {
-  CanvasDocument,
-  CanvasEdge,
-  CanvasNode,
-  MarkdownTheme,
-} from '../model'
+import type { CanvasDocument, CanvasEdge, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { blockKind, contentScale, isBlockNode, isRatioLocked } from './blocks'
 import { BlockActions } from './BlockActions'
@@ -65,7 +60,6 @@ interface CanvasEditorOverlayProps {
   onToggleBlockEdit?: (id: string) => void
   onFocusBlockEdit?: (id: string) => void
   onDeleteBlock?: (id: string) => void
-  onSetMarkdownTheme?: (id: string, theme: MarkdownTheme) => void
   onToggleRatioLock?: (id: string) => void
 }
 
@@ -166,7 +160,6 @@ export function CanvasEditorOverlay({
   onToggleBlockEdit,
   onFocusBlockEdit,
   onDeleteBlock,
-  onSetMarkdownTheme,
   onToggleRatioLock,
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
@@ -1175,7 +1168,6 @@ export function CanvasEditorOverlay({
             onToggleBlockEdit={onToggleBlockEdit}
             onFocusBlockEdit={onFocusBlockEdit}
             onDeleteBlock={onDeleteBlock}
-            onSetMarkdownTheme={onSetMarkdownTheme}
             onToggleRatioLock={onToggleRatioLock}
           />
         ))}

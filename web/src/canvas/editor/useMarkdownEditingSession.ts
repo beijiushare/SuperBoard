@@ -2,10 +2,8 @@ import { useRef, useState, type Dispatch, type RefObject, type SetStateAction } 
 import type {
   CanvasDocument,
   CanvasNode,
-  MarkdownTheme,
   SuperBoardNodeExtension,
 } from '../model'
-import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 
 interface UseMarkdownEditingSessionOptions {
   canvas: CanvasDocument | null
@@ -13,7 +11,6 @@ interface UseMarkdownEditingSessionOptions {
   setCanvas: Dispatch<SetStateAction<CanvasDocument | null>>
   markDirty: () => void
   recordHistory: () => void
-  viewerRef: RefObject<CanvasViewerHandle | null>
   setSelectedIds: Dispatch<SetStateAction<string[]>>
   setSelectedEdgeId: (id: string | null) => void
   closeTextEditing: () => void
@@ -26,7 +23,6 @@ export function useMarkdownEditingSession({
   setCanvas,
   markDirty,
   recordHistory,
-  viewerRef,
   setSelectedIds,
   setSelectedEdgeId,
   closeTextEditing,
@@ -124,33 +120,6 @@ export function useMarkdownEditingSession({
     markDirty()
   }
 
-  function setMarkdownTheme(id: string, theme: MarkdownTheme) {
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === id)
-    if (!document || !node || node['x-superboard']?.kind !== 'markdown') return
-    recordHistory()
-    const nodes = document.nodes.map((item) => {
-      if (item.id !== id) return item
-      return {
-        ...item,
-        'x-superboard': {
-          ...ensureExtension(item),
-          markdownTheme: theme,
-        },
-      }
-    })
-    const root = document['x-superboard']
-    setCanvas({
-      ...document,
-      nodes,
-      'x-superboard': root
-        ? { ...root, markdownDefaultTheme: theme }
-        : root,
-    })
-    markDirty()
-    viewerRef.current?.viewer?.refresh?.()
-  }
-
   function resetMarkdownEditing() {
     setMarkdownEditingId(null)
     setMarkdownFocusId(null)
@@ -168,7 +137,6 @@ export function useMarkdownEditingSession({
     toggleMarkdownEdit,
     startMarkdownEditing,
     handleMarkdownInput,
-    setMarkdownTheme,
     resetMarkdownEditing,
   }
 }

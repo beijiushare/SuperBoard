@@ -343,7 +343,7 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 		element.style.setProperty('--sb-content-scale', String(contentScale));
 		element.style.setProperty('--sb-content-width', `${100 / contentScale}%`);
 		element.style.setProperty('--sb-content-height', `${100 / contentScale}%`);
-		element.style.setProperty('--sb-markdown-font-size', `${14 * contentScale}px`);
+		element.style.setProperty('--sb-markdown-font-size', `${16 * contentScale}px`);
 		element.style.transformOrigin = 'center center';
 		element.style.transform = rotation ? `rotate(${rotation}deg)` : '';
 	};

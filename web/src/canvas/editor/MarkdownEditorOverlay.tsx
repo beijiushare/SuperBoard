@@ -115,11 +115,7 @@ export function MarkdownEditorOverlay({
   return (
     <div
       ref={wrapperRef}
-      className={`sb-md-editor${
-        node['x-superboard']?.markdownTheme
-          ? ` sb-md-theme-${node['x-superboard'].markdownTheme}`
-          : ''
-      }`}
+      className="sb-md-editor"
       data-tick={tick}
       style={{
         left,
@@ -130,7 +126,7 @@ export function MarkdownEditorOverlay({
         transform: rotation ? `rotate(${rotation}deg)` : undefined,
         transformOrigin: 'center center',
         ['--sb-content-scale' as string]: String(contentScale),
-        ['--sb-markdown-font-size' as string]: `${14 * contentScale}px`,
+        ['--sb-markdown-font-size' as string]: `${16 * contentScale}px`,
       }}
       onPointerDown={(event) => event.stopPropagation()}
       onContextMenu={(event) => {

@@ -1,25 +1,11 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-} from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import UseAnimations from 'react-useanimations'
 import hash from 'react-useanimations/lib/hash'
 import lock from 'react-useanimations/lib/lock'
 import trash2 from 'react-useanimations/lib/trash2'
 import typeIcon from 'react-useanimations/lib/type'
-import type { CanvasNode, MarkdownTheme } from '../model'
+import type { CanvasNode } from '../model'
 import { blockKind, isRatioLocked } from './blocks'
-import { MarkdownThemeIcon } from './MarkdownThemeIcon'
-
-const MARKDOWN_THEMES: MarkdownTheme[] = ['purple', 'orange', 'mint']
-const MARKDOWN_THEME_COLORS: Record<MarkdownTheme, string> = {
-  purple: '#8064a9',
-  orange: '#ef7060',
-  mint: '#4eb289',
-}
 
 interface BlockActionsProps {
   node: CanvasNode
@@ -32,7 +18,6 @@ interface BlockActionsProps {
   onToggleBlockEdit?: (id: string) => void
   onFocusBlockEdit?: (id: string) => void
   onDeleteBlock?: (id: string) => void
-  onSetMarkdownTheme?: (id: string, theme: MarkdownTheme) => void
   onToggleRatioLock?: (id: string) => void
 }
 
@@ -47,27 +32,13 @@ export function BlockActions({
   onToggleBlockEdit,
   onFocusBlockEdit,
   onDeleteBlock,
-  onSetMarkdownTheme,
   onToggleRatioLock,
 }: BlockActionsProps) {
   const [actionsSize, setActionsSize] = useState({ width: 0, height: 0 })
-  const [themeMenuOpen, setThemeMenuOpen] = useState(false)
   const actionsRef = useRef<HTMLDivElement>(null)
   const ratioLocked = isRatioLocked(node)
   const markdownBlock = blockKind(node) === 'markdown'
   const scheduleBlock = blockKind(node) === 'schedule'
-  const markdownTheme = node['x-superboard']?.markdownTheme
-
-  useEffect(() => {
-    if (!themeMenuOpen) return
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as HTMLElement | null
-      if (target?.closest('.sb-md-theme-popover, .sb-md-theme-action')) return
-      setThemeMenuOpen(false)
-    }
-    window.addEventListener('pointerdown', onPointerDown, true)
-    return () => window.removeEventListener('pointerdown', onPointerDown, true)
-  }, [themeMenuOpen])
 
   useLayoutEffect(() => {
     const element = actionsRef.current
@@ -182,21 +153,6 @@ export function BlockActions({
           <UseAnimations animation={hash} size={16} interaction="click-replay" />
         </button>
       ) : null}
-      {markdownBlock ? (
-        <button
-          type="button"
-          className={`sb-block-action sb-md-theme-action${
-            themeMenuOpen ? ' is-active' : ''
-          }`}
-          title="设置颜色"
-          onClick={(event) => {
-            event.stopPropagation()
-            setThemeMenuOpen((current) => !current)
-          }}
-        >
-          <MarkdownThemeIcon />
-        </button>
-      ) : null}
       <button
         type="button"
         className="sb-block-action"
@@ -208,36 +164,6 @@ export function BlockActions({
       >
         <UseAnimations animation={trash2} size={16} interaction="click-replay" />
       </button>
-      {markdownBlock && themeMenuOpen ? (
-        <div
-          className="sb-md-theme-popover"
-          onPointerDown={(event) => event.stopPropagation()}
-        >
-          {MARKDOWN_THEMES.map((theme) => (
-            <button
-              key={theme}
-              type="button"
-              className={`sb-md-theme-option${
-                markdownTheme === theme ? ' is-active' : ''
-              }`}
-              style={
-                {
-                  '--sb-theme-color': MARKDOWN_THEME_COLORS[theme],
-                } as CSSProperties
-              }
-              title={theme}
-              aria-label={theme}
-              onClick={(event) => {
-                event.stopPropagation()
-                onSetMarkdownTheme?.(node.id, theme)
-                setThemeMenuOpen(false)
-              }}
-            >
-              <span />
-            </button>
-          ))}
-        </div>
-      ) : null}
     </div>
   )
 }

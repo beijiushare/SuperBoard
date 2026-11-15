@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import type { MarkdownTheme } from '../../canvas/model'
 import { MarkdownView } from './MarkdownView'
 import { loadMathJax } from './mathjax'
 import { vditorCdn } from './vditorAssets'
@@ -31,13 +30,11 @@ async function renderHtml(source: string) {
 interface MarkdownVditorPreviewProps {
   source: string
   className?: string
-  theme?: MarkdownTheme
 }
 
 export function MarkdownVditorPreview({
   source,
   className = '',
-  theme,
 }: MarkdownVditorPreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
@@ -64,13 +61,7 @@ export function MarkdownVditorPreview({
         host.innerHTML = html
         host.classList.add('vditor-reset', 'sb-markdown')
         Vditor.highlightRender(
-          {
-            enable: true,
-            style:
-              theme === 'orange' || theme === 'mint'
-                ? 'atom-one-dark'
-                : 'github',
-          },
+          { enable: true, style: 'github' },
           host,
           vditorCdn,
         )
@@ -99,7 +90,7 @@ export function MarkdownVditorPreview({
 
   if (useLegacyRenderer || failed) {
     return (
-      <div className={theme ? `sb-md-theme-${theme}` : undefined}>
+      <div className={className}>
         <MarkdownView source={source} />
       </div>
     )
@@ -108,9 +99,7 @@ export function MarkdownVditorPreview({
   return (
     <div
       ref={hostRef}
-      className={`sb-markdown-vditor ${
-        theme ? `sb-md-theme-${theme}` : ''
-      } ${className}`.trim()}
+      className={`sb-markdown-vditor ${className}`.trim()}
       style={{ visibility: ready ? 'visible' : 'hidden' }}
     />
   )
