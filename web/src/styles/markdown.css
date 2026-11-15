@@ -1164,4 +1164,97 @@
   height: auto;
 }
 
+/* Keep the docs style above Vditor's dynamically loaded reset rules */
+
+.sb-md-docs.sb-markdown,
+.sb-md-docs.sb-markdown-vditor.vditor-reset,
+.sb-md-docs .vditor-reset {
+  color: #20232a !important;
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+.sb-md-docs.sb-markdown h1,
+.sb-md-docs.sb-markdown h2,
+.sb-md-docs.sb-markdown h3,
+.sb-md-docs.sb-markdown h4,
+.sb-md-docs.sb-markdown-vditor.vditor-reset h1,
+.sb-md-docs.sb-markdown-vditor.vditor-reset h2,
+.sb-md-docs.sb-markdown-vditor.vditor-reset h3,
+.sb-md-docs.sb-markdown-vditor.vditor-reset h4,
+.sb-md-docs .vditor-reset h1,
+.sb-md-docs .vditor-reset h2,
+.sb-md-docs .vditor-reset h3,
+.sb-md-docs .vditor-reset h4 {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #20232a !important;
+  text-align: left !important;
+}
+
+.sb-md-docs.sb-markdown h1,
+.sb-md-docs.sb-markdown-vditor.vditor-reset h1,
+.sb-md-docs .vditor-reset h1 {
+  font-size: 34px !important;
+  font-weight: 900 !important;
+}
+
+.sb-md-docs.sb-markdown h2,
+.sb-md-docs.sb-markdown-vditor.vditor-reset h2,
+.sb-md-docs .vditor-reset h2 {
+  font-size: 24px !important;
+}
+
+.sb-md-docs.sb-markdown h3,
+.sb-md-docs.sb-markdown-vditor.vditor-reset h3,
+.sb-md-docs .vditor-reset h3 {
+  font-size: 22px !important;
+}
+
+.sb-md-docs.sb-markdown h4,
+.sb-md-docs.sb-markdown-vditor.vditor-reset h4,
+.sb-md-docs .vditor-reset h4 {
+  font-size: 20px !important;
+}
+
+.sb-md-docs.sb-markdown a,
+.sb-md-docs.sb-markdown-vditor.vditor-reset a,
+.sb-md-docs .vditor-reset a {
+  color: #1976d2 !important;
+  text-decoration: none !important;
+}
+
+.sb-md-docs.sb-markdown a:hover,
+.sb-md-docs.sb-markdown-vditor.vditor-reset a:hover,
+.sb-md-docs .vditor-reset a:hover {
+  text-decoration: underline !important;
+}
+
+.sb-md-docs.sb-markdown :not(pre) > code,
+.sb-md-docs.sb-markdown-vditor.vditor-reset :not(pre) > code,
+.sb-md-docs .vditor-reset :not(pre) > code {
+  border: 0 !important;
+  border-bottom: 1px solid #ddd !important;
+  border-radius: 0 !important;
+  background: #f2f2f2 !important;
+  color: #20232a !important;
+}
+
+.sb-md-docs.sb-markdown pre > code,
+.sb-md-docs.sb-markdown-vditor.vditor-reset pre > code,
+.sb-md-docs .vditor-reset pre > code {
+  border: 1px solid #ddd !important;
+  border-radius: 0 !important;
+  background: #f2f2f2 !important;
+  color: #20232a !important;
+}
+
+.sb-md-docs.sb-markdown th,
+.sb-md-docs.sb-markdown-vditor.vditor-reset th,
+.sb-md-docs .vditor-reset th {
+  border-color: #ddd !important;
+  background: #f2f2f2 !important;
+}
+
 
