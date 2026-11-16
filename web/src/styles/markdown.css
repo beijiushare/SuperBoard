@@ -8,12 +8,16 @@
   overflow-wrap: anywhere;
 }
 
-.sb-markdown > :first-child {
-  margin-top: 0;
+.sb-markdown > :first-child,
+.sb-markdown-vditor > :first-child,
+.sb-markdown-vditor.vditor-reset > :first-child {
+  margin-top: 0 !important;
 }
 
-.sb-markdown > :last-child {
-  margin-bottom: 0;
+.sb-markdown > :last-child,
+.sb-markdown-vditor > :last-child,
+.sb-markdown-vditor.vditor-reset > :last-child {
+  margin-bottom: 0 !important;
 }
 
 .sb-markdown h1,
