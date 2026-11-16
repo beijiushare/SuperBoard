@@ -1270,14 +1270,44 @@
   background: #f2f2f2 !important;
 }
 
+.sb-md-editor .vditor-ir .vditor-reset > h1::before,
+.sb-md-editor .vditor-ir .vditor-reset > h2::before,
+.sb-md-editor .vditor-ir .vditor-reset > h3::before,
+.sb-md-editor .vditor-ir .vditor-reset > h4::before,
+.sb-md-editor .vditor-ir .vditor-reset > h5::before,
+.sb-md-editor .vditor-ir .vditor-reset > h6::before,
+.sb-md-focus-body .vditor-ir .vditor-reset > h1::before,
+.sb-md-focus-body .vditor-ir .vditor-reset > h2::before,
+.sb-md-focus-body .vditor-ir .vditor-reset > h3::before,
+.sb-md-focus-body .vditor-ir .vditor-reset > h4::before,
+.sb-md-focus-body .vditor-ir .vditor-reset > h5::before,
+.sb-md-focus-body .vditor-ir .vditor-reset > h6::before {
+  content: none !important;
+}
+
 .sb-md-editor .vditor-linenumber__rows,
 .sb-md-focus-body .vditor-linenumber__rows {
-  display: none;
+  display: none !important;
 }
 
 .sb-md-editor .vditor-linenumber,
 .sb-md-focus-body .vditor-linenumber {
   padding-left: 0 !important;
+}
+
+.sb-md-editor .vditor-reset > :first-child,
+.sb-md-focus-body .vditor-reset > :first-child,
+.sb-md-editor .vditor-reset > :first-child h1,
+.sb-md-editor .vditor-reset > :first-child h2,
+.sb-md-editor .vditor-reset > :first-child h3,
+.sb-md-editor .vditor-reset > :first-child h4,
+.sb-md-editor .vditor-reset > :first-child p,
+.sb-md-focus-body .vditor-reset > :first-child h1,
+.sb-md-focus-body .vditor-reset > :first-child h2,
+.sb-md-focus-body .vditor-reset > :first-child h3,
+.sb-md-focus-body .vditor-reset > :first-child h4,
+.sb-md-focus-body .vditor-reset > :first-child p {
+  margin-top: 0 !important;
 }
 
 
