@@ -351,7 +351,7 @@ export default class Renderer extends BaseModule {
 		const levels: Array<{ step: number; alpha: number }> = [
 			{ step: base, alpha: 0.38 },
 		];
-		for (let index = 1; index <= 3; index += 1) {
+		for (let index = 1; index <= 5; index += 1) {
 			const step = base / 2 ** index;
 			if (step < MIN_GRID_GAP) break;
 			const start = 20 * 2 ** (index - 1);
