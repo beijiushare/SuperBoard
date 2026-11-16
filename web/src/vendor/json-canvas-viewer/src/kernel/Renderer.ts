@@ -55,7 +55,8 @@ export default class Renderer extends BaseModule {
 		const currentViewport = this.getCurrentViewport(offsetX, offsetY, scale);
 		this.canvas.style.transform = '';
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		this.applyGridBackground(scale, offsetX, offsetY);
+		this.applyGridBackground();
+		this.drawGrid(scale, offsetX, offsetY);
 		this.ctx.save();
 		this.ctx.translate(offsetX, offsetY);
 		this.ctx.scale(scale, scale);
@@ -326,59 +327,86 @@ export default class Renderer extends BaseModule {
 		return [startControlX, startControlY, endControlX, endControlY];
 	};
 
-	private readonly gridGap = (scale: number) => {
-		let gap = DOT_BASE_GAP * scale;
-		while (gap < MIN_GRID_GAP) gap *= 2;
-		return gap;
-	};
-
-	private readonly applyGridBackground = (
-		scale: number,
-		offsetX: number,
-		offsetY: number,
-	) => {
-		const gap = this.gridGap(scale);
-		const container = this.DM.data.container;
-		const color = this.SM.getNamedColor('dots');
-		const settings = (
+	private readonly gridSettings = () =>
+		(
 			this.DM.data.canvasData as {
 				'x-superboard'?: {
 					settings?: { background?: string; grid?: 'none' | 'dots' | 'lines' }
 				}
 			}
 		)['x-superboard']?.settings;
+
+	private readonly applyGridBackground = () => {
+		const container = this.DM.data.container;
+		const settings = this.gridSettings();
 		container.style.backgroundColor = settings?.background ?? '#ffffff';
-		const grid = settings?.grid ?? 'dots';
-		if (grid === 'none') {
-			container.style.backgroundImage = 'none';
-			container.style.backgroundSize = '';
-			container.style.backgroundPosition = '';
-			return;
-		}
-		if (grid === 'lines') {
-			container.style.backgroundImage = `linear-gradient(to right, ${color} 1px, transparent 1px), linear-gradient(to bottom, ${color} 1px, transparent 1px)`;
-			container.style.backgroundSize = `${gap}px ${gap}px`;
-			container.style.backgroundPosition = `${offsetX % gap}px 0, 0 ${offsetY % gap}px`;
-			return;
-		}
-		container.style.backgroundImage = `radial-gradient(circle, ${color} ${DOT_RADIUS}px, transparent ${DOT_RADIUS}px)`;
-		container.style.backgroundSize = `${gap}px ${gap}px`;
-		container.style.backgroundPosition = `${offsetX % gap}px ${offsetY % gap}px`;
+		container.style.backgroundImage = 'none';
+		container.style.backgroundSize = '';
+		container.style.backgroundPosition = '';
 	};
 
-	private readonly drawGridDots = (scale: number, offsetX: number, offsetY: number) => {
-		const actualGap = this.gridGap(scale);
-		const width = this.canvas.width;
-		const height = this.canvas.height;
-		const startX = offsetX % actualGap;
-		const startY = offsetY % actualGap;
-		this.ctx.fillStyle = this.SM.getNamedColor('dots');
-		for (let x = startX; x <= width; x += actualGap)
-			for (let y = startY; y <= height; y += actualGap) {
+	private readonly gridLevels = (scale: number) => {
+		let base = DOT_BASE_GAP * scale;
+		while (base < MIN_GRID_GAP) base *= 2;
+		const levels: Array<{ step: number; alpha: number }> = [
+			{ step: base, alpha: 0.16 },
+		];
+		for (let index = 1; index <= 3; index += 1) {
+			const step = base / 2 ** index;
+			if (step < MIN_GRID_GAP) break;
+			const start = 20 * 2 ** (index - 1);
+			const end = 40 * 2 ** (index - 1);
+			const t = Math.max(0, Math.min(1, (base - start) / (end - start)));
+			const alpha = (t * t * (3 - 2 * t)) * 0.12;
+			if (alpha > 0.002) levels.push({ step, alpha });
+		}
+		return levels;
+	};
+
+	private readonly drawGrid = (
+		scale: number,
+		offsetX: number,
+		offsetY: number,
+	) => {
+		const settings = this.gridSettings();
+		const mode = settings?.grid ?? 'dots';
+		if (mode === 'none') return;
+		const width = this.DM.data.container.clientWidth;
+		const height = this.DM.data.container.clientHeight;
+		const color = this.SM.getNamedColor('dots');
+		const levels = this.gridLevels(scale);
+		this.ctx.save();
+		this.ctx.strokeStyle = color;
+		this.ctx.fillStyle = color;
+		this.ctx.lineWidth = 1;
+		for (const level of levels) {
+			const step = level.step;
+			const startX = ((offsetX % step) + step) % step;
+			const startY = ((offsetY % step) + step) % step;
+			this.ctx.globalAlpha = level.alpha;
+			if (mode === 'lines') {
 				this.ctx.beginPath();
-				this.ctx.arc(x, y, DOT_RADIUS, 0, 2 * Math.PI);
-				this.ctx.fill();
+				for (let x = startX; x <= width; x += step) {
+					this.ctx.moveTo(x, 0);
+					this.ctx.lineTo(x, height);
+				}
+				for (let y = startY; y <= height; y += step) {
+					this.ctx.moveTo(0, y);
+					this.ctx.lineTo(width, y);
+				}
+				this.ctx.stroke();
+			} else {
+				for (let x = startX; x <= width; x += step) {
+					for (let y = startY; y <= height; y += step) {
+						this.ctx.beginPath();
+						this.ctx.arc(x, y, DOT_RADIUS, 0, 2 * Math.PI);
+						this.ctx.fill();
+					}
+				}
 			}
+		}
+		this.ctx.globalAlpha = 1;
+		this.ctx.restore();
 	};
 
 	private readonly drawCurvedPath = (
