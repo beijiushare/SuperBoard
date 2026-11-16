@@ -1,10 +1,7 @@
 import 'temporal-polyfill/global'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import {
   Calendar,
-  type CalendarRef,
-  type DateSelectInfo,
-  type DateUnselectInfo,
   type EventChangeInfo,
   type EventClickInfo,
   type EventDisplayInfo,
@@ -36,12 +33,6 @@ type ScheduleDialog =
   | { type: 'add'; start: Date; end?: Date; allDay: boolean }
   | { type: 'edit'; id: string; title: string }
 
-type Selection = {
-  start: string
-  end: string
-  allDay: boolean
-}
-
 export function ScheduleBlock({
   events = [],
   onEventsChange,
@@ -49,10 +40,8 @@ export function ScheduleBlock({
   events?: SuperBoardScheduleEvent[]
   onEventsChange?: (events: SuperBoardScheduleEvent[]) => void
 }) {
-  const calendarRef = useRef<CalendarRef | null>(null)
   const [dialog, setDialog] = useState<ScheduleDialog | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
-  const [selection, setSelection] = useState<Selection | null>(null)
 
   function openAddDialog(start = new Date(), end?: Date, allDay = false) {
     setDialog({ type: 'add', start, end, allDay })
@@ -63,22 +52,7 @@ export function ScheduleBlock({
     setDialog({ type: 'edit', id, title })
   }
 
-  function handleSelect(info: DateSelectInfo) {
-    setSelectedEventId(null)
-    setSelection({
-      start: info.startStr,
-      end: info.endStr,
-      allDay: info.allDay,
-    })
-  }
-
-  function handleUnselect(_info: DateUnselectInfo) {
-    setSelection(null)
-  }
-
   function handleEventClick(info: EventClickInfo) {
-    setSelection(null)
-    calendarRef.current?.getApi().unselect()
     if (info.jsEvent.detail >= 2) {
       openEditDialog(info.event.id, info.event.title)
       return
@@ -133,25 +107,18 @@ export function ScheduleBlock({
     }
 
     setDialog(null)
-    setSelection(null)
-    calendarRef.current?.getApi().unselect()
   }
 
   function deleteEvent(id: string) {
     onEventsChange?.(events.filter((item) => item.id !== id))
     setSelectedEventId(null)
     setDialog(null)
-    calendarRef.current?.getApi().unselect()
   }
 
   const buttons = {
     add: {
       text: '新建日程',
-      click: () => {
-        const start = selection ? new Date(selection.start) : new Date()
-        const end = selection ? new Date(selection.end) : undefined
-        openAddDialog(start, end, selection?.allDay ?? false)
-      },
+      click: () => openAddDialog(),
     },
   }
 
@@ -159,7 +126,6 @@ export function ScheduleBlock({
     <>
       <div className="sb-schedule">
         <Calendar
-          ref={calendarRef}
           colorScheme="light"
           plugins={PLUGINS}
           headerToolbar={HEADER_TOOLBAR}
@@ -167,13 +133,9 @@ export function ScheduleBlock({
           initialView="timeGridWeek"
           height="100%"
           events={events}
-          selectable
-          unselectAuto
           editable
           eventStartEditable
           eventDurationEditable
-          select={handleSelect}
-          unselect={handleUnselect}
           eventClick={handleEventClick}
           eventChange={handleEventChange}
           eventClass={(arg: EventDisplayInfo) =>
