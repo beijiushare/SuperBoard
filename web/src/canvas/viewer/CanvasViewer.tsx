@@ -1,4 +1,10 @@
-import { forwardRef, useCallback, useMemo, type CSSProperties } from 'react'
+import {
+  forwardRef,
+  useCallback,
+  useMemo,
+  useRef,
+  type CSSProperties,
+} from 'react'
 import {
   Controls,
   JSONCanvasViewerComponent,
@@ -51,6 +57,11 @@ export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
     onNodeSelect,
     onScheduleEventsChange,
   }, ref) {
+    const onNodeSelectRef = useRef(onNodeSelect)
+    const onScheduleEventsChangeRef = useRef(onScheduleEventsChange)
+    onNodeSelectRef.current = onNodeSelect
+    onScheduleEventsChangeRef.current = onScheduleEventsChange
+
     const options = useMemo(
       () => ({
         parser,
@@ -67,21 +78,23 @@ export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
         <TextSlot
           node={node}
           onActive={onActive}
-          onSelect={onNodeSelect}
-          onScheduleEventsChange={
-            onScheduleEventsChange
-              ? (events) => onScheduleEventsChange(node.id, events)
-              : undefined
+          onSelect={(id) => onNodeSelectRef.current?.(id)}
+          onScheduleEventsChange={(events) =>
+            onScheduleEventsChangeRef.current?.(node.id, events)
           }
         />
       ),
-      [onNodeSelect, onScheduleEventsChange],
+      [],
     )
     const renderLink = useCallback(
       ({ node, onActive }: { node: JSONCanvasLinkNode; onActive: Hook }) => (
-        <LinkSlot node={node} onActive={onActive} onSelect={onNodeSelect} />
+        <LinkSlot
+          node={node}
+          onActive={onActive}
+          onSelect={(id) => onNodeSelectRef.current?.(id)}
+        />
       ),
-      [onNodeSelect],
+      [],
     )
 
     return (

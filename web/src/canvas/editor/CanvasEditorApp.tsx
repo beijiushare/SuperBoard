@@ -558,36 +558,32 @@ export function CanvasEditorApp() {
     viewerRef.current?.viewer?.refresh?.()
   }
 
-  function resetBlockRatio(id: string) {
+  function resetBlockSize(id: string) {
     const document = canvasRef.current
     const node = document?.nodes.find((item) => item.id === id)
     if (!document || !node) return
     const kind = blockKind(node)
     if (!kind) return
     const target = DEFAULT_BLOCK_SIZES[kind]
-    const ratio = target.width / target.height
     if (
-      node.width <= 0 ||
-      node.height <= 0 ||
-      Math.abs(node.width / node.height - ratio) < 0.001
+      node.width === target.width &&
+      node.height === target.height &&
+      (node['x-superboard']?.contentScale ?? 1) === 1
     ) {
       return
     }
     recordHistory()
     pendingViewportRef.current = readViewport(viewerRef.current)
-    const area = node.width * node.height
-    const width = Math.max(40, Math.sqrt(area * ratio))
-    const height = Math.max(40, width / ratio)
     const next: CanvasDocument = {
       ...document,
       nodes: document.nodes.map((item) =>
         item.id === id
           ? {
               ...item,
-              x: item.x + (item.width - width) / 2,
-              y: item.y + (item.height - height) / 2,
-              width,
-              height,
+              x: item.x + (item.width - target.width) / 2,
+              y: item.y + (item.height - target.height) / 2,
+              width: target.width,
+              height: target.height,
               'x-superboard': {
                 ...ensureExtension(item),
                 contentScale: 1,
@@ -1949,7 +1945,7 @@ export function CanvasEditorApp() {
                     onToggleBlockEdit={toggleBlockEdit}
                     onFocusBlockEdit={openMarkdownFocus}
                     onDeleteBlock={deleteBlock}
-                    onResetBlockRatio={resetBlockRatio}
+                    onResetBlockSize={resetBlockSize}
                     onToggleRatioLock={toggleRatioLock}
                   />
                   <CanvasEditorTools

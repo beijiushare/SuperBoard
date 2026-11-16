@@ -6,6 +6,7 @@ import type {
 	JSONCanvasTextNode,
 	JSONCanvasLinkNode,
 	JSONCanvasFileNode,
+	JSONCanvasNode,
 	JSONCanvas,
 } from '../src/index.ts'
 import type { CSSProperties, ReactNode } from 'react'
@@ -67,7 +68,18 @@ type PortalEntry = {
 	id: string;
 	container: HTMLDivElement;
 	element: ReactNode;
+	node: JSONCanvasNode;
+	onActive: Hook;
+	onLoseActive: Hook;
+	render: (node: JSONCanvasNode) => ReactNode;
 };
+
+function contentOf(node: JSONCanvasNode) {
+	if (node.type === 'text') return node.text;
+	if (node.type === 'link') return node.url;
+	if (node.type === 'file') return node.file;
+	return '';
+}
 
 const emptyOptions = {} as ViewerProps['options'];
 
@@ -93,20 +105,18 @@ export default forwardRef(
 	) => {
 		const containerRef = useRef<HTMLElement | undefined>(undefined);
 		const viewerRef = useRef<JSONCanvasViewerInterface<T> | undefined>(undefined);
+		const lastCanvasRef = useRef(canvas);
 		const [portalsById, setPortalsById] = useState(() => new Map<string, PortalEntry>());
 
-		const upsertPortal = useCallback(
-			(id: string, container: HTMLDivElement, element: ReactNode) => {
-				flushSync(() => {
-					setPortalsById((current) => {
-						const next = new Map(current);
-						next.set(id, { container, element, id });
-						return next;
-					});
+		const upsertPortal = useCallback((entry: PortalEntry) => {
+			flushSync(() => {
+				setPortalsById((current) => {
+					const next = new Map(current);
+					next.set(entry.id, entry);
+					return next;
 				});
-			},
-			[],
-		);
+			});
+		}, []);
 
 		const removePortalById = useCallback((id: string) => {
 			setPortalsById((current) => {
@@ -146,16 +156,27 @@ export default forwardRef(
 					onActive: Hook;
 					onLoseActive: Hook;
 				}) => {
-					upsertPortal(
-						node.id,
-						container,
+					const render = (nextNode: JSONCanvasNode) =>
 						renderFn({
+							content: contentOf(nextNode),
+							node: nextNode,
+							onActive,
+							onLoseActive,
+						} as N);
+					upsertPortal({
+						id: node.id,
+						container,
+						element: renderFn({
 							content,
 							node,
 							onActive,
 							onLoseActive,
 						} as N),
-					);
+						node,
+						onActive,
+						onLoseActive,
+						render,
+					});
 					onBeforeUnmount.subscribe(() => {
 						removePortalById(node.id);
 					});
@@ -172,6 +193,32 @@ export default forwardRef(
 			return out;
 		}, [audio, image, link, markdown, removePortalById, text, upsertPortal, video]);
 
+		const syncPortals = useCallback((nextCanvas: JSONCanvas) => {
+			const nextNodes = new Map(
+				(nextCanvas.nodes ?? []).map((node) => [node.id, node]),
+			);
+			setPortalsById((current) => {
+				let changed = false;
+				const next = new Map(current);
+				for (const [id, entry] of next) {
+					const node = nextNodes.get(id);
+					if (!node) {
+						next.delete(id);
+						changed = true;
+						continue;
+					}
+					if (node === entry.node) continue;
+					next.set(id, {
+						...entry,
+						node,
+						element: entry.render(node),
+					});
+					changed = true;
+				}
+				return changed ? next : current;
+			});
+		}, []);
+
 		useLayoutEffect(() => {
 			if (!containerRef.current) return;
 
@@ -187,13 +234,21 @@ export default forwardRef(
 				modules,
 			);
 			viewerRef.current = viewer;
+			lastCanvasRef.current = canvas;
 
 			return () => {
 				viewer.dispose();
 				viewerRef.current = undefined;
 				setPortalsById(new Map());
 			};
-		}, [attachments, canvas, modules, nodeComponents, options, theme]);
+		}, [attachments, modules, nodeComponents, options, theme]);
+
+		useLayoutEffect(() => {
+			if (!viewerRef.current || !canvas || lastCanvasRef.current === canvas) return;
+			lastCanvasRef.current = canvas;
+			viewerRef.current.updateCanvas(canvas);
+			syncPortals(canvas);
+		}, [canvas, syncPortals]);
 
 		const portals = [...portalsById.values()].map((p) =>
 			createPortal(p.element, p.container, p.id),

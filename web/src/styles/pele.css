@@ -69,14 +69,17 @@
 
 .sb-pele-svg {
   display: grid;
-  min-width: min-content;
+  width: 100%;
+  height: 100%;
   place-items: center;
 }
 
 .sb-pele-svg svg {
   display: block;
+  width: 100%;
+  height: 100%;
   max-width: 100%;
-  height: auto;
+  max-height: 100%;
 }
 
 .sb-pele-loading,

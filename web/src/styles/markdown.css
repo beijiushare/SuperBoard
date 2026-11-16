@@ -975,7 +975,7 @@
   padding: 0;
   border: 0;
   color: #20232a;
-  font-size: 34px;
+  font-size: 2.125em;
   font-weight: 900;
   line-height: 1.25;
   text-align: left;
@@ -1005,21 +1005,21 @@
 .sb-markdown-vditor.vditor-reset h2,
 .sb-md-editor .vditor-reset h2,
 .sb-md-focus-body .vditor-reset h2 {
-  font-size: 24px;
+  font-size: 1.5em;
 }
 
 .sb-markdown h3,
 .sb-markdown-vditor.vditor-reset h3,
 .sb-md-editor .vditor-reset h3,
 .sb-md-focus-body .vditor-reset h3 {
-  font-size: 22px;
+  font-size: 1.375em;
 }
 
 .sb-markdown h4,
 .sb-markdown-vditor.vditor-reset h4,
 .sb-md-editor .vditor-reset h4,
 .sb-md-focus-body .vditor-reset h4 {
-  font-size: 20px;
+  font-size: 1.25em;
 }
 
 .sb-markdown p,
@@ -1209,26 +1209,26 @@
 .sb-md-docs.sb-markdown h1,
 .sb-md-docs.sb-markdown-vditor.vditor-reset h1,
 .sb-md-docs .vditor-reset h1 {
-  font-size: 34px !important;
+  font-size: 2.125em !important;
   font-weight: 900 !important;
 }
 
 .sb-md-docs.sb-markdown h2,
 .sb-md-docs.sb-markdown-vditor.vditor-reset h2,
 .sb-md-docs .vditor-reset h2 {
-  font-size: 24px !important;
+  font-size: 1.5em !important;
 }
 
 .sb-md-docs.sb-markdown h3,
 .sb-md-docs.sb-markdown-vditor.vditor-reset h3,
 .sb-md-docs .vditor-reset h3 {
-  font-size: 22px !important;
+  font-size: 1.375em !important;
 }
 
 .sb-md-docs.sb-markdown h4,
 .sb-md-docs.sb-markdown-vditor.vditor-reset h4,
 .sb-md-docs .vditor-reset h4 {
-  font-size: 20px !important;
+  font-size: 1.25em !important;
 }
 
 .sb-md-docs.sb-markdown a,

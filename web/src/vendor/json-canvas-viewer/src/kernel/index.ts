@@ -106,6 +106,13 @@ class JSONCanvasViewer<M extends ModuleInputCtor> {
 		}
 	};
 
+	updateCanvas = (canvas: JSONCanvas) => {
+		if (this.disposed) return;
+		this.options.canvas = canvas;
+		this.container.get(DataManager).updateCanvas(canvas);
+		this.container.get(Controller).refresh();
+	};
+
 	dispose = () => {
 		if (!this.started || this.disposed) return;
 		this.IO?.disconnect();

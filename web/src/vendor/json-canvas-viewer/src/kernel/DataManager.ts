@@ -146,6 +146,54 @@ export default class DataManager extends BaseModule<Options, Augmentation> {
 		this.resetView();
 	};
 
+	updateCanvas = (canvas: JSONCanvas) => {
+		const canvasData = {
+			edges: [],
+			nodes: [],
+			...canvas,
+		} as Required<JSONCanvas>;
+		const previous = this.data.nodeMap;
+		const next: NodeMap = {};
+		const nextIds = new Set<string>();
+
+		canvasData.nodes.forEach((node) => {
+			const item: NodeItem = previous[node.id] ?? {
+				box: this.getNodeBox(node),
+				ref: node,
+			};
+			item.ref = node;
+			item.box = this.getNodeBox(node);
+			next[node.id] = item;
+			nextIds.add(node.id);
+
+			if (node.type === 'file') {
+				const path = node.file;
+				const basename = path.split('/').pop() ?? '';
+				const lastIndex = basename.lastIndexOf('?');
+				item.fileName = lastIndex !== -1 ? basename.slice(0, lastIndex) : basename;
+				if (!path.includes('://')) {
+					const userDefinedAttachment = this.options.attachments?.[path];
+					if (userDefinedAttachment) node.file = userDefinedAttachment;
+				}
+			}
+		});
+
+		Object.keys(previous).forEach((id) => {
+			if (!nextIds.has(id)) previous[id]?.onBeforeUnmount?.();
+		});
+
+		this.data.canvasData = canvasData;
+		this.data.nodeMap = next;
+		this.data.edgeMap = {};
+		canvasData.edges.forEach((edge) => {
+			this.data.edgeMap[edge.id] = {
+				box: this.getEdgeBox(edge),
+				ref: edge,
+			};
+		});
+		this.data.nodeBounds = this.calculateNodeBounds(canvasData);
+	};
+
 	private readonly getNodeBox = (node: JSONCanvasNode) => ({
 		bottom: node.y + node.height,
 		left: node.x,
@@ -182,6 +230,18 @@ export default class DataManager extends BaseModule<Options, Augmentation> {
 	};
 
 	private calculateNodeBounds(canvasData: Required<JSONCanvas>) {
+		if (canvasData.nodes.length === 0) {
+			return {
+				centerX: 0,
+				centerY: 0,
+				height: 0,
+				maxX: 0,
+				maxY: 0,
+				minX: 0,
+				minY: 0,
+				width: 0,
+			};
+		}
 		let minX = Infinity;
 		let minY = Infinity;
 		let maxX = -Infinity;
@@ -211,6 +271,12 @@ export default class DataManager extends BaseModule<Options, Augmentation> {
 		const bounds = this.data.nodeBounds;
 		const container = this.data.container;
 		if (!bounds || !container) return;
+		if (bounds.width === 0 && bounds.height === 0) {
+			this.data.offsetX = container.clientWidth / 2;
+			this.data.offsetY = container.clientHeight / 2;
+			this.data.scale = 1;
+			return;
+		}
 		const contentWidth = bounds.width + INITIAL_VIEWPORT_PADDING * 2;
 		const contentHeight = bounds.height + INITIAL_VIEWPORT_PADDING * 2;
 		// Use logical dimensions for scaling calculations

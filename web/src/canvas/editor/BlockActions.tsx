@@ -19,7 +19,7 @@ interface BlockActionsProps {
   onToggleBlockEdit?: (id: string) => void
   onFocusBlockEdit?: (id: string) => void
   onDeleteBlock?: (id: string) => void
-  onResetBlockRatio?: (id: string) => void
+  onResetBlockSize?: (id: string) => void
   onToggleRatioLock?: (id: string) => void
 }
 
@@ -34,7 +34,7 @@ export function BlockActions({
   onToggleBlockEdit,
   onFocusBlockEdit,
   onDeleteBlock,
-  onResetBlockRatio,
+  onResetBlockSize,
   onToggleRatioLock,
 }: BlockActionsProps) {
   const [actionsSize, setActionsSize] = useState({ width: 0, height: 0 })
@@ -159,10 +159,10 @@ export function BlockActions({
       <button
         type="button"
         className="sb-block-action"
-        title="恢复比例"
+        title="恢复大小"
         onClick={(event) => {
           event.stopPropagation()
-          onResetBlockRatio?.(node.id)
+          onResetBlockSize?.(node.id)
         }}
       >
         <UseAnimations animation={refresh} size={16} interaction="click-replay" />
