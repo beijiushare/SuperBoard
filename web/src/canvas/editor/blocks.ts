@@ -2,6 +2,14 @@ import type { CanvasNode } from '../model'
 
 export const BLOCK_KINDS = ['text', 'markdown', 'pele', 'schedule', 'media'] as const
 
+export const DEFAULT_BLOCK_SIZES = {
+  text: { width: 360, height: 220 },
+  markdown: { width: 360, height: 220 },
+  pele: { width: 580, height: 380 },
+  schedule: { width: 900, height: 600 },
+  media: { width: 480, height: 320 },
+} as const
+
 export function blockKind(node: CanvasNode) {
   const kind = node['x-superboard']?.kind
   if (

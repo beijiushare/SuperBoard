@@ -66,21 +66,46 @@ export function ScheduleBlock({
     setDialog({ type: 'edit', id, title })
   }
 
+  function localPoint(clientX: number, clientY: number) {
+    const host = hostRef.current
+    const rect = host?.getBoundingClientRect()
+    if (!host || !rect || rect.width === 0 || rect.height === 0) {
+      return { x: 12, y: 12 }
+    }
+    return {
+      x: (clientX - rect.left) * (host.clientWidth / rect.width),
+      y: (clientY - rect.top) * (host.clientHeight / rect.height),
+    }
+  }
+
   function handleSelect(info: DateSelectInfo) {
-    const rect = hostRef.current?.getBoundingClientRect()
-    const x = info.jsEvent
-      ? info.jsEvent.clientX - (rect?.left ?? 0)
-      : 12
-    const y = info.jsEvent
-      ? info.jsEvent.clientY - (rect?.top ?? 0)
-      : 12
-    setSelectedEventId(null)
-    setSelection({
+    const fallback = info.jsEvent
+      ? localPoint(info.jsEvent.clientX, info.jsEvent.clientY)
+      : { x: 12, y: 12 }
+    const next = {
       start: info.startStr,
       end: info.endStr,
       allDay: info.allDay,
-      x: Math.max(8, Math.min(x, (rect?.width ?? 220) - 140)),
-      y: Math.max(8, Math.min(y, (rect?.height ?? 80) - 40)),
+      x: fallback.x,
+      y: fallback.y,
+    }
+    setSelectedEventId(null)
+    setSelection(next)
+    requestAnimationFrame(() => {
+      const host = hostRef.current
+      const highlight = host?.querySelector<HTMLElement>('.fc-highlight')
+      if (!host || !highlight) return
+      const highlightRect = highlight.getBoundingClientRect()
+      const point = localPoint(highlightRect.left + 6, highlightRect.top + 6)
+      setSelection((current) =>
+        current && current.start === next.start && current.end === next.end
+          ? {
+              ...current,
+              x: Math.max(8, Math.min(point.x, host.clientWidth - 140)),
+              y: Math.max(8, Math.min(point.y, host.clientHeight - 40)),
+            }
+          : current,
+      )
     })
   }
 
@@ -180,7 +205,8 @@ export function ScheduleBlock({
           height="100%"
           events={events}
           selectable
-          unselectAuto={false}
+          unselectAuto
+          unselectCancel=".sb-schedule-add-event"
           editable
           eventStartEditable
           eventDurationEditable

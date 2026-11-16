@@ -65,7 +65,7 @@ import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
 import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { PeleCreateDialog } from './PeleCreateDialog'
 import { InputDialog } from '../../shared/ui/InputDialog'
-import { blockKind, isRatioLocked } from './blocks'
+import { DEFAULT_BLOCK_SIZES, blockKind, isRatioLocked } from './blocks'
 import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
 import { CanvasStylePanel } from './CanvasStylePanel'
@@ -556,6 +556,45 @@ export function CanvasEditorApp() {
     if (wasLocked) extension.contentScale = 1
     markDirty()
     viewerRef.current?.viewer?.refresh?.()
+  }
+
+  function resetBlockRatio(id: string) {
+    const document = canvasRef.current
+    const node = document?.nodes.find((item) => item.id === id)
+    if (!document || !node) return
+    const kind = blockKind(node)
+    if (!kind) return
+    const target = DEFAULT_BLOCK_SIZES[kind]
+    const ratio = target.width / target.height
+    if (
+      node.width <= 0 ||
+      node.height <= 0 ||
+      Math.abs(node.width / node.height - ratio) < 0.001
+    ) {
+      return
+    }
+    recordHistory()
+    pendingViewportRef.current = readViewport(viewerRef.current)
+    const area = node.width * node.height
+    const width = Math.max(40, Math.sqrt(area * ratio))
+    const height = Math.max(40, width / ratio)
+    const next: CanvasDocument = {
+      ...document,
+      nodes: document.nodes.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              x: item.x + (item.width - width) / 2,
+              y: item.y + (item.height - height) / 2,
+              width,
+              height,
+            }
+          : item,
+      ),
+    }
+    setSelectedIds([id])
+    setCanvas(next)
+    markDirty()
   }
 
   function handleMarkdownCommit(id: string, value: string) {
@@ -1906,6 +1945,7 @@ export function CanvasEditorApp() {
                     onToggleBlockEdit={toggleBlockEdit}
                     onFocusBlockEdit={openMarkdownFocus}
                     onDeleteBlock={deleteBlock}
+                    onResetBlockRatio={resetBlockRatio}
                     onToggleRatioLock={toggleRatioLock}
                   />
                   <CanvasEditorTools

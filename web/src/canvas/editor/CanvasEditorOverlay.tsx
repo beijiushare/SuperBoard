@@ -60,6 +60,7 @@ interface CanvasEditorOverlayProps {
   onToggleBlockEdit?: (id: string) => void
   onFocusBlockEdit?: (id: string) => void
   onDeleteBlock?: (id: string) => void
+  onResetBlockRatio?: (id: string) => void
   onToggleRatioLock?: (id: string) => void
 }
 
@@ -160,6 +161,7 @@ export function CanvasEditorOverlay({
   onToggleBlockEdit,
   onFocusBlockEdit,
   onDeleteBlock,
+  onResetBlockRatio,
   onToggleRatioLock,
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
@@ -1169,6 +1171,7 @@ export function CanvasEditorOverlay({
             onToggleBlockEdit={onToggleBlockEdit}
             onFocusBlockEdit={onFocusBlockEdit}
             onDeleteBlock={onDeleteBlock}
+            onResetBlockRatio={onResetBlockRatio}
             onToggleRatioLock={onToggleRatioLock}
           />
         ))}

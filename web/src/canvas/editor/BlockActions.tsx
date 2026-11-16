@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import UseAnimations from 'react-useanimations'
 import hash from 'react-useanimations/lib/hash'
 import lock from 'react-useanimations/lib/lock'
+import refresh from 'react-useanimations/lib/refresh'
 import trash2 from 'react-useanimations/lib/trash2'
 import typeIcon from 'react-useanimations/lib/type'
 import type { CanvasNode } from '../model'
@@ -18,6 +19,7 @@ interface BlockActionsProps {
   onToggleBlockEdit?: (id: string) => void
   onFocusBlockEdit?: (id: string) => void
   onDeleteBlock?: (id: string) => void
+  onResetBlockRatio?: (id: string) => void
   onToggleRatioLock?: (id: string) => void
 }
 
@@ -32,6 +34,7 @@ export function BlockActions({
   onToggleBlockEdit,
   onFocusBlockEdit,
   onDeleteBlock,
+  onResetBlockRatio,
   onToggleRatioLock,
 }: BlockActionsProps) {
   const [actionsSize, setActionsSize] = useState({ width: 0, height: 0 })
@@ -153,6 +156,17 @@ export function BlockActions({
           <UseAnimations animation={hash} size={16} interaction="click-replay" />
         </button>
       ) : null}
+      <button
+        type="button"
+        className="sb-block-action"
+        title="恢复比例"
+        onClick={(event) => {
+          event.stopPropagation()
+          onResetBlockRatio?.(node.id)
+        }}
+      >
+        <UseAnimations animation={refresh} size={16} interaction="click-replay" />
+      </button>
       <button
         type="button"
         className="sb-block-action"
