@@ -168,10 +168,23 @@ export interface SuperBoardNodeExtension {
   [key: string]: unknown
 }
 
+export type SuperBoardGridMode = 'none' | 'dots' | 'lines'
+
+export interface SuperBoardCanvasSettings {
+  background?: string
+  grid?: SuperBoardGridMode
+  guides?: boolean
+  zoomMin?: number
+  zoomMax?: number
+  defaultBlockWidth?: number
+  defaultBlockHeight?: number
+}
+
 export interface SuperBoardRootExtension {
   version: 1
   meta: CanvasMeta
   director?: CanvasDirector
+  settings?: SuperBoardCanvasSettings
 }
 
 export interface CanvasDocument {

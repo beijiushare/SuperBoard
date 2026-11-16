@@ -57,6 +57,7 @@ interface CanvasEditorOverlayProps {
   focusedGroupId?: string | null
   activeEditingId?: string | null
   selectionSuppressedId?: string | null
+  guidesEnabled?: boolean
   onToggleBlockEdit?: (id: string) => void
   onFocusBlockEdit?: (id: string) => void
   onDeleteBlock?: (id: string) => void
@@ -114,6 +115,14 @@ interface Marquee {
   height: number
 }
 
+function isAdditiveSelection(event: {
+  shiftKey: boolean
+  metaKey: boolean
+  ctrlKey: boolean
+}) {
+  return event.shiftKey || event.metaKey || event.ctrlKey
+}
+
 function screenRect(node: CanvasNode, offsetX: number, offsetY: number, scale: number) {
   return {
     left: offsetX + node.x * scale,
@@ -158,6 +167,7 @@ export function CanvasEditorOverlay({
   focusedGroupId = null,
   activeEditingId = null,
   selectionSuppressedId = null,
+  guidesEnabled = true,
   onToggleBlockEdit,
   onFocusBlockEdit,
   onDeleteBlock,
@@ -174,7 +184,8 @@ export function CanvasEditorOverlay({
     x: number
     y: number
   } | null>(null)
-  const canShowGuides = !activeEditingId && !selectionSuppressedId
+  const canShowGuides =
+    guidesEnabled && !activeEditingId && !selectionSuppressedId
 
   useEffect(() => {
     if (!canShowGuides) setGuides(null)
@@ -274,7 +285,7 @@ export function CanvasEditorOverlay({
       }
       event.preventDefault()
       event.stopPropagation()
-      marqueeAdditiveRef.current = event.shiftKey
+      marqueeAdditiveRef.current = isAdditiveSelection(event)
       marqueeStartRef.current = { x: event.clientX, y: event.clientY }
       setMarquee({ left: event.clientX - bounds.left, top: event.clientY - bounds.top, width: 0, height: 0 })
     }
@@ -350,6 +361,7 @@ export function CanvasEditorOverlay({
       const target = event.target as HTMLElement | null
       if (!dm || !target) return
       if (!dm.data.container.contains(target)) return
+      if (isAdditiveSelection(event)) return
       if (
         target.closest('.JCV-overlay-container') ||
         target.closest('.sb-modal-backdrop') ||
@@ -367,6 +379,7 @@ export function CanvasEditorOverlay({
 
   function beginMove(event: ReactPointerEvent, node: CanvasNode) {
     if (event.button !== 0) return
+    event.preventDefault()
     event.stopPropagation()
     const dm = dmRef.current
     if (!dm) return
@@ -375,7 +388,7 @@ export function CanvasEditorOverlay({
     const target = selectableAncestor(node, map, focusedGroupId)
     if (isLocked(target, map)) return
 
-    if (event.shiftKey) {
+    if (isAdditiveSelection(event)) {
       onSelect(
         selectedIds.includes(target.id)
           ? selectedIds.filter((id) => id !== target.id)

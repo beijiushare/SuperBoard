@@ -5,6 +5,7 @@ import {
 } from 'react'
 import type { EditorTool } from './tools'
 import { useFloatingPanel } from './useFloatingPanel'
+import { WindowDragHandle } from './WindowDragHandle'
 
 type ShapeTool = Extract<EditorTool, 'rect' | 'rounded-rect' | 'ellipse' | 'line' | 'diamond'>
 
@@ -178,7 +179,7 @@ export function CanvasToolPalette({
           aria-label="拖动操作栏"
           {...handleProps}
         >
-          <span className="sb-window-dots" />
+          <WindowDragHandle />
         </div>
         <button
           type="button"

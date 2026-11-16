@@ -625,13 +625,22 @@ export function CanvasEditorApp() {
     markDirty()
   }
 
+  function defaultBlockSize(kind: keyof typeof DEFAULT_BLOCK_SIZES) {
+    const settings = canvasRef.current?.['x-superboard']?.settings
+    const base = DEFAULT_BLOCK_SIZES[kind]
+    return {
+      width: settings?.defaultBlockWidth ?? base.width,
+      height: settings?.defaultBlockHeight ?? base.height,
+    }
+  }
+
   function insertTextBlock(
     kind: 'markdown' | 'pele',
     point?: { x: number; y: number },
   ) {
     if (!canvas) return
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), kind)
-    const size = DEFAULT_BLOCK_SIZES[kind]
+    const size = defaultBlockSize(kind)
     const position = point
       ? {
           x: Math.round(point.x - size.width / 2),
@@ -721,13 +730,14 @@ export function CanvasEditorApp() {
     }
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'pele')
     const offset = (canvas.nodes.length % 6) * 24
+    const size = defaultBlockSize('pele')
     const position = peleDialog.point
       ? {
-          x: Math.round(peleDialog.point.x - 290),
-          y: Math.round(peleDialog.point.y - 190),
+          x: Math.round(peleDialog.point.x - size.width / 2),
+          y: Math.round(peleDialog.point.y - size.height / 2),
         }
       : (() => {
-          const center = viewportCenter(580, 380)
+          const center = viewportCenter(size.width, size.height)
           return { x: center.x + offset, y: center.y + offset }
         })()
     const node: CanvasNode = {
@@ -735,8 +745,8 @@ export function CanvasEditorApp() {
       type: 'text',
       x: position.x,
       y: position.y,
-      width: 580,
-      height: 380,
+      width: size.width,
+      height: size.height,
       text,
       'x-superboard': { kind: 'pele', diagram, code },
     }
@@ -749,16 +759,20 @@ export function CanvasEditorApp() {
   function insertScheduleBlock(point?: { x: number; y: number }) {
     if (!canvas) return
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'schedule')
+    const size = defaultBlockSize('schedule')
     const position = point
-      ? { x: Math.round(point.x - 450), y: Math.round(point.y - 300) }
-      : viewportCenter(900, 600)
+      ? {
+          x: Math.round(point.x - size.width / 2),
+          y: Math.round(point.y - size.height / 2),
+        }
+      : viewportCenter(size.width, size.height)
     const node: CanvasNode = {
       id,
       type: 'text',
       x: position.x,
       y: position.y,
-      width: 900,
-      height: 600,
+      width: size.width,
+      height: size.height,
       text: '',
       'x-superboard': { kind: 'schedule', scheduleEvents: [] },
     }
@@ -772,17 +786,21 @@ export function CanvasEditorApp() {
     const url = normalizeMediaUrl(value)
     if (!url) return
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'media')
+    const size = defaultBlockSize('media')
     const position = mediaInsertPoint
-      ? { x: Math.round(mediaInsertPoint.x - 240), y: Math.round(mediaInsertPoint.y - 160) }
-      : viewportCenter(480, 320)
+      ? {
+          x: Math.round(mediaInsertPoint.x - size.width / 2),
+          y: Math.round(mediaInsertPoint.y - size.height / 2),
+        }
+      : viewportCenter(size.width, size.height)
     const node: CanvasNode = {
       id,
       type: 'link',
       url,
       x: position.x,
       y: position.y,
-      width: 480,
-      height: 320,
+      width: size.width,
+      height: size.height,
       'x-superboard': {
         kind: 'media',
         media: { kind: detectMediaKind(url), url },
@@ -1852,6 +1870,9 @@ export function CanvasEditorApp() {
                     }}
                     focusedGroupId={focusedGroupId}
                     activeEditingId={markdownEditingId ?? textEditingId}
+                    guidesEnabled={
+                      canvas['x-superboard']?.settings?.guides ?? true
+                    }
                     onToggleBlockEdit={toggleBlockEdit}
                     onFocusBlockEdit={openMarkdownFocus}
                     onDeleteBlock={deleteBlock}

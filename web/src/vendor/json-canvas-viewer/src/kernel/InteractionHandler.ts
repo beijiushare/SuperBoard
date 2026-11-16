@@ -149,7 +149,14 @@ export default class InteractionHandler extends BaseModule<Options, Augmentation
 	};
 
 	trueZoom = (_factor: number, origin: Coordinates) => {
-		const newScale = Math.max(Math.min(this.DM.data.scale * _factor, 20), 0.05);
+		const settings = (
+			this.DM.data.canvasData as {
+				'x-superboard'?: { settings?: { zoomMin?: number; zoomMax?: number } }
+			}
+		)['x-superboard']?.settings;
+		const min = settings?.zoomMin ?? 0.05;
+		const max = Math.max(min, settings?.zoomMax ?? 20);
+		const newScale = Math.max(Math.min(this.DM.data.scale * _factor, max), min);
 		const scale = this.DM.data.scale;
 		if (newScale === scale) return;
 		const factor = newScale / this.DM.data.scale;

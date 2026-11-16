@@ -8,6 +8,7 @@ import type {
 } from '../model'
 import { collectDescendants } from './hierarchy'
 import { useFloatingPanel } from './useFloatingPanel'
+import { WindowDragHandle } from './WindowDragHandle'
 
 interface CanvasStylePanelProps {
   canvas: CanvasDocument
@@ -132,7 +133,21 @@ export function CanvasStylePanel({
   const edge = selectedEdgeId
     ? canvas.edges.find((item) => item.id === selectedEdgeId)
     : undefined
-  if (nodes.length === 0 && !edge) return null
+  const boardSettings = canvas['x-superboard']?.settings ?? {}
+  const hasSelection = nodes.length > 0 || Boolean(edge)
+
+  function updateBoardSettings(patch: NonNullable<typeof boardSettings>) {
+    const root = canvas['x-superboard']
+    if (!root) return
+    onBeforeChange()
+    onApply({
+      ...canvas,
+      'x-superboard': {
+        ...root,
+        settings: { ...boardSettings, ...patch },
+      },
+    })
+  }
 
   const shapes = nodes.filter((node) => kindOf(node) === 'shape')
   const texts = nodes.filter((node) => node.type === 'text' && (!kindOf(node) || kindOf(node) === 'text'))
@@ -318,12 +333,159 @@ export function CanvasStylePanel({
           aria-label="拖动样式面板"
           {...handleProps}
         >
-          <span className="sb-window-dots" />
+          <WindowDragHandle />
         </div>
-        <span className="sb-style-panel-icon" aria-hidden="true" />
         <strong>样式面板</strong>
       </div>
       <div className="sb-style-panel-content">
+      {!hasSelection ? (
+        <>
+          <section>
+            <h3>画布</h3>
+            <div className="sb-style-row">
+              <span>背景</span>
+              <div className="sb-style-color-row">
+                {['#ffffff', '#f8f7f3', '#f6f5f1', '#f3efe8', '#eef3fb', '#f7eef6'].map(
+                  (color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={`sb-style-color${
+                        (boardSettings.background ?? '#ffffff') === color
+                          ? ' is-active'
+                          : ''
+                      }`}
+                      style={{ background: color }}
+                      onClick={() => updateBoardSettings({ background: color })}
+                    />
+                  ),
+                )}
+                <input
+                  className="sb-style-color-input"
+                  type="color"
+                  value={boardSettings.background ?? '#ffffff'}
+                  onChange={(event) =>
+                    updateBoardSettings({ background: event.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="sb-style-row">
+              <span>网格</span>
+              <div className="sb-style-buttons">
+                {([
+                  ['none', '无'],
+                  ['dots', '点'],
+                  ['lines', '线'],
+                ] as const).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={
+                      (boardSettings.grid ?? 'dots') === value
+                        ? 'is-active'
+                        : undefined
+                    }
+                    onClick={() => updateBoardSettings({ grid: value })}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="sb-style-row">
+              <span>对齐提示</span>
+              <button
+                type="button"
+                className={`sb-style-toggle${
+                  (boardSettings.guides ?? true) ? ' is-active' : ''
+                }`}
+                onClick={() =>
+                  updateBoardSettings({
+                    guides: !(boardSettings.guides ?? true),
+                  })
+                }
+              >
+                {(boardSettings.guides ?? true) ? '开启' : '关闭'}
+              </button>
+            </div>
+          </section>
+          <section>
+            <h3>缩放</h3>
+            <div className="sb-style-row">
+              <span>最小值</span>
+              <input
+                className="sb-style-number"
+                type="number"
+                min={5}
+                max={2000}
+                step={5}
+                value={Math.round((boardSettings.zoomMin ?? 0.05) * 100)}
+                onChange={(event) =>
+                  updateBoardSettings({
+                    zoomMin: Math.max(0.05, Number(event.target.value) / 100),
+                  })
+                }
+              />
+              <em className="sb-style-value">%</em>
+            </div>
+            <div className="sb-style-row">
+              <span>最大值</span>
+              <input
+                className="sb-style-number"
+                type="number"
+                min={5}
+                max={2000}
+                step={5}
+                value={Math.round((boardSettings.zoomMax ?? 20) * 100)}
+                onChange={(event) =>
+                  updateBoardSettings({
+                    zoomMax: Math.max(0.05, Number(event.target.value) / 100),
+                  })
+                }
+              />
+              <em className="sb-style-value">%</em>
+            </div>
+          </section>
+          <section>
+            <h3>新增元素</h3>
+            <div className="sb-style-row">
+              <span>宽度</span>
+              <input
+                className="sb-style-number"
+                type="number"
+                min={40}
+                placeholder="按类型"
+                value={boardSettings.defaultBlockWidth ?? ''}
+                onChange={(event) =>
+                  updateBoardSettings({
+                    defaultBlockWidth: event.target.value
+                      ? Number(event.target.value)
+                      : undefined,
+                  })
+                }
+              />
+            </div>
+            <div className="sb-style-row">
+              <span>高度</span>
+              <input
+                className="sb-style-number"
+                type="number"
+                min={40}
+                placeholder="按类型"
+                value={boardSettings.defaultBlockHeight ?? ''}
+                onChange={(event) =>
+                  updateBoardSettings({
+                    defaultBlockHeight: event.target.value
+                      ? Number(event.target.value)
+                      : undefined,
+                  })
+                }
+              />
+            </div>
+          </section>
+        </>
+      ) : null}
       {edge ? (
         <section>
           <h3>箭头</h3>

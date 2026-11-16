@@ -431,8 +431,8 @@ export function CanvasEditorTools({
       kind: 'text',
       x,
       y,
-      width: 260,
-      height: 120,
+      width: canvas['x-superboard']?.settings?.defaultBlockWidth ?? 260,
+      height: canvas['x-superboard']?.settings?.defaultBlockHeight ?? 120,
       value: '',
       fontSize: 16,
     })

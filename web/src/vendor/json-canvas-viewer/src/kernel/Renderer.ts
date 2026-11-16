@@ -334,6 +334,27 @@ export default class Renderer extends BaseModule {
 		const gap = DOT_BASE_GAP * 2 ** scaleLevel * scale;
 		const container = this.DM.data.container;
 		const color = this.SM.getNamedColor('dots');
+		const settings = (
+			this.DM.data.canvasData as {
+				'x-superboard'?: {
+					settings?: { background?: string; grid?: 'none' | 'dots' | 'lines' }
+				}
+			}
+		)['x-superboard']?.settings;
+		container.style.backgroundColor = settings?.background ?? '#ffffff';
+		const grid = settings?.grid ?? 'dots';
+		if (grid === 'none') {
+			container.style.backgroundImage = 'none';
+			container.style.backgroundSize = '';
+			container.style.backgroundPosition = '';
+			return;
+		}
+		if (grid === 'lines') {
+			container.style.backgroundImage = `linear-gradient(to right, ${color} 1px, transparent 1px), linear-gradient(to bottom, ${color} 1px, transparent 1px)`;
+			container.style.backgroundSize = `${gap}px ${gap}px`;
+			container.style.backgroundPosition = `${offsetX % gap}px 0, 0 ${offsetY % gap}px`;
+			return;
+		}
 		container.style.backgroundImage = `radial-gradient(circle, ${color} ${DOT_RADIUS}px, transparent ${DOT_RADIUS}px)`;
 		container.style.backgroundSize = `${gap}px ${gap}px`;
 		container.style.backgroundPosition = `${offsetX % gap}px ${offsetY % gap}px`;
