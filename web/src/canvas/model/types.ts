@@ -178,6 +178,13 @@ export interface SuperBoardCanvasSettings {
   zoomMax?: number
   defaultBlockWidth?: number
   defaultBlockHeight?: number
+  stylePanelOpen?: boolean
+  toolPaletteOpen?: boolean
+  viewport?: {
+    offsetX: number
+    offsetY: number
+    scale: number
+  }
 }
 
 export interface SuperBoardRootExtension {

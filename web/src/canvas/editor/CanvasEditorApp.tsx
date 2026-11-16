@@ -123,7 +123,7 @@ export function CanvasEditorApp() {
       ? 'private'
       : 'public',
   )
-  const [stylePanelOpen, setStylePanelOpen] = useState(false)
+  const [stylePanelOpen, setStylePanelOpen] = useState(true)
   const [menuPanelOpen, setMenuPanelOpen] = useState(true)
   const [directorMode, setDirectorMode] = useState(false)
   const [presentation, setPresentation] = useState(false)
@@ -157,6 +157,7 @@ export function CanvasEditorApp() {
   const clipboardRef = useRef<Clipboard | null>(null)
   const pasteCountRef = useRef(0)
   const pendingViewportRef = useRef<Viewport | null>(null)
+  const viewportSaveTimerRef = useRef<number | null>(null)
   const revisionRef = useRef(0)
   const savingRef = useRef(false)
   const canvasRef = useRef<CanvasDocument | null>(null)
@@ -208,6 +209,13 @@ export function CanvasEditorApp() {
     window.addEventListener('pointerdown', onPointerDown, true)
     return () => window.removeEventListener('pointerdown', onPointerDown, true)
   }, [])
+
+  function applyCanvasUiSettings(next: CanvasDocument) {
+    const settings = next['x-superboard']?.settings
+    setStylePanelOpen(settings?.stylePanelOpen ?? true)
+    setMenuPanelOpen(settings?.toolPaletteOpen ?? true)
+    pendingViewportRef.current = settings?.viewport ?? null
+  }
 
   const handleNodeSelect = useCallback(
     (id: string) => {
@@ -296,6 +304,7 @@ export function CanvasEditorApp() {
         normalizeMarkdownLocks(next)
         setSelectedSlug(first.slug)
         setScope(first.scope)
+        applyCanvasUiSettings(next)
         setCanvas(next)
         resetMarkdownEditing()
         setTextEditingId(null)
@@ -320,6 +329,95 @@ export function CanvasEditorApp() {
     if (!viewport) return
     pendingViewportRef.current = null
     writeViewport(viewerRef.current, viewport)
+  }, [canvas])
+
+  useEffect(() => {
+    const current = canvasRef.current
+    if (!current) return
+    const root = current['x-superboard']
+    if (!root) return
+    const settings = root.settings
+    if (
+      (settings?.stylePanelOpen ?? true) === stylePanelOpen &&
+      (settings?.toolPaletteOpen ?? true) === menuPanelOpen
+    ) {
+      return
+    }
+    const next = {
+      ...current,
+      'x-superboard': {
+        ...root,
+        settings: {
+          ...settings,
+          stylePanelOpen,
+          toolPaletteOpen: menuPanelOpen,
+        },
+      },
+    }
+    canvasRef.current = next
+    setCanvas(next)
+    markDirty()
+  }, [canvas, menuPanelOpen, stylePanelOpen])
+
+  useEffect(() => {
+    const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
+    if (!viewer?.container) return
+    let dm: DataManagerLike
+    let controller: {
+      onRefresh: { subscribe: (callback: () => void) => () => void }
+    }
+    try {
+      dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
+      controller = viewer.container.get(internal.Controller as never) as {
+        onRefresh: { subscribe: (callback: () => void) => () => void }
+      }
+    } catch {
+      return
+    }
+    const saveViewport = () => {
+      if (viewportSaveTimerRef.current) {
+        window.clearTimeout(viewportSaveTimerRef.current)
+      }
+      viewportSaveTimerRef.current = window.setTimeout(() => {
+        viewportSaveTimerRef.current = null
+        const document = canvasRef.current
+        if (!document) return
+        const root = document['x-superboard']
+        if (!root) return
+        const viewport = {
+          offsetX: dm.data.offsetX,
+          offsetY: dm.data.offsetY,
+          scale: dm.data.scale,
+        }
+        const previous = root.settings?.viewport
+        if (
+          previous &&
+          previous.offsetX === viewport.offsetX &&
+          previous.offsetY === viewport.offsetY &&
+          previous.scale === viewport.scale
+        ) {
+          return
+        }
+        const next = {
+          ...document,
+          'x-superboard': {
+            ...root,
+            settings: { ...root.settings, viewport },
+          },
+        }
+        canvasRef.current = next
+        setCanvas(next)
+        markDirty()
+      }, 500)
+    }
+    const unsubscribe = controller.onRefresh.subscribe(saveViewport)
+    return () => {
+      unsubscribe()
+      if (viewportSaveTimerRef.current) {
+        window.clearTimeout(viewportSaveTimerRef.current)
+        viewportSaveTimerRef.current = null
+      }
+    }
   }, [canvas])
 
   useEffect(() => {
@@ -1414,6 +1512,7 @@ export function CanvasEditorApp() {
     setFrameControllerOpen(false)
     setSelectedSlug(item.slug)
     setScope(item.scope)
+    applyCanvasUiSettings(next)
     setCanvas(next)
     setSaveState('saved')
     expandPath(item.path)
