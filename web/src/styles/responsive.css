@@ -21,6 +21,10 @@
       visibility 0s linear 0s;
   }
 
+  .sb-tree-resizer {
+    display: none;
+  }
+
   .sb-tree-panel.is-collapsed {
     margin-left: 0;
     opacity: 0;

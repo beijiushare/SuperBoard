@@ -1,8 +1,9 @@
 .sb-tree-panel {
+  position: relative;
   display: flex;
-  width: 264px;
+  width: var(--sb-tree-width, 264px);
   min-height: 0;
-  flex: 0 0 264px;
+  flex: 0 0 var(--sb-tree-width, 264px);
   flex-direction: column;
   border-right: 1px solid #dedbd2;
   background: #fbfaf6;
@@ -13,7 +14,7 @@
 }
 
 .sb-tree-panel.is-collapsed {
-  margin-left: -264px;
+  margin-left: calc(var(--sb-tree-width, 264px) * -1);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -21,6 +22,38 @@
     margin-left 280ms cubic-bezier(0.32, 0.72, 0, 1),
     opacity 200ms ease,
     visibility 0s linear 280ms;
+}
+
+.sb-tree-resizer {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  right: -3px;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.sb-tree-resizer::after {
+  position: absolute;
+  top: 0;
+  right: 2px;
+  bottom: 0;
+  width: 1px;
+  background: transparent;
+  content: '';
+  transition: background 120ms ease;
+}
+
+.sb-tree-resizer:hover::after,
+.sb-tree-resizer:active::after {
+  background: #b8b1a3;
+}
+
+body.sb-tree-resizing {
+  cursor: col-resize;
+  user-select: none;
 }
 
 .sb-tree-header {
