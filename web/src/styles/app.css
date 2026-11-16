@@ -587,7 +587,7 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: 0 6px 6px;
+  padding: 10px 6px 6px;
   border: 1px solid #dedbd2;
   border-radius: 10px;
   background: rgba(251, 250, 246, 0.98);
@@ -596,31 +596,27 @@
 }
 
 .canvas-tool-palette-handle {
-  position: relative;
+  display: grid;
   width: 100%;
-  height: 20px;
+  height: 24px;
   margin-bottom: 2px;
   border-bottom: 1px solid #e5e1d8;
   color: #a8a397;
   cursor: grab;
+  place-items: center;
   touch-action: none;
-}
-
-.canvas-tool-palette-handle::before {
-  position: absolute;
-  top: 7px;
-  left: 50%;
-  width: 18px;
-  height: 2px;
-  border-radius: 2px;
-  background: currentColor;
-  box-shadow: 0 -4px 0 currentColor, 0 4px 0 currentColor;
-  content: '';
-  transform: translateX(-50%);
 }
 
 .canvas-tool-palette-handle:active {
   cursor: grabbing;
+}
+
+.sb-window-dots {
+  width: 18px;
+  height: 18px;
+  background-image: radial-gradient(currentColor 1.4px, transparent 1.5px);
+  background-position: 3px 3px;
+  background-size: 6px 6px;
 }
 
 .canvas-tool-button {
@@ -658,6 +654,7 @@
   width: 0;
   height: 0;
   border-top: 4px solid currentColor;
+  border-right: 4px solid transparent;
   border-left: 4px solid transparent;
   opacity: 0.65;
 }
@@ -738,16 +735,63 @@
 .sb-style-panel {
   position: absolute;
   z-index: 8;
-  top: 64px;
-  right: 16px;
-  width: 224px;
+  display: flex;
+  width: 252px;
   max-height: calc(100% - 32px);
-  padding: 12px;
-  overflow-y: auto;
+  flex-direction: column;
+  overflow: hidden;
   border: 1px solid #dedbd2;
   border-radius: 10px;
-  background: rgba(251, 250, 246, 0.96);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  background: rgba(251, 250, 246, 0.98);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+}
+
+.sb-style-panel-header {
+  display: flex;
+  min-height: 42px;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 8px;
+  border-bottom: 1px solid #e6e2d8;
+  color: #5c584e;
+}
+
+.sb-style-panel-drag {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  color: #a8a397;
+  cursor: grab;
+  place-items: center;
+  touch-action: none;
+}
+
+.sb-style-panel-drag:active {
+  cursor: grabbing;
+}
+
+.sb-style-panel-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border: 2px solid currentColor;
+  color: #2f80ed;
+}
+
+.sb-style-panel-header strong {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-style-panel-content {
+  min-height: 0;
+  padding: 12px;
+  overflow-y: auto;
 }
 
 .sb-style-panel section + section {

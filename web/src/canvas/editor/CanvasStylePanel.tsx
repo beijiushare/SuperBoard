@@ -7,6 +7,7 @@ import type {
   SuperBoardStyle,
 } from '../model'
 import { collectDescendants } from './hierarchy'
+import { useFloatingPanel } from './useFloatingPanel'
 
 interface CanvasStylePanelProps {
   canvas: CanvasDocument
@@ -122,6 +123,10 @@ export function CanvasStylePanel({
   onBeforeChange,
   onApply,
 }: CanvasStylePanelProps) {
+  const { rootRef, position, handleProps } = useFloatingPanel({
+    alignRight: true,
+    centerVertically: true,
+  })
   const selected = new Set(selectedIds)
   const nodes = canvas.nodes.filter((node) => selected.has(node.id))
   const edge = selectedEdgeId
@@ -300,7 +305,25 @@ export function CanvasStylePanel({
   const firstMedia = mediaNodes[0]?.['x-superboard']?.media
 
   return (
-    <aside className="sb-style-panel">
+    <div
+      ref={rootRef}
+      className="sb-style-panel"
+      style={{ left: position.x, top: position.y }}
+    >
+      <div className="sb-style-panel-header">
+        <div
+          className="sb-style-panel-drag"
+          role="button"
+          tabIndex={-1}
+          aria-label="拖动样式面板"
+          {...handleProps}
+        >
+          <span className="sb-window-dots" />
+        </div>
+        <span className="sb-style-panel-icon" aria-hidden="true" />
+        <strong>样式面板</strong>
+      </div>
+      <div className="sb-style-panel-content">
       {edge ? (
         <section>
           <h3>箭头</h3>
@@ -726,6 +749,7 @@ export function CanvasStylePanel({
           ) : null}
         </section>
       ) : null}
-    </aside>
+      </div>
+    </div>
   )
 }

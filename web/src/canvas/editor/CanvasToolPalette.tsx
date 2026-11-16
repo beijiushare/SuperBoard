@@ -1,11 +1,10 @@
 import {
   useEffect,
-  useRef,
   useState,
   type MouseEvent as ReactMouseEvent,
-  type PointerEvent as ReactPointerEvent,
 } from 'react'
 import type { EditorTool } from './tools'
+import { useFloatingPanel } from './useFloatingPanel'
 
 type ShapeTool = Extract<EditorTool, 'rect' | 'rounded-rect' | 'ellipse' | 'line' | 'diamond'>
 
@@ -126,14 +125,7 @@ export function CanvasToolPalette({
   onInsertPele,
   onInsertSchedule,
 }: CanvasToolPaletteProps) {
-  const rootRef = useRef<HTMLDivElement>(null)
-  const dragRef = useRef<{
-    pointerX: number
-    pointerY: number
-    x: number
-    y: number
-  } | null>(null)
-  const [position, setPosition] = useState({ x: 16, y: 16 })
+  const { rootRef, position, handleProps } = useFloatingPanel()
   const [flyout, setFlyout] = useState<Flyout | null>(null)
 
   useEffect(() => {
@@ -157,36 +149,6 @@ export function CanvasToolPalette({
       x: Math.min(rect.right + 8, window.innerWidth - 210),
       y: Math.min(rect.top, window.innerHeight - 190),
     })
-  }
-
-  function startDrag(event: ReactPointerEvent<HTMLDivElement>) {
-    event.preventDefault()
-    event.stopPropagation()
-    event.currentTarget.setPointerCapture(event.pointerId)
-    dragRef.current = {
-      pointerX: event.clientX,
-      pointerY: event.clientY,
-      x: position.x,
-      y: position.y,
-    }
-  }
-
-  function moveDrag(event: ReactPointerEvent<HTMLDivElement>) {
-    const drag = dragRef.current
-    const root = rootRef.current
-    if (!drag || !root) return
-    const stage = root.parentElement
-    if (!stage) return
-    const maxX = Math.max(0, stage.clientWidth - root.offsetWidth - 8)
-    const maxY = Math.max(0, stage.clientHeight - root.offsetHeight - 8)
-    setPosition({
-      x: Math.max(0, Math.min(maxX, drag.x + event.clientX - drag.pointerX)),
-      y: Math.max(0, Math.min(maxY, drag.y + event.clientY - drag.pointerY)),
-    })
-  }
-
-  function endDrag() {
-    dragRef.current = null
   }
 
   function chooseShape(shape: ShapeTool) {
@@ -214,11 +176,10 @@ export function CanvasToolPalette({
           role="button"
           tabIndex={-1}
           aria-label="拖动操作栏"
-          onPointerDown={startDrag}
-          onPointerMove={moveDrag}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-        />
+          {...handleProps}
+        >
+          <span className="sb-window-dots" />
+        </div>
         <button
           type="button"
           className={`canvas-tool-button${tool === 'select' ? ' is-active' : ''}`}
