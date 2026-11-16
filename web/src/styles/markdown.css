@@ -1270,4 +1270,14 @@
   background: #f2f2f2 !important;
 }
 
+.sb-md-editor .vditor-linenumber__rows,
+.sb-md-focus-body .vditor-linenumber__rows {
+  display: none;
+}
+
+.sb-md-editor .vditor-linenumber,
+.sb-md-focus-body .vditor-linenumber {
+  padding-left: 0 !important;
+}
+
 
