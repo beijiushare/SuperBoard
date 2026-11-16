@@ -33,7 +33,7 @@ export function isRatioLocked(node: CanvasNode) {
   if (!kind) return false
   const locked = node['x-superboard']?.ratioLocked
   if (locked !== undefined) return locked
-  return kind !== 'text' && kind !== 'schedule'
+  return kind !== 'text'
 }
 
 export function contentScale(node: CanvasNode) {
