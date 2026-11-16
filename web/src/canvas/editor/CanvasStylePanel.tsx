@@ -149,6 +149,32 @@ export function CanvasStylePanel({
     })
   }
 
+  function updateGeometry(patch: {
+    width?: number
+    height?: number
+    rotation?: number
+  }) {
+    if (nodes.length === 0) return
+    const targetIds = new Set(nodes.map((node) => node.id))
+    onBeforeChange()
+    onApply({
+      ...canvas,
+      nodes: canvas.nodes.map((node) => {
+        if (!targetIds.has(node.id)) return node
+        const extension = node['x-superboard'] ?? { kind: fallbackKind(node) }
+        return {
+          ...node,
+          width: patch.width ?? node.width,
+          height: patch.height ?? node.height,
+          'x-superboard': {
+            ...extension,
+            rotation: patch.rotation ?? extension.rotation,
+          },
+        }
+      }),
+    }, selectedIds)
+  }
+
   const shapes = nodes.filter((node) => kindOf(node) === 'shape')
   const texts = nodes.filter((node) => node.type === 'text' && (!kindOf(node) || kindOf(node) === 'text'))
   const blocks = nodes.filter((node) => {
@@ -314,6 +340,7 @@ export function CanvasStylePanel({
     moveBy(moves)
   }
 
+  const firstNode = nodes[0]
   const firstShape = shapes[0]
   const firstText = texts[0]
   const firstBlock = blocks[0]
@@ -338,6 +365,54 @@ export function CanvasStylePanel({
         <strong>样式面板</strong>
       </div>
       <div className="sb-style-panel-content">
+      {firstNode ? (
+        <section>
+          <h3>变换</h3>
+          <div className="sb-style-row">
+            <span>角度</span>
+            <input
+              className="sb-style-number"
+              type="number"
+              step={1}
+              value={Math.round(firstNode['x-superboard']?.rotation ?? 0)}
+              onChange={(event) =>
+                updateGeometry({ rotation: Number(event.target.value) || 0 })
+              }
+            />
+            <em className="sb-style-value">°</em>
+          </div>
+          <div className="sb-style-row">
+            <span>宽度</span>
+            <input
+              className="sb-style-number"
+              type="number"
+              min={1}
+              value={Math.round(firstNode.width)}
+              onChange={(event) => {
+                const value = Number(event.target.value)
+                if (Number.isFinite(value) && value > 0) {
+                  updateGeometry({ width: value })
+                }
+              }}
+            />
+          </div>
+          <div className="sb-style-row">
+            <span>高度</span>
+            <input
+              className="sb-style-number"
+              type="number"
+              min={1}
+              value={Math.round(firstNode.height)}
+              onChange={(event) => {
+                const value = Number(event.target.value)
+                if (Number.isFinite(value) && value > 0) {
+                  updateGeometry({ height: value })
+                }
+              }}
+            />
+          </div>
+        </section>
+      ) : null}
       {!hasSelection ? (
         <>
           <section>

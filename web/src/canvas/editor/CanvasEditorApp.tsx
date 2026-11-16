@@ -67,10 +67,13 @@ import { PeleCreateDialog } from './PeleCreateDialog'
 import { InputDialog } from '../../shared/ui/InputDialog'
 import {
   DEFAULT_BLOCK_SIZES,
+  SHAPE_DEFAULT_SIZE,
   blockDefinition,
   blockEditor,
   blockKind,
+  isActionableNode,
   isRatioLocked,
+  isShapeNode,
 } from './blocks'
 import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
@@ -660,7 +663,7 @@ export function CanvasEditorApp() {
   function toggleRatioLock(id: string) {
     const document = canvasRef.current
     const node = document?.nodes.find((item) => item.id === id)
-    if (!document || !node || !blockKind(node)) return
+    if (!document || !node || !isActionableNode(node)) return
     recordHistory()
     const extension = ensureExtension(node)
     const wasLocked = isRatioLocked(node)
@@ -675,8 +678,12 @@ export function CanvasEditorApp() {
     const node = document?.nodes.find((item) => item.id === id)
     if (!document || !node) return
     const kind = blockKind(node)
-    if (!kind) return
-    const target = DEFAULT_BLOCK_SIZES[kind]
+    const target = kind
+      ? DEFAULT_BLOCK_SIZES[kind]
+      : isShapeNode(node)
+        ? SHAPE_DEFAULT_SIZE
+        : null
+    if (!target) return
     if (
       node.width === target.width &&
       node.height === target.height &&

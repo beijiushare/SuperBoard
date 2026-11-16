@@ -13,6 +13,8 @@ export const DEFAULT_BLOCK_SIZES = {
   media: { width: 480, height: 320 },
 } as const
 
+export const SHAPE_DEFAULT_SIZE = { width: 160, height: 160 } as const
+
 export interface BlockDefinition {
   kind: BlockKind
   label: string
@@ -91,10 +93,19 @@ export function isBlockNode(node: CanvasNode) {
   return blockKind(node) !== null
 }
 
+export function isShapeNode(node: CanvasNode) {
+  return node['x-superboard']?.kind === 'shape'
+}
+
+export function isActionableNode(node: CanvasNode) {
+  return isBlockNode(node) || isShapeNode(node)
+}
+
 export function isRatioLocked(node: CanvasNode) {
   const definition = blockDefinition(node)
-  if (!definition) return false
   const locked = node['x-superboard']?.ratioLocked
+  if (isShapeNode(node)) return locked ?? false
+  if (!definition) return false
   return locked !== undefined ? locked : definition.ratioLocked
 }
 

@@ -8,7 +8,13 @@ import {
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument, CanvasEdge, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
-import { blockKind, contentScale, isBlockNode, isRatioLocked } from './blocks'
+import {
+  blockKind,
+  contentScale,
+  isActionableNode,
+  isBlockNode,
+  isRatioLocked,
+} from './blocks'
 import { BlockActions } from './BlockActions'
 import { edgeGeometry, edgePath } from './edges'
 import {
@@ -461,7 +467,7 @@ export function CanvasEditorOverlay({
       startHeight: target.height,
       scale: dm.data.scale,
       corner,
-      ratioLocked: isBlockNode(target) && isRatioLocked(target),
+      ratioLocked: isActionableNode(target) && isRatioLocked(target),
       startContentScale: contentScale(target),
     }
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -1165,7 +1171,7 @@ function cornerRatioScale(
         .filter(
           (node) =>
             actionsVisible &&
-            isBlockNode(node) &&
+            isActionableNode(node) &&
             ((selectedIds.length === 1 && selectedIds[0] === node.id) ||
               activeEditingId === node.id) &&
             (node.id !== selectionSuppressedId ||
