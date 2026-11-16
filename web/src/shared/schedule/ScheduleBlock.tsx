@@ -40,8 +40,6 @@ type Selection = {
   start: string
   end: string
   allDay: boolean
-  x: number
-  y: number
 }
 
 export function ScheduleBlock({
@@ -51,7 +49,6 @@ export function ScheduleBlock({
   events?: SuperBoardScheduleEvent[]
   onEventsChange?: (events: SuperBoardScheduleEvent[]) => void
 }) {
-  const hostRef = useRef<HTMLDivElement | null>(null)
   const calendarRef = useRef<CalendarRef | null>(null)
   const [dialog, setDialog] = useState<ScheduleDialog | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
@@ -66,46 +63,12 @@ export function ScheduleBlock({
     setDialog({ type: 'edit', id, title })
   }
 
-  function localPoint(clientX: number, clientY: number) {
-    const host = hostRef.current
-    const rect = host?.getBoundingClientRect()
-    if (!host || !rect || rect.width === 0 || rect.height === 0) {
-      return { x: 12, y: 12 }
-    }
-    return {
-      x: (clientX - rect.left) * (host.clientWidth / rect.width),
-      y: (clientY - rect.top) * (host.clientHeight / rect.height),
-    }
-  }
-
   function handleSelect(info: DateSelectInfo) {
-    const fallback = info.jsEvent
-      ? localPoint(info.jsEvent.clientX, info.jsEvent.clientY)
-      : { x: 12, y: 12 }
-    const next = {
+    setSelectedEventId(null)
+    setSelection({
       start: info.startStr,
       end: info.endStr,
       allDay: info.allDay,
-      x: fallback.x,
-      y: fallback.y,
-    }
-    setSelectedEventId(null)
-    setSelection(next)
-    requestAnimationFrame(() => {
-      const host = hostRef.current
-      const highlight = host?.querySelector<HTMLElement>('.fc-highlight')
-      if (!host || !highlight) return
-      const highlightRect = highlight.getBoundingClientRect()
-      const point = localPoint(highlightRect.left + 6, highlightRect.top + 6)
-      setSelection((current) =>
-        current && current.start === next.start && current.end === next.end
-          ? {
-              ...current,
-              x: Math.max(8, Math.min(point.x, host.clientWidth - 140)),
-              y: Math.max(8, Math.min(point.y, host.clientHeight - 40)),
-            }
-          : current,
-      )
     })
   }
 
@@ -183,7 +146,7 @@ export function ScheduleBlock({
 
   const buttons = {
     add: {
-      text: 'Add Event',
+      text: '新建日程',
       click: () => {
         const start = selection ? new Date(selection.start) : new Date()
         const end = selection ? new Date(selection.end) : undefined
@@ -194,7 +157,7 @@ export function ScheduleBlock({
 
   return (
     <>
-      <div ref={hostRef} className="sb-schedule">
+      <div className="sb-schedule">
         <Calendar
           ref={calendarRef}
           colorScheme="light"
@@ -206,7 +169,6 @@ export function ScheduleBlock({
           events={events}
           selectable
           unselectAuto
-          unselectCancel=".sb-schedule-add-event"
           editable
           eventStartEditable
           eventDurationEditable
@@ -220,23 +182,6 @@ export function ScheduleBlock({
               : ''
           }
         />
-        {selection ? (
-          <button
-            type="button"
-            className="sb-schedule-add-event"
-            style={{ left: selection.x, top: selection.y }}
-            onPointerDown={(event) => event.stopPropagation()}
-            onClick={() => {
-              const start = new Date(selection.start)
-              const end = new Date(selection.end)
-              openAddDialog(start, end, selection.allDay)
-              setSelection(null)
-              calendarRef.current?.getApi().unselect()
-            }}
-          >
-            + 新建日程
-          </button>
-        ) : null}
       </div>
       {dialog ? (
         <InputDialog
