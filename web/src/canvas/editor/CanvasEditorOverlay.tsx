@@ -644,16 +644,16 @@ export function CanvasEditorOverlay({
     node.height = Math.max(40, Math.round(lines * fontSize * 1.45 + 28))
   }
 
-  function cornerRatioScale(
-    width: number,
-    height: number,
-    startWidth: number,
-    startHeight: number,
-  ) {
-    const scaleX = width / startWidth
-    const scaleY = height / startHeight
-    return Math.abs(scaleX - 1) >= Math.abs(scaleY - 1) ? scaleX : scaleY
-  }
+function cornerRatioScale(
+  width: number,
+  height: number,
+  startWidth: number,
+  startHeight: number,
+) {
+  const startRatio = startWidth / startHeight
+  const cornerRatio = width / height
+  return cornerRatio > startRatio ? width / startWidth : height / startHeight
+}
 
   function applyContentScale(drag: DragState, ratioScale: number) {
     if (!drag.ratioLocked || drag.nodes.length !== 1) return
