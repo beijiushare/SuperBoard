@@ -33,6 +33,13 @@ type ScheduleDialog =
   | { type: 'add'; start: Date; end?: Date; allDay: boolean }
   | { type: 'edit'; id: string; title: string }
 
+function currentScrollTime() {
+  const now = new Date()
+  return `${String(now.getHours()).padStart(2, '0')}:${String(
+    now.getMinutes(),
+  ).padStart(2, '0')}:00`
+}
+
 export function ScheduleBlock({
   events = [],
   onEventsChange,
@@ -42,6 +49,7 @@ export function ScheduleBlock({
 }) {
   const [dialog, setDialog] = useState<ScheduleDialog | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+  const [initialScrollTime] = useState(currentScrollTime)
 
   function openAddDialog(start = new Date(), end?: Date, allDay = false) {
     setDialog({ type: 'add', start, end, allDay })
@@ -132,6 +140,8 @@ export function ScheduleBlock({
           buttons={buttons}
           initialView="timeGridWeek"
           height="100%"
+          scrollTime={initialScrollTime}
+          nowIndicator
           events={events}
           editable
           eventStartEditable
