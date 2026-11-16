@@ -134,21 +134,23 @@ export function LinkSlot({
   const style = { width: '100%', height: '100%', border: 0, display: 'block' } as const
   const clipPath = mediaClipPath(media, node.width, node.height)
   return (
-    <div style={{ width: '100%', height: '100%', clipPath }}>
-      {media.kind === 'image' ? (
-        <img src={media.url} alt="" style={{ ...style, objectFit: 'cover' }} loading="lazy" />
-      ) : media.kind === 'video' ? (
-        <video src={media.url} controls style={{ ...style, objectFit: 'cover' }} />
-      ) : (
-        <iframe
-          src={media.url}
-          title="media"
-          sandbox="allow-scripts allow-same-origin allow-presentation"
-          referrerPolicy="no-referrer"
-          loading="lazy"
-          style={style}
-        />
-      )}
+    <div className="sb-block-scale">
+      <div style={{ width: '100%', height: '100%', clipPath }}>
+        {media.kind === 'image' ? (
+          <img src={media.url} alt="" style={{ ...style, objectFit: 'cover' }} loading="lazy" />
+        ) : media.kind === 'video' ? (
+          <video src={media.url} controls style={{ ...style, objectFit: 'cover' }} />
+        ) : (
+          <iframe
+            src={media.url}
+            title="media"
+            sandbox="allow-scripts allow-same-origin allow-presentation"
+            referrerPolicy="no-referrer"
+            loading="lazy"
+            style={style}
+          />
+        )}
+      </div>
     </div>
   )
 }

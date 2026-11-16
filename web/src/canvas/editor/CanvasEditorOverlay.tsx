@@ -658,7 +658,7 @@ function cornerRatioScale(
   function applyContentScale(drag: DragState, ratioScale: number) {
     if (!drag.ratioLocked || drag.nodes.length !== 1) return
     const kind = blockKind(drag.primary)
-    if (!kind || kind === 'media') return
+    if (!kind) return
     const extension = ensureExtension(drag.primary)
     extension.contentScale =
       Math.round((drag.startContentScale ?? 1) * ratioScale * 1000) / 1000

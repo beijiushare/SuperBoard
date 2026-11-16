@@ -588,6 +588,10 @@ export function CanvasEditorApp() {
               y: item.y + (item.height - height) / 2,
               width,
               height,
+              'x-superboard': {
+                ...ensureExtension(item),
+                contentScale: 1,
+              },
             }
           : item,
       ),

@@ -338,12 +338,14 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 			extension?.kind === 'text' ||
 			extension?.kind === 'markdown' ||
 			extension?.kind === 'pele' ||
+			extension?.kind === 'schedule' ||
+			extension?.kind === 'media' ||
 			(extension?.contentScale !== undefined && extension?.kind === undefined);
 		const contentScale = scalable ? extension?.contentScale ?? 1 : 1;
 		element.style.setProperty('--sb-content-scale', String(contentScale));
 		element.style.setProperty('--sb-content-width', `${100 / contentScale}%`);
 		element.style.setProperty('--sb-content-height', `${100 / contentScale}%`);
-		element.style.setProperty('--sb-markdown-font-size', `${16 * contentScale}px`);
+		element.style.setProperty('--sb-markdown-font-size', '16px');
 		element.style.transformOrigin = 'center center';
 		element.style.transform = rotation ? `rotate(${rotation}deg)` : '';
 	};
