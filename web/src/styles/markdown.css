@@ -154,6 +154,19 @@
   background: #fff;
 }
 
+.sb-markdown li.task-list-item,
+.sb-markdown-vditor.vditor-reset li.vditor-task,
+.sb-md-editor .vditor-reset li.vditor-task {
+  list-style: none;
+}
+
+.sb-markdown li.task-list-item > input[type='checkbox'],
+.sb-markdown-vditor.vditor-reset li.vditor-task > input[type='checkbox'],
+.sb-md-editor .vditor-reset li.vditor-task > input[type='checkbox'] {
+  margin: 0 0.4em 0 0;
+  vertical-align: middle;
+}
+
 .sb-markdown input[type='checkbox'] {
   margin-right: 0.4em;
 }
