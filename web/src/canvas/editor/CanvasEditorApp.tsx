@@ -65,7 +65,13 @@ import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
 import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { PeleCreateDialog } from './PeleCreateDialog'
 import { InputDialog } from '../../shared/ui/InputDialog'
-import { DEFAULT_BLOCK_SIZES, blockKind, isRatioLocked } from './blocks'
+import {
+  DEFAULT_BLOCK_SIZES,
+  blockDefinition,
+  blockEditor,
+  blockKind,
+  isRatioLocked,
+} from './blocks'
 import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
 import { CanvasToolPalette } from './CanvasToolPalette'
@@ -332,21 +338,11 @@ export function CanvasEditorApp() {
       if (!element?.id) return
       event.preventDefault()
       const node = canvasRef.current?.nodes.find((item) => item.id === element.id)
-      if (node?.['x-superboard']?.kind === 'markdown') {
-        openMarkdownEditor(node.id)
-        return
-      }
-      if (node?.['x-superboard']?.kind === 'pele') {
-        openPeleEditor(node.id)
-        return
-      }
-      if (node?.['x-superboard']?.kind === 'schedule') {
-        setSelectedIds([node.id])
+      if (node && blockEditor(node)) {
+        openBlockEditor(node.id)
         return
       }
       setSelectedIds([element.id])
-      setTool('text')
-      setEditRequest({ id: element.id, nonce: Date.now() })
     }
     container.addEventListener('dblclick', onDoubleClick)
     return () => container.removeEventListener('dblclick', onDoubleClick)
@@ -510,22 +506,43 @@ export function CanvasEditorApp() {
     }
   }
 
+  function openBlockEditor(id: string) {
+    const document = canvasRef.current
+    const node = document?.nodes.find((item) => item.id === id)
+    const editor = node ? blockEditor(node) : null
+    if (!editor) return
+    if (editor === 'markdown') {
+      closeTextEditing()
+      openMarkdownEditor(id)
+      return
+    }
+    if (editor === 'pele') {
+      openPeleEditor(id)
+      return
+    }
+    if (editor === 'schedule') {
+      closeMarkdownEditor()
+      setSelectedIds([id])
+      setTool('select')
+      return
+    }
+    closeMarkdownEditor()
+    setSelectedIds([id])
+    setTool('text')
+    setEditRequest({ id, nonce: Date.now() })
+  }
+
   function toggleBlockEdit(id: string) {
     const document = canvasRef.current
     const node = document?.nodes.find((item) => item.id === id)
-    if (!node) return
-    const kind = blockKind(node)
-    if (!kind) return
-    if (kind === 'markdown') {
+    const editor = node ? blockEditor(node) : null
+    if (!editor) return
+    if (editor === 'markdown') {
       closeTextEditing()
       toggleMarkdownEdit(id)
       return
     }
-    if (kind === 'pele') {
-      openPeleEditor(id)
-      return
-    }
-    if (kind === 'schedule') {
+    if (editor === 'schedule') {
       setSelectedIds([id])
       setTool('select')
       return
@@ -534,10 +551,7 @@ export function CanvasEditorApp() {
       closeTextEditing()
       return
     }
-    closeMarkdownEditor()
-    setSelectedIds([id])
-    setTool('text')
-    setEditRequest({ id, nonce: Date.now() })
+    openBlockEditor(id)
   }
 
   function closeTextEditing() {
@@ -617,9 +631,13 @@ export function CanvasEditorApp() {
   ) {
     if (!canvas) return
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), kind)
+    const size = DEFAULT_BLOCK_SIZES[kind]
     const position = point
-      ? { x: Math.round(point.x - 180), y: Math.round(point.y - 110) }
-      : viewportCenter(360, 220)
+      ? {
+          x: Math.round(point.x - size.width / 2),
+          y: Math.round(point.y - size.height / 2),
+        }
+      : viewportCenter(size.width, size.height)
     const code = 'flowchart LR\n    A[开始] --> B[结束]'
     const node: CanvasNode =
       kind === 'markdown'
@@ -628,8 +646,8 @@ export function CanvasEditorApp() {
             type: 'text',
             x: position.x,
             y: position.y,
-            width: 360,
-            height: 220,
+            width: size.width,
+            height: size.height,
             text: '# 新 Markdown\n\n在这里输入内容。',
             'x-superboard': {
               kind: 'markdown',
@@ -641,8 +659,8 @@ export function CanvasEditorApp() {
             type: 'text',
             x: position.x,
             y: position.y,
-            width: 360,
-            height: 220,
+            width: size.width,
+            height: size.height,
             text: `\`\`\`mermaid\n${code}\n\`\`\``,
             'x-superboard': { kind: 'pele', diagram: 'flowchart', code },
           }
@@ -1751,15 +1769,9 @@ export function CanvasEditorApp() {
           ? '保存中…'
           : '已保存'
   const menuNode = canvasMenu?.nodeId ? nodeMap.get(canvasMenu.nodeId) ?? null : null
-  const menuKind = menuNode?.['x-superboard']?.kind
+  const menuDefinition = menuNode ? blockDefinition(menuNode) : null
   const menuEditable = Boolean(
-    menuNode &&
-      ((menuNode.type === 'text' &&
-        (!menuKind ||
-          menuKind === 'text' ||
-          menuKind === 'markdown' ||
-          menuKind === 'pele')) ||
-        (menuNode.type === 'link' && menuKind === 'media')),
+    menuDefinition && menuDefinition.editor !== 'schedule',
   )
 
   return (
@@ -2005,15 +2017,7 @@ export function CanvasEditorApp() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (menuNode['x-superboard']?.kind === 'markdown') {
-                      openMarkdownEditor(menuNode.id)
-                    } else if (menuNode['x-superboard']?.kind === 'pele') {
-                      openPeleEditor(menuNode.id)
-                    } else {
-                      setSelectedIds([menuNode.id])
-                      setTool('text')
-                      setEditRequest({ id: menuNode.id, nonce: Date.now() })
-                    }
+                    openBlockEditor(menuNode.id)
                     setCanvasMenu(null)
                   }}
                 >

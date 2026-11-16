@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import { PeleView } from '../../shared/pele/PeleView'
@@ -40,6 +40,23 @@ function useNodeSelection(
   }, [id, onActive, onSelect])
 }
 
+function BlockSurface({
+  node,
+  children,
+}: {
+  node: object
+  children: ReactNode
+}) {
+  const markdown = extension(node)?.kind === 'markdown'
+  return (
+    <div
+      className={`sb-block-scale${markdown ? ' sb-markdown-block-scale' : ''}`}
+    >
+      {children}
+    </div>
+  )
+}
+
 export function TextSlot({
   node,
   onActive,
@@ -70,15 +87,7 @@ export function TextSlot({
     ) : (
       <div style={textStyle(node)}>{node.text}</div>
     )
-  return (
-    <div
-      className={`sb-block-scale${
-        ext?.kind === 'markdown' ? ' sb-markdown-block-scale' : ''
-      }`}
-    >
-      {content}
-    </div>
-  )
+  return <BlockSurface node={node}>{content}</BlockSurface>
 }
 
 function clampPercent(value: number | undefined, fallback: number) {
@@ -134,7 +143,7 @@ export function LinkSlot({
   const style = { width: '100%', height: '100%', border: 0, display: 'block' } as const
   const clipPath = mediaClipPath(media, node.width, node.height)
   return (
-    <div className="sb-block-scale">
+    <BlockSurface node={node}>
       <div style={{ width: '100%', height: '100%', clipPath }}>
         {media.kind === 'image' ? (
           <img src={media.url} alt="" style={{ ...style, objectFit: 'cover' }} loading="lazy" />
@@ -151,6 +160,6 @@ export function LinkSlot({
           />
         )}
       </div>
-    </div>
+    </BlockSurface>
   )
 }

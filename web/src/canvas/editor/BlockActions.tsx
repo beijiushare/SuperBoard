@@ -6,7 +6,7 @@ import refresh from 'react-useanimations/lib/refresh'
 import trash2 from 'react-useanimations/lib/trash2'
 import typeIcon from 'react-useanimations/lib/type'
 import type { CanvasNode } from '../model'
-import { blockKind, isRatioLocked } from './blocks'
+import { blockDefinition, isRatioLocked } from './blocks'
 
 interface BlockActionsProps {
   node: CanvasNode
@@ -39,9 +39,10 @@ export function BlockActions({
 }: BlockActionsProps) {
   const [actionsSize, setActionsSize] = useState({ width: 0, height: 0 })
   const actionsRef = useRef<HTMLDivElement>(null)
+  const definition = blockDefinition(node)
   const ratioLocked = isRatioLocked(node)
-  const markdownBlock = blockKind(node) === 'markdown'
-  const scheduleBlock = blockKind(node) === 'schedule'
+  const markdownBlock = definition?.focusable ?? false
+  const canEdit = definition ? definition.editor !== 'schedule' : false
 
   useLayoutEffect(() => {
     const element = actionsRef.current
@@ -124,7 +125,7 @@ export function BlockActions({
           interaction="click-replay"
         />
       </button>
-      {!scheduleBlock ? (
+      {canEdit ? (
         <button
           type="button"
           className={`sb-block-action${editing ? ' is-active' : ''}`}

@@ -10,6 +10,7 @@ import type {
   SuperBoardStroke,
 } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
+import { blockEditor } from './blocks'
 import { isLocked, nextFreeId, nodeMapOf, topAncestor } from './hierarchy'
 import { detectMediaKind, type EditorTool } from './tools'
 
@@ -325,15 +326,9 @@ export function CanvasEditorTools({
   }, [editRequest, canvas])
 
   function editKindOf(node: CanvasNode): Editing['kind'] | null {
-    const extension = node['x-superboard']
-    if (node.type === 'text') {
-      if (!extension?.kind || extension.kind === 'text') return 'text'
-      if (extension.kind === 'markdown') return 'markdown'
-      if (extension.kind === 'pele') return 'pele'
-      return null
-    }
-    if (node.type === 'link' && extension?.kind === 'media') return 'media'
-    return null
+    const editor = blockEditor(node)
+    if (!editor || editor === 'schedule') return null
+    return editor
   }
 
   function editingValue(node: CanvasNode, kind: Editing['kind']) {
