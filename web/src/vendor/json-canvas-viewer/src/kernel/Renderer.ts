@@ -14,6 +14,7 @@ const NODE_RADIUS = 12;
 const NODE_BORDER_WIDTH = 2;
 const DOT_RADIUS = 1; // Dot radius in CSS pixels
 const DOT_BASE_GAP = 10; // Base gap between dots in CSS pixels
+const MIN_GRID_GAP = 4; // Minimum on-screen grid spacing in CSS pixels
 
 const NODE_BORDER_HALF_WIDTH = NODE_BORDER_WIDTH / 2;
 
@@ -325,13 +326,18 @@ export default class Renderer extends BaseModule {
 		return [startControlX, startControlY, endControlX, endControlY];
 	};
 
+	private readonly gridGap = (scale: number) => {
+		let gap = DOT_BASE_GAP * scale;
+		while (gap < MIN_GRID_GAP) gap *= 2;
+		return gap;
+	};
+
 	private readonly applyGridBackground = (
 		scale: number,
 		offsetX: number,
 		offsetY: number,
 	) => {
-		const scaleLevel = -Math.floor(Math.log2(scale));
-		const gap = DOT_BASE_GAP * 2 ** scaleLevel * scale;
+		const gap = this.gridGap(scale);
 		const container = this.DM.data.container;
 		const color = this.SM.getNamedColor('dots');
 		const settings = (
@@ -361,8 +367,7 @@ export default class Renderer extends BaseModule {
 	};
 
 	private readonly drawGridDots = (scale: number, offsetX: number, offsetY: number) => {
-		const scaleLevel = -Math.floor(Math.log2(scale));
-		const actualGap = DOT_BASE_GAP * 2 ** scaleLevel * scale;
+		const actualGap = this.gridGap(scale);
 		const width = this.canvas.width;
 		const height = this.canvas.height;
 		const startX = offsetX % actualGap;
