@@ -7,6 +7,8 @@ import type {
   SuperBoardStyle,
 } from '../model'
 import { collectDescendants } from './hierarchy'
+import { ColorPicker } from './ColorPicker'
+import { StyleNumberControl } from './StyleNumberControl'
 import { useFloatingPanel } from './useFloatingPanel'
 import { WindowDragHandle } from './WindowDragHandle'
 
@@ -16,6 +18,7 @@ interface CanvasStylePanelProps {
   selectedEdgeId?: string | null
   onBeforeChange: () => void
   onApply: (next: CanvasDocument, selection?: string[]) => void
+  onRememberColor?: (color: string) => void
 }
 
 const EDGE_COLORS = [
@@ -123,6 +126,7 @@ export function CanvasStylePanel({
   selectedEdgeId = null,
   onBeforeChange,
   onApply,
+  onRememberColor,
 }: CanvasStylePanelProps) {
   const { rootRef, position, handleProps } = useFloatingPanel({
     alignRight: true,
@@ -173,6 +177,20 @@ export function CanvasStylePanel({
         }
       }),
     }, selectedIds)
+  }
+
+  function updateCommonStyle(patch: Partial<SuperBoardStyle>) {
+    applyTo(nodes, (node) => {
+      if (kindOf(node) !== 'shape') return withStyle(node, patch)
+      const { borderColor, borderWidth, ...rest } = patch
+      return withStyle(node, {
+        ...rest,
+        ...(borderColor !== undefined ? { stroke: borderColor } : {}),
+        ...(borderWidth !== undefined
+          ? { strokeWidth: Number(borderWidth) || 0 }
+          : {}),
+      })
+    })
   }
 
   const shapes = nodes.filter((node) => kindOf(node) === 'shape')
@@ -341,6 +359,16 @@ export function CanvasStylePanel({
   }
 
   const firstNode = nodes[0]
+  const firstStyle = firstNode?.['x-superboard']?.style
+  const firstIsShape = firstNode ? kindOf(firstNode) === 'shape' : false
+  const firstBorderColor =
+    firstStyle?.borderColor ?? firstStyle?.stroke ?? '#1d1d1d'
+  const firstBorderWidth = Number(
+    firstStyle?.borderWidth ??
+      firstStyle?.strokeWidth ??
+      (firstIsShape ? 2 : 0),
+  )
+  const firstOpacity = Math.round((firstStyle?.opacity ?? 1) * 100)
   const firstShape = shapes[0]
   const firstText = texts[0]
   const firstBlock = blocks[0]
@@ -366,85 +394,81 @@ export function CanvasStylePanel({
       </div>
       <div className="sb-style-panel-content">
       {firstNode ? (
-        <section>
-          <h3>变换</h3>
-          <div className="sb-style-row">
-            <span>角度</span>
-            <input
-              className="sb-style-number"
-              type="number"
+        <>
+          <section>
+            <h3>变换</h3>
+            <StyleNumberControl
+              label="角度"
+              value={firstNode['x-superboard']?.rotation ?? 0}
+              min={-360}
+              max={360}
               step={1}
-              value={Math.round(firstNode['x-superboard']?.rotation ?? 0)}
-              onChange={(event) =>
-                updateGeometry({ rotation: Number(event.target.value) || 0 })
-              }
+              unit="°"
+              slider
+              onChange={(rotation) => updateGeometry({ rotation })}
             />
-            <em className="sb-style-value">°</em>
-          </div>
-          <div className="sb-style-row">
-            <span>宽度</span>
-            <input
-              className="sb-style-number"
-              type="number"
+            <StyleNumberControl
+              label="宽度"
+              value={firstNode.width}
               min={1}
-              value={Math.round(firstNode.width)}
-              onChange={(event) => {
-                const value = Number(event.target.value)
-                if (Number.isFinite(value) && value > 0) {
-                  updateGeometry({ width: value })
-                }
-              }}
+              max={10000}
+              step={1}
+              unit="px"
+              onChange={(width) => updateGeometry({ width })}
             />
-          </div>
-          <div className="sb-style-row">
-            <span>高度</span>
-            <input
-              className="sb-style-number"
-              type="number"
+            <StyleNumberControl
+              label="高度"
+              value={firstNode.height}
               min={1}
-              value={Math.round(firstNode.height)}
-              onChange={(event) => {
-                const value = Number(event.target.value)
-                if (Number.isFinite(value) && value > 0) {
-                  updateGeometry({ height: value })
-                }
-              }}
+              max={10000}
+              step={1}
+              unit="px"
+              onChange={(height) => updateGeometry({ height })}
             />
-          </div>
-        </section>
+          </section>
+          <section>
+            <h3>外观</h3>
+            <StyleNumberControl
+              label="透明度"
+              value={firstOpacity}
+              min={0}
+              max={100}
+              step={1}
+              unit="%"
+              slider
+              onChange={(value) => updateCommonStyle({ opacity: value / 100 })}
+            />
+            <ColorPicker
+              label="边框颜色(C)"
+              value={firstBorderColor}
+              allowNone
+              recentColors={boardSettings.recentColors}
+              onChange={(borderColor) => updateCommonStyle({ borderColor })}
+              onColorUsed={onRememberColor}
+            />
+            <StyleNumberControl
+              label="边框粗细"
+              value={firstBorderWidth}
+              min={0}
+              max={40}
+              step={0.5}
+              unit="px"
+              onChange={(borderWidth) => updateCommonStyle({ borderWidth })}
+            />
+          </section>
+        </>
       ) : null}
       {!hasSelection ? (
         <>
           <section>
             <h3>画布</h3>
-            <div className="sb-style-row">
-              <span>背景</span>
-              <div className="sb-style-color-row">
-                {['#ffffff', '#f8f7f3', '#f6f5f1', '#f3efe8', '#eef3fb', '#f7eef6'].map(
-                  (color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      className={`sb-style-color${
-                        (boardSettings.background ?? '#ffffff') === color
-                          ? ' is-active'
-                          : ''
-                      }`}
-                      style={{ background: color }}
-                      onClick={() => updateBoardSettings({ background: color })}
-                    />
-                  ),
-                )}
-                <input
-                  className="sb-style-color-input"
-                  type="color"
-                  value={boardSettings.background ?? '#ffffff'}
-                  onChange={(event) =>
-                    updateBoardSettings({ background: event.target.value })
-                  }
-                />
-              </div>
-            </div>
+            <ColorPicker
+              label="背景(C)"
+              value={boardSettings.background ?? '#ffffff'}
+              recentColors={boardSettings.recentColors}
+              onChange={(background) => updateBoardSettings({ background })}
+              onColorUsed={onRememberColor}
+            />
             <div className="sb-style-row">
               <span>网格</span>
               <div className="sb-style-buttons">
@@ -564,21 +588,13 @@ export function CanvasStylePanel({
       {edge ? (
         <section>
           <h3>箭头</h3>
-          <div className="sb-style-row">
-            <span>颜色</span>
-            <div className="sb-style-swatches">
-              {EDGE_COLORS.map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  title={item.label}
-                  className={(edge.color ?? '#1d1d1d') === item.value ? 'is-active' : undefined}
-                  style={{ background: item.value }}
-                  onClick={() => updateEdge({ color: item.value })}
-                />
-              ))}
-            </div>
-          </div>
+          <ColorPicker
+            label="颜色(C)"
+            value={edge.color ?? '#1d1d1d'}
+            recentColors={boardSettings.recentColors}
+            onChange={(color) => updateEdge({ color })}
+            onColorUsed={onRememberColor}
+          />
           <div className="sb-style-row">
             <span>终点箭头</span>
             <div className="sb-style-buttons">
@@ -734,36 +750,22 @@ export function CanvasStylePanel({
       {shapes.length > 0 ? (
         <section>
           <h3>形状</h3>
-          <div className="sb-style-row">
-            <span>填充</span>
-            <div className="sb-style-swatches">
-              {FILLS.map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  title={item.label}
-                  className={firstShape?.['x-superboard']?.style?.fill === item.value ? 'is-active' : undefined}
-                  style={{ background: item.value === 'none' ? '#fff' : item.value }}
-                  onClick={() => styleAll(shapes, { fill: item.value })}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="sb-style-row">
-            <span>描边</span>
-            <div className="sb-style-swatches">
-              {STROKES.map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  title={item.label}
-                  className={firstShape?.['x-superboard']?.style?.stroke === item.value ? 'is-active' : undefined}
-                  style={{ background: item.value === 'none' ? '#fff' : item.value }}
-                  onClick={() => styleAll(shapes, { stroke: item.value })}
-                />
-              ))}
-            </div>
-          </div>
+          <ColorPicker
+            label="填充(C)"
+            value={firstShape?.['x-superboard']?.style?.fill ?? '#ffffff'}
+            allowNone
+            recentColors={boardSettings.recentColors}
+            onChange={(fill) => styleAll(shapes, { fill })}
+            onColorUsed={onRememberColor}
+          />
+          <ColorPicker
+            label="描边(C)"
+            value={firstShape?.['x-superboard']?.style?.stroke ?? '#1d1d1d'}
+            allowNone
+            recentColors={boardSettings.recentColors}
+            onChange={(stroke) => styleAll(shapes, { stroke })}
+            onColorUsed={onRememberColor}
+          />
           <div className="sb-style-row">
             <span>线宽</span>
             <div className="sb-style-buttons">
@@ -838,21 +840,13 @@ export function CanvasStylePanel({
               ))}
             </div>
           </div>
-          <div className="sb-style-row">
-            <span>颜色</span>
-            <div className="sb-style-swatches">
-              {TEXT_COLORS.map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  title={item.label}
-                  className={firstText?.['x-superboard']?.style?.color === item.value ? 'is-active' : undefined}
-                  style={{ background: item.value }}
-                  onClick={() => styleAll(texts, { color: item.value })}
-                />
-              ))}
-            </div>
-          </div>
+          <ColorPicker
+            label="颜色(C)"
+            value={firstText?.['x-superboard']?.style?.color ?? '#1d1d1d'}
+            recentColors={boardSettings.recentColors}
+            onChange={(color) => styleAll(texts, { color })}
+            onColorUsed={onRememberColor}
+          />
           <div className="sb-style-row">
             <span>对齐</span>
             <div className="sb-style-buttons">

@@ -489,6 +489,29 @@ export function CanvasEditorApp() {
     setSaveState('dirty')
   }
 
+  function rememberBoardColor(color: string) {
+    if (!color || color === 'transparent') return
+    setCanvas((current) => {
+      if (!current) return current
+      const root = current['x-superboard']
+      if (!root) return current
+      const recent = (root.settings?.recentColors ?? []).filter(
+        (item) => item.toLowerCase() !== color.toLowerCase(),
+      )
+      return {
+        ...current,
+        'x-superboard': {
+          ...root,
+          settings: {
+            ...root.settings,
+            recentColors: [color, ...recent].slice(0, 5),
+          },
+        },
+      }
+    })
+    markDirty()
+  }
+
   function applyDocument(next: CanvasDocument, selection: string[] = []) {
     pendingViewportRef.current = readViewport(viewerRef.current)
     setSelectedIds(selection)
@@ -2028,6 +2051,7 @@ export function CanvasEditorApp() {
                       selectedEdgeId={selectedEdgeId}
                       onBeforeChange={recordHistory}
                       onApply={applyDocument}
+                      onRememberColor={rememberBoardColor}
                     />
                   ) : null}
                   {directorMode && !presentation ? (

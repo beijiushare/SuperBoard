@@ -185,6 +185,7 @@ export interface SuperBoardCanvasSettings {
     offsetY: number
     scale: number
   }
+  recentColors?: string[]
 }
 
 export interface SuperBoardRootExtension {

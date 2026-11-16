@@ -47,10 +47,21 @@ function BlockSurface({
   node: object
   children: ReactNode
 }) {
-  const markdown = extension(node)?.kind === 'markdown'
+  const ext = extension(node)
+  const markdown = ext?.kind === 'markdown'
+  const style = ext?.style
+  const borderWidth = Number(style?.borderWidth ?? 0)
   return (
     <div
       className={`sb-block-scale${markdown ? ' sb-markdown-block-scale' : ''}`}
+      style={{
+        border: borderWidth
+          ? `${borderWidth}px ${style?.borderStyle ?? 'solid'} ${
+              style?.borderColor ?? '#1d1d1d'
+            }`
+          : undefined,
+        opacity: style?.opacity ?? 1,
+      }}
     >
       {children}
     </div>
