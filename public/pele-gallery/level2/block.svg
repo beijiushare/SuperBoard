@@ -1,0 +1,2454 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="level2-block"
+   width="210"
+   height="843"
+   viewBox="0 0 210 843"
+   version="1.1"
+   sodipodi:docname="block.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs190" />
+  <sodipodi:namedview
+     id="namedview190"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.53887603"
+     inkscape:cx="-290.4193"
+     inkscape:cy="901.8772"
+     inkscape:window-width="1260"
+     inkscape:window-height="770"
+     inkscape:window-x="-6"
+     inkscape:window-y="-6"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="level2-block" />
+  <g
+     id="l2-block-2"
+     data-sb-key="pele:example:block:1"
+     data-sb-label="2. block · a b c"
+     transform="matrix(0.34738279,0,0,0.34738279,126.59932,-39.749696)">
+    <g
+       transform="matrix(1.141304,0,0,1.141304,0,144.115)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g19">
+      <g
+         class="pele-nodes"
+         id="g18">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-2-a"
+           transform="translate(32,32)"
+           id="g15">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect14" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text14">a</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-2-b"
+           transform="translate(92,32)"
+           id="g16">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect15" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text15">b</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-2-c"
+           transform="translate(152,32)"
+           id="g17">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect16" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text16">c</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-3"
+     data-sb-key="pele:example:block:2"
+     data-sb-label="3. block · columns 3"
+     transform="matrix(0.33064549,0,0,0.33064549,127.39877,-34.103207)">
+    <g
+       transform="matrix(1.141304,0,0,1.141304,0,233.159)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g25">
+      <g
+         class="pele-nodes"
+         id="g24">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-3-a"
+           transform="translate(32,32)"
+           id="g20">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect19" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text19">a</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-3-b"
+           transform="translate(92,32)"
+           id="g21">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect20" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text20">b</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-3-c"
+           transform="translate(152,32)"
+           id="g22">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect21" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text21">c</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-3-d"
+           transform="translate(32,92)"
+           id="g23">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect22" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text22">d</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-4"
+     data-sb-key="pele:example:block:3"
+     data-sb-label="4. block · columns 3"
+     transform="matrix(0.5450222,0,0,0.5450222,5.7602826,-203.49814)">
+    <g
+       transform="matrix(0.711864,0,0,0.711864,0,390.68)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g31">
+      <g
+         class="pele-nodes"
+         id="g30">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-4-a"
+           transform="translate(50.46,32)"
+           id="g26">
+          <rect
+             x="-42.459999"
+             y="-24"
+             width="84.910004"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect25" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text25">A label</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-4-b"
+           transform="translate(195.82,32)"
+           id="g27">
+          <rect
+             x="-90.910004"
+             y="-24"
+             width="181.82001"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect26" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text26">b</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-4-c"
+           transform="translate(98.91,92)"
+           id="g28">
+          <rect
+             x="-90.910004"
+             y="-24"
+             width="181.82001"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect27" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text27">c</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-4-d"
+           transform="translate(244.28,92)"
+           id="g29">
+          <rect
+             x="-42.459999"
+             y="-24"
+             width="84.910004"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect28" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text28">d</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-5"
+     data-sb-key="pele:example:block:4"
+     data-sb-label="5. block · block"
+     transform="matrix(0.5315216,0,0,0.5315216,95.008453,-172.14861)">
+    <g
+       transform="matrix(0.57377,0,0,0.57377,0,494.952)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g37">
+      <g
+         class="pele-clusters"
+         id="g33">
+        <g
+           class="pele-cluster"
+           data-id="l2-block-5-id-1"
+           id="g32">
+          <rect
+             x="8"
+             y="8"
+             width="168.50999"
+             height="72"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect31" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g36">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-5-A"
+           transform="translate(272.77,44)"
+           id="g34">
+          <rect
+             x="-84.260002"
+             y="-36"
+             width="168.50999"
+             height="72"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect33" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text33">A: I am a wide one</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-5-D"
+           transform="translate(92.26,44)"
+           id="g35">
+          <rect
+             x="-72.260002"
+             y="-24"
+             width="144.50999"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect34" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text34">D</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-6"
+     data-sb-key="pele:example:block:5"
+     data-sb-label="6. block · columns 3"
+     transform="matrix(0.71430052,0,0,0.71430052,51.927001,175.65783)">
+    <g
+       transform="matrix(0.458515,0,0,0.458515,0,561.443)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g55">
+      <g
+         class="pele-clusters"
+         id="g40">
+        <g
+           class="pele-cluster"
+           data-id="l2-block-6-group1"
+           id="g38">
+          <rect
+             x="8"
+             y="152"
+             width="290.20001"
+             height="132"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect37" />
+        </g>
+        <g
+           class="pele-cluster"
+           data-id="l2-block-6-group2"
+           id="g39">
+          <rect
+             x="8"
+             y="296"
+             width="441.29999"
+             height="72"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect38" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g54">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-a"
+           transform="translate(228.65,74)"
+           id="g41">
+          <rect
+             x="-220.64999"
+             y="-66"
+             width="441.29999"
+             height="132"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect40" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text40">a</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-g"
+           transform="translate(379.75,218)"
+           id="g42">
+          <rect
+             x="-69.550003"
+             y="-66"
+             width="139.10001"
+             height="132"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect41" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text41">g</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-h"
+           transform="translate(83.55,188)"
+           id="g43">
+          <rect
+             x="-63.549999"
+             y="-24"
+             width="127.1"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect42" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text42">h</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-i"
+           transform="translate(222.65,188)"
+           id="g44">
+          <rect
+             x="-63.549999"
+             y="-24"
+             width="127.1"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect43" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text43">i</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-j"
+           transform="translate(83.55,248)"
+           id="g45">
+          <rect
+             x="-63.549999"
+             y="-24"
+             width="127.1"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect44" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text44">j</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-k"
+           transform="translate(222.65,248)"
+           id="g46">
+          <rect
+             x="-63.549999"
+             y="-24"
+             width="127.1"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect45" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text45">k</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-l"
+           transform="translate(44.66,332)"
+           id="g47">
+          <rect
+             x="-24.66"
+             y="-24"
+             width="49.330002"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect46" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text46">l</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-m"
+           transform="translate(105.99,332)"
+           id="g48">
+          <rect
+             x="-24.66"
+             y="-24"
+             width="49.330002"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect47" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text47">m</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-n"
+           transform="translate(167.32,332)"
+           id="g49">
+          <rect
+             x="-24.66"
+             y="-24"
+             width="49.330002"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect48" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text48">n</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-o"
+           transform="translate(228.65,332)"
+           id="g50">
+          <rect
+             x="-24.66"
+             y="-24"
+             width="49.330002"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect49" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text49">o</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-p"
+           transform="translate(289.98,332)"
+           id="g51">
+          <rect
+             x="-24.66"
+             y="-24"
+             width="49.330002"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect50" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text50">p</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-q"
+           transform="translate(351.3,332)"
+           id="g52">
+          <rect
+             x="-24.66"
+             y="-24"
+             width="49.330002"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect51" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text51">q</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-6-r"
+           transform="translate(412.63,332)"
+           id="g53">
+          <rect
+             x="-24.66"
+             y="-24"
+             width="49.330002"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect52" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text52">r</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-7"
+     data-sb-key="pele:example:block:6"
+     data-sb-label="7. block · block"
+     transform="matrix(0.18762645,0,0,0.18762645,8.2083513,438.13404)">
+    <g
+       transform="matrix(1.68,0,0,1.68,0,749.845)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g63">
+      <g
+         class="pele-clusters"
+         id="g57">
+        <g
+           class="pele-cluster"
+           data-id="l2-block-7-id-1"
+           id="g56">
+          <rect
+             x="8"
+             y="8"
+             width="108.91"
+             height="252"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect55" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g62">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-7-a"
+           transform="translate(62.46,44)"
+           id="g58">
+          <rect
+             x="-42.459999"
+             y="-24"
+             width="84.910004"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect57" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text57">A label</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-7-b"
+           transform="translate(62.46,104)"
+           id="g59">
+          <rect
+             x="-42.459999"
+             y="-24"
+             width="84.910004"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect58" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text58">b</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-7-c"
+           transform="translate(62.46,164)"
+           id="g60">
+          <rect
+             x="-42.459999"
+             y="-24"
+             width="84.910004"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect59" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text59">c</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-7-d"
+           transform="translate(62.46,224)"
+           id="g61">
+          <rect
+             x="-42.459999"
+             y="-24"
+             width="84.910004"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect60" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text60">d</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-8"
+     data-sb-key="pele:example:block:7"
+     data-sb-label="8. block · id1(&quot;This is the text in the box&quot;)"
+     transform="matrix(0.4092464,0,0,0.4092464,5.753168,-404.40584)">
+    <g
+       transform="matrix(0.917031,0,0,0.917031,0,1216.085)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g66">
+      <g
+         class="pele-nodes"
+         id="g65">
+        <g
+           class="pele-node pele-shape-rounded"
+           data-id="l2-block-8-id1"
+           transform="translate(114.49,32)"
+           id="g64">
+          <rect
+             x="-106.49"
+             y="-24"
+             width="212.98"
+             height="48"
+             rx="12"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="rect63" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text63">This is the text in the box</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-9"
+     data-sb-key="pele:example:block:8"
+     data-sb-label="9. block · id1([&quot;This is the text in the box&quot;])"
+     transform="matrix(0.4092464,0,0,0.4092464,5.753168,-404.40584)">
+    <g
+       transform="matrix(0.857143,0,0,0.857143,0,1290.775)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g69">
+      <g
+         class="pele-nodes"
+         id="g68">
+        <g
+           class="pele-node pele-shape-stadium"
+           data-id="l2-block-9-id1"
+           transform="translate(122.49,32)"
+           id="g67">
+          <rect
+             x="-114.49"
+             y="-24"
+             width="228.98"
+             height="48"
+             rx="24"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="rect66" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text66">This is the text in the box</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-10"
+     data-sb-key="pele:example:block:9"
+     data-sb-label="10. block · id1[[&quot;This is the text in the box&quot;]]"
+     transform="matrix(0.4092464,0,0,0.4092464,5.753168,-404.40584)">
+    <g
+       transform="matrix(0.857143,0,0,0.857143,0,1361.632)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g72">
+      <g
+         class="pele-nodes"
+         id="g71">
+        <g
+           class="pele-node pele-shape-fr-rect"
+           data-id="l2-block-10-id1"
+           transform="translate(122.49,32)"
+           id="g70">
+          <rect
+             x="-114.49"
+             y="-24"
+             width="228.98"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect69" />
+          <path
+             d="M -106.49,-24 V 24 M 106.49,-24 V 24"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path69" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text69">This is the text in the box</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-11"
+     data-sb-key="pele:example:block:10"
+     data-sb-label="11. block · id1[(&quot;Database&quot;)]"
+     transform="matrix(0.20095107,0,0,0.20095107,93.65639,-134.11927)">
+    <g
+       transform="matrix(1.735537,0,0,1.735537,0,1432.489)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g75">
+      <g
+         class="pele-nodes"
+         id="g74">
+        <g
+           class="pele-node pele-shape-cyl"
+           data-id="l2-block-11-id1"
+           transform="translate(60.24,40)"
+           id="g73">
+          <path
+             d="m -52.24,-24.54 a 52.24,7.46 0 0 1 104.48,0 v 49.08 a 52.24,7.46 0 0 1 -104.48,0 z"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="path72" />
+          <path
+             d="m -52.24,-24.54 a 52.24,7.46 0 0 0 104.48,0"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path73" />
+          <text
+             class="pele-label"
+             x="0"
+             y="9.3299999"
+             text-anchor="middle"
+             id="text73">Database</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-12"
+     data-sb-key="pele:example:block:11"
+     data-sb-label="12. block · id1((&quot;This is the text in the circle&quot;))"
+     transform="matrix(0.3171456,0,0,0.3171456,139.2411,-382.84643)">
+    <g
+       transform="matrix(0.941704,0,0,0.941704,0,1587.332)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g78">
+      <g
+         class="pele-nodes"
+         id="g77">
+        <g
+           class="pele-node pele-shape-circle"
+           data-id="l2-block-12-id1"
+           transform="translate(111.02,111.02)"
+           id="g76">
+          <circle
+             r="103.02"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="circle75"
+             cx="0"
+             cy="0" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text75">This is the text in the circle</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-13"
+     data-sb-key="pele:example:block:12"
+     data-sb-label="13. block · id1&gt;&quot;This is the text in the box&quot;]"
+     transform="matrix(0.42901749,0,0,0.42901749,6.6071996,-590.6226)">
+    <g
+       transform="matrix(0.871369,0,0,0.871369,0,1813.332)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g81">
+      <g
+         class="pele-nodes"
+         id="g80">
+        <g
+           class="pele-node pele-shape-odd"
+           data-id="l2-block-13-id1"
+           transform="translate(120.49,32)"
+           id="g79">
+          <polygon
+             points="-112.49,24 -100.49,0 -112.49,-24 112.49,-24 112.49,24 "
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon78" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text78">This is the text in the box</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-14"
+     data-sb-key="pele:example:block:13"
+     data-sb-label="14. block · id1{&quot;This is the text in the box&quot;}"
+     transform="matrix(0.42901749,0,0,0.42901749,6.6071996,-590.6226)">
+    <g
+       transform="matrix(0.804598,0,0,0.804598,0,1885.1)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g84">
+      <g
+         class="pele-nodes"
+         id="g83">
+        <g
+           class="pele-node pele-shape-diam"
+           data-id="l2-block-14-id1"
+           transform="translate(130.09,84.31)"
+           id="g82">
+          <polygon
+             points="0,76.31 -122.09,0 0,-76.31 122.09,0 "
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon81" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text81">This is the text in the box</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-15"
+     data-sb-key="pele:example:block:14"
+     data-sb-label="15. block · id1{{&quot;This is the text in the box&quot;}}"
+     transform="matrix(0.42901749,0,0,0.42901749,6.6071996,-590.6226)">
+    <g
+       transform="matrix(0.83004,0,0,0.83004,0,2037.077)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g87">
+      <g
+         class="pele-nodes"
+         id="g86">
+        <g
+           class="pele-node pele-shape-hex"
+           data-id="l2-block-15-id1"
+           transform="translate(126.49,32)"
+           id="g85">
+          <polygon
+             points="-106.49,-24 106.49,-24 118.49,0 106.49,24 -106.49,24 -118.49,0 "
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon84" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text84">This is the text in the box</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-16"
+     data-sb-key="pele:example:block:15"
+     data-sb-label="16. block · id1[/&quot;This is the text in the box&quot;/]"
+     transform="matrix(0.9154137,0,0,0.9154137,11.049186,-1614.6805)">
+    <g
+       transform="matrix(0.21,0,0,0.21,0,2106.199)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g93">
+      <g
+         class="pele-nodes"
+         id="g92">
+        <g
+           class="pele-node pele-shape-lean-r"
+           data-id="l2-block-16-id1"
+           transform="translate(126.49,32)"
+           id="g88">
+          <polygon
+             points="106.49,24 -118.49,24 -106.49,-24 118.49,-24 "
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon87" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text87">This is the text in the box</text>
+        </g>
+        <g
+           class="pele-node pele-shape-lean-l"
+           data-id="l2-block-16-id2"
+           transform="translate(375.46,32)"
+           id="g89">
+          <polygon
+             points="118.49,24 -106.49,24 -118.49,-24 106.49,-24 "
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon88" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text88">This is the text in the box</text>
+        </g>
+        <g
+           class="pele-node pele-shape-trap-b"
+           data-id="l2-block-16-A"
+           transform="translate(624.44,32)"
+           id="g90">
+          <polygon
+             points="118.49,24 -118.49,24 -106.49,-24 106.49,-24 "
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon89" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text89">Christmas</text>
+        </g>
+        <g
+           class="pele-node pele-shape-trap-t"
+           data-id="l2-block-16-B"
+           transform="translate(873.42,32)"
+           id="g91">
+          <polygon
+             points="106.49,24 -106.49,24 -118.49,-24 118.49,-24 "
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon90" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text90">Go shopping</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-17"
+     data-sb-key="pele:example:block:16"
+     data-sb-label="17. block · id1(((&quot;This is the text in the circle&quot;)))"
+     transform="matrix(0.39587855,0,0,0.39587855,113.03802,-655.7346)">
+    <g
+       transform="matrix(0.901288,0,0,0.901288,0,2135.639)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g96">
+      <g
+         class="pele-nodes"
+         id="g95">
+        <g
+           class="pele-node pele-shape-dbl-circ"
+           data-id="l2-block-17-id1"
+           transform="translate(116.02,116.02)"
+           id="g94">
+          <circle
+             r="108.02"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="circle93"
+             cx="0"
+             cy="0" />
+          <circle
+             r="103.02"
+             fill="none"
+             stroke="#e0e0e0"
+             id="circle94"
+             cx="0"
+             cy="0" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text94">This is the text in the circle</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-18"
+     data-sb-key="pele:example:block:17"
+     data-sb-label="18. block · blockArrowId&lt;[&quot;Label&quot;]&gt;(right)"
+     transform="matrix(0.91705015,0,0,0.91705015,9.1143781,-1832.2963)">
+    <g
+       transform="matrix(0.289256,0,0,0.289256,0,2361.639)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g105">
+      <g
+         class="pele-nodes"
+         id="g104">
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-18-blockArrowId"
+           transform="translate(53.57,44)"
+           id="g97">
+          <polygon
+             points="-35.57,16 -35.57,-16 15.57,-16 15.57,-23 35.57,0 15.57,23 15.57,16 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon96" />
+          <text
+             class="pele-label"
+             x="-10"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text96">Label</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-18-blockArrowId2"
+           transform="translate(156.7,44)"
+           id="g98">
+          <polygon
+             points="-15.57,-23 -15.57,-16 35.57,-16 35.57,16 -15.57,16 -15.57,23 -35.57,0 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon97" />
+          <text
+             class="pele-label"
+             x="10"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text97">Label</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-18-blockArrowId3"
+           transform="translate(259.84,44)"
+           id="g99">
+          <polygon
+             points="34.57,-6 27.57,-6 27.57,26 -27.57,26 -27.57,-6 -34.57,-6 0,-26 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon98" />
+          <text
+             class="pele-label"
+             x="0"
+             y="15.6"
+             text-anchor="middle"
+             id="text98">Label</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-18-blockArrowId4"
+           transform="translate(362.98,44)"
+           id="g100">
+          <polygon
+             points="-27.57,-26 27.57,-26 27.57,6 34.57,6 0,26 -34.57,6 -27.57,6 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon99" />
+          <text
+             class="pele-label"
+             x="0"
+             y="-4.4000001"
+             text-anchor="middle"
+             id="text99">Label</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-18-blockArrowId5"
+           transform="translate(466.11,44)"
+           id="g101">
+          <polygon
+             points="-25.57,16 -25.57,23 -45.57,0 -25.57,-23 -25.57,-16 25.57,-16 25.57,-23 45.57,0 25.57,23 25.57,16 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon100" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text100">Label</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-18-blockArrowId6"
+           transform="translate(569.25,44)"
+           id="g102">
+          <polygon
+             points="-27.57,-16 -34.57,-16 0,-36 34.57,-16 27.57,-16 27.57,16 34.57,16 0,36 -34.57,16 -27.57,16 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon101" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text101">Label</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-18-blockArrowId7"
+           transform="translate(672.38,44)"
+           id="g103">
+          <polygon
+             points="-10,10 -27.57,10 -27.57,4 -39.57,-6 -27.57,-16 -27.57,-22 27.57,-22 27.57,-16 39.57,-6 27.57,4 27.57,10 10,10 0,22 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon102" />
+          <text
+             class="pele-label"
+             x="0"
+             y="-0.40000001"
+             text-anchor="middle"
+             id="text102">Label</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-19"
+     data-sb-key="pele:example:block:18"
+     data-sb-label="19. block · columns 3"
+     transform="matrix(0.44607433,0,0,0.44607433,10.280107,-711.99686)">
+    <g
+       transform="matrix(1.141304,0,0,1.141304,0,2403.094)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g112">
+      <g
+         class="pele-nodes"
+         id="g111">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-19-a"
+           transform="translate(32,32)"
+           id="g106">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect105" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text105">a</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-19-b"
+           transform="translate(152,32)"
+           id="g107">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect106" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text106">b</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-19-c"
+           transform="translate(32,92)"
+           id="g108">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect107" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text107">c</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-19-d"
+           transform="translate(92,92)"
+           id="g109">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect108" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text108">d</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-19-e"
+           transform="translate(152,92)"
+           id="g110">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect109" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text109">e</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-20"
+     data-sb-key="pele:example:block:19"
+     data-sb-label="20. block · ida space:3 idb idc"
+     transform="matrix(0.81296701,0,0,0.81296701,9.9758486,-1622.8611)">
+    <g
+       transform="matrix(0.498812,0,0,0.498812,0,2560.616)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g117">
+      <g
+         class="pele-nodes"
+         id="g116">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-20-ida"
+           transform="translate(36.67,32)"
+           id="g113">
+          <rect
+             x="-28.67"
+             y="-24"
+             width="57.34"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect112" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text112">ida</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-20-idb"
+           transform="translate(314.05,32)"
+           id="g114">
+          <rect
+             x="-28.67"
+             y="-24"
+             width="57.34"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect113" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text113">idb</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-20-idc"
+           transform="translate(383.39,32)"
+           id="g115">
+          <rect
+             x="-28.67"
+             y="-24"
+             width="57.34"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect114" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text114">idc</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-21"
+     data-sb-key="pele:example:block:20"
+     data-sb-label="21. block · A space B"
+     transform="matrix(0.38230423,0,0,0.38230423,115.27423,-718.99072)">
+    <g
+       transform="matrix(1.141304,0,0,1.141304,0,2608.54)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g123">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g119">
+        <g
+           class="pele-edge"
+           data-id="l2-block-21-1-A-B"
+           id="g118">
+          <path
+             d="m 56,32 h 65"
+             id="path117" />
+          <path
+             class="pele-marker"
+             d="m 128,32 -8,3.36 v -6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path118" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g122">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-21-A"
+           transform="translate(32,32)"
+           id="g120">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect119" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text119">A</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-21-B"
+           transform="translate(152,32)"
+           id="g121">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect120" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text120">B</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-22"
+     data-sb-key="pele:example:block:21"
+     data-sb-label="22. block · A space:2 B"
+     transform="matrix(0.49759635,0,0,0.49759635,11.26658,-914.58031)">
+    <g
+       transform="matrix(0.860656,0,0,0.860656,0,2697.583)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g131">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g125">
+        <g
+           class="pele-edge"
+           data-id="l2-block-22-1-A-B"
+           id="g124">
+          <path
+             d="M 56,32 H 181"
+             id="path123" />
+          <path
+             class="pele-marker"
+             d="m 188,32 -8,3.36 v -6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path124" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g128">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-22-A"
+           transform="translate(32,32)"
+           id="g126">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect125" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text125">A</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-22-B"
+           transform="translate(212,32)"
+           id="g127">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect126" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text126">B</text>
+        </g>
+      </g>
+      <g
+         class="pele-edge-labels"
+         font-size="14px"
+         id="g130">
+        <g
+           class="pele-edge-label"
+           data-id="l2-block-22-1-A-B"
+           id="g129">
+          <rect
+             x="113.33"
+             y="21.5"
+             width="17.34"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect128" />
+          <text
+             x="122"
+             y="36.900002"
+             text-anchor="middle"
+             id="text128">X</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-24"
+     data-sb-key="pele:example:block:23"
+     data-sb-label="24. block · id1 space id2"
+     transform="matrix(0.41801898,0,0,0.41801898,116.50082,-855.3305)">
+    <g
+       transform="matrix(0.84,0,0,0.84,0,2912.78)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g151">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g147">
+        <g
+           class="pele-edge"
+           data-id="l2-block-24-1-id1-id2"
+           id="g146">
+          <path
+             d="m 77.79,32 h 86.79"
+             id="path145" />
+          <path
+             class="pele-marker"
+             d="m 171.58,32 -8,3.36 v -6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path146" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g150">
+        <g
+           class="pele-node pele-shape-rounded"
+           data-id="l2-block-24-id1"
+           transform="translate(42.9,32)"
+           id="g148">
+          <rect
+             x="-34.900002"
+             y="-24"
+             width="69.790001"
+             height="48"
+             rx="12"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             style="fill:#663366;stroke:#333333;stroke-width:4px"
+             id="rect147" />
+          <text
+             class="pele-label"
+             fill="#ffffff"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text147">Start</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded"
+           data-id="l2-block-24-id2"
+           transform="translate(206.48,32)"
+           id="g149">
+          <rect
+             x="-34.900002"
+             y="-24"
+             width="69.790001"
+             height="48"
+             rx="12"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             style="fill:#bbbbff;stroke:#ff6666;stroke-width:2px;stroke-dasharray:5, 5"
+             id="rect148" />
+          <text
+             class="pele-label"
+             style="fill:#ffffff"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text148">Stop</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-25"
+     data-sb-key="pele:example:block:24"
+     data-sb-label="25. block · A space B"
+     transform="matrix(0.41801898,0,0,0.41801898,116.50082,-855.3305)">
+    <g
+       transform="matrix(1.141304,0,0,1.141304,0,2982.54)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g157">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g153">
+        <g
+           class="pele-edge"
+           data-id="l2-block-25-1-A-B"
+           id="g152">
+          <path
+             d="m 56,32 h 65"
+             id="path151" />
+          <path
+             class="pele-marker"
+             d="m 128,32 -8,3.36 v -6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path152" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g156">
+        <g
+           class="pele-node pele-shape-rect blue"
+           data-id="l2-block-25-A"
+           transform="translate(32,32)"
+           id="g154">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             style="fill:#6e6ce6;stroke:#333333;stroke-width:4px"
+             id="rect153" />
+          <text
+             class="pele-label"
+             fill="#ffffff"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text153">A</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-25-B"
+           transform="translate(152,32)"
+           id="g155">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             style="fill:#bbbbff;stroke:#ff6666;stroke-width:2px;stroke-dasharray:5, 5"
+             id="rect154" />
+          <text
+             class="pele-label"
+             style="fill:#ffffff"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text154">B</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-26"
+     data-sb-key="pele:example:block:25"
+     data-sb-label="26. block · columns 3"
+     transform="matrix(0.53495205,0,0,0.53495205,9.5954402,-1151.429)">
+    <g
+       transform="matrix(0.59322,0,0,0.59322,0,3071.584)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g166">
+      <g
+         class="pele-nodes"
+         id="g165">
+        <g
+           class="pele-node pele-shape-rect front"
+           data-id="l2-block-26-Frontend"
+           transform="translate(60.24,40)"
+           id="g158">
+          <rect
+             x="-52.240002"
+             y="-32"
+             width="104.48"
+             height="64"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             style="fill:#669966;stroke:#333333"
+             id="rect157" />
+          <text
+             class="pele-label"
+             fill="#1f1f1f"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text157">Frontend</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-26-blockArrowId6"
+           transform="translate(176.72,40)"
+           id="g159">
+          <polygon
+             points="15,0 1,14 1,7 -15,7 -15,-7 1,-7 1,-14 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon158" />
+          <text
+             class="pele-label"
+             x="-7"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text158" />
+        </g>
+        <g
+           class="pele-node pele-shape-rect back"
+           data-id="l2-block-26-Backend"
+           transform="translate(293.2,40)"
+           id="g160">
+          <rect
+             x="-52.240002"
+             y="-32"
+             width="104.48"
+             height="64"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             style="fill:#996699;stroke:#333333"
+             id="rect159" />
+          <text
+             class="pele-label"
+             fill="#ffffff"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text159">Backend</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-26-down"
+           transform="translate(293.2,116)"
+           id="g161">
+          <polygon
+             points="0,15.5 -15,0.5 -8,0.5 -8,-15.5 8,-15.5 8,0.5 15,0.5 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon160" />
+          <text
+             class="pele-label"
+             x="0"
+             y="-1.9"
+             text-anchor="middle"
+             id="text160" />
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-26-Disk"
+           transform="translate(60.24,192)"
+           id="g162">
+          <rect
+             x="-52.240002"
+             y="-32"
+             width="104.48"
+             height="64"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect161" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text161">Disk</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-26-left"
+           transform="translate(176.72,192)"
+           id="g163">
+          <polygon
+             points="-1,7 -1,14 -15,0 -1,-14 -1,-7 15,-7 15,7 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon162" />
+          <text
+             class="pele-label"
+             x="7"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text162" />
+        </g>
+        <g
+           class="pele-node pele-shape-cyl back"
+           data-id="l2-block-26-Database"
+           transform="translate(293.2,192)"
+           id="g164">
+          <path
+             d="m -52.24,-24.54 a 52.24,7.46 0 0 1 104.48,0 v 49.08 a 52.24,7.46 0 0 1 -104.48,0 z"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             style="fill:#996699;stroke:#333333"
+             id="path163" />
+          <path
+             d="m -52.24,-24.54 a 52.24,7.46 0 0 0 104.48,0"
+             fill="none"
+             stroke="#e0e0e0"
+             style="stroke:#333333"
+             id="path164" />
+          <text
+             class="pele-label"
+             fill="#ffffff"
+             x="0"
+             y="9.3299999"
+             text-anchor="middle"
+             id="text164">Database</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-27"
+     data-sb-key="pele:example:block:26"
+     data-sb-label="27. block · columns 3"
+     transform="matrix(0.92302502,0,0,0.92302502,11.005188,-2272.7227)">
+    <g
+       transform="matrix(0.392523,0,0,0.392523,0,3225.211)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g178">
+      <g
+         class="pele-nodes"
+         id="g177">
+        <g
+           class="pele-node pele-shape-circle"
+           data-id="l2-block-27-Start"
+           transform="translate(90.46,36.72)"
+           id="g167">
+          <circle
+             r="28.719999"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             style="fill:#996699"
+             id="circle166"
+             cx="0"
+             cy="0" />
+          <text
+             class="pele-label"
+             fill="#ffffff"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text166">Start</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-27-down"
+           transform="translate(90.46,106.17)"
+           id="g168">
+          <polygon
+             points="15,0.5 0,15.5 -15,0.5 -8,0.5 -8,-15.5 8,-15.5 8,0.5 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon167" />
+          <text
+             class="pele-label"
+             x="0"
+             y="-1.9"
+             text-anchor="middle"
+             id="text167" />
+        </g>
+        <g
+           class="pele-node pele-shape-hex"
+           data-id="l2-block-27-Decision"
+           transform="translate(90.46,175.62)"
+           id="g169">
+          <polygon
+             points="70.46,24 -70.46,24 -82.46,0 -70.46,-24 70.46,-24 82.46,0 "
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon168" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text168">Make Decision</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-27-right"
+           transform="translate(267.37,175.62)"
+           id="g170">
+          <polygon
+             points="9.78,-23 29.78,0 9.78,23 9.78,16 -29.78,16 -29.78,-16 9.78,-16 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon169" />
+          <text
+             class="pele-label"
+             x="-10"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text169">Yes</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-27-Process1"
+           transform="translate(444.28,175.62)"
+           id="g171">
+          <rect
+             x="-82.459999"
+             y="-28.719999"
+             width="164.91"
+             height="57.450001"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect170" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text170">Process A</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-27-downAgain"
+           transform="translate(90.46,245.07)"
+           id="g172">
+          <polygon
+             points="25.22,6 0,26 -25.22,6 -18.22,6 -18.22,-26 18.22,-26 18.22,6 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon171" />
+          <text
+             class="pele-label"
+             x="0"
+             y="-4.4000001"
+             text-anchor="middle"
+             id="text171">No</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-27-r3"
+           transform="translate(444.28,245.07)"
+           id="g173">
+          <polygon
+             points="34.12,6 0,26 -34.12,6 -27.12,6 -27.12,-26 27.12,-26 27.12,6 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon172" />
+          <text
+             class="pele-label"
+             x="0"
+             y="-4.4000001"
+             text-anchor="middle"
+             id="text172">Done</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-27-Process2"
+           transform="translate(90.46,314.51)"
+           id="g174">
+          <rect
+             x="-82.459999"
+             y="-28.719999"
+             width="164.91"
+             height="57.450001"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect173" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text173">Process B</text>
+        </g>
+        <g
+           class="pele-node pele-shape-block-arrow"
+           data-id="l2-block-27-r2"
+           transform="translate(267.37,314.51)"
+           id="g175">
+          <polygon
+             points="15.12,-23 35.12,0 15.12,23 15.12,16 -35.12,16 -35.12,-16 15.12,-16 "
+             stroke-linejoin="round"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             id="polygon174" />
+          <text
+             class="pele-label"
+             x="-10"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text174">Done</text>
+        </g>
+        <g
+           class="pele-node pele-shape-circle"
+           data-id="l2-block-27-End"
+           transform="translate(444.28,314.51)"
+           id="g176">
+          <circle
+             r="26.620001"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             style="fill:#669966"
+             id="circle175"
+             cx="0"
+             cy="0" />
+          <text
+             class="pele-label"
+             fill="#1f1f1f"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text175">End</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-28"
+     data-sb-key="pele:example:block:27"
+     data-sb-label="28. block · A space B"
+     transform="matrix(0.31698436,0,0,0.31698436,7.4697884,-1008.4123)">
+    <g
+       transform="matrix(1.141304,0,0,1.141304,0,3379.379)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g184">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g180">
+        <g
+           class="pele-edge"
+           data-id="l2-block-28-1-A-B"
+           id="g179">
+          <path
+             d="m 56,32 h 65"
+             id="path178" />
+          <path
+             class="pele-marker"
+             d="m 128,32 -8,3.36 v -6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path179" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g183">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-28-A"
+           transform="translate(32,32)"
+           id="g181">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect180" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text180">A</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-28-B"
+           transform="translate(152,32)"
+           id="g182">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect181" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text181">B</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-29"
+     data-sb-key="pele:example:block:28"
+     data-sb-label="29. block · A"
+     transform="matrix(0.10893065,0,0,0.10893065,93.009514,-315.04324)">
+    <g
+       transform="matrix(3.28125,0,0,3.28125,0,3468.423)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g187">
+      <g
+         class="pele-nodes"
+         id="g186">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-29-A"
+           transform="translate(32,32)"
+           id="g185">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect184" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text184">A</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-block-30"
+     data-sb-key="pele:example:block:29"
+     data-sb-label="30. block · A"
+     transform="matrix(0.09960123,0,0,0.09960123,94.419584,-243.89108)">
+    <g
+       transform="matrix(3.28125,0,0,3.28125,0,3694.423)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g190">
+      <g
+         class="pele-nodes"
+         id="g189">
+        <g
+           class="pele-node pele-shape-rect"
+           data-id="l2-block-30-A"
+           transform="translate(32,32)"
+           id="g188">
+          <rect
+             x="-24"
+             y="-24"
+             width="48"
+             height="48"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             style="fill:#996699;stroke:#333333"
+             id="rect187" />
+          <text
+             class="pele-label"
+             fill="#ffffff"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text187">A</text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

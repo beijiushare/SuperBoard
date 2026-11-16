@@ -1,0 +1,5769 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="level2-class"
+   width="210"
+   height="1400"
+   viewBox="0 0 210 1400"
+   version="1.1"
+   sodipodi:docname="class.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs450" />
+  <sodipodi:namedview
+     id="namedview450"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.5725981"
+     inkscape:cx="195.85424"
+     inkscape:cy="1320.7443"
+     inkscape:window-width="1260"
+     inkscape:window-height="770"
+     inkscape:window-x="-6"
+     inkscape:window-y="-6"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="level2-class" />
+  <g
+     id="l2-class-1"
+     data-sb-key="pele:example:class:0"
+     data-sb-label="1. classDiagram · note &quot;From Duck till Zebra&quot;"
+     transform="matrix(0.59187148,0,0,0.59187148,7.0001719,6.4724314)">
+    <g
+       transform="scale(0.351759)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g31">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g8">
+        <g
+           class="pele-edge pele-note-edge"
+           data-id="l2-class-1-edgeNote1"
+           id="g1">
+          <path
+             d="m 507.76,126 c 0,43 12,43 12,86"
+             stroke-dasharray="2, 4"
+             id="path1" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-1-id_Animal_Duck_1"
+           id="g3">
+          <path
+             d="m 163.15,168 v 6 c 0,17.37 332.61,20.63 332.61,38"
+             id="path2" />
+          <path
+             class="pele-marker"
+             d="m 163.15,156 6,12 h -12 z"
+             stroke-linejoin="round"
+             id="path3" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-1-id_Animal_Fish_2"
+           id="g5">
+          <path
+             d="m 115.15,168 v 6 c 0,24.25 -51.19,24.25 -51.19,48.5"
+             id="path4" />
+          <path
+             class="pele-marker"
+             d="m 115.15,156 6,12 h -12 z"
+             stroke-linejoin="round"
+             id="path5" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-1-id_Animal_Zebra_3"
+           id="g7">
+          <path
+             d="m 139.15,168 v 6 c 0,24.25 73.03,24.25 73.03,48.5"
+             id="path6" />
+          <path
+             class="pele-marker"
+             d="m 139.15,156 6,12 h -12 z"
+             stroke-linejoin="round"
+             id="path7" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g30">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-1-Animal"
+           transform="translate(139.15,82)"
+           id="g13">
+          <rect
+             x="-58.110001"
+             y="-74"
+             width="116.22"
+             height="148"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect8" />
+          <path
+             class="pele-divider"
+             d="M -58.11,-34 H 58.11 M -58.11,20 H 58.11"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path8" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text8"><tspan
+               x="0"
+               y="-48.400002"
+               id="tspan8">Animal</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g12">
+            <text
+               class="pele-member pele-attribute"
+               x="-46.110001"
+               y="-12.6"
+               id="text9">+int age</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-46.110001"
+               y="8.3999996"
+               id="text10">+String gender</text>
+            <text
+               class="pele-member pele-method"
+               x="-46.110001"
+               y="41.400002"
+               id="text11">+isMammal()</text>
+            <text
+               class="pele-member pele-method"
+               x="-46.110001"
+               y="62.400002"
+               id="text12">+mate()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-1-Duck"
+           transform="translate(507.76,275.5)"
+           id="g17">
+          <rect
+             x="-68.220001"
+             y="-63.5"
+             width="136.42999"
+             height="127"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect13" />
+          <path
+             class="pele-divider"
+             d="M -68.22,-23.5 H 68.22 M -68.22,9.5 H 68.22"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path13" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text13"><tspan
+               x="0"
+               y="-37.900002"
+               id="tspan13">Duck</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g16">
+            <text
+               class="pele-member pele-attribute"
+               x="-56.220001"
+               y="-2.0999999"
+               id="text14">+String beakColor</text>
+            <text
+               class="pele-member pele-method"
+               x="-56.220001"
+               y="30.9"
+               id="text15">+swim()</text>
+            <text
+               class="pele-member pele-method"
+               x="-56.220001"
+               y="51.900002"
+               id="text16">+quack()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-1-Fish"
+           transform="translate(63.96,275.5)"
+           id="g20">
+          <rect
+             x="-55.959999"
+             y="-53"
+             width="111.92"
+             height="106"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect17" />
+          <path
+             class="pele-divider"
+             d="M -55.96,-13 H 55.96 M -55.96,20 H 55.96"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path17" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text17"><tspan
+               x="0"
+               y="-27.4"
+               id="tspan17">Fish</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g19">
+            <text
+               class="pele-member pele-attribute"
+               x="-43.959999"
+               y="8.3999996"
+               id="text18">-int sizeInFeet</text>
+            <text
+               class="pele-member pele-method"
+               x="-43.959999"
+               y="41.400002"
+               id="text19">-canEat()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-1-Zebra"
+           transform="translate(212.18,275.5)"
+           id="g23">
+          <rect
+             x="-52.259998"
+             y="-53"
+             width="104.53"
+             height="106"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect20" />
+          <path
+             class="pele-divider"
+             d="M -52.26,-13 H 52.26 M -52.26,20 H 52.26"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path20" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text20"><tspan
+               x="0"
+               y="-27.4"
+               id="tspan20">Zebra</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g22">
+            <text
+               class="pele-member pele-attribute"
+               x="-40.259998"
+               y="8.3999996"
+               id="text21">+bool is_wild</text>
+            <text
+               class="pele-member pele-method"
+               x="-40.259998"
+               y="41.400002"
+               id="text22">+run()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-note"
+           data-id="l2-class-1-note0"
+           transform="translate(312.26,82)"
+           id="g24">
+          <path
+             d="M -75.01,-18.5 H 67.01 l 8,8 v 29 H -75.01 Z"
+             fill="#f0f0f0"
+             stroke="#e0e0e0"
+             stroke-linejoin="round"
+             id="path23" />
+          <path
+             d="m 67.01,-18.5 v 8 h 8"
+             fill="none"
+             stroke="#e0e0e0"
+             stroke-linejoin="round"
+             id="path24" />
+          <text
+             class="pele-label"
+             font-size="14px"
+             x="0"
+             y="4.9000001"
+             text-anchor="middle"
+             id="text24">From Duck till Zebra</text>
+        </g>
+        <g
+           class="pele-node pele-note"
+           data-id="l2-class-1-note1"
+           transform="translate(507.76,82)"
+           id="g29">
+          <path
+             d="M -80.49,-44 H 72.49 l 8,8 V 44 H -80.49 Z"
+             fill="#f0f0f0"
+             stroke="#e0e0e0"
+             stroke-linejoin="round"
+             id="path25" />
+          <path
+             d="m 72.49,-44 v 8 h 8"
+             fill="none"
+             stroke="#e0e0e0"
+             stroke-linejoin="round"
+             id="path26" />
+          <text
+             class="pele-label"
+             font-size="14px"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text29"><tspan
+               x="0"
+               y="-22.1"
+               id="tspan26">can fly</tspan><tspan
+               x="0"
+               y="-4.0999999"
+               id="tspan27">can swim</tspan><tspan
+               x="0"
+               y="13.9"
+               id="tspan28">can dive</tspan><tspan
+               x="0"
+               y="31.9"
+               id="tspan29">can help in debugging</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-2"
+     data-sb-key="pele:example:class:1"
+     data-sb-label="2. classDiagram · class Customer {"
+     transform="matrix(0.31296356,0,0,0.31296356,138.11524,-37.617915)">
+    <g
+       transform="matrix(0.714286,0,0,0.714286,0,138.06)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g59">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g37">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-2-id_Customer_Order_1"
+           id="g32">
+          <path
+             d="m 137.21,112 v 90"
+             id="path31" />
+          <path
+             class="pele-marker"
+             d="m 137.21,209 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path32" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-2-id_Order_LineItem_2"
+           id="g34">
+          <path
+             d="m 125.21,352 v -3.4 c 0,11.7 -67.27,11.7 -67.27,23.4 v 70"
+             id="path33" />
+          <path
+             class="pele-marker"
+             d="m 125.21,336 5,8 -5,8 -5,-8 z"
+             stroke-linejoin="round"
+             fill="#2e3338"
+             id="path34" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-2-id_Order_Payment_3"
+           id="g36">
+          <path
+             d="m 149.21,336 c 0,18 67.28,18 67.28,36 v 54"
+             id="path35" />
+          <path
+             class="pele-marker"
+             d="m 216.49,433 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path36" />
+        </g>
+      </g>
+      <g
+         class="pele-edge-labels"
+         font-size="14px"
+         id="g41">
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-2-id_Customer_Order_1"
+           id="g38">
+          <rect
+             x="112.98"
+             y="150"
+             width="48.459999"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect37" />
+          <text
+             x="137.21001"
+             y="165.39999"
+             text-anchor="middle"
+             id="text37">places</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-2-id_Order_LineItem_2"
+           id="g39">
+          <rect
+             x="27.870001"
+             y="374"
+             width="60.139999"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect38" />
+          <text
+             x="57.939999"
+             y="389.39999"
+             text-anchor="middle"
+             id="text38">contains</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-2-id_Order_Payment_3"
+           id="g40">
+          <rect
+             x="182.53"
+             y="374"
+             width="67.919998"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect39" />
+          <text
+             x="216.49001"
+             y="389.39999"
+             text-anchor="middle"
+             id="text39">settled by</text>
+        </g>
+      </g>
+      <g
+         class="pele-cardinalities"
+         font-size="13px"
+         fill="#888888"
+         id="g44">
+        <text
+           class="pele-cardinality"
+           x="149.83"
+           y="128.55"
+           text-anchor="middle"
+           id="text41">1</text>
+        <text
+           class="pele-cardinality"
+           x="148.74001"
+           y="201.55"
+           text-anchor="middle"
+           id="text42">*</text>
+        <text
+           class="pele-cardinality"
+           x="112.6"
+           y="352.54999"
+           text-anchor="middle"
+           id="text43">1</text>
+        <text
+           class="pele-cardinality"
+           x="69.470001"
+           y="434.54999"
+           text-anchor="middle"
+           id="text44">*</text>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g58">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-2-Customer"
+           transform="translate(137.21,60)"
+           id="g48">
+          <rect
+             x="-53.82"
+             y="-52"
+             width="107.65"
+             height="104"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect44" />
+          <path
+             class="pele-divider"
+             d="M -53.82,-12 H 53.83 M -53.82,42 H 53.83"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path44" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text45"><tspan
+               x="0"
+               y="-26.4"
+               id="tspan44">Customer</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g47">
+            <text
+               class="pele-member pele-attribute"
+               x="-41.82"
+               y="9.3999996"
+               id="text46">+String name</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-41.82"
+               y="30.4"
+               id="text47">+String email</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-2-Order"
+           transform="translate(137.21,272.5)"
+           id="g52">
+          <rect
+             x="-60.82"
+             y="-63.5"
+             width="121.65"
+             height="127"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect48" />
+          <path
+             class="pele-divider"
+             d="M -60.82,-23.5 H 60.83 m -121.65,54 H 60.83"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path48" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text48"><tspan
+               x="0"
+               y="-37.900002"
+               id="tspan48">Order</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g51">
+            <text
+               class="pele-member pele-attribute"
+               x="-48.82"
+               y="-2.0999999"
+               id="text49">+String id</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-48.82"
+               y="18.9"
+               id="text50">+Date placedAt</text>
+            <text
+               class="pele-member pele-method"
+               x="-48.82"
+               y="51.900002"
+               id="text51">+total() : Money</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-2-LineItem"
+           transform="translate(57.94,483.5)"
+           id="g54">
+          <rect
+             x="-49.939999"
+             y="-41.5"
+             width="99.879997"
+             height="83"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect52" />
+          <path
+             class="pele-divider"
+             d="m -49.94,-1.5 h 99.88 m -99.88,33 h 99.88"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path52" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text52"><tspan
+               x="0"
+               y="-15.9"
+               id="tspan52">LineItem</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g53">
+            <text
+               class="pele-member pele-attribute"
+               x="-37.939999"
+               y="19.9"
+               id="text53">+int quantity</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-2-Payment"
+           transform="translate(216.49,483.5)"
+           id="g57">
+          <rect
+             x="-68.610001"
+             y="-50.5"
+             width="137.22"
+             height="101"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect54" />
+          <path
+             class="pele-divider"
+             d="M -68.61,7.5 H 68.61 m -137.22,10 H 68.61"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path54" />
+          <text
+             class="pele-annotation"
+             x="0"
+             y="-28.950001"
+             text-anchor="middle"
+             font-size="13px"
+             fill="#888888"
+             id="text54">«interface»</text>
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text55"><tspan
+               x="0"
+               y="-6.9000001"
+               id="tspan54">Payment</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g56">
+            <text
+               class="pele-member pele-method"
+               x="-56.610001"
+               y="38.900002"
+               id="text56">+authorise() : bool</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-3"
+     data-sb-key="pele:example:class:2"
+     data-sb-label="3. classDiagram · class Customer {"
+     transform="matrix(0.47204546,0,0,0.47204546,8.5814589,-165.69978)">
+    <g
+       transform="matrix(0.714286,0,0,0.714286,0,541.203)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g87">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g65">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-3-id_Customer_Order_1"
+           id="g60">
+          <path
+             d="m 137.21,112 v 90"
+             id="path59" />
+          <path
+             class="pele-marker"
+             d="m 137.21,209 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path60" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-3-id_Order_LineItem_2"
+           id="g62">
+          <path
+             d="m 125.21,352 v -3.4 c 0,11.7 -67.27,11.7 -67.27,23.4 v 70"
+             id="path61" />
+          <path
+             class="pele-marker"
+             d="m 125.21,336 5,8 -5,8 -5,-8 z"
+             stroke-linejoin="round"
+             fill="#2e3338"
+             id="path62" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-3-id_Order_Payment_3"
+           id="g64">
+          <path
+             d="m 149.21,336 c 0,18 67.28,18 67.28,36 v 54"
+             id="path63" />
+          <path
+             class="pele-marker"
+             d="m 216.49,433 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path64" />
+        </g>
+      </g>
+      <g
+         class="pele-edge-labels"
+         font-size="14px"
+         id="g69">
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-3-id_Customer_Order_1"
+           id="g66">
+          <rect
+             x="112.98"
+             y="150"
+             width="48.459999"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect65" />
+          <text
+             x="137.21001"
+             y="165.39999"
+             text-anchor="middle"
+             id="text65">places</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-3-id_Order_LineItem_2"
+           id="g67">
+          <rect
+             x="27.870001"
+             y="374"
+             width="60.139999"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect66" />
+          <text
+             x="57.939999"
+             y="389.39999"
+             text-anchor="middle"
+             id="text66">contains</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-3-id_Order_Payment_3"
+           id="g68">
+          <rect
+             x="182.53"
+             y="374"
+             width="67.919998"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect67" />
+          <text
+             x="216.49001"
+             y="389.39999"
+             text-anchor="middle"
+             id="text67">settled by</text>
+        </g>
+      </g>
+      <g
+         class="pele-cardinalities"
+         font-size="13px"
+         fill="#888888"
+         id="g72">
+        <text
+           class="pele-cardinality"
+           x="149.83"
+           y="128.55"
+           text-anchor="middle"
+           id="text69">1</text>
+        <text
+           class="pele-cardinality"
+           x="148.74001"
+           y="201.55"
+           text-anchor="middle"
+           id="text70">*</text>
+        <text
+           class="pele-cardinality"
+           x="112.6"
+           y="352.54999"
+           text-anchor="middle"
+           id="text71">1</text>
+        <text
+           class="pele-cardinality"
+           x="69.470001"
+           y="434.54999"
+           text-anchor="middle"
+           id="text72">*</text>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g86">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-3-Customer"
+           transform="translate(137.21,60)"
+           id="g76">
+          <rect
+             x="-53.82"
+             y="-52"
+             width="107.65"
+             height="104"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect72" />
+          <path
+             class="pele-divider"
+             d="M -53.82,-12 H 53.83 M -53.82,42 H 53.83"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path72" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text73"><tspan
+               x="0"
+               y="-26.4"
+               id="tspan72">Customer</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g75">
+            <text
+               class="pele-member pele-attribute"
+               x="-41.82"
+               y="9.3999996"
+               id="text74">+String name</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-41.82"
+               y="30.4"
+               id="text75">+String email</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-3-Order"
+           transform="translate(137.21,272.5)"
+           id="g80">
+          <rect
+             x="-60.82"
+             y="-63.5"
+             width="121.65"
+             height="127"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect76" />
+          <path
+             class="pele-divider"
+             d="M -60.82,-23.5 H 60.83 m -121.65,54 H 60.83"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path76" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text76"><tspan
+               x="0"
+               y="-37.900002"
+               id="tspan76">Order</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g79">
+            <text
+               class="pele-member pele-attribute"
+               x="-48.82"
+               y="-2.0999999"
+               id="text77">+String id</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-48.82"
+               y="18.9"
+               id="text78">+Date placedAt</text>
+            <text
+               class="pele-member pele-method"
+               x="-48.82"
+               y="51.900002"
+               id="text79">+total() : Money</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-3-LineItem"
+           transform="translate(57.94,483.5)"
+           id="g82">
+          <rect
+             x="-49.939999"
+             y="-41.5"
+             width="99.879997"
+             height="83"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect80" />
+          <path
+             class="pele-divider"
+             d="m -49.94,-1.5 h 99.88 m -99.88,33 h 99.88"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path80" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text80"><tspan
+               x="0"
+               y="-15.9"
+               id="tspan80">LineItem</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g81">
+            <text
+               class="pele-member pele-attribute"
+               x="-37.939999"
+               y="19.9"
+               id="text81">+int quantity</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-3-Payment"
+           transform="translate(216.49,483.5)"
+           id="g85">
+          <rect
+             x="-68.610001"
+             y="-50.5"
+             width="137.22"
+             height="101"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect82" />
+          <path
+             class="pele-divider"
+             d="M -68.61,7.5 H 68.61 m -137.22,10 H 68.61"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path82" />
+          <text
+             class="pele-annotation"
+             x="0"
+             y="-28.950001"
+             text-anchor="middle"
+             font-size="13px"
+             fill="#888888"
+             id="text82">«interface»</text>
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text83"><tspan
+               x="0"
+               y="-6.9000001"
+               id="tspan82">Payment</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g84">
+            <text
+               class="pele-member pele-method"
+               x="-56.610001"
+               y="38.900002"
+               id="text84">+authorise() : bool</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-4"
+     data-sb-key="pele:example:class:3"
+     data-sb-label="4. classDiagram · class BankAccount"
+     transform="matrix(0.38868242,0,0,0.38868242,9.3492742,-88.456607)">
+    <g
+       transform="matrix(1.22807,0,0,1.22807,0,944.346)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g94">
+      <g
+         class="pele-nodes"
+         id="g93">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-4-BankAccount"
+           transform="translate(85.16,82)"
+           id="g92">
+          <rect
+             x="-77.160004"
+             y="-74"
+             width="154.31"
+             height="148"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect87" />
+          <path
+             class="pele-divider"
+             d="M -77.16,-34 H 77.16 M -77.16,20 H 77.16"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path87" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text87"><tspan
+               x="0"
+               y="-48.400002"
+               id="tspan87">BankAccount</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g91">
+            <text
+               class="pele-member pele-attribute"
+               x="-65.160004"
+               y="-12.6"
+               id="text88">+String owner</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-65.160004"
+               y="8.3999996"
+               id="text89">+Bigdecimal balance</text>
+            <text
+               class="pele-member pele-method"
+               x="-65.160004"
+               y="41.400002"
+               id="text90">+deposit(amount)</text>
+            <text
+               class="pele-member pele-method"
+               x="-65.160004"
+               y="62.400002"
+               id="text91">+withdrawal(amount)</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-5"
+     data-sb-key="pele:example:class:4"
+     data-sb-label="5. classDiagram · class Animal"
+     transform="matrix(0.37597978,0,0,0.37597978,117.99606,-123.17122)">
+    <g
+       transform="matrix(0.981308,0,0,0.981308,0,1161.75)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g101">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g96">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-5-id_Vehicle_Car_1"
+           id="g95">
+          <path
+             d="m 165.36,80 v 44"
+             id="path94" />
+          <path
+             class="pele-marker"
+             d="m 165.36,68 6,12 h -12 z"
+             stroke-linejoin="round"
+             id="path95" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g100">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-5-Animal"
+           transform="translate(46.67,38)"
+           id="g97">
+          <rect
+             x="-38.669998"
+             y="-30"
+             width="77.339996"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect96" />
+          <path
+             class="pele-divider"
+             d="M -38.67,10 H 38.67 M -38.67,20 H 38.67"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path96" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text96"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan96">Animal</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-5-Vehicle"
+           transform="translate(165.36,38)"
+           id="g98">
+          <rect
+             x="-40.02"
+             y="-30"
+             width="80.029999"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect97" />
+          <path
+             class="pele-divider"
+             d="M -40.02,10 H 40.02 M -40.02,20 H 40.02"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path97" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text97"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan97">Vehicle</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-5-Car"
+           transform="translate(165.36,154)"
+           id="g99">
+          <rect
+             x="-32"
+             y="-30"
+             width="64"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect98" />
+          <path
+             class="pele-divider"
+             d="M -32,10 H 32 M -32,20 H 32"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path98" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text98"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan98">Car</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-6"
+     data-sb-key="pele:example:class:5"
+     data-sb-label="6. classDiagram · class Animal[&quot;Animal with a label&quot;]"
+     transform="matrix(0.39007442,0,0,0.39007442,9.7493594,-172.37796)">
+    <g
+       transform="matrix(1.111111,0,0,1.111111,0,1366.161)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g107">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g103">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-6-id_Animal_Car_1"
+           id="g102">
+          <path
+             d="m 94.24,68 v 49"
+             id="path101" />
+          <path
+             class="pele-marker"
+             d="m 94.24,124 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path102" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g106">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-6-Animal"
+           transform="translate(94.24,38)"
+           id="g104">
+          <rect
+             x="-84.019997"
+             y="-30"
+             width="168.05"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect103" />
+          <path
+             class="pele-divider"
+             d="M -84.02,10 H 84.02 M -84.02,20 H 84.02"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path103" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text103"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan103">Animal with a label</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-6-Car"
+           transform="translate(94.24,154)"
+           id="g105">
+          <rect
+             x="-86.239998"
+             y="-30"
+             width="172.48"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect104" />
+          <path
+             class="pele-divider"
+             d="M -86.24,10 H 86.24 M -86.24,20 H 86.24"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path104" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text104"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan104">Car with *! symbols</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-7"
+     data-sb-key="pele:example:class:6"
+     data-sb-label="7. classDiagram · class `Animal Class!`"
+     transform="matrix(0.47204546,0,0,0.47204546,29.539369,-162.76935)">
+    <g
+       transform="matrix(0.86344068,0,0,0.86344068,142.0589,1209.013)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g113">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g109">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-7-id_Animal Class!_Car Class_1"
+           id="g108">
+          <path
+             d="m 72.9,68 v 49"
+             id="path107" />
+          <path
+             class="pele-marker"
+             d="m 72.9,124 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path108" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g112">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-7-Animal Class!"
+           transform="translate(72.9,38)"
+           id="g110">
+          <rect
+             x="-64.900002"
+             y="-30"
+             width="129.81"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect109" />
+          <path
+             class="pele-divider"
+             d="M -64.9,10 H 64.9 M -64.9,20 H 64.9"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path109" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text109"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan109">Animal Class!</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-7-Car Class"
+           transform="translate(72.9,154)"
+           id="g111">
+          <rect
+             x="-48.900002"
+             y="-30"
+             width="97.809998"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect110" />
+          <path
+             class="pele-divider"
+             d="M -48.9,10 H 48.9 M -48.9,20 H 48.9"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path110" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text110"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan110">Car Class</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-8"
+     data-sb-key="pele:example:class:7"
+     data-sb-label="8. classDiagram · class BankAccount"
+     transform="matrix(0.41348017,0,0,0.41348017,6.6163164,-331.37105)">
+    <g
+       transform="matrix(1.22093,0,0,1.22093,0,1887.658)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g120">
+      <g
+         class="pele-nodes"
+         id="g119">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-8-BankAccount"
+           transform="translate(85.94,82)"
+           id="g118">
+          <rect
+             x="-77.940002"
+             y="-74"
+             width="155.88"
+             height="148"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect113" />
+          <path
+             class="pele-divider"
+             d="M -77.94,-34 H 77.94 M -77.94,20 H 77.94"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path113" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text113"><tspan
+               x="0"
+               y="-48.400002"
+               id="tspan113">BankAccount</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g117">
+            <text
+               class="pele-member pele-attribute"
+               x="-65.940002"
+               y="-12.6"
+               id="text114">+String owner</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-65.940002"
+               y="8.3999996"
+               id="text115">+BigDecimal balance</text>
+            <text
+               class="pele-member pele-method"
+               x="-65.940002"
+               y="41.400002"
+               id="text116">+deposit(amount)</text>
+            <text
+               class="pele-member pele-method"
+               x="-65.940002"
+               y="62.400002"
+               id="text117">+withdrawal(amount)</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-12"
+     data-sb-key="pele:example:class:11"
+     data-sb-label="12. classDiagram · classA &lt;|-- classB"
+     transform="matrix(0.92030779,0,0,0.92030779,6.8822068,-1653.0145)">
+    <g
+       transform="matrix(0.233333,0,0,0.233333,0,2712.284)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g177">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g159">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-12-id_classA_classB_1"
+           id="g146">
+          <path
+             d="m 45.79,80 v 44"
+             id="path145" />
+          <path
+             class="pele-marker"
+             d="m 45.79,68 6,12 h -12 z"
+             stroke-linejoin="round"
+             id="path146" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-12-id_classC_classD_2"
+           id="g148">
+          <path
+             d="m 161.38,84 v 40"
+             id="path147" />
+          <path
+             class="pele-marker"
+             d="m 161.38,68 5,8 -5,8 -5,-8 z"
+             stroke-linejoin="round"
+             fill="#2e3338"
+             id="path148" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-12-id_classE_classF_3"
+           id="g150">
+          <path
+             d="m 276.52,84 v 40"
+             id="path149" />
+          <path
+             class="pele-marker"
+             d="m 276.52,68 5,8 -5,8 -5,-8 z"
+             stroke-linejoin="round"
+             id="path150" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-12-id_classG_classH_4"
+           id="g152">
+          <path
+             d="m 392.11,75 v 49"
+             id="path151" />
+          <path
+             class="pele-marker"
+             d="m 392.11,68 3.36,8 h -6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path152" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-12-id_classI_classJ_5"
+           id="g153">
+          <path
+             d="m 506.37,68 v 56"
+             id="path153" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-12-id_classK_classL_6"
+           id="g155">
+          <path
+             d="m 619.74,75 v 49"
+             stroke-dasharray="6, 4"
+             id="path154" />
+          <path
+             class="pele-marker"
+             d="m 619.74,68 3.36,8 h -6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path155" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-12-id_classM_classN_7"
+           id="g157">
+          <path
+             d="m 736.21,80 v 44"
+             stroke-dasharray="6, 4"
+             id="path156" />
+          <path
+             class="pele-marker"
+             d="m 736.21,68 6,12 h -12 z"
+             stroke-linejoin="round"
+             id="path157" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-12-id_classO_classP_8"
+           id="g158">
+          <path
+             d="m 853.13,68 v 56"
+             stroke-dasharray="6, 4"
+             id="path158" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g176">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classA"
+           transform="translate(45.79,38)"
+           id="g160">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect159" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path159" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text159"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan159">classA</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classB"
+           transform="translate(45.79,154)"
+           id="g161">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect160" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path160" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text160"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan160">classB</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classC"
+           transform="translate(161.38,38)"
+           id="g162">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect161" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path161" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text161"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan161">classC</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classD"
+           transform="translate(161.38,154)"
+           id="g163">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect162" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path162" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text162"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan162">classD</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classE"
+           transform="translate(276.52,38)"
+           id="g164">
+          <rect
+             x="-37.349998"
+             y="-30"
+             width="74.699997"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect163" />
+          <path
+             class="pele-divider"
+             d="m -37.35,10 h 74.7 m -74.7,10 h 74.7"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path163" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text163"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan163">classE</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classF"
+           transform="translate(276.52,154)"
+           id="g165">
+          <rect
+             x="-36.900002"
+             y="-30"
+             width="73.809998"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect164" />
+          <path
+             class="pele-divider"
+             d="M -36.9,10 H 36.9 M -36.9,20 H 36.9"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path164" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text164"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan164">classF</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classG"
+           transform="translate(392.11,38)"
+           id="g166">
+          <rect
+             x="-38.240002"
+             y="-30"
+             width="76.480003"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect165" />
+          <path
+             class="pele-divider"
+             d="M -38.24,10 H 38.24 M -38.24,20 H 38.24"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path165" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text165"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan165">classG</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classH"
+           transform="translate(392.11,154)"
+           id="g167">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect166" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path166" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text166"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan166">classH</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classI"
+           transform="translate(506.37,38)"
+           id="g168">
+          <rect
+             x="-34.240002"
+             y="-30"
+             width="68.480003"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect167" />
+          <path
+             class="pele-divider"
+             d="M -34.24,10 H 34.24 M -34.24,20 H 34.24"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path167" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text167"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan167">classI</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classJ"
+           transform="translate(506.37,154)"
+           id="g169">
+          <rect
+             x="-36.459999"
+             y="-30"
+             width="72.93"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect168" />
+          <path
+             class="pele-divider"
+             d="M -36.46,10 H 36.46 M -36.46,20 H 36.46"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path168" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text168"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan168">classJ</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classK"
+           transform="translate(619.74,38)"
+           id="g170">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect169" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path169" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text169"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan169">classK</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classL"
+           transform="translate(619.74,154)"
+           id="g171">
+          <rect
+             x="-36.900002"
+             y="-30"
+             width="73.809998"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect170" />
+          <path
+             class="pele-divider"
+             d="M -36.9,10 H 36.9 M -36.9,20 H 36.9"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path170" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text170"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan170">classL</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classM"
+           transform="translate(736.21,38)"
+           id="g172">
+          <rect
+             x="-38.68"
+             y="-30"
+             width="77.360001"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect171" />
+          <path
+             class="pele-divider"
+             d="M -38.68,10 H 38.68 M -38.68,20 H 38.68"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path171" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text171"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan171">classM</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classN"
+           transform="translate(736.21,154)"
+           id="g173">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect172" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path172" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text172"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan172">classN</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classO"
+           transform="translate(853.13,38)"
+           id="g174">
+          <rect
+             x="-38.240002"
+             y="-30"
+             width="76.480003"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect173" />
+          <path
+             class="pele-divider"
+             d="M -38.24,10 H 38.24 M -38.24,20 H 38.24"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path173" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text173"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan173">classO</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-12-classP"
+           transform="translate(853.13,154)"
+           id="g175">
+          <rect
+             x="-37.349998"
+             y="-30"
+             width="74.699997"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect174" />
+          <path
+             class="pele-divider"
+             d="m -37.35,10 h 74.7 m -74.7,10 h 74.7"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path174" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text174"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan174">classP</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-13"
+     data-sb-key="pele:example:class:12"
+     data-sb-label="13. classDiagram · classA --|&gt; classB : Inheritance"
+     transform="matrix(0.92030779,0,0,0.92030779,7.5180972,-1662.8708)">
+    <g
+       transform="matrix(0.230263,0,0,0.230263,0,2773.084)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g218">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g191">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-13-id_classA_classB_1"
+           id="g178">
+          <path
+             d="m 48.63,68 v 69"
+             id="path177" />
+          <path
+             class="pele-marker"
+             d="m 48.63,149 -6,-12 h 12 z"
+             stroke-linejoin="round"
+             id="path178" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-13-id_classC_classD_2"
+           id="g180">
+          <path
+             d="m 164.21,68 v 65"
+             id="path179" />
+          <path
+             class="pele-marker"
+             d="m 164.21,149 -5,-8 5,-8 5,8 z"
+             stroke-linejoin="round"
+             fill="#2e3338"
+             id="path180" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-13-id_classE_classF_3"
+           id="g182">
+          <path
+             d="m 279.36,68 v 65"
+             id="path181" />
+          <path
+             class="pele-marker"
+             d="m 279.36,149 -5,-8 5,-8 5,8 z"
+             stroke-linejoin="round"
+             id="path182" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-13-id_classG_classH_4"
+           id="g184">
+          <path
+             d="m 394.95,68 v 74"
+             id="path183" />
+          <path
+             class="pele-marker"
+             d="m 394.95,149 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path184" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-13-id_classI_classJ_5"
+           id="g185">
+          <path
+             d="m 509.21,68 v 81"
+             id="path185" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-13-id_classK_classL_6"
+           id="g187">
+          <path
+             d="m 622.57,68 v 74"
+             stroke-dasharray="6, 4"
+             id="path186" />
+          <path
+             class="pele-marker"
+             d="m 622.57,149 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path187" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-13-id_classM_classN_7"
+           id="g189">
+          <path
+             d="m 739.05,68 v 69"
+             stroke-dasharray="6, 4"
+             id="path188" />
+          <path
+             class="pele-marker"
+             d="m 739.05,149 -6,-12 h 12 z"
+             stroke-linejoin="round"
+             id="path189" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-13-id_classO_classP_8"
+           id="g190">
+          <path
+             d="m 855.96,68 v 81"
+             stroke-dasharray="6, 4"
+             id="path190" />
+        </g>
+      </g>
+      <g
+         class="pele-edge-labels"
+         font-size="14px"
+         id="g200">
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-13-id_classA_classB_1"
+           id="g192">
+          <rect
+             x="10"
+             y="98"
+             width="77.260002"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect191" />
+          <text
+             x="48.630001"
+             y="113.4"
+             text-anchor="middle"
+             id="text191">Inheritance</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-13-id_classC_classD_2"
+           id="g193">
+          <rect
+             x="121.31"
+             y="98"
+             width="85.800003"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect192" />
+          <text
+             x="164.21001"
+             y="113.4"
+             text-anchor="middle"
+             id="text192">Composition</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-13-id_classE_classF_3"
+           id="g194">
+          <rect
+             x="237.61"
+             y="98"
+             width="83.489998"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect193" />
+          <text
+             x="279.35999"
+             y="113.4"
+             text-anchor="middle"
+             id="text193">Aggregation</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-13-id_classG_classH_4"
+           id="g195">
+          <rect
+             x="355.16"
+             y="98"
+             width="79.580002"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect194" />
+          <text
+             x="394.95001"
+             y="113.4"
+             text-anchor="middle"
+             id="text194">Association</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-13-id_classI_classJ_5"
+           id="g196">
+          <rect
+             x="472.14001"
+             y="98"
+             width="74.120003"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect195" />
+          <text
+             x="509.20999"
+             y="113.4"
+             text-anchor="middle"
+             id="text195">Link(Solid)</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-13-id_classK_classL_6"
+           id="g197">
+          <rect
+             x="579.28003"
+             y="98"
+             width="86.599998"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect196" />
+          <text
+             x="622.57001"
+             y="113.4"
+             text-anchor="middle"
+             id="text196">Dependency</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-13-id_classM_classN_7"
+           id="g198">
+          <rect
+             x="700.41998"
+             y="98"
+             width="77.239998"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect197" />
+          <text
+             x="739.04999"
+             y="113.4"
+             text-anchor="middle"
+             id="text197">Realization</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-13-id_classO_classP_8"
+           id="g199">
+          <rect
+             x="810.34003"
+             y="98"
+             width="91.239998"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect198" />
+          <text
+             x="855.96002"
+             y="113.4"
+             text-anchor="middle"
+             id="text198">Link(Dashed)</text>
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g217">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classA"
+           transform="translate(48.63,38)"
+           id="g201">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect200" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path200" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text200"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan200">classA</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classB"
+           transform="translate(48.63,179)"
+           id="g202">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect201" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path201" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text201"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan201">classB</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classC"
+           transform="translate(164.21,38)"
+           id="g203">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect202" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path202" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text202"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan202">classC</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classD"
+           transform="translate(164.21,179)"
+           id="g204">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect203" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path203" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text203"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan203">classD</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classE"
+           transform="translate(279.36,38)"
+           id="g205">
+          <rect
+             x="-37.349998"
+             y="-30"
+             width="74.699997"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect204" />
+          <path
+             class="pele-divider"
+             d="m -37.35,10 h 74.7 m -74.7,10 h 74.7"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path204" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text204"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan204">classE</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classF"
+           transform="translate(279.36,179)"
+           id="g206">
+          <rect
+             x="-36.900002"
+             y="-30"
+             width="73.809998"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect205" />
+          <path
+             class="pele-divider"
+             d="M -36.9,10 H 36.9 M -36.9,20 H 36.9"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path205" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text205"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan205">classF</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classG"
+           transform="translate(394.95,38)"
+           id="g207">
+          <rect
+             x="-38.240002"
+             y="-30"
+             width="76.480003"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect206" />
+          <path
+             class="pele-divider"
+             d="M -38.24,10 H 38.24 M -38.24,20 H 38.24"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path206" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text206"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan206">classG</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classH"
+           transform="translate(394.95,179)"
+           id="g208">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect207" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path207" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text207"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan207">classH</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classI"
+           transform="translate(509.21,38)"
+           id="g209">
+          <rect
+             x="-34.240002"
+             y="-30"
+             width="68.480003"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect208" />
+          <path
+             class="pele-divider"
+             d="M -34.24,10 H 34.24 M -34.24,20 H 34.24"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path208" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text208"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan208">classI</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classJ"
+           transform="translate(509.21,179)"
+           id="g210">
+          <rect
+             x="-36.459999"
+             y="-30"
+             width="72.93"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect209" />
+          <path
+             class="pele-divider"
+             d="M -36.46,10 H 36.46 M -36.46,20 H 36.46"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path209" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text209"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan209">classJ</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classK"
+           transform="translate(622.57,38)"
+           id="g211">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect210" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path210" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text210"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan210">classK</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classL"
+           transform="translate(622.57,179)"
+           id="g212">
+          <rect
+             x="-36.900002"
+             y="-30"
+             width="73.809998"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect211" />
+          <path
+             class="pele-divider"
+             d="M -36.9,10 H 36.9 M -36.9,20 H 36.9"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path211" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text211"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan211">classL</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classM"
+           transform="translate(739.05,38)"
+           id="g213">
+          <rect
+             x="-38.68"
+             y="-30"
+             width="77.360001"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect212" />
+          <path
+             class="pele-divider"
+             d="M -38.68,10 H 38.68 M -38.68,20 H 38.68"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path212" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text212"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan212">classM</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classN"
+           transform="translate(739.05,179)"
+           id="g214">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect213" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path213" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text213"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan213">classN</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classO"
+           transform="translate(855.96,38)"
+           id="g215">
+          <rect
+             x="-38.240002"
+             y="-30"
+             width="76.480003"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect214" />
+          <path
+             class="pele-divider"
+             d="M -38.24,10 H 38.24 M -38.24,20 H 38.24"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path214" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text214"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan214">classO</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-13-classP"
+           transform="translate(855.96,179)"
+           id="g216">
+          <rect
+             x="-37.349998"
+             y="-30"
+             width="74.699997"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect215" />
+          <path
+             class="pele-divider"
+             d="m -37.35,10 h 74.7 m -74.7,10 h 74.7"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path215" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text215"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan215">classP</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-14"
+     data-sb-key="pele:example:class:13"
+     data-sb-label="14. classDiagram · classA &lt;|-- classB : implements"
+     transform="matrix(0.623382,0,0,0.623382,7.411419,-829.75204)">
+    <g
+       transform="matrix(0.63253,0,0,0.63253,0,2839.051)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g236">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g224">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-14-id_classA_classB_1"
+           id="g219">
+          <path
+             d="m 49.78,80 v 69"
+             id="path218" />
+          <path
+             class="pele-marker"
+             d="m 49.78,68 6,12 h -12 z"
+             stroke-linejoin="round"
+             id="path219" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-14-id_classC_classD_2"
+           id="g221">
+          <path
+             d="m 165.37,84 v 65"
+             id="path220" />
+          <path
+             class="pele-marker"
+             d="m 165.37,68 5,8 -5,8 -5,-8 z"
+             stroke-linejoin="round"
+             fill="#2e3338"
+             id="path221" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-14-id_classE_classF_3"
+           id="g223">
+          <path
+             d="m 280.51,84 v 65"
+             id="path222" />
+          <path
+             class="pele-marker"
+             d="m 280.51,68 5,8 -5,8 -5,-8 z"
+             stroke-linejoin="round"
+             id="path223" />
+        </g>
+      </g>
+      <g
+         class="pele-edge-labels"
+         font-size="14px"
+         id="g228">
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-14-id_classA_classB_1"
+           id="g225">
+          <rect
+             x="10"
+             y="98"
+             width="79.57"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect224" />
+          <text
+             x="49.779999"
+             y="113.4"
+             text-anchor="middle"
+             id="text224">implements</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-14-id_classC_classD_2"
+           id="g226">
+          <rect
+             x="124.02"
+             y="98"
+             width="82.690002"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect225" />
+          <text
+             x="165.37"
+             y="113.4"
+             text-anchor="middle"
+             id="text225">composition</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-14-id_classE_classF_3"
+           id="g227">
+          <rect
+             x="239.55"
+             y="98"
+             width="81.93"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect226" />
+          <text
+             x="280.51001"
+             y="113.4"
+             text-anchor="middle"
+             id="text226">aggregation</text>
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g235">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-14-classA"
+           transform="translate(49.78,38)"
+           id="g229">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect228" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path228" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text228"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan228">classA</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-14-classB"
+           transform="translate(49.78,179)"
+           id="g230">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect229" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path229" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text229"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan229">classB</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-14-classC"
+           transform="translate(165.37,38)"
+           id="g231">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect230" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path230" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text230"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan230">classC</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-14-classD"
+           transform="translate(165.37,179)"
+           id="g232">
+          <rect
+             x="-37.790001"
+             y="-30"
+             width="75.580002"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect231" />
+          <path
+             class="pele-divider"
+             d="M -37.79,10 H 37.79 M -37.79,20 H 37.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path231" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text231"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan231">classD</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-14-classE"
+           transform="translate(280.51,38)"
+           id="g233">
+          <rect
+             x="-37.349998"
+             y="-30"
+             width="74.699997"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect232" />
+          <path
+             class="pele-divider"
+             d="m -37.35,10 h 74.7 m -74.7,10 h 74.7"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path232" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text232"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan232">classE</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-14-classF"
+           transform="translate(280.51,179)"
+           id="g234">
+          <rect
+             x="-36.900002"
+             y="-30"
+             width="73.809998"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect233" />
+          <path
+             class="pele-divider"
+             d="M -36.9,10 H 36.9 M -36.9,20 H 36.9"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path233" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text233"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan233">classF</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-15"
+     data-sb-key="pele:example:class:14"
+     data-sb-label="15. classDiagram · Animal &lt;|--|&gt; Zebra"
+     transform="matrix(0.14293067,0,0,0.14293067,110.36,-294.34536)">
+    <g
+       transform="matrix(2.234043,0,0,2.234043,0,2992.31)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g243">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g239">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-15-id_Animal_Zebra_1"
+           id="g238">
+          <path
+             d="m 46.67,80 v 32"
+             id="path236" />
+          <path
+             class="pele-marker"
+             d="m 46.67,68 6,12 h -12 z"
+             stroke-linejoin="round"
+             id="path237" />
+          <path
+             class="pele-marker"
+             d="m 46.67,124 -6,-12 h 12 z"
+             stroke-linejoin="round"
+             id="path238" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g242">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-15-Animal"
+           transform="translate(46.67,38)"
+           id="g240">
+          <rect
+             x="-38.669998"
+             y="-30"
+             width="77.339996"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect239" />
+          <path
+             class="pele-divider"
+             d="M -38.67,10 H 38.67 M -38.67,20 H 38.67"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path239" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text239"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan239">Animal</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-15-Zebra"
+           transform="translate(46.67,154)"
+           id="g241">
+          <rect
+             x="-33.779999"
+             y="-30"
+             width="67.57"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect240" />
+          <path
+             class="pele-divider"
+             d="M -33.78,10 H 33.78 M -33.78,20 H 33.78"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path240" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text240"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan240">Zebra</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-16"
+     data-sb-key="pele:example:class:15"
+     data-sb-label="16. classDiagram · bar ()-- foo"
+     transform="matrix(0.170493,0,0,0.170493,141.22036,-456.97648)">
+    <g
+       transform="matrix(2.625,0,0,2.625,0,3437.246)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g249">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g245">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-16-id_interface0_foo_1"
+           id="g244">
+          <path
+             d="M 40,39 V 85"
+             id="path243" />
+          <circle
+             class="pele-marker"
+             cx="40"
+             cy="34"
+             r="5"
+             id="circle243" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g248">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-16-foo"
+           transform="translate(40,115)"
+           id="g246">
+          <rect
+             x="-32"
+             y="-30"
+             width="64"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect245" />
+          <path
+             class="pele-divider"
+             d="M -32,10 H 32 M -32,20 H 32"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path245" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text245"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan245">foo</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-interface"
+           data-id="l2-class-16-interface0"
+           transform="translate(40,18.5)"
+           id="g247">
+          <text
+             class="pele-label"
+             font-size="14px"
+             x="0"
+             y="4.9000001"
+             text-anchor="middle"
+             id="text246">bar</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-17"
+     data-sb-key="pele:example:class:16"
+     data-sb-label="17. classDiagram · class Class01 {"
+     transform="matrix(0.36537235,0,0,0.36537235,121.25035,-1201.2032)">
+    <g
+       transform="matrix(0.9403627,0,0,0.9403627,-0.91811028,3840.0295)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g262">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g253">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-17-id_Class01_interface0_1"
+           id="g250">
+          <path
+             d="m 147.04,230 v 46"
+             id="path249" />
+          <circle
+             class="pele-marker"
+             cx="147.03999"
+             cy="281"
+             r="5"
+             id="circle249" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-17-id_Class02_interface1_2"
+           id="g251">
+          <path
+             d="m 50.24,68 v 88.5"
+             id="path250" />
+          <circle
+             class="pele-marker"
+             cx="50.240002"
+             cy="161.5"
+             r="5"
+             id="circle250" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-17-id_interface2_Class01_3"
+           id="g252">
+          <path
+             d="M 147.04,58.5 V 124"
+             id="path251" />
+          <circle
+             class="pele-marker"
+             cx="147.03999"
+             cy="53.5"
+             r="5"
+             id="circle251" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g261">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-17-Class01"
+           transform="translate(147.04,177)"
+           id="g256">
+          <rect
+             x="-44.68"
+             y="-53"
+             width="89.370003"
+             height="106"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect253" />
+          <path
+             class="pele-divider"
+             d="M -44.68,-13 H 44.68 M -44.68,20 H 44.68"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path253" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text253"><tspan
+               x="0"
+               y="-27.4"
+               id="tspan253">Class01</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g255">
+            <text
+               class="pele-member pele-attribute"
+               x="-32.68"
+               y="8.3999996"
+               id="text254">int amount</text>
+            <text
+               class="pele-member pele-method"
+               x="-32.68"
+               y="41.400002"
+               id="text255">draw()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-17-Class02"
+           transform="translate(50.24,38)"
+           id="g257">
+          <rect
+             x="-42.240002"
+             y="-30"
+             width="84.480003"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect256" />
+          <path
+             class="pele-divider"
+             d="M -42.24,10 H 42.24 M -42.24,20 H 42.24"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path256" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text256"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan256">Class02</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-interface"
+           data-id="l2-class-17-interface0"
+           transform="translate(147.04,296.5)"
+           id="g258">
+          <text
+             class="pele-label"
+             font-size="14px"
+             x="0"
+             y="4.9000001"
+             text-anchor="middle"
+             id="text257">bar</text>
+        </g>
+        <g
+           class="pele-node pele-interface"
+           data-id="l2-class-17-interface1"
+           transform="translate(50.24,177)"
+           id="g259">
+          <text
+             class="pele-label"
+             font-size="14px"
+             x="0"
+             y="4.9000001"
+             text-anchor="middle"
+             id="text258">bar</text>
+        </g>
+        <g
+           class="pele-node pele-interface"
+           data-id="l2-class-17-interface2"
+           transform="translate(147.04,38)"
+           id="g260">
+          <text
+             class="pele-label"
+             font-size="14px"
+             x="0"
+             y="4.9000001"
+             text-anchor="middle"
+             id="text259">foo</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-18"
+     data-sb-key="pele:example:class:17"
+     data-sb-label="18. classDiagram · namespace BaseShapes {"
+     transform="matrix(0.47204546,0,0,0.47204546,104.10297,-1490.3027)">
+    <g
+       transform="matrix(0.721649,0,0,0.721649,0,4201.621)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g270">
+      <g
+         class="pele-clusters"
+         id="g264">
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-18-BaseShapes"
+           id="g263">
+          <rect
+             x="8"
+             y="8"
+             width="274.29999"
+             height="164"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect262" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="67.360001"
+             y="33.599998"
+             text-anchor="middle"
+             id="text262">BaseShapes</text>
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g269">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-18-Triangle"
+           transform="translate(71.12,100)"
+           id="g265">
+          <rect
+             x="-43.119999"
+             y="-30"
+             width="86.239998"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect264" />
+          <path
+             class="pele-divider"
+             d="M -43.12,10 H 43.12 M -43.12,20 H 43.12"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path264" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text264"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan264">Triangle</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-18-Rectangle"
+           transform="translate(208.27,100)"
+           id="g268">
+          <rect
+             x="-54.029999"
+             y="-52"
+             width="108.06"
+             height="104"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect265" />
+          <path
+             class="pele-divider"
+             d="M -54.03,-12 H 54.03 M -54.03,42 H 54.03"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path265" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text265"><tspan
+               x="0"
+               y="-26.4"
+               id="tspan265">Rectangle</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g267">
+            <text
+               class="pele-member pele-attribute"
+               x="-42.029999"
+               y="9.3999996"
+               id="text266">double width</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-42.029999"
+               y="30.4"
+               id="text267">double height</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-19"
+     data-sb-key="pele:example:class:18"
+     data-sb-label="19. classDiagram · namespace Auth[&quot;Authentication Service&quot;] {"
+     transform="matrix(0.47204546,0,0,0.47204546,104.10297,-1490.3027)">
+    <g
+       transform="matrix(1.029412,0,0,1.029412,0,4347.518)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g277">
+      <g
+         class="pele-clusters"
+         id="g272">
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-19-Auth"
+           id="g271">
+          <rect
+             x="8"
+             y="8"
+             width="187.17999"
+             height="164"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect270" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="101.59"
+             y="33.599998"
+             text-anchor="middle"
+             id="text270">Authentication Service</text>
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g276">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-19-UserService"
+           transform="translate(101.59,100)"
+           id="g275">
+          <rect
+             x="-58.25"
+             y="-52"
+             width="116.5"
+             height="104"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect272" />
+          <path
+             class="pele-divider"
+             d="M -58.25,-12 H 58.25 M -58.25,-2 H 58.25"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path272" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text272"><tspan
+               x="0"
+               y="-26.4"
+               id="tspan272">UserService</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g274">
+            <text
+               class="pele-member pele-method"
+               x="-46.25"
+               y="19.4"
+               id="text273">+login()</text>
+            <text
+               class="pele-member pele-method"
+               x="-46.25"
+               y="40.400002"
+               id="text274">+logout()</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-20"
+     data-sb-key="pele:example:class:19"
+     data-sb-label="20. classDiagram · namespace Company.Engineering.Backend {"
+     transform="matrix(0.89282679,0,0,0.89282679,-157.13545,-2972.4115)">
+    <g
+       transform="matrix(0.425963,0,0,0.425963,190.50809,4482.1342)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g297">
+      <g
+         class="pele-clusters"
+         id="g282">
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-20-Company"
+           id="g278">
+          <rect
+             x="8"
+             y="8"
+             width="476.57999"
+             height="447"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect277" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="56.23"
+             y="33.599998"
+             text-anchor="middle"
+             id="text277">Company</text>
+        </g>
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-20-Company.Engineering"
+           id="g279">
+          <rect
+             x="28"
+             y="48"
+             width="436.57999"
+             height="387"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect278" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="84.690002"
+             y="73.599998"
+             text-anchor="middle"
+             id="text278">Engineering</text>
+        </g>
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-20-Company.Engineering.Backend"
+           id="g280">
+          <rect
+             x="48"
+             y="252"
+             width="176.50999"
+             height="163"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect279" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="93.129997"
+             y="277.60001"
+             text-anchor="middle"
+             id="text279">Backend</text>
+        </g>
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-20-Company.Engineering.Frontend"
+           id="g281">
+          <rect
+             x="264.51001"
+             y="252"
+             width="180.06"
+             height="163"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect280" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="310.53"
+             y="277.60001"
+             text-anchor="middle"
+             id="text280">Frontend</text>
+        </g>
+      </g>
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g286">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-20-id_TechLead_Developer_1"
+           id="g283">
+          <path
+             d="m 233.4,171 c 0,14 -97.14,14 -97.14,28 v 106"
+             id="path282" />
+          <path
+             class="pele-marker"
+             d="m 136.26,312 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path283" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-20-id_TechLead_Designer_2"
+           id="g285">
+          <path
+             d="m 257.4,171 c 0,14 97.14,14 97.14,28 v 106"
+             id="path284" />
+          <path
+             class="pele-marker"
+             d="m 354.54,312 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path285" />
+        </g>
+      </g>
+      <g
+         class="pele-edge-labels"
+         font-size="14px"
+         id="g289">
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-20-id_TechLead_Developer_1"
+           id="g287">
+          <rect
+             x="115.53"
+             y="201"
+             width="41.459999"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect286" />
+          <text
+             x="136.25999"
+             y="216.39999"
+             text-anchor="middle"
+             id="text286">leads</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-20-id_TechLead_Designer_2"
+           id="g288">
+          <rect
+             x="333.81"
+             y="201"
+             width="41.459999"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect287" />
+          <text
+             x="354.54001"
+             y="216.39999"
+             text-anchor="middle"
+             id="text287">leads</text>
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g296">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-20-Developer"
+           transform="translate(136.26,353.5)"
+           id="g291">
+          <rect
+             x="-52.259998"
+             y="-41.5"
+             width="104.51"
+             height="83"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect289" />
+          <path
+             class="pele-divider"
+             d="M -52.26,-1.5 H 52.26 M -52.26,8.5 H 52.26"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path289" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text289"><tspan
+               x="0"
+               y="-15.9"
+               id="tspan289">Developer</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g290">
+            <text
+               class="pele-member pele-method"
+               x="-40.259998"
+               y="29.9"
+               id="text290">+writeCode()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-20-Designer"
+           transform="translate(354.54,353.5)"
+           id="g293">
+          <rect
+             x="-64.709999"
+             y="-41.5"
+             width="129.42"
+             height="83"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect291" />
+          <path
+             class="pele-divider"
+             d="M -64.71,-1.5 H 64.71 M -64.71,8.5 H 64.71"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path291" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text291"><tspan
+               x="0"
+               y="-15.9"
+               id="tspan291">Designer</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g292">
+            <text
+               class="pele-member pele-method"
+               x="-52.709999"
+               y="29.9"
+               id="text292">+createMockup()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-20-TechLead"
+           transform="translate(245.4,129.5)"
+           id="g295">
+          <rect
+             x="-52.259998"
+             y="-41.5"
+             width="104.53"
+             height="83"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect293" />
+          <path
+             class="pele-divider"
+             d="M -52.26,-1.5 H 52.26 M -52.26,8.5 H 52.26"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path293" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text293"><tspan
+               x="0"
+               y="-15.9"
+               id="tspan293">TechLead</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g294">
+            <text
+               class="pele-member pele-method"
+               x="-40.259998"
+               y="29.9"
+               id="text294">+planSprint()</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-21"
+     data-sb-key="pele:example:class:20"
+     data-sb-label="21. classDiagram · namespace Platform {"
+     transform="matrix(0.42942697,0,0,0.42942697,7.5729246,-833.80815)">
+    <g
+       transform="matrix(0.523691,0,0,0.523691,0,4762.033)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g318">
+      <g
+         class="pele-clusters"
+         id="g301">
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-21-Platform"
+           id="g298">
+          <rect
+             x="8"
+             y="8"
+             width="384.06"
+             height="408"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect297" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="51.779999"
+             y="33.599998"
+             text-anchor="middle"
+             id="text297">Platform</text>
+        </g>
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-21-Platform.Auth"
+           id="g299">
+          <rect
+             x="28"
+             y="212"
+             width="156.5"
+             height="184"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect298" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="58.459999"
+             y="237.60001"
+             text-anchor="middle"
+             id="text298">Auth</text>
+        </g>
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-21-Platform.Data"
+           id="g300">
+          <rect
+             x="224.5"
+             y="212"
+             width="147.57001"
+             height="184"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect299" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="255.39"
+             y="237.60001"
+             text-anchor="middle"
+             id="text299">Data</text>
+        </g>
+      </g>
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g305">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-21-id_Gateway_UserService_1"
+           id="g302">
+          <path
+             d="m 190.26,131 c 0,14 -84.01,14 -84.01,28 v 106"
+             id="path301" />
+          <path
+             class="pele-marker"
+             d="m 106.25,272 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path302" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-21-id_Gateway_Repository_2"
+           id="g304">
+          <path
+             d="m 214.26,131 c 0,14 84.02,14 84.02,28 v 106"
+             id="path303" />
+          <path
+             class="pele-marker"
+             d="m 298.28,272 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path304" />
+        </g>
+      </g>
+      <g
+         class="pele-edge-labels"
+         font-size="14px"
+         id="g308">
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-21-id_Gateway_UserService_1"
+           id="g306">
+          <rect
+             x="71.900002"
+             y="161"
+             width="68.699997"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect305" />
+          <text
+             x="106.25"
+             y="176.39999"
+             text-anchor="middle"
+             id="text305">delegates</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-21-id_Gateway_Repository_2"
+           id="g307">
+          <rect
+             x="263.92999"
+             y="161"
+             width="68.699997"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect306" />
+          <text
+             x="298.28"
+             y="176.39999"
+             text-anchor="middle"
+             id="text306">delegates</text>
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g317">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-21-UserService"
+           transform="translate(106.25,324)"
+           id="g311">
+          <rect
+             x="-58.25"
+             y="-52"
+             width="116.5"
+             height="104"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect308" />
+          <path
+             class="pele-divider"
+             d="M -58.25,-12 H 58.25 M -58.25,-2 H 58.25"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path308" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text308"><tspan
+               x="0"
+               y="-26.4"
+               id="tspan308">UserService</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g310">
+            <text
+               class="pele-member pele-method"
+               x="-46.25"
+               y="19.4"
+               id="text309">+login()</text>
+            <text
+               class="pele-member pele-method"
+               x="-46.25"
+               y="40.400002"
+               id="text310">+logout()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-21-Repository"
+           transform="translate(298.28,324)"
+           id="g314">
+          <rect
+             x="-53.779999"
+             y="-52"
+             width="107.57"
+             height="104"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect311" />
+          <path
+             class="pele-divider"
+             d="M -53.78,-12 H 53.78 M -53.78,-2 H 53.78"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path311" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text311"><tspan
+               x="0"
+               y="-26.4"
+               id="tspan311">Repository</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g313">
+            <text
+               class="pele-member pele-method"
+               x="-41.779999"
+               y="19.4"
+               id="text312">+find()</text>
+            <text
+               class="pele-member pele-method"
+               x="-41.779999"
+               y="40.400002"
+               id="text313">+save()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-21-Gateway"
+           transform="translate(202.26,89.5)"
+           id="g316">
+          <rect
+             x="-44.900002"
+             y="-41.5"
+             width="89.809998"
+             height="83"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect314" />
+          <path
+             class="pele-divider"
+             d="m -44.9,-1.5 h 89.8 m -89.8,10 h 89.8"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path314" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text314"><tspan
+               x="0"
+               y="-15.9"
+               id="tspan314">Gateway</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g315">
+            <text
+               class="pele-member pele-method"
+               x="-32.900002"
+               y="29.9"
+               id="text315">+route()</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-22"
+     data-sb-key="pele:example:class:21"
+     data-sb-label="22. classDiagram · namespace Company.Engineering.Backend {"
+     transform="matrix(0.93354385,0,0,0.93354385,7.9606132,-3355.7946)">
+    <g
+       transform="matrix(0.201149,0,0,0.201149,0,5000.078)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g337">
+      <g
+         class="pele-clusters"
+         id="g322">
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-22-Company"
+           id="g319">
+          <rect
+             x="426.97"
+             y="8"
+             width="188.92999"
+             height="163"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect318" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="475.20001"
+             y="33.599998"
+             text-anchor="middle"
+             id="text318">Company</text>
+        </g>
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-22-Company.Engineering.Backend"
+           id="g320">
+          <rect
+             x="8"
+             y="256.37"
+             width="492.98999"
+             height="163"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect319" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="134.5"
+             y="281.97"
+             text-anchor="middle"
+             id="text319">Company.Engineering.Backend</text>
+        </g>
+        <g
+           class="pele-cluster pele-namespace"
+           data-id="l2-class-22-Company.Engineering.Frontend"
+           id="g321">
+          <rect
+             x="540.98999"
+             y="256.37"
+             width="494.76999"
+             height="163"
+             fill="#f0f0f0"
+             fill-opacity="0.5"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect320" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="668.38"
+             y="281.97"
+             text-anchor="middle"
+             id="text320">Company.Engineering.Frontend</text>
+        </g>
+      </g>
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g326">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-22-id_CEO_Developer_1"
+           id="g323">
+          <path
+             d="m 509.44,131 v 40 c 0,16.18 -254.94,16.18 -254.94,32.37 v 106"
+             id="path322" />
+          <path
+             class="pele-marker"
+             d="m 254.5,316.37 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path323" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-22-id_CEO_Designer_2"
+           id="g325">
+          <path
+             d="m 533.44,131 v 40 c 0,16.18 254.94,16.18 254.94,32.37 v 106"
+             id="path324" />
+          <path
+             class="pele-marker"
+             d="m 788.38,316.37 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path325" />
+        </g>
+      </g>
+      <g
+         class="pele-edge-labels"
+         font-size="14px"
+         id="g329">
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-22-id_CEO_Developer_1"
+           id="g327">
+          <rect
+             x="222.10001"
+             y="205.37"
+             width="64.800003"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect326" />
+          <text
+             x="254.5"
+             y="220.77"
+             text-anchor="middle"
+             id="text326">oversees</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-22-id_CEO_Designer_2"
+           id="g328">
+          <rect
+             x="755.97998"
+             y="205.37"
+             width="64.800003"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect327" />
+          <text
+             x="788.38"
+             y="220.77"
+             text-anchor="middle"
+             id="text327">oversees</text>
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g336">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-22-Developer"
+           transform="translate(254.5,357.87)"
+           id="g331">
+          <rect
+             x="-52.259998"
+             y="-41.5"
+             width="104.51"
+             height="83"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect329" />
+          <path
+             class="pele-divider"
+             d="M -52.26,-1.5 H 52.26 M -52.26,8.5 H 52.26"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path329" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text329"><tspan
+               x="0"
+               y="-15.9"
+               id="tspan329">Developer</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g330">
+            <text
+               class="pele-member pele-method"
+               x="-40.259998"
+               y="29.9"
+               id="text330">+writeCode()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-22-Designer"
+           transform="translate(788.38,357.87)"
+           id="g333">
+          <rect
+             x="-64.709999"
+             y="-41.5"
+             width="129.42"
+             height="83"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect331" />
+          <path
+             class="pele-divider"
+             d="M -64.71,-1.5 H 64.71 M -64.71,8.5 H 64.71"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path331" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text331"><tspan
+               x="0"
+               y="-15.9"
+               id="tspan331">Designer</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g332">
+            <text
+               class="pele-member pele-method"
+               x="-52.709999"
+               y="29.9"
+               id="text332">+createMockup()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-22-CEO"
+           transform="translate(521.44,89.5)"
+           id="g335">
+          <rect
+             x="-68.199997"
+             y="-41.5"
+             width="136.41"
+             height="83"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect333" />
+          <path
+             class="pele-divider"
+             d="M -68.2,-1.5 H 68.2 M -68.2,8.5 H 68.2"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path333" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text333"><tspan
+               x="0"
+               y="-15.9"
+               id="tspan333">CEO</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g334">
+            <text
+               class="pele-member pele-method"
+               x="-56.200001"
+               y="29.9"
+               id="text334">+makeDecisions()</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-23"
+     data-sb-key="pele:example:class:22"
+     data-sb-label="23. classDiagram · Customer &quot;1&quot; --&gt; &quot;*&quot; Ticket"
+     transform="matrix(0.49316543,0,0,0.49316543,102.25475,-1304.4255)">
+    <g
+       transform="matrix(0.586592,0,0,0.586592,0,5102.17)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g357">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g343">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-23-id_Customer_Ticket_1"
+           id="g338">
+          <path
+             d="m 57.34,68 v 90"
+             id="path337" />
+          <path
+             class="pele-marker"
+             d="m 57.34,165 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path338" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-23-id_Student_Course_2"
+           id="g340">
+          <path
+             d="m 188.45,68 v 90"
+             id="path339" />
+          <path
+             class="pele-marker"
+             d="m 188.45,165 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path340" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-23-id_Galaxy_Star_3"
+           id="g342">
+          <path
+             d="m 308.46,68 v 90"
+             id="path341" />
+          <path
+             class="pele-marker"
+             d="m 308.46,165 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path342" />
+        </g>
+      </g>
+      <g
+         class="pele-edge-labels"
+         font-size="14px"
+         id="g345">
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-23-id_Galaxy_Star_3"
+           id="g344">
+          <rect
+             x="276.84"
+             y="106"
+             width="63.240002"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect343" />
+          <text
+             x="308.45999"
+             y="121.4"
+             text-anchor="middle"
+             id="text343">Contains</text>
+        </g>
+      </g>
+      <g
+         class="pele-cardinalities"
+         font-size="13px"
+         fill="#888888"
+         id="g349">
+        <text
+           class="pele-cardinality"
+           x="69.949997"
+           y="84.550003"
+           text-anchor="middle"
+           id="text345">1</text>
+        <text
+           class="pele-cardinality"
+           x="68.860001"
+           y="157.55"
+           text-anchor="middle"
+           id="text346">*</text>
+        <text
+           class="pele-cardinality"
+           x="201.06"
+           y="84.550003"
+           text-anchor="middle"
+           id="text347">1</text>
+        <text
+           class="pele-cardinality"
+           x="207.2"
+           y="157.55"
+           text-anchor="middle"
+           id="text348">1..*</text>
+        <text
+           class="pele-cardinality"
+           x="333.35999"
+           y="157.55"
+           text-anchor="middle"
+           id="text349">many</text>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g356">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-23-Customer"
+           transform="translate(57.34,38)"
+           id="g350">
+          <rect
+             x="-49.34"
+             y="-30"
+             width="98.669998"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect349" />
+          <path
+             class="pele-divider"
+             d="M -49.34,10 H 49.34 M -49.34,20 H 49.34"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path349" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text350"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan349">Customer</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-23-Ticket"
+           transform="translate(57.34,195)"
+           id="g351">
+          <rect
+             x="-35.119999"
+             y="-30"
+             width="70.239998"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect350" />
+          <path
+             class="pele-divider"
+             d="M -35.12,10 H 35.12 M -35.12,20 H 35.12"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path350" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text351"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan350">Ticket</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-23-Student"
+           transform="translate(188.45,38)"
+           id="g352">
+          <rect
+             x="-41.779999"
+             y="-30"
+             width="83.550003"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect351" />
+          <path
+             class="pele-divider"
+             d="M -41.78,10 H 41.78 M -41.78,20 H 41.78"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path351" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text352"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan351">Student</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-23-Course"
+           transform="translate(188.45,195)"
+           id="g353">
+          <rect
+             x="-39.560001"
+             y="-30"
+             width="79.120003"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect352" />
+          <path
+             class="pele-divider"
+             d="M -39.56,10 H 39.56 M -39.56,20 H 39.56"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path352" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text353"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan352">Course</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-23-Galaxy"
+           transform="translate(308.46,38)"
+           id="g354">
+          <rect
+             x="-38.240002"
+             y="-30"
+             width="76.480003"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect353" />
+          <path
+             class="pele-divider"
+             d="M -38.24,10 H 38.24 M -38.24,20 H 38.24"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path353" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text354"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan353">Galaxy</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-23-Star"
+           transform="translate(308.46,195)"
+           id="g355">
+          <rect
+             x="-32"
+             y="-30"
+             width="64"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect354" />
+          <path
+             class="pele-divider"
+             d="M -32,10 H 32 M -32,20 H 32"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path354" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text355"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan354">Star</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-24"
+     data-sb-key="pele:example:class:23"
+     data-sb-label="24. classDiagram · class Shape &lt;&lt;interface&gt;&gt;"
+     transform="matrix(0.23656963,0,0,0.23656963,156.77813,-834.82887)">
+    <g
+       transform="matrix(2,0,0,2,0,5254.846)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g360">
+      <g
+         class="pele-nodes"
+         id="g359">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-24-Shape"
+           transform="translate(52.47,47)"
+           id="g358">
+          <rect
+             x="-44.470001"
+             y="-39"
+             width="88.940002"
+             height="78"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect357" />
+          <path
+             class="pele-divider"
+             d="M -44.47,19 H 44.47 M -44.47,29 H 44.47"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path357" />
+          <text
+             class="pele-annotation"
+             x="0"
+             y="-17.450001"
+             text-anchor="middle"
+             font-size="13px"
+             fill="#888888"
+             id="text357">«interface»</text>
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text358"><tspan
+               x="0"
+               y="4.5999999"
+               id="tspan357">Shape</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-25"
+     data-sb-key="pele:example:class:24"
+     data-sb-label="25. classDiagram · class Shape"
+     transform="matrix(0.2373398,0,0,0.2373398,30.234727,-529.17775)">
+    <g
+       transform="matrix(1.735537,0,0,1.735537,-86.762762,5496.937)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g366">
+      <g
+         class="pele-nodes"
+         id="g365">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-25-Shape"
+           transform="translate(60.46,70)"
+           id="g364">
+          <rect
+             x="-52.459999"
+             y="-62"
+             width="104.92"
+             height="124"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect360" />
+          <path
+             class="pele-divider"
+             d="M -52.46,-4 H 52.46 M -52.46,29 H 52.46"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path360" />
+          <text
+             class="pele-annotation"
+             x="0"
+             y="-40.450001"
+             text-anchor="middle"
+             font-size="13px"
+             fill="#888888"
+             id="text360">«interface»</text>
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text361"><tspan
+               x="0"
+               y="-18.4"
+               id="tspan360">Shape</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g363">
+            <text
+               class="pele-member pele-attribute"
+               x="-40.459999"
+               y="17.4"
+               id="text362">noOfVertices</text>
+            <text
+               class="pele-member pele-method"
+               x="-40.459999"
+               y="50.400002"
+               id="text363">draw()</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-26"
+     data-sb-key="pele:example:class:25"
+     data-sb-label="26. classDiagram · class Shape{"
+     transform="matrix(0.454118,0,0,0.454118,6.4715882,-2061.0907)">
+    <g
+       transform="matrix(0.769231,0,0,0.769231,0,5717.821)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g379">
+      <g
+         class="pele-nodes"
+         id="g378">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-26-Shape"
+           transform="translate(60.46,100.5)"
+           id="g370">
+          <rect
+             x="-52.459999"
+             y="-62"
+             width="104.92"
+             height="124"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect366" />
+          <path
+             class="pele-divider"
+             d="M -52.46,-4 H 52.46 M -52.46,29 H 52.46"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path366" />
+          <text
+             class="pele-annotation"
+             x="0"
+             y="-40.450001"
+             text-anchor="middle"
+             font-size="13px"
+             fill="#888888"
+             id="text366">«interface»</text>
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text367"><tspan
+               x="0"
+               y="-18.4"
+               id="tspan366">Shape</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g369">
+            <text
+               class="pele-member pele-attribute"
+               x="-40.459999"
+               y="17.4"
+               id="text368">noOfVertices</text>
+            <text
+               class="pele-member pele-method"
+               x="-40.459999"
+               y="50.400002"
+               id="text369">draw()</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-26-Color"
+           transform="translate(208.59,100.5)"
+           id="g377">
+          <rect
+             x="-55.669998"
+             y="-92.5"
+             width="111.33"
+             height="185"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect370" />
+          <path
+             class="pele-divider"
+             d="M -55.67,-34.5 H 55.67 M -55.67,82.5 H 55.67"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path370" />
+          <text
+             class="pele-annotation"
+             x="0"
+             y="-70.949997"
+             text-anchor="middle"
+             font-size="13px"
+             fill="#888888"
+             id="text370">«enumeration»</text>
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text371"><tspan
+               x="0"
+               y="-48.900002"
+               id="tspan370">Color</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g376">
+            <text
+               class="pele-member pele-attribute"
+               x="-43.669998"
+               y="-13.1"
+               id="text372">RED</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-43.669998"
+               y="7.9000001"
+               id="text373">BLUE</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-43.669998"
+               y="28.9"
+               id="text374">GREEN</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-43.669998"
+               y="49.900002"
+               id="text375">WHITE</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-43.669998"
+               y="70.900002"
+               id="text376">BLACK</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-27"
+     data-sb-key="pele:example:class:26"
+     data-sb-label="27. classDiagram · class Shape{"
+     transform="matrix(0.30049188,0,0,0.30049188,139.28348,-825.40784)">
+    <g
+       transform="matrix(1.735537,0,0,1.735537,0,5888.437)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g385">
+      <g
+         class="pele-nodes"
+         id="g384">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-27-Shape"
+           transform="translate(60.46,70)"
+           id="g383">
+          <rect
+             x="-52.459999"
+             y="-62"
+             width="104.92"
+             height="124"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect379" />
+          <path
+             class="pele-divider"
+             d="M -52.46,-4 H 52.46 M -52.46,29 H 52.46"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path379" />
+          <text
+             class="pele-annotation"
+             x="0"
+             y="-40.450001"
+             text-anchor="middle"
+             font-size="13px"
+             fill="#888888"
+             id="text379">«interface»</text>
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text380"><tspan
+               x="0"
+               y="-18.4"
+               id="tspan379">Shape</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g382">
+            <text
+               class="pele-member pele-attribute"
+               x="-40.459999"
+               y="17.4"
+               id="text381">noOfVertices</text>
+            <text
+               class="pele-member pele-method"
+               x="-40.459999"
+               y="50.400002"
+               id="text382">draw()</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-28"
+     data-sb-key="pele:example:class:27"
+     data-sb-label="28. classDiagram · direction RL"
+     transform="matrix(0.82894682,0,0,0.82894682,16.236143,-4443.954)">
+    <g
+       transform="matrix(0.558511,0,0,0.558511,0,6147.412)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g406">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g389">
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-28-id_Student_IdCard_1"
+           id="g386">
+          <path
+             d="m 243.58,122 h -12.6 c -11.7,0 -11.7,-62 -23.4,-62 h -77.4 3.4"
+             id="path385" />
+          <path
+             class="pele-marker"
+             d="m 117.58,60 8,-5 8,5 -8,5 z"
+             stroke-linejoin="round"
+             id="path386" />
+        </g>
+        <g
+           class="pele-edge pele-relation"
+           data-id="l2-class-28-id_Student_Bike_2"
+           id="g388">
+          <path
+             d="m 243.58,142 h -12.6 c -11.7,0 -11.7,62 -23.4,62 h -77.4 3.4"
+             id="path387" />
+          <path
+             class="pele-marker"
+             d="m 117.58,204 8,-5 8,5 -8,5 z"
+             stroke-linejoin="round"
+             id="path388" />
+        </g>
+      </g>
+      <g
+         class="pele-edge-labels"
+         font-size="14px"
+         id="g392">
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-28-id_Student_IdCard_1"
+           id="g390">
+          <rect
+             x="155.58"
+             y="49.5"
+             width="50"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect389" />
+          <text
+             x="180.58"
+             y="64.900002"
+             text-anchor="middle"
+             id="text389">carries</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-class-28-id_Student_Bike_2"
+           id="g391">
+          <rect
+             x="161.41"
+             y="193.5"
+             width="38.34"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect390" />
+          <text
+             x="180.58"
+             y="208.89999"
+             text-anchor="middle"
+             id="text390">rides</text>
+        </g>
+      </g>
+      <g
+         class="pele-cardinalities"
+         font-size="13px"
+         fill="#888888"
+         id="g395">
+        <text
+           class="pele-cardinality"
+           x="234.97"
+           y="110.55"
+           text-anchor="middle"
+           id="text392">1</text>
+        <text
+           class="pele-cardinality"
+           x="126.2"
+           y="48.549999"
+           text-anchor="middle"
+           id="text393">1</text>
+        <text
+           class="pele-cardinality"
+           x="234.97"
+           y="162.55"
+           text-anchor="middle"
+           id="text394">1</text>
+        <text
+           class="pele-cardinality"
+           x="126.2"
+           y="192.55"
+           text-anchor="middle"
+           id="text395">1</text>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g405">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-28-Student"
+           transform="translate(305.37,132)"
+           id="g398">
+          <rect
+             x="-61.790001"
+             y="-41.5"
+             width="123.58"
+             height="83"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect395" />
+          <path
+             class="pele-divider"
+             d="M -61.79,-1.5 H 61.79 m -123.58,33 H 61.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path395" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text396"><tspan
+               x="0"
+               y="-15.9"
+               id="tspan395">Student</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g397">
+            <text
+               class="pele-member pele-attribute"
+               x="-49.790001"
+               y="19.9"
+               id="text397">-idCard : IdCard</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-28-IdCard"
+           transform="translate(62.79,60)"
+           id="g401">
+          <rect
+             x="-54.790001"
+             y="-52"
+             width="109.58"
+             height="104"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect398" />
+          <path
+             class="pele-divider"
+             d="M -54.79,-12 H 54.79 M -54.79,42 H 54.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path398" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text398"><tspan
+               x="0"
+               y="-26.4"
+               id="tspan398">IdCard</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g400">
+            <text
+               class="pele-member pele-attribute"
+               x="-42.790001"
+               y="9.3999996"
+               id="text399">-id : int</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-42.790001"
+               y="30.4"
+               id="text400">-name : string</text>
+          </g>
+        </g>
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-28-Bike"
+           transform="translate(62.79,204)"
+           id="g404">
+          <rect
+             x="-54.790001"
+             y="-52"
+             width="109.58"
+             height="104"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect401" />
+          <path
+             class="pele-divider"
+             d="M -54.79,-12 H 54.79 M -54.79,42 H 54.79"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path401" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text401"><tspan
+               x="0"
+               y="-26.4"
+               id="tspan401">Bike</tspan></text>
+          <g
+             class="pele-members"
+             font-size="14px"
+             id="g403">
+            <text
+               class="pele-member pele-attribute"
+               x="-42.790001"
+               y="9.3999996"
+               id="text402">-id : int</text>
+            <text
+               class="pele-member pele-attribute"
+               x="-42.790001"
+               y="30.4"
+               id="text403">-name : string</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-29"
+     data-sb-key="pele:example:class:28"
+     data-sb-label="29. classDiagram · note &quot;This is a general note&quot;"
+     transform="matrix(0.68132878,0,0,0.68132878,61.000963,-3522.2309)">
+    <g
+       transform="matrix(0.539846,0,0,0.539846,0,6310.859)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g414">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g408">
+        <g
+           class="pele-edge pele-note-edge"
+           data-id="l2-class-29-edgeNote1"
+           id="g407">
+          <path
+             d="m 293.31,45 v 56"
+             stroke-dasharray="2, 4"
+             id="path406" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g413">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-29-MyClass"
+           transform="translate(293.31,131)"
+           id="g409">
+          <rect
+             x="-44.459999"
+             y="-30"
+             width="88.910004"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect408" />
+          <path
+             class="pele-divider"
+             d="M -44.46,10 H 44.46 M -44.46,20 H 44.46"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path408" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text408"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan408">MyClass</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-note"
+           data-id="l2-class-29-note0"
+           transform="translate(86.92,26.5)"
+           id="g410">
+          <path
+             d="M -78.92,-18.5 H 70.92 l 8,8 v 29 H -78.92 Z"
+             fill="#f0f0f0"
+             stroke="#e0e0e0"
+             stroke-linejoin="round"
+             id="path409" />
+          <path
+             d="m 70.92,-18.5 v 8 h 8"
+             fill="none"
+             stroke="#e0e0e0"
+             stroke-linejoin="round"
+             id="path410" />
+          <text
+             class="pele-label"
+             font-size="14px"
+             x="0"
+             y="4.9000001"
+             text-anchor="middle"
+             id="text410">This is a general note</text>
+        </g>
+        <g
+           class="pele-node pele-note"
+           data-id="l2-class-29-note1"
+           transform="translate(293.31,26.5)"
+           id="g412">
+          <path
+             d="M -87.47,-18.5 H 79.47 l 8,8 v 29 H -87.47 Z"
+             fill="#f0f0f0"
+             stroke="#e0e0e0"
+             stroke-linejoin="round"
+             id="path411" />
+          <path
+             d="m 79.47,-18.5 v 8 h 8"
+             fill="none"
+             stroke="#e0e0e0"
+             stroke-linejoin="round"
+             id="path412" />
+          <text
+             class="pele-label"
+             font-size="14px"
+             x="0"
+             y="4.9000001"
+             text-anchor="middle"
+             id="text412">This is a note for a class</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-30"
+     data-sb-key="pele:example:class:29"
+     data-sb-label="30. classDiagram · class Shape"
+     transform="matrix(0.38231813,0,0,0.38231813,12.868121,-1840.7483)">
+    <g
+       transform="matrix(1.004785,0,0,1.004785,0,6418.093)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g418">
+      <g
+         class="pele-nodes"
+         id="g417">
+        <g
+           class="pele-node pele-class clickable"
+           data-id="l2-class-30-Shape"
+           transform="translate(44.01,38)"
+           id="g415">
+          <a
+             href="https://www.github.com/"
+             target="_blank"
+             rel="noopener"
+             id="a414">
+            <title
+               id="title414">This is a tooltip for a link</title>
+            <rect
+               x="-36.009998"
+               y="-30"
+               width="72.019997"
+               height="60"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect414" />
+            <path
+               class="pele-divider"
+               d="M -36.01,10 H 36.01 M -36.01,20 H 36.01"
+               fill="none"
+               stroke="#e0e0e0"
+               id="path414" />
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text414"><tspan
+                 x="0"
+                 y="-4.4000001"
+                 id="tspan414">Shape</tspan></text>
+          </a>
+        </g>
+        <g
+           class="pele-node pele-class clickable"
+           data-id="l2-class-30-Shape2"
+           transform="translate(160.47,38)"
+           id="g416">
+          <a
+             href="https://www.github.com/"
+             target="_blank"
+             rel="noopener"
+             id="a415">
+            <title
+               id="title415">This is a tooltip for a link</title>
+            <rect
+               x="-40.459999"
+               y="-30"
+               width="80.910004"
+               height="60"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect415" />
+            <path
+               class="pele-divider"
+               d="M -40.46,10 H 40.46 M -40.46,20 H 40.46"
+               fill="none"
+               stroke="#e0e0e0"
+               id="path415" />
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text415"><tspan
+                 x="0"
+                 y="-4.4000001"
+                 id="tspan415">Shape2</tspan></text>
+          </a>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-37"
+     data-sb-key="pele:example:class:36"
+     data-sb-label="37. classDiagram · class Animal:::styleClass"
+     transform="matrix(0.12431648,0,0,0.12431648,179.24412,-764.94751)">
+    <g
+       transform="matrix(2.234043,0,0,2.234043,0,7235.593)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g447">
+      <g
+         class="pele-nodes"
+         id="g446">
+        <g
+           class="pele-node pele-class styleClass"
+           data-id="l2-class-37-Animal"
+           transform="translate(46.67,38)"
+           id="g445">
+          <rect
+             x="-38.669998"
+             y="-30"
+             width="77.339996"
+             height="60"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect444" />
+          <path
+             class="pele-divider"
+             d="M -38.67,10 H 38.67 M -38.67,20 H 38.67"
+             fill="none"
+             stroke="#e0e0e0"
+             id="path444" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text444"><tspan
+               x="0"
+               y="-4.4000001"
+               id="tspan444">Animal</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-class-38"
+     data-sb-key="pele:example:class:37"
+     data-sb-label="38. classDiagram · class Duck"
+     transform="matrix(0.12431648,0,0,0.12431648,179.6131,-759.88306)">
+    <g
+       transform="matrix(2.625,0,0,2.625,0,7421.381)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g450">
+      <g
+         class="pele-nodes"
+         id="g449">
+        <g
+           class="pele-node pele-class"
+           data-id="l2-class-38-Duck"
+           transform="translate(40,28)"
+           id="g448">
+          <rect
+             x="-32"
+             y="-20"
+             width="64"
+             height="40"
+             fill="#f6f6f6"
+             stroke="#e0e0e0"
+             rx="6"
+             id="rect447" />
+          <text
+             class="pele-label"
+             font-weight="none"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text447"><tspan
+               x="0"
+               y="5.5999999"
+               id="tspan447">Duck</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

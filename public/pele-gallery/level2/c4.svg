@@ -1,0 +1,3185 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="level2-c4"
+   width="210"
+   height="700"
+   viewBox="0 0 210 700"
+   version="1.1"
+   sodipodi:docname="c4.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs403" />
+  <sodipodi:namedview
+     id="namedview403"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.181689"
+     inkscape:cx="49.73211"
+     inkscape:cy="645.37153"
+     inkscape:window-width="1260"
+     inkscape:window-height="770"
+     inkscape:window-x="-6"
+     inkscape:window-y="-6"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="level2-c4" />
+  <g
+     id="l2-c4-3"
+     data-sb-key="pele:example:c4:2"
+     data-sb-label="3. C4Container · title Container diagram for Internet Banking System"
+     transform="matrix(0.95422599,0,0,0.95422599,5.5881442,-554.65999)">
+    <g
+       transform="matrix(0.150862,0,0,0.150862,0,588.417)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g208">
+      <g
+         transform="translate(103.18,8)"
+         id="g207">
+        <g
+           class="pele-clusters"
+           id="g133">
+          <g
+             class="pele-cluster pele-c4-boundary"
+             data-id="l2-c4-3-c1"
+             id="g132">
+            <rect
+               x="0"
+               y="187"
+               width="1280"
+               height="509"
+               fill="none"
+               stroke="#e0e0e0"
+               stroke-dasharray="6, 4"
+               rx="6"
+               id="rect131" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="16"
+               y="214.60001"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text131">Internet Banking</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="16"
+               y="235.55"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text132">[CONTAINER]</text>
+          </g>
+        </g>
+        <g
+           class="pele-edges"
+           fill="none"
+           stroke="#2e3338"
+           stroke-linecap="round"
+           id="g153">
+          <g
+             class="pele-edge"
+             data-id="l2-c4-3-customer-web_app"
+             id="g134">
+            <path
+               d="M 534.35,139 695.2,262.73"
+               id="path133" />
+            <path
+               class="pele-marker"
+               d="m 700.75,267 -8.39,-2.21 4.1,-5.33 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path134" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-3-customer-spa"
+             id="g136">
+            <path
+               d="M 367.55,139 231.93,262.29"
+               id="path135" />
+            <path
+               class="pele-marker"
+               d="m 226.75,267 3.66,-7.87 4.52,4.97 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path136" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-3-customer-mobile_app"
+             id="g138">
+            <path
+               d="M 458,139 V 260"
+               id="path137" />
+            <path
+               class="pele-marker"
+               d="m 458,267 -3.36,-8 h 6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path138" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-3-web_app-spa"
+             id="g140">
+            <path
+               d="m 754,432 v 12 q 0,8 -8,8 H 198 q -8,0 -8,-8 v -5"
+               id="path139" />
+            <path
+               class="pele-marker"
+               d="m 190,432 3.36,8 h -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path140" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-3-spa-backend_api"
+             id="g142">
+            <path
+               d="m 136,432 v 81"
+               id="path141" />
+            <path
+               class="pele-marker"
+               d="m 136,520 -3.36,-8 h 6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path142" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-3-mobile_app-backend_api"
+             id="g144">
+            <path
+               d="M 364,428.09 235.13,521.87"
+               id="path143" />
+            <path
+               class="pele-marker"
+               d="m 229.47,525.99 4.49,-7.43 3.95,5.44 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path144" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-3-database-backend_api"
+             id="g146">
+            <path
+               d="M 1090,437.39 V 468 q 0,8 -8,8 H 198 q -8,0 -8,8 v 37.61"
+               id="path145" />
+            <path
+               class="pele-marker"
+               d="m 1090,430.39 3.36,8 h -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path146" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-3-email_system-customer"
+             id="g148">
+            <path
+               d="M 216,69.5 H 329"
+               id="path147" />
+            <path
+               class="pele-marker"
+               d="m 336,69.5 -8,3.36 v -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path148" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-3-backend_api-email_system"
+             id="g150">
+            <path
+               d="m 28,557 h -40 q -8,0 -8,-8 V 112.25 q 0,-8 8,-8 h 5"
+               id="path149" />
+            <path
+               class="pele-marker"
+               d="m 0,104.25 -8,3.36 v -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path150" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-3-backend_api-banking_system"
+             id="g152">
+            <path
+               d="M 221.18,524.62 689.24,143.42"
+               id="path151" />
+            <path
+               class="pele-marker"
+               d="m 694.67,139 -4.09,7.66 -4.24,-5.21 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path152" />
+          </g>
+        </g>
+        <g
+           class="pele-nodes"
+           id="g188">
+          <g
+             class="pele-node pele-shape-rect pele-c4-external_system pele-c4-external"
+             data-id="l2-c4-3-email_system"
+             transform="translate(108,69.5)"
+             id="g155">
+            <rect
+               x="-108"
+               y="-69.5"
+               width="216"
+               height="139"
+               fill="#ffffff"
+               stroke="#e0e0e0"
+               stroke-dasharray="4, 3"
+               rx="6"
+               id="rect153" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-26.799999"
+               text-anchor="middle"
+               id="text153">«external system»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text154"><tspan
+                 x="0"
+                 y="-4.4000001"
+                 id="tspan153">E-Mail System</tspan></text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text155"><tspan
+                 x="0"
+                 y="19.049999"
+                 id="tspan154">The internal Microsoft Exchange</tspan><tspan
+                 x="0"
+                 y="36.049999"
+                 id="tspan155">system</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-person pele-c4-person"
+             data-id="l2-c4-3-customer"
+             transform="translate(444,69.5)"
+             id="g158">
+            <rect
+               x="-108"
+               y="-43.5"
+               width="216"
+               height="113"
+               rx="12"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               id="rect155" />
+            <circle
+               cy="-55.5"
+               r="13"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               id="circle155"
+               cx="0" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-13.8"
+               text-anchor="middle"
+               id="text156">«person»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text157"><tspan
+                 x="0"
+                 y="8.6000004"
+                 id="tspan156">Customer</tspan></text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text158"><tspan
+                 x="0"
+                 y="32.049999"
+                 id="tspan157">A customer of the bank, with</tspan><tspan
+                 x="0"
+                 y="49.049999"
+                 id="tspan158">personal bank accounts</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-external_system pele-c4-external"
+             data-id="l2-c4-3-banking_system"
+             transform="translate(780,69.5)"
+             id="g163">
+            <rect
+               x="-108"
+               y="-69.5"
+               width="216"
+               height="139"
+               fill="#ffffff"
+               stroke="#e0e0e0"
+               stroke-dasharray="4, 3"
+               rx="6"
+               id="rect158" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-44.299999"
+               text-anchor="middle"
+               id="text159">«external system»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text160"><tspan
+                 x="0"
+                 y="-23.4"
+                 id="tspan159">Mainframe Banking</tspan><tspan
+                 x="0"
+                 y="-2.4000001"
+                 id="tspan160">System</tspan></text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text163"><tspan
+                 x="0"
+                 y="19.549999"
+                 id="tspan161">Stores all of the core banking</tspan><tspan
+                 x="0"
+                 y="36.549999"
+                 id="tspan162">information about customers,</tspan><tspan
+                 x="0"
+                 y="53.549999"
+                 id="tspan163">accounts, transactions, etc.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-container"
+             data-id="l2-c4-3-spa"
+             transform="translate(136,349.5)"
+             id="g168">
+            <rect
+               x="-108"
+               y="-82.5"
+               width="216"
+               height="165"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect163" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-45.299999"
+               text-anchor="middle"
+               id="text164">«container»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text165"><tspan
+                 x="0"
+                 y="-22.9"
+                 id="tspan164">Single-Page App</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-1.95"
+               text-anchor="middle"
+               id="text166">[JavaScript, Angular]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text168"><tspan
+                 x="0"
+                 y="20.549999"
+                 id="tspan166">Provides all the Internet banking</tspan><tspan
+                 x="0"
+                 y="37.549999"
+                 id="tspan167">functionality to customers via</tspan><tspan
+                 x="0"
+                 y="54.549999"
+                 id="tspan168">their web browser</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-external_container pele-c4-external"
+             data-id="l2-c4-3-mobile_app"
+             transform="translate(472,349.5)"
+             id="g174">
+            <rect
+               x="-108"
+               y="-82.5"
+               width="216"
+               height="165"
+               fill="#ffffff"
+               stroke="#e0e0e0"
+               stroke-dasharray="4, 3"
+               rx="6"
+               id="rect168" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-53.799999"
+               text-anchor="middle"
+               id="text169">«external container»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text170"><tspan
+                 x="0"
+                 y="-31.4"
+                 id="tspan169">Mobile App</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-10.45"
+               text-anchor="middle"
+               id="text171">[C#, Xamarin]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text174"><tspan
+                 x="0"
+                 y="12.05"
+                 id="tspan171">Provides a limited subset of the</tspan><tspan
+                 x="0"
+                 y="29.049999"
+                 id="tspan172">Internet banking functionality to</tspan><tspan
+                 x="0"
+                 y="46.049999"
+                 id="tspan173">customers via their mobile</tspan><tspan
+                 x="0"
+                 y="63.049999"
+                 id="tspan174">device</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-container"
+             data-id="l2-c4-3-web_app"
+             transform="translate(808,349.5)"
+             id="g178">
+            <rect
+               x="-108"
+               y="-82.5"
+               width="216"
+               height="165"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect174" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-36.799999"
+               text-anchor="middle"
+               id="text175">«container»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text176"><tspan
+                 x="0"
+                 y="-14.4"
+                 id="tspan175">Web Application</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="6.5500002"
+               text-anchor="middle"
+               id="text177">[Java, Spring MVC]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text178"><tspan
+                 x="0"
+                 y="29.049999"
+                 id="tspan177">Delivers the static content and</tspan><tspan
+                 x="0"
+                 y="46.049999"
+                 id="tspan178">the Internet banking SPA</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-cyl pele-c4-container_db"
+             data-id="l2-c4-3-database"
+             transform="translate(1144,349.5)"
+             id="g183">
+            <path
+               d="m -108,-70.5 a 108,12 0 0 1 216,0 v 141 a 108,12 0 0 1 -216,0 z"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               id="path178" />
+            <path
+               d="m -108,-70.5 a 108,12 0 0 0 216,0"
+               fill="none"
+               stroke="#e0e0e0"
+               id="path179" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-39.299999"
+               text-anchor="middle"
+               id="text179">«container db»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text180"><tspan
+                 x="0"
+                 y="-16.9"
+                 id="tspan179">Database</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="4.0500002"
+               text-anchor="middle"
+               id="text181">[SQL Database]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text183"><tspan
+                 x="0"
+                 y="26.549999"
+                 id="tspan181">Stores user registration</tspan><tspan
+                 x="0"
+                 y="43.549999"
+                 id="tspan182">information, hashed auth</tspan><tspan
+                 x="0"
+                 y="60.549999"
+                 id="tspan183">credentials, access logs, etc.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-cyl pele-c4-external_container_db pele-c4-external"
+             data-id="l2-c4-3-backend_api"
+             transform="translate(136,594)"
+             id="g187">
+            <path
+               d="m -108,-62 a 108,12 0 0 1 216,0 V 62 a 108,12 0 0 1 -216,0 z"
+               fill="#ffffff"
+               stroke="#e0e0e0"
+               stroke-dasharray="4, 3"
+               id="path183" />
+            <path
+               d="m -108,-62 a 108,12 0 0 0 216,0"
+               fill="none"
+               stroke="#e0e0e0"
+               stroke-dasharray="4, 3"
+               id="path184" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-30.799999"
+               text-anchor="middle"
+               id="text184">«external container db»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text185"><tspan
+                 x="0"
+                 y="-8.3999996"
+                 id="tspan184">API Application</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="12.55"
+               text-anchor="middle"
+               id="text186">[Java, Docker Container]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text187"><tspan
+                 x="0"
+                 y="35.049999"
+                 id="tspan186">Provides Internet banking</tspan><tspan
+                 x="0"
+                 y="52.049999"
+                 id="tspan187">functionality via API</tspan></text>
+          </g>
+        </g>
+        <g
+           class="pele-edge-labels"
+           font-size="13px"
+           id="g206">
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-3-customer-web_app"
+             id="g189">
+            <rect
+               x="645.34998"
+               y="217.39999"
+               width="57.84"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect188" />
+            <text
+               x="674.27002"
+               y="231.95"
+               text-anchor="middle"
+               id="text188">Uses</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text189"><tspan
+                 x="674.27002"
+                 y="251.95"
+                 id="tspan188">[HTTPS]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-3-customer-spa"
+             id="g191">
+            <rect
+               x="268.23001"
+               y="143"
+               width="57.84"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect189" />
+            <text
+               x="297.14999"
+               y="157.55"
+               text-anchor="middle"
+               id="text190">Uses</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text191"><tspan
+                 x="297.14999"
+                 y="177.55"
+                 id="tspan190">[HTTPS]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-3-customer-mobile_app"
+             id="g192">
+            <rect
+               x="439.19"
+               y="163"
+               width="37.610001"
+               height="20"
+               rx="3"
+               fill="#ffffff"
+               id="rect191" />
+            <text
+               x="458"
+               y="177.55"
+               text-anchor="middle"
+               id="text192">Uses</text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-3-web_app-spa"
+             id="g193">
+            <rect
+               x="574.53003"
+               y="442"
+               width="54.939999"
+               height="20"
+               rx="3"
+               fill="#ffffff"
+               id="rect192" />
+            <text
+               x="602"
+               y="456.54999"
+               text-anchor="middle"
+               id="text193">Delivers</text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-3-spa-backend_api"
+             id="g195">
+            <rect
+               x="67.339996"
+               y="456"
+               width="137.31"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect193" />
+            <text
+               x="136"
+               y="470.54999"
+               text-anchor="middle"
+               id="text194">Uses</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text195"><tspan
+                 x="136"
+                 y="490.54999"
+                 id="tspan194">[async, JSON/HTTPS]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-3-mobile_app-backend_api"
+             id="g197">
+            <rect
+               x="250.48"
+               y="450.04001"
+               width="92.510002"
+               height="54"
+               rx="3"
+               fill="#ffffff"
+               id="rect195" />
+            <text
+               x="296.73001"
+               y="464.59"
+               text-anchor="middle"
+               id="text196">Uses</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text197"><tspan
+                 x="296.73001"
+                 y="483.09"
+                 id="tspan196">[async,</tspan><tspan
+                 x="296.73001"
+                 y="500.09"
+                 id="tspan197">JSON/HTTPS]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-3-database-backend_api"
+             id="g199">
+            <rect
+               x="653.75"
+               y="456"
+               width="152.5"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect197" />
+            <text
+               x="730"
+               y="470.54999"
+               text-anchor="middle"
+               id="text198">Reads from and writes to</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text199"><tspan
+                 x="730"
+                 y="490.54999"
+                 id="tspan198">[sync, JDBC]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-3-email_system-customer"
+             id="g200">
+            <rect
+               x="209.82001"
+               y="52.5"
+               width="90.360001"
+               height="34"
+               rx="3"
+               fill="#ffffff"
+               id="rect199" />
+            <text
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text200"><tspan
+                 x="255"
+                 y="65.550003"
+                 id="tspan199">Sends e-mails</tspan><tspan
+                 x="255"
+                 y="82.550003"
+                 id="tspan200">to</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-3-backend_api-email_system"
+             id="g203">
+            <rect
+               x="-95.18"
+               y="243.63"
+               width="90.360001"
+               height="54"
+               rx="3"
+               fill="#ffffff"
+               id="rect200" />
+            <text
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text202"><tspan
+                 x="-50"
+                 y="256.67999"
+                 id="tspan201">Sends e-mails</tspan><tspan
+                 x="-50"
+                 y="273.67999"
+                 id="tspan202">using</tspan></text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text203"><tspan
+                 x="-50"
+                 y="292.17999"
+                 id="tspan203">[sync, SMTP]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-3-backend_api-banking_system"
+             id="g205">
+            <rect
+               x="275.64001"
+               y="254.81"
+               width="84.57"
+               height="54"
+               rx="3"
+               fill="#ffffff"
+               id="rect203" />
+            <text
+               x="317.92001"
+               y="269.35999"
+               text-anchor="middle"
+               id="text204">Uses</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text205"><tspan
+                 x="317.92001"
+                 y="287.85999"
+                 id="tspan204">[sync/async,</tspan><tspan
+                 x="317.92001"
+                 y="304.85999"
+                 id="tspan205">XML/HTTPS]</tspan></text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-c4-4"
+     data-sb-key="pele:example:c4:3"
+     data-sb-label="4. C4Component · title Component diagram for Internet Banking System - API Applica…"
+     transform="matrix(0.94893271,0,0,0.94893271,5.5621383,-564.81744)">
+    <g
+       transform="matrix(0.162037,0,0,0.162037,0,711.831)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g281">
+      <g
+         transform="translate(8,8)"
+         id="g280">
+        <g
+           class="pele-clusters"
+           id="g210">
+          <g
+             class="pele-cluster pele-c4-boundary"
+             data-id="l2-c4-4-api"
+             id="g209">
+            <rect
+               x="0"
+               y="230"
+               width="1280"
+               height="250"
+               fill="none"
+               stroke="#e0e0e0"
+               stroke-dasharray="6, 4"
+               rx="6"
+               id="rect208" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="580.88"
+               y="257.60001"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text208">API Application</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="580.88"
+               y="278.54999"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text209">[CONTAINER]</text>
+          </g>
+        </g>
+        <g
+           class="pele-edges"
+           fill="none"
+           stroke="#2e3338"
+           stroke-linecap="round"
+           id="g226">
+          <g
+             class="pele-edge"
+             data-id="l2-c4-4-sign-security"
+             id="g211">
+            <path
+               d="m 190,452 v 12 q 0,8 8,8 h 548 q 8,0 8,-8 v -5"
+               id="path210" />
+            <path
+               class="pele-marker"
+               d="m 754,452 3.36,8 h -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path211" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-4-accounts-mbsfacade"
+             id="g213">
+            <path
+               d="m 526,452 v 26 q 0,8 8,8 h 548 q 8,0 8,-8 v -19"
+               id="path212" />
+            <path
+               class="pele-marker"
+               d="m 1090,452 3.36,8 h -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path213" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-4-security-db"
+             id="g215">
+            <path
+               d="M 794,310 V 188.9"
+               id="path214" />
+            <path
+               class="pele-marker"
+               d="m 794,181.9 3.36,8 h -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path215" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-4-mbsfacade-mbs"
+             id="g217">
+            <path
+               d="M 1130,310 V 189"
+               id="path216" />
+            <path
+               class="pele-marker"
+               d="m 1130,182 3.36,8 h -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path217" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-4-spa-sign"
+             id="g219">
+            <path
+               d="M 122,189 V 310"
+               id="path218" />
+            <path
+               class="pele-marker"
+               d="m 122,182 3.36,8 h -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path219" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-4-spa-accounts"
+             id="g221">
+            <path
+               d="m 216,177.04 161.41,128.6"
+               id="path220" />
+            <path
+               class="pele-marker"
+               d="m 382.88,310 -8.35,-2.36 4.19,-5.25 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path221" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-4-ma-sign"
+             id="g223">
+            <path
+               d="M 347.35,182 216.5,305.2"
+               id="path222" />
+            <path
+               class="pele-marker"
+               d="m 211.41,310 3.52,-7.93 4.6,4.89 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path223" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-4-ma-accounts"
+             id="g225">
+            <path
+               d="M 458,182 V 303"
+               id="path224" />
+            <path
+               class="pele-marker"
+               d="m 458,310 -3.36,-8 h 6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path225" />
+          </g>
+        </g>
+        <g
+           class="pele-nodes"
+           id="g265">
+          <g
+             class="pele-node pele-shape-rect pele-c4-container"
+             data-id="l2-c4-4-spa"
+             transform="translate(108,91)"
+             id="g230">
+            <rect
+               x="-108"
+               y="-91"
+               width="216"
+               height="182"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect226" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-45.299999"
+               text-anchor="middle"
+               id="text226">«container»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text227"><tspan
+                 x="0"
+                 y="-22.9"
+                 id="tspan226">Single Page Application</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-1.95"
+               text-anchor="middle"
+               id="text228">[javascript and angular]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text230"><tspan
+                 x="0"
+                 y="20.549999"
+                 id="tspan228">Provides all the internet banking</tspan><tspan
+                 x="0"
+                 y="37.549999"
+                 id="tspan229">functionality to customers via</tspan><tspan
+                 x="0"
+                 y="54.549999"
+                 id="tspan230">their web browser.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-container"
+             data-id="l2-c4-4-ma"
+             transform="translate(444,91)"
+             id="g236">
+            <rect
+               x="-108"
+               y="-91"
+               width="216"
+               height="182"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect230" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-53.799999"
+               text-anchor="middle"
+               id="text231">«container»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text232"><tspan
+                 x="0"
+                 y="-31.4"
+                 id="tspan231">Mobile App</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-10.45"
+               text-anchor="middle"
+               id="text233">[Xamarin]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text236"><tspan
+                 x="0"
+                 y="12.05"
+                 id="tspan233">Provides a limited subset to the</tspan><tspan
+                 x="0"
+                 y="29.049999"
+                 id="tspan234">internet banking functionality to</tspan><tspan
+                 x="0"
+                 y="46.049999"
+                 id="tspan235">customers via their mobile</tspan><tspan
+                 x="0"
+                 y="63.049999"
+                 id="tspan236">device.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-cyl pele-c4-container_db"
+             data-id="l2-c4-4-db"
+             transform="translate(780,91)"
+             id="g242">
+            <path
+               d="m -108,-79 a 108,12 0 0 1 216,0 V 79 a 108,12 0 0 1 -216,0 z"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               id="path236" />
+            <path
+               d="m -108,-79 a 108,12 0 0 0 216,0"
+               fill="none"
+               stroke="#e0e0e0"
+               id="path237" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-47.799999"
+               text-anchor="middle"
+               id="text237">«container db»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text238"><tspan
+                 x="0"
+                 y="-25.4"
+                 id="tspan237">Database</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-4.4499998"
+               text-anchor="middle"
+               id="text239">[Relational Database Schema]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text242"><tspan
+                 x="0"
+                 y="18.049999"
+                 id="tspan239">Stores user registration</tspan><tspan
+                 x="0"
+                 y="35.049999"
+                 id="tspan240">information, hashed</tspan><tspan
+                 x="0"
+                 y="52.049999"
+                 id="tspan241">authentication credentials,</tspan><tspan
+                 x="0"
+                 y="69.050003"
+                 id="tspan242">access logs, etc.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-external_system pele-c4-external"
+             data-id="l2-c4-4-mbs"
+             transform="translate(1116,91)"
+             id="g247">
+            <rect
+               x="-108"
+               y="-91"
+               width="216"
+               height="182"
+               fill="#ffffff"
+               stroke="#e0e0e0"
+               stroke-dasharray="4, 3"
+               rx="6"
+               id="rect242" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-44.299999"
+               text-anchor="middle"
+               id="text243">«external system»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text244"><tspan
+                 x="0"
+                 y="-23.4"
+                 id="tspan243">Mainframe Banking</tspan><tspan
+                 x="0"
+                 y="-2.4000001"
+                 id="tspan244">System</tspan></text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text247"><tspan
+                 x="0"
+                 y="19.549999"
+                 id="tspan245">Stores all of the core banking</tspan><tspan
+                 x="0"
+                 y="36.549999"
+                 id="tspan246">information about customers,</tspan><tspan
+                 x="0"
+                 y="53.549999"
+                 id="tspan247">accounts, transactions, etc.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-component"
+             data-id="l2-c4-4-sign"
+             transform="translate(136,381)"
+             id="g251">
+            <rect
+               x="-108"
+               y="-71"
+               width="216"
+               height="142"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect247" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-36.799999"
+               text-anchor="middle"
+               id="text248">«component»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text249"><tspan
+                 x="0"
+                 y="-14.4"
+                 id="tspan248">Sign In Controller</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="6.5500002"
+               text-anchor="middle"
+               id="text250">[MVC Rest Controller]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text251"><tspan
+                 x="0"
+                 y="29.049999"
+                 id="tspan250">Allows users to sign in to the</tspan><tspan
+                 x="0"
+                 y="46.049999"
+                 id="tspan251">internet banking system</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-component"
+             data-id="l2-c4-4-accounts"
+             transform="translate(472,381)"
+             id="g255">
+            <rect
+               x="-108"
+               y="-71"
+               width="216"
+               height="142"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect251" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-45.799999"
+               text-anchor="middle"
+               id="text252">«component»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text253"><tspan
+                 x="0"
+                 y="-24.9"
+                 id="tspan252">Accounts Summary</tspan><tspan
+                 x="0"
+                 y="-3.9000001"
+                 id="tspan253">Controller</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="15.55"
+               text-anchor="middle"
+               id="text254">[MVC Rest Controller]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text255"><tspan
+                 x="0"
+                 y="38.049999"
+                 id="tspan254">Provides customers with a</tspan><tspan
+                 x="0"
+                 y="55.049999"
+                 id="tspan255">summary of their bank accounts</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-component"
+             data-id="l2-c4-4-security"
+             transform="translate(808,381)"
+             id="g260">
+            <rect
+               x="-108"
+               y="-71"
+               width="216"
+               height="142"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect255" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-45.299999"
+               text-anchor="middle"
+               id="text256">«component»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text257"><tspan
+                 x="0"
+                 y="-22.9"
+                 id="tspan256">Security Component</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-1.95"
+               text-anchor="middle"
+               id="text258">[Spring Bean]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text260"><tspan
+                 x="0"
+                 y="20.549999"
+                 id="tspan258">Provides functionality related to</tspan><tspan
+                 x="0"
+                 y="37.549999"
+                 id="tspan259">singing in, changing passwords,</tspan><tspan
+                 x="0"
+                 y="54.549999"
+                 id="tspan260">etc.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-component"
+             data-id="l2-c4-4-mbsfacade"
+             transform="translate(1144,381)"
+             id="g264">
+            <rect
+               x="-108"
+               y="-71"
+               width="216"
+               height="142"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect260" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-45.799999"
+               text-anchor="middle"
+               id="text261">«component»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text262"><tspan
+                 x="0"
+                 y="-24.9"
+                 id="tspan261">Mainframe Banking</tspan><tspan
+                 x="0"
+                 y="-3.9000001"
+                 id="tspan262">System Facade</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="15.55"
+               text-anchor="middle"
+               id="text263">[Spring Bean]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text264"><tspan
+                 x="0"
+                 y="38.049999"
+                 id="tspan263">A facade onto the mainframe</tspan><tspan
+                 x="0"
+                 y="55.049999"
+                 id="tspan264">banking system.</tspan></text>
+          </g>
+        </g>
+        <g
+           class="pele-edge-labels"
+           font-size="13px"
+           id="g279">
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-4-sign-security"
+             id="g266">
+            <rect
+               x="293.19"
+               y="472"
+               width="37.610001"
+               height="20"
+               rx="3"
+               fill="#ffffff"
+               id="rect265" />
+            <text
+               x="312"
+               y="486.54999"
+               text-anchor="middle"
+               id="text265">Uses</text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-4-accounts-mbsfacade"
+             id="g267">
+            <rect
+               x="929.19"
+               y="486"
+               width="37.610001"
+               height="20"
+               rx="3"
+               fill="#ffffff"
+               id="rect266" />
+            <text
+               x="948"
+               y="500.54999"
+               text-anchor="middle"
+               id="text266">Uses</text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-4-security-db"
+             id="g268">
+            <rect
+               x="745.57001"
+               y="198.75999"
+               width="96.870003"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect267" />
+            <text
+               x="794"
+               y="213.31"
+               text-anchor="middle"
+               id="text267">Read &amp; write to</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text268"><tspan
+                 x="794"
+                 y="233.31"
+                 id="tspan267">[JDBC]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-4-mbsfacade-mbs"
+             id="g270">
+            <rect
+               x="1085.91"
+               y="198.8"
+               width="88.18"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect268" />
+            <text
+               x="1130"
+               y="213.35001"
+               text-anchor="middle"
+               id="text269">Uses</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text270"><tspan
+                 x="1130"
+                 y="233.35001"
+                 id="tspan269">[XML/HTTPS]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-4-spa-sign"
+             id="g272">
+            <rect
+               x="73.940002"
+               y="198.8"
+               width="96.129997"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect270" />
+            <text
+               x="122"
+               y="213.35001"
+               text-anchor="middle"
+               id="text271">Uses</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text272"><tspan
+                 x="122"
+                 y="233.35001"
+                 id="tspan271">[JSON/HTTPS]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-4-spa-accounts"
+             id="g274">
+            <rect
+               x="274.69"
+               y="250.23"
+               width="96.129997"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect272" />
+            <text
+               x="322.75"
+               y="264.78"
+               text-anchor="middle"
+               id="text273">Uses</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text274"><tspan
+                 x="322.75"
+                 y="284.78"
+                 id="tspan273">[JSON/HTTPS]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-4-ma-sign"
+             id="g276">
+            <rect
+               x="154.91"
+               y="253.2"
+               width="96.129997"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect274" />
+            <text
+               x="202.97"
+               y="267.75"
+               text-anchor="middle"
+               id="text275">Uses</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text276"><tspan
+                 x="202.97"
+                 y="287.75"
+                 id="tspan275">[JSON/HTTPS]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-4-ma-accounts"
+             id="g278">
+            <rect
+               x="409.94"
+               y="186"
+               width="96.129997"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect276" />
+            <text
+               x="458"
+               y="200.55"
+               text-anchor="middle"
+               id="text277">Uses</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text278"><tspan
+                 x="458"
+                 y="220.55"
+                 id="tspan277">[JSON/HTTPS]</tspan></text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-c4-5"
+     data-sb-key="pele:example:c4:4"
+     data-sb-label="5. C4Dynamic · title Dynamic diagram for Internet Banking System - API Application"
+     transform="matrix(0.955113,0,0,0.955113,6.0584895,-581.45495)">
+    <g
+       transform="matrix(0.336538,0,0,0.336538,0,812.414)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g320">
+      <g
+         transform="translate(8,8)"
+         id="g319">
+        <g
+           class="pele-clusters"
+           id="g283">
+          <g
+             class="pele-cluster pele-c4-boundary"
+             data-id="l2-c4-5-b"
+             id="g282">
+            <rect
+               x="0"
+               y="230"
+               width="608"
+               height="249"
+               fill="none"
+               stroke="#e0e0e0"
+               stroke-dasharray="6, 4"
+               rx="6"
+               id="rect281" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="244.88"
+               y="257.60001"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text281">API Application</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="244.88"
+               y="278.54999"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text282">[CONTAINER]</text>
+          </g>
+        </g>
+        <g
+           class="pele-edges"
+           fill="none"
+           stroke="#2e3338"
+           stroke-linecap="round"
+           id="g289">
+          <g
+             class="pele-edge"
+             data-id="l2-c4-5-c1-c2"
+             id="g284">
+            <path
+               d="M 458,182 V 303"
+               id="path283" />
+            <path
+               class="pele-marker"
+               d="m 458,310 -3.36,-8 h 6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path284" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-5-c2-c3"
+             id="g286">
+            <path
+               d="M 364,380.5 H 251"
+               id="path285" />
+            <path
+               class="pele-marker"
+               d="m 244,380.5 8,-3.36 v 6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path286" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-5-c3-c4"
+             id="g288">
+            <path
+               d="M 122,310 V 188.9"
+               id="path287" />
+            <path
+               class="pele-marker"
+               d="m 122,181.9 3.36,8 h -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path288" />
+          </g>
+        </g>
+        <g
+           class="pele-nodes"
+           id="g311">
+          <g
+             class="pele-node pele-shape-cyl pele-c4-container_db"
+             data-id="l2-c4-5-c4"
+             transform="translate(108,91)"
+             id="g295">
+            <path
+               d="m -108,-79 a 108,12 0 0 1 216,0 V 79 a 108,12 0 0 1 -216,0 z"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               id="path289" />
+            <path
+               d="m -108,-79 a 108,12 0 0 0 216,0"
+               fill="none"
+               stroke="#e0e0e0"
+               id="path290" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-47.799999"
+               text-anchor="middle"
+               id="text290">«container db»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text291"><tspan
+                 x="0"
+                 y="-25.4"
+                 id="tspan290">Database</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-4.4499998"
+               text-anchor="middle"
+               id="text292">[Relational Database Schema]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text295"><tspan
+                 x="0"
+                 y="18.049999"
+                 id="tspan292">Stores user registration</tspan><tspan
+                 x="0"
+                 y="35.049999"
+                 id="tspan293">information, hashed</tspan><tspan
+                 x="0"
+                 y="52.049999"
+                 id="tspan294">authentication credentials,</tspan><tspan
+                 x="0"
+                 y="69.050003"
+                 id="tspan295">access logs, etc.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-container"
+             data-id="l2-c4-5-c1"
+             transform="translate(444,91)"
+             id="g301">
+            <rect
+               x="-108"
+               y="-91"
+               width="216"
+               height="182"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect295" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-53.799999"
+               text-anchor="middle"
+               id="text296">«container»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text297"><tspan
+                 x="0"
+                 y="-31.4"
+                 id="tspan296">Single-Page Application</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-10.45"
+               text-anchor="middle"
+               id="text298">[JavaScript and Angular]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text301"><tspan
+                 x="0"
+                 y="12.05"
+                 id="tspan298">Provides all of the Internet</tspan><tspan
+                 x="0"
+                 y="29.049999"
+                 id="tspan299">banking functionality to</tspan><tspan
+                 x="0"
+                 y="46.049999"
+                 id="tspan300">customers via their web</tspan><tspan
+                 x="0"
+                 y="63.049999"
+                 id="tspan301">browser.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-component"
+             data-id="l2-c4-5-c3"
+             transform="translate(136,380.5)"
+             id="g306">
+            <rect
+               x="-108"
+               y="-70.5"
+               width="216"
+               height="141"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect301" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-45.299999"
+               text-anchor="middle"
+               id="text302">«component»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text303"><tspan
+                 x="0"
+                 y="-22.9"
+                 id="tspan302">Security Component</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-1.95"
+               text-anchor="middle"
+               id="text304">[Spring Bean]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text306"><tspan
+                 x="0"
+                 y="20.549999"
+                 id="tspan304">Provides functionality Related to</tspan><tspan
+                 x="0"
+                 y="37.549999"
+                 id="tspan305">signing in, changing passwords,</tspan><tspan
+                 x="0"
+                 y="54.549999"
+                 id="tspan306">etc.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-component"
+             data-id="l2-c4-5-c2"
+             transform="translate(472,380.5)"
+             id="g310">
+            <rect
+               x="-108"
+               y="-70.5"
+               width="216"
+               height="141"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect306" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-36.799999"
+               text-anchor="middle"
+               id="text307">«component»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text308"><tspan
+                 x="0"
+                 y="-14.4"
+                 id="tspan307">Sign In Controller</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="6.5500002"
+               text-anchor="middle"
+               id="text309">[Spring MVC Rest Controller]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text310"><tspan
+                 x="0"
+                 y="29.049999"
+                 id="tspan309">Allows users to sign in to the</tspan><tspan
+                 x="0"
+                 y="46.049999"
+                 id="tspan310">Internet Banking System.</tspan></text>
+          </g>
+        </g>
+        <g
+           class="pele-edge-labels"
+           font-size="13px"
+           id="g318">
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-5-c1-c2"
+             id="g312">
+            <rect
+               x="382.82999"
+               y="186"
+               width="150.34"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect311" />
+            <text
+               style="fill:#ff0000"
+               x="458"
+               y="200.55"
+               text-anchor="middle"
+               id="text311">1: Submits credentials to</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               style="fill:#ff0000"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text312"><tspan
+                 x="458"
+                 y="220.55"
+                 id="tspan311">[JSON/HTTPS]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-5-c2-c3"
+             id="g314">
+            <rect
+               x="247.23"
+               y="415"
+               width="105.54"
+               height="51"
+               rx="3"
+               fill="#ffffff"
+               id="rect312" />
+            <text
+               style="fill:#ff0000"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text314"><tspan
+                 x="300"
+                 y="428.04999"
+                 id="tspan312">2: Calls</tspan><tspan
+                 x="300"
+                 y="445.04999"
+                 id="tspan313">isAuthenticated()</tspan><tspan
+                 x="300"
+                 y="462.04999"
+                 id="tspan314">on</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-5-c3-c4"
+             id="g317">
+            <rect
+               x="66.949997"
+               y="191.75999"
+               width="130.10001"
+               height="54"
+               rx="3"
+               fill="#ffffff"
+               id="rect314" />
+            <text
+               style="fill:#ff0000"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text316"><tspan
+                 x="132"
+                 y="204.81"
+                 id="tspan315">3: select * from users</tspan><tspan
+                 x="132"
+                 y="221.81"
+                 id="tspan316">where username = ?</tspan></text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               style="fill:#ff0000"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text317"><tspan
+                 x="132"
+                 y="240.31"
+                 id="tspan317">[JDBC]</tspan></text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-c4-6"
+     data-sb-key="pele:example:c4:5"
+     data-sb-label="6. C4Deployment · title Deployment Diagram for Internet Banking System - Live"
+     transform="matrix(0.93347583,0,0,0.93347583,6.0802132,-575.69265)">
+    <g
+       transform="matrix(0.270619,0,0,0.270619,0,995.001)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g403">
+      <g
+         transform="translate(8,8)"
+         id="g402">
+        <g
+           class="pele-clusters"
+           id="g345">
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-mob"
+             id="g321">
+            <rect
+               x="0"
+               y="0"
+               width="272"
+               height="266"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect320" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="16"
+               y="27.6"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text320">Customer's mobile device</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="16"
+               y="48.549999"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text321">[Apple IOS or Android]</text>
+          </g>
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-comp"
+             id="g323">
+            <rect
+               x="320"
+               y="0"
+               width="328"
+               height="388"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect321" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="336"
+               y="27.6"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text322">Customer's computer</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="336"
+               y="48.549999"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text323">[Microsoft Windows or Apple macOS]</text>
+          </g>
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-plc"
+             id="g325">
+            <rect
+               x="0"
+               y="436"
+               width="760"
+               height="911"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect323" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="595.87"
+               y="463.60001"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text324">Big Bank plc</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="595.87"
+               y="484.54999"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text325">[Big Bank plc data center]</text>
+          </g>
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-browser"
+             id="g328">
+            <rect
+               x="348"
+               y="80"
+               width="272"
+               height="280"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect325" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="364"
+               y="107.6"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text326">Web Browser</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="364"
+               y="127.05"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text327">[Google Chrome, Mozilla Firefox,</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="364"
+               y="144.05"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text328">Apple Safari or Microsoft Edge]</text>
+          </g>
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-dn"
+             id="g330">
+            <rect
+               x="28"
+               y="516"
+               width="328"
+               height="357"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect328" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="44"
+               y="543.59998"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text329">bigbank-api*** x8</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="44"
+               y="564.54999"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text330">[Ubuntu 16.04 LTS]</text>
+          </g>
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-bb2"
+             id="g332">
+            <rect
+               x="404"
+               y="516"
+               width="328"
+               height="357"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect330" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="577.29999"
+               y="543.59998"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text331">bigbank-web*** x4</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="577.29999"
+               y="564.54999"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text332">[Ubuntu 16.04 LTS]</text>
+          </g>
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-bigbankdb01"
+             id="g334">
+            <rect
+               x="28"
+               y="921"
+               width="328"
+               height="398"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect332" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="44"
+               y="948.59998"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text333">bigbank-db01</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="44"
+               y="969.54999"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text334">[Ubuntu 16.04 LTS]</text>
+          </g>
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-bigbankdb02"
+             id="g336">
+            <rect
+               x="404"
+               y="921"
+               width="328"
+               height="398"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect334" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="420"
+               y="948.59998"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text335">bigbank-db02</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="420"
+               y="969.54999"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text336">[Ubuntu 16.04 LTS]</text>
+          </g>
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-apache"
+             id="g338">
+            <rect
+               x="56"
+               y="596"
+               width="272"
+               height="249"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect336" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="72"
+               y="623.59998"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text337">Apache Tomcat</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="72"
+               y="644.54999"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text338">[Apache Tomcat 8.x]</text>
+          </g>
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-apache2"
+             id="g340">
+            <rect
+               x="432"
+               y="596"
+               width="272"
+               height="249"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect338" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="568.78003"
+               y="623.59998"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text339">Apache Tomcat</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="568.78003"
+               y="644.54999"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text340">[Apache Tomcat 8.x]</text>
+          </g>
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-oracle"
+             id="g342">
+            <rect
+               x="56"
+               y="1001"
+               width="272"
+               height="290"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect340" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="72"
+               y="1028.6"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text341">Oracle - Primary</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="72"
+               y="1049.55"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text342">[Oracle 12c]</text>
+          </g>
+          <g
+             class="pele-cluster pele-c4-node"
+             data-id="l2-c4-6-oracle2"
+             id="g344">
+            <rect
+               x="432"
+               y="1001"
+               width="272"
+               height="290"
+               fill="none"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect342" />
+            <text
+               class="pele-cluster-label"
+               font-weight="none"
+               x="495.07999"
+               y="1028.6"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text343">Oracle - Secondary</text>
+            <text
+               class="pele-c4-type"
+               font-size="13px"
+               fill="#888888"
+               x="495.07999"
+               y="1049.55"
+               text-anchor="start"
+               xml:space="preserve"
+               id="text344">[Oracle 12c]</text>
+          </g>
+        </g>
+        <g
+           class="pele-edges"
+           fill="none"
+           stroke="#2e3338"
+           stroke-linecap="round"
+           id="g357">
+          <g
+             class="pele-edge"
+             data-id="l2-c4-6-mobile-api"
+             id="g346">
+            <path
+               d="M 164,238 V 669"
+               id="path345" />
+            <path
+               class="pele-marker"
+               d="m 164,676 -3.36,-8 h 6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path346" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-6-spa-api"
+             id="g348">
+            <path
+               d="M 437.26,332 237.28,669.98"
+               id="path347" />
+            <path
+               class="pele-marker"
+               d="m 233.71,676 1.19,-8.6 5.78,3.43 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path348" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-6-web-spa"
+             id="g350">
+            <path
+               d="M 526,676 V 339"
+               id="path349" />
+            <path
+               class="pele-marker"
+               d="m 526,332 3.36,8 h -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path350" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-6-api-db"
+             id="g352">
+            <path
+               d="m 192,817 v 257"
+               id="path351" />
+            <path
+               class="pele-marker"
+               d="m 192,1081 -3.36,-8 h 6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path352" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-6-api-db2"
+             id="g354">
+            <path
+               d="m 254.3,817 231.84,262.37"
+               id="path353" />
+            <path
+               class="pele-marker"
+               d="m 490.78,1084.61 -7.82,-3.77 5.04,-4.45 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path354" />
+          </g>
+          <g
+             class="pele-edge"
+             data-id="l2-c4-6-db-db2"
+             id="g356">
+            <path
+               d="M 300,1172 H 453"
+               id="path355" />
+            <path
+               class="pele-marker"
+               d="m 460,1172 -8,3.36 v -6.72 z"
+               fill="#2e3338"
+               stroke="none"
+               id="path356" />
+          </g>
+        </g>
+        <g
+           class="pele-nodes"
+           id="g391">
+          <g
+             class="pele-node pele-shape-rect pele-c4-container"
+             data-id="l2-c4-6-mobile"
+             transform="translate(136,159)"
+             id="g362">
+            <rect
+               x="-108"
+               y="-79"
+               width="216"
+               height="158"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect357" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-53.799999"
+               text-anchor="middle"
+               id="text357">«container»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text358"><tspan
+                 x="0"
+                 y="-31.4"
+                 id="tspan357">Mobile App</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-10.45"
+               text-anchor="middle"
+               id="text359">[Xamarin]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text362"><tspan
+                 x="0"
+                 y="12.05"
+                 id="tspan359">Provides a limited subset of the</tspan><tspan
+                 x="0"
+                 y="29.049999"
+                 id="tspan360">Internet Banking functionality to</tspan><tspan
+                 x="0"
+                 y="46.049999"
+                 id="tspan361">customers via their mobile</tspan><tspan
+                 x="0"
+                 y="63.049999"
+                 id="tspan362">device.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-container"
+             data-id="l2-c4-6-spa"
+             transform="translate(484,253)"
+             id="g368">
+            <rect
+               x="-108"
+               y="-79"
+               width="216"
+               height="158"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect362" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-53.799999"
+               text-anchor="middle"
+               id="text363">«container»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text364"><tspan
+                 x="0"
+                 y="-31.4"
+                 id="tspan363">Single Page Application</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-10.45"
+               text-anchor="middle"
+               id="text365">[JavaScript and Angular]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text368"><tspan
+                 x="0"
+                 y="12.05"
+                 id="tspan365">Provides all of the Internet</tspan><tspan
+                 x="0"
+                 y="29.049999"
+                 id="tspan366">Banking functionality to</tspan><tspan
+                 x="0"
+                 y="46.049999"
+                 id="tspan367">customers via their web</tspan><tspan
+                 x="0"
+                 y="63.049999"
+                 id="tspan368">browser.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-container"
+             data-id="l2-c4-6-api"
+             transform="translate(192,746.5)"
+             id="g373">
+            <rect
+               x="-108"
+               y="-70.5"
+               width="216"
+               height="141"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect368" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-45.299999"
+               text-anchor="middle"
+               id="text369">«container»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text370"><tspan
+                 x="0"
+                 y="-22.9"
+                 id="tspan369">API Application</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-1.95"
+               text-anchor="middle"
+               id="text371">[Java and Spring MVC]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text373"><tspan
+                 x="0"
+                 y="20.549999"
+                 id="tspan371">Provides Internet Banking</tspan><tspan
+                 x="0"
+                 y="37.549999"
+                 id="tspan372">functionality via a JSON/HTTPS</tspan><tspan
+                 x="0"
+                 y="54.549999"
+                 id="tspan373">API.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-rect pele-c4-container"
+             data-id="l2-c4-6-web"
+             transform="translate(568,746.5)"
+             id="g378">
+            <rect
+               x="-108"
+               y="-70.5"
+               width="216"
+               height="141"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               rx="6"
+               id="rect373" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-45.299999"
+               text-anchor="middle"
+               id="text374">«container»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text375"><tspan
+                 x="0"
+                 y="-22.9"
+                 id="tspan374">Web Application</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-1.95"
+               text-anchor="middle"
+               id="text376">[Java and Spring MVC]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text378"><tspan
+                 x="0"
+                 y="20.549999"
+                 id="tspan376">Delivers the static content and</tspan><tspan
+                 x="0"
+                 y="37.549999"
+                 id="tspan377">the Internet Banking single page</tspan><tspan
+                 x="0"
+                 y="54.549999"
+                 id="tspan378">application.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-cyl pele-c4-container_db"
+             data-id="l2-c4-6-db"
+             transform="translate(192,1172)"
+             id="g384">
+            <path
+               d="m -108,-79 a 108,12 0 0 1 216,0 V 79 a 108,12 0 0 1 -216,0 z"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               id="path378" />
+            <path
+               d="m -108,-79 a 108,12 0 0 0 216,0"
+               fill="none"
+               stroke="#e0e0e0"
+               id="path379" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-47.799999"
+               text-anchor="middle"
+               id="text379">«container db»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text380"><tspan
+                 x="0"
+                 y="-25.4"
+                 id="tspan379">Database</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-4.4499998"
+               text-anchor="middle"
+               id="text381">[Relational Database Schema]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text384"><tspan
+                 x="0"
+                 y="18.049999"
+                 id="tspan381">Stores user registration</tspan><tspan
+                 x="0"
+                 y="35.049999"
+                 id="tspan382">information, hashed</tspan><tspan
+                 x="0"
+                 y="52.049999"
+                 id="tspan383">authentication credentials,</tspan><tspan
+                 x="0"
+                 y="69.050003"
+                 id="tspan384">access logs, etc.</tspan></text>
+          </g>
+          <g
+             class="pele-node pele-shape-cyl pele-c4-container_db"
+             data-id="l2-c4-6-db2"
+             transform="translate(568,1172)"
+             id="g390">
+            <path
+               d="m -108,-79 a 108,12 0 0 1 216,0 V 79 a 108,12 0 0 1 -216,0 z"
+               fill="#f6f6f6"
+               stroke="#e0e0e0"
+               id="path384" />
+            <path
+               d="m -108,-79 a 108,12 0 0 0 216,0"
+               fill="none"
+               stroke="#e0e0e0"
+               id="path385" />
+            <text
+               class="pele-c4-type"
+               font-size="12px"
+               fill="#888888"
+               x="0"
+               y="-47.799999"
+               text-anchor="middle"
+               id="text385">«container db»</text>
+            <text
+               class="pele-label"
+               font-weight="none"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text386"><tspan
+                 x="0"
+                 y="-25.4"
+                 id="tspan385">Database</tspan></text>
+            <text
+               class="pele-c4-techn"
+               font-size="13px"
+               fill="#888888"
+               x="0"
+               y="-4.4499998"
+               text-anchor="middle"
+               id="text387">[Relational Database Schema]</text>
+            <text
+               class="pele-c4-descr"
+               font-size="13px"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text390"><tspan
+                 x="0"
+                 y="18.049999"
+                 id="tspan387">Stores user registration</tspan><tspan
+                 x="0"
+                 y="35.049999"
+                 id="tspan388">information, hashed</tspan><tspan
+                 x="0"
+                 y="52.049999"
+                 id="tspan389">authentication credentials,</tspan><tspan
+                 x="0"
+                 y="69.050003"
+                 id="tspan390">access logs, etc.</tspan></text>
+          </g>
+        </g>
+        <g
+           class="pele-edge-labels"
+           font-size="13px"
+           id="g401">
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-6-mobile-api"
+             id="g392">
+            <rect
+               x="106.54"
+               y="437"
+               width="114.93"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect391" />
+            <text
+               x="164"
+               y="451.54999"
+               text-anchor="middle"
+               id="text391">Makes API calls to</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text392"><tspan
+                 x="164"
+                 y="471.54999"
+                 id="tspan391">[json/HTTPS]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-6-spa-api"
+             id="g394">
+            <rect
+               x="278.01999"
+               y="444"
+               width="114.93"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect392" />
+            <text
+               x="335.48999"
+               y="458.54999"
+               text-anchor="middle"
+               id="text393">Makes API calls to</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text394"><tspan
+                 x="335.48999"
+                 y="478.54999"
+                 id="tspan393">[json/HTTPS]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-6-web-spa"
+             id="g395">
+            <rect
+               x="447.42999"
+               y="378.20001"
+               width="157.14"
+               height="34"
+               rx="3"
+               fill="#ffffff"
+               id="rect394" />
+            <text
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text395"><tspan
+                 x="526"
+                 y="391.25"
+                 id="tspan394">Delivers to the customer's</tspan><tspan
+                 x="526"
+                 y="408.25"
+                 id="tspan395">web browser</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-6-api-db"
+             id="g397">
+            <rect
+               x="120.75"
+               y="882.59998"
+               width="152.5"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect395" />
+            <text
+               x="197"
+               y="897.15002"
+               text-anchor="middle"
+               id="text396">Reads from and writes to</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text397"><tspan
+                 x="197"
+                 y="917.15002"
+                 id="tspan396">[JDBC]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-6-api-db2"
+             id="g399">
+            <rect
+               x="185.35001"
+               y="830.52002"
+               width="152.5"
+               height="40"
+               rx="3"
+               fill="#ffffff"
+               id="rect397" />
+            <text
+               x="261.59"
+               y="845.07001"
+               text-anchor="middle"
+               id="text398">Reads from and writes to</text>
+            <text
+               class="pele-c4-techn"
+               fill="#888888"
+               font-style="italic"
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text399"><tspan
+                 x="261.59"
+                 y="865.07001"
+                 id="tspan398">[JDBC]</tspan></text>
+          </g>
+          <g
+             class="pele-edge-label"
+             data-id="l2-c4-6-db-db2"
+             id="g400">
+            <rect
+               x="345.66"
+               y="1145"
+               width="68.68"
+               height="34"
+               rx="3"
+               fill="#ffffff"
+               id="rect399" />
+            <text
+               text-anchor="middle"
+               xml:space="preserve"
+               id="text400"><tspan
+                 x="380"
+                 y="1158.05"
+                 id="tspan399">Replicates</tspan><tspan
+                 x="380"
+                 y="1175.05"
+                 id="tspan400">data to</tspan></text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

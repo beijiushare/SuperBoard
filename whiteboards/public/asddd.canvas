@@ -1,62 +1,165 @@
 {
   "nodes": [
     {
-      "id": "ellipse-1",
-      "type": "group",
-      "x": 224.368896925859,
-      "y": 329.75677104002807,
-      "width": 62.3869801084991,
-      "height": 40.08438818565401,
+      "id": "pele-1",
+      "type": "text",
+      "x": 860.8040113961812,
+      "y": -1248.498026402253,
+      "width": 513.7790297169321,
+      "height": 173.32141861512724,
+      "text": "```mermaid\nmindmap\n  root((mindmap))\n    Origins\n      Long history\n      ::icon(fa fa-book)\n      Popularisation\n        British popular psychology author Tony Buzan\n    Research\n      On effectiveness<br/>and features\n      On Automatic creation\n        Uses\n            Creative techniques\n            Strategic planning\n            Argument mapping\n    Tools\n      Pen and paper\n      Mermaid\n\n\n```",
       "x-superboard": {
-        "kind": "shape",
-        "shape": "ellipse",
-        "style": {
-          "fill": "#ffffff",
-          "stroke": "#1d1d1d",
-          "strokeWidth": 2
-        }
-      }
-    },
-    {
-      "id": "ellipse-2",
-      "type": "group",
-      "x": 268.8053044002411,
-      "y": 257.90626883664856,
-      "width": 63.8939119951778,
-      "height": 24.11091018685954,
-      "x-superboard": {
-        "kind": "shape",
-        "shape": "ellipse",
-        "style": {
-          "fill": "#ffffff",
-          "stroke": "#1d1d1d",
-          "strokeWidth": 2
-        }
+        "kind": "pele",
+        "diagram": "mindmap",
+        "code": "mindmap\n  root((mindmap))\n    Origins\n      Long history\n      ::icon(fa fa-book)\n      Popularisation\n        British popular psychology author Tony Buzan\n    Research\n      On effectiveness<br/>and features\n      On Automatic creation\n        Uses\n            Creative techniques\n            Strategic planning\n            Argument mapping\n    Tools\n      Pen and paper\n      Mermaid\n\n",
+        "contentScale": 1,
+        "ratioLocked": true
       }
     },
     {
       "id": "markdown-1",
       "type": "text",
-      "x": -73.6666666666667,
-      "y": 190.88888888888897,
-      "width": 241.68888888888887,
-      "height": 700.0888888888891,
-      "text": "# 新 Markdown\n\n在这里输入内容。多少啊# 新 Markdown\n\n在这里输入内容。多少啊# 新 Markdown\n\n在这里输入内容。多少啊# 新 Markdown\n\n在这里输入内容。多少啊# 新 Markdown\n\n在这里输入内容。多少啊# 新 Markdown\n\n在这里输入内容。多少啊# 新 Markdown\n\n在这里输入内容。多少啊# 新 Markdown\n\n在这里输入内容。多少啊# 新 Markdown\n\n在这里输入内容。多少啊# 新 Markdown\n\n在这里输入内容。多少啊",
+      "x": 228.3103234373007,
+      "y": 7.405672749940714,
+      "width": 456.7988847169507,
+      "height": 379.0585784725843,
+      "text": "# test123新 Markdown\n\n在这里输入内容。多少啊\n\n## 新 Markdown\n\n### 你好\n\n你是**谁**\n\n> 酸奶哦按时到\n\n在这里输**入内容**。多少`啊在这`里输入内容。多少啊在这[里输](#aaa)入内容。多少啊在这里输入内容。多少啊\n\n```js\nprint(\"aaa\")\n```\n\n你说学习 Markdown 基础\n\n- [ ]  你谁啊？\n- [ ]  我去\n\n## 新 Markdown\n\n在这里输入内容。多\n\n- 行内：$sqrt(2)$\n- 块级：\n\n$$\nsum_(i=1)^n i\n$$\n\n<iframe src=\"https://player.bilibili.com/player.html?isOutside=true&aid=117556425853768&bvid=BV1asxS68EmA&cid=43313332551&p=1&autoplay=0\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"></iframe>\n",
       "x-superboard": {
-        "kind": "markdown"
+        "kind": "markdown",
+        "markdownLocked": true,
+        "ratioLocked": false,
+        "contentScale": 1,
+        "rotation": 359.6,
+        "markdownTheme": "orange"
+      }
+    },
+    {
+      "id": "markdown-2",
+      "type": "text",
+      "x": 1897.928147250299,
+      "y": -920.6157904947866,
+      "width": 374.40221914541064,
+      "height": 427.78536830244315,
+      "text": "# 新 Mahhhsrkdown\n\n你说学习 Markdown 基础\n\n- [ ]  ss\n\n<iframe src=\"https://player.bilibili.com/player.html?isOutside=true&aid=117556425853768&bvid=BV1asxS68EmA&cid=43313332551&p=1&autoplay=0\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"></iframe>\n",
+      "x-superboard": {
+        "kind": "markdown",
+        "markdownLocked": true,
+        "markdownTheme": "mint",
+        "contentScale": 1,
+        "ratioLocked": false,
+        "rotation": 1.1
+      }
+    },
+    {
+      "id": "markdown-3",
+      "type": "text",
+      "x": 1575.8599235365577,
+      "y": -1311.0873448041348,
+      "width": 432.5420491406977,
+      "height": 220,
+      "text": "# 新 Markdxzzown\n\n在这里输入内容。\n\n## 你好\n\n### 我去\n\nsss\n\n我去\n\nss\n",
+      "x-superboard": {
+        "kind": "markdown",
+        "markdownLocked": true,
+        "markdownTheme": "orange",
+        "contentScale": 1,
+        "ratioLocked": false
+      }
+    },
+    {
+      "id": "schedule-1",
+      "type": "text",
+      "x": 1457.1237306427465,
+      "y": -196.55254981193525,
+      "width": 900,
+      "height": 600,
+      "text": "",
+      "x-superboard": {
+        "kind": "schedule",
+        "scheduleEvents": [
+          {
+            "id": "ad4c3e06-b5f0-483d-9d40-9d3ecf051f06",
+            "title": "aa",
+            "start": "2026-11-16T13:06:01.215Z",
+            "end": "2026-11-16T14:06:01.215Z",
+            "allDay": false
+          },
+          {
+            "id": "ee31263a-6e29-4231-87a8-1758d191d441",
+            "title": "bb",
+            "start": "2026-11-17T21:06:04+08:00",
+            "end": "2026-11-17T21:36:04+08:00",
+            "allDay": false
+          }
+        ],
+        "ratioLocked": true,
+        "contentScale": 1
+      }
+    },
+    {
+      "id": "ellipse-1",
+      "type": "group",
+      "x": 302.20913267368996,
+      "y": -1185.1935924043648,
+      "width": 487.2593774970439,
+      "height": 586.1520330899847,
+      "x-superboard": {
+        "kind": "shape",
+        "shape": "ellipse",
+        "style": {
+          "fill": "#ffffff",
+          "stroke": "#1d1d1d",
+          "strokeWidth": 2
+        },
+        "rotation": 359.6
+      }
+    },
+    {
+      "id": "markdown-4",
+      "type": "text",
+      "x": 2085.129256823004,
+      "y": -1311.83394411752,
+      "width": 434.11905020897376,
+      "height": 220,
+      "text": "# 啊啊啊新 Markdown\n\n在这里输入内闪烁 容。\n\n\n<iframe src=\"https://player.bilibili.com/player.html?isOutside=true&aid=117556425853768&bvid=BV1asxS68EmA&cid=43313332551&p=1&autoplay=0\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\"></iframe>\n",
+      "x-superboard": {
+        "kind": "markdown",
+        "markdownLocked": true,
+        "ratioLocked": false,
+        "contentScale": 1
       }
     }
   ],
-  "edges": [],
+  "edges": [
+    {
+      "id": "edge-2",
+      "fromNode": "markdown-1",
+      "toNode": "markdown-3",
+      "fromSide": "right",
+      "toSide": "left",
+      "fromEnd": "none",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "edge-1",
+      "fromNode": "markdown-1",
+      "toNode": "markdown-2",
+      "fromSide": "right",
+      "toSide": "left",
+      "fromEnd": "none",
+      "toEnd": "arrow"
+    }
+  ],
   "x-superboard": {
     "version": 1,
     "meta": {
       "title": "ass发",
       "slug": "asddd",
-      "updatedAt": "2026-11-12T18:47:55.347Z"
+      "updatedAt": "2026-11-16T18:03:28.380Z"
     },
     "director": {
       "frames": []
-    }
+    },
+    "markdownDefaultTheme": "orange"
   }
 }

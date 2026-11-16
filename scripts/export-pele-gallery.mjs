@@ -104,17 +104,27 @@ function flatten(svg, prefix) {
   return inner.replace(/var\(--[\w-]+(?:,([^)]*))?\)/g, (_, fallback) => fallback ?? 'none')
 }
 
-function cardSvg({ source, title, key, id, maxChars, fontSize }) {
+function cardSvg({
+  source,
+  title,
+  key,
+  id,
+  maxChars,
+  fontSize,
+  showLabel = true,
+}) {
   const result = render(stripDiagramTitle(source))
   const width = 360
-  const height = 260
   const artHeight = 200
+  const height = showLabel ? 260 : artHeight
   const scale = Math.min(width / result.width, artHeight / result.height)
   const y = (artHeight - result.height * scale) / 2
   const inner = flatten(result.svg, id)
+  const label = showLabel
+    ? `\n  <text x="0" y="236" fill="${theme.fg}" font-family="${theme.font}" font-size="${fontSize}" font-weight="600">${escapeXml(singleLine(title, maxChars))}</text>`
+    : ''
   return `<svg xmlns="http://www.w3.org/2000/svg" id="${id}" data-sb-key="${escapeXml(key)}" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" data-sb-title="${escapeXml(title)}">
-  <g transform="translate(0 ${y}) scale(${scale})" font-family="${theme.font}" font-size="16">${inner}</g>
-  <text x="0" y="236" fill="${theme.fg}" font-family="${theme.font}" font-size="${fontSize}" font-weight="600">${escapeXml(singleLine(title, maxChars))}</text>
+  <g transform="translate(0 ${y}) scale(${scale})" font-family="${theme.font}" font-size="16">${inner}</g>${label}
 </svg>
 `
 }
@@ -224,6 +234,7 @@ for (const group of groups) {
         id: `l2-${group.type}-${index + 1}`,
         maxChars: 48,
         fontSize: 11,
+        showLabel: false,
       }),
       'utf8',
     )

@@ -1,0 +1,39 @@
+{
+  "nodes": [
+    {
+      "id": "markdown-1",
+      "type": "text",
+      "x": -375,
+      "y": -312,
+      "width": 360,
+      "height": 220,
+      "text": "# 新 Markdown\n\n在这里输入内容。是阿迪达斯\n",
+      "x-superboard": {
+        "kind": "markdown",
+        "markdownLocked": true
+      }
+    },
+    {
+      "id": "markdown-2",
+      "type": "text",
+      "x": -453.09496226509225,
+      "y": -368.90936337425774,
+      "width": 360,
+      "height": 220,
+      "text": "# 新 M1arkdown\n\n在这里输入内容。\n",
+      "x-superboard": {
+        "kind": "markdown",
+        "markdownLocked": true
+      }
+    }
+  ],
+  "edges": [],
+  "x-superboard": {
+    "version": 1,
+    "meta": {
+      "title": "多少啊",
+      "slug": "aa",
+      "updatedAt": "2026-11-16T17:31:03.253Z"
+    }
+  }
+}

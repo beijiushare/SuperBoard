@@ -1,0 +1,2222 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="level2-agentflow"
+   width="210"
+   height="720.14001"
+   viewBox="0 0 210 720.14"
+   version="1.1"
+   sodipodi:docname="agentflow.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs160" />
+  <sodipodi:namedview
+     id="namedview160"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.33803108"
+     inkscape:cx="-643.43196"
+     inkscape:cy="659.70266"
+     inkscape:window-width="1260"
+     inkscape:window-height="770"
+     inkscape:window-x="-6"
+     inkscape:window-y="-6"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="level2-agentflow" />
+  <g
+     id="l2-agentflow-1"
+     data-sb-key="pele:example:agentflow:0"
+     data-sb-label="1. agentflow-beta TB · flow reviewer[&quot;Review Agent&quot;]"
+     transform="matrix(0.30262496,0,0,0.30262496,10.136143,170.73866)">
+    <g
+       transform="scale(0.889831)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g14">
+      <g
+         class="pele-clusters"
+         id="g2">
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-1-reviewer"
+           id="g1">
+          <rect
+             x="8"
+             y="8"
+             width="220"
+             height="421.67999"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect1" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="71.349998"
+             y="33.599998"
+             text-anchor="middle"
+             id="text1">Review Agent</text>
+        </g>
+      </g>
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g8">
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-1-L_changes_analyse_0"
+           id="g3">
+          <path
+             d="m 118,96 v 41"
+             id="path2" />
+          <path
+             class="pele-marker"
+             d="m 118,144 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path3" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-1-L_analyse_lint_0"
+           id="g5">
+          <path
+             d="m 118,192 v 41"
+             id="path4" />
+          <path
+             class="pele-marker"
+             d="m 118,240 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path5" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-1-L_lint_ok_0"
+           id="g7">
+          <path
+             d="m 118,288 v 41"
+             id="path6" />
+          <path
+             class="pele-marker"
+             d="m 118,336 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path7" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g13">
+        <g
+           class="pele-node pele-shape-lean-r pele-kind-input"
+           data-id="l2-agentflow-1-changes"
+           transform="translate(118,72)"
+           id="g9">
+          <polygon
+             points="90,-24 78,24 -90,24 -78,-24 "
+             fill="#e45756"
+             fill-opacity="0.14"
+             stroke="#e45756"
+             id="polygon8" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text8">Gather changes</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-1-analyse"
+           transform="translate(118,168)"
+           id="g10">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect9" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text9">Analyse diff</text>
+        </g>
+        <g
+           class="pele-node pele-shape-fr-rect pele-kind-tool"
+           data-id="l2-agentflow-1-lint"
+           transform="translate(118,264)"
+           id="g11">
+          <rect
+             x="-86"
+             y="-24"
+             width="172"
+             height="48"
+             fill="#4c78a8"
+             fill-opacity="0.14"
+             stroke="#4c78a8"
+             rx="6"
+             id="rect10" />
+          <path
+             d="M -78,-24 V 24 M 78,-24 v 48"
+             fill="none"
+             stroke="#4c78a8"
+             id="path10" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text10">run_linter</text>
+        </g>
+        <g
+           class="pele-node pele-shape-diam pele-kind-decision"
+           data-id="l2-agentflow-1-ok"
+           transform="translate(118,372.84)"
+           id="g12">
+          <polygon
+             points="58.94,0 0,36.84 -58.94,0 0,-36.84 "
+             fill="#54a24b"
+             fill-opacity="0.14"
+             stroke="#54a24b"
+             id="polygon11" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text11">Clean?</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-agentflow-2"
+     data-sb-key="pele:example:agentflow:1"
+     data-sb-label="2. agentflow-beta TB · brief[&quot;Release brief&quot;]@{ shape: input }"
+     transform="matrix(0.47573487,0,0,0.47573487,99.900744,-186.32901)">
+    <g
+       transform="matrix(0.474041,0,0,0.474041,0,405.746)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g37">
+      <g
+         class="pele-clusters"
+         id="g17">
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-2-reviewer"
+           id="g15">
+          <rect
+             x="123.37"
+             y="366"
+             width="196"
+             height="281.01999"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect14" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="186.72"
+             y="391.60001"
+             text-anchor="middle"
+             id="text14">Review Agent</text>
+        </g>
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-2-writer"
+           id="g16">
+          <rect
+             x="8"
+             y="104"
+             width="426.73999"
+             height="214"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect15" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="73.139999"
+             y="129.60001"
+             text-anchor="middle"
+             id="text15">Drafting Agent</text>
+        </g>
+      </g>
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g28">
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-2-L_draft_lookup_0"
+           id="g18">
+          <path
+             d="m 226.05,192 c 0,20 -106.68,20 -106.68,40 v 6"
+             id="path17" />
+          <path
+             class="pele-marker"
+             d="m 119.37,245 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path18" />
+        </g>
+        <g
+           class="pele-edge pele-edge-reference"
+           data-id="l2-agentflow-2-L_draft_guide_0"
+           id="g19">
+          <path
+             d="m 226.05,192 c 0,24 106.69,24 106.69,48"
+             stroke-dasharray="3, 4"
+             id="path19" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-2-L_check_ok_0"
+           id="g21">
+          <path
+             d="m 221.37,472 v 41"
+             id="path20" />
+          <path
+             class="pele-marker"
+             d="m 221.37,520 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path21" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-2-L_brief_writer_0"
+           id="g23">
+          <path
+             d="M 221.37,56 V 97"
+             id="path22" />
+          <path
+             class="pele-marker"
+             d="m 221.37,104 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path23" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-2-L_writer_reviewer_0"
+           id="g25">
+          <path
+             d="m 221.37,318 v 41"
+             id="path24" />
+          <path
+             class="pele-marker"
+             d="m 221.37,366 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path25" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-2-L_ok_publish_0"
+           id="g27">
+          <path
+             d="m 221.37,607.02 v 81"
+             id="path26" />
+          <path
+             class="pele-marker"
+             d="m 221.37,695.02 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path27" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g36">
+        <g
+           class="pele-node pele-shape-lean-r pele-kind-input"
+           data-id="l2-agentflow-2-brief"
+           transform="translate(221.37,32)"
+           id="g29">
+          <polygon
+             points="78,24 -90,24 -78,-24 90,-24 "
+             fill="#e45756"
+             fill-opacity="0.14"
+             stroke="#e45756"
+             id="polygon28" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text28">Release brief</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-2-draft"
+           transform="translate(226.05,168)"
+           id="g30">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect29" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text29">Draft the notes</text>
+        </g>
+        <g
+           class="pele-node pele-shape-fr-rect pele-kind-tool"
+           data-id="l2-agentflow-2-lookup"
+           transform="translate(119.37,269)"
+           id="g31">
+          <rect
+             x="-91.370003"
+             y="-24"
+             width="182.74001"
+             height="48"
+             fill="#4c78a8"
+             fill-opacity="0.14"
+             stroke="#4c78a8"
+             rx="6"
+             id="rect30" />
+          <path
+             d="M -83.37,-24 V 24 M 83.37,-24 v 48"
+             fill="none"
+             stroke="#4c78a8"
+             id="path30" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text30">changelog_search</text>
+        </g>
+        <g
+           class="pele-node pele-shape-lin-doc pele-kind-refdoc"
+           data-id="l2-agentflow-2-guide"
+           transform="translate(332.74,269)"
+           id="g32">
+          <path
+             d="M -82,-29 H 82 V 19 Q 41,7 0,19 -41,31 -82,19 Z"
+             fill="#72b7b2"
+             fill-opacity="0.14"
+             stroke="#72b7b2"
+             id="path31" />
+          <path
+             d="M -74,-29 V 23"
+             fill="none"
+             stroke="#72b7b2"
+             id="path32" />
+          <text
+             class="pele-label"
+             x="0"
+             y="0.60000002"
+             text-anchor="middle"
+             id="text32">Tone of voice</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-2-check"
+           transform="translate(221.37,439)"
+           id="g33">
+          <rect
+             x="-78"
+             y="-33"
+             width="156"
+             height="66"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect32" />
+          <text
+             class="pele-label"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text33"><tspan
+               x="0"
+               y="-4.9000001"
+               id="tspan32">Check the</tspan><tspan
+               x="0"
+               y="16.1"
+               id="tspan33">claims</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-shape-diam pele-kind-decision"
+           data-id="l2-agentflow-2-ok"
+           transform="translate(221.37,563.51)"
+           id="g34">
+          <polygon
+             points="0,43.51 -69.62,0 0,-43.51 69.62,0 "
+             fill="#54a24b"
+             fill-opacity="0.14"
+             stroke="#54a24b"
+             id="polygon33" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text34">Accurate?</text>
+        </g>
+        <g
+           class="pele-node pele-shape-hex pele-kind-action"
+           data-id="l2-agentflow-2-publish"
+           transform="translate(221.37,719.02)"
+           id="g35">
+          <polygon
+             points="90,0 78,24 -78,24 -90,0 -78,-24 78,-24 "
+             fill="#b279a2"
+             fill-opacity="0.14"
+             stroke="#b279a2"
+             id="polygon34" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text35">Publish</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-agentflow-3"
+     data-sb-key="pele:example:agentflow:2"
+     data-sb-label="3. agentflow-beta TB · brief[&quot;Release brief&quot;]@{ shape: input }"
+     transform="matrix(0.43134879,0,0,0.43134879,7.2307284,-327.99343)">
+    <g
+       transform="matrix(0.474041,0,0,0.474041,0,778.224)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g60">
+      <g
+         class="pele-clusters"
+         id="g40">
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-3-reviewer"
+           id="g38">
+          <rect
+             x="123.37"
+             y="366"
+             width="196"
+             height="281.01999"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect37" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="186.72"
+             y="391.60001"
+             text-anchor="middle"
+             id="text37">Review Agent</text>
+        </g>
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-3-writer"
+           id="g39">
+          <rect
+             x="8"
+             y="104"
+             width="426.73999"
+             height="214"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect38" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="73.139999"
+             y="129.60001"
+             text-anchor="middle"
+             id="text38">Drafting Agent</text>
+        </g>
+      </g>
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g51">
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-3-L_draft_lookup_0"
+           id="g41">
+          <path
+             d="m 226.05,192 c 0,20 -106.68,20 -106.68,40 v 6"
+             id="path40" />
+          <path
+             class="pele-marker"
+             d="m 119.37,245 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path41" />
+        </g>
+        <g
+           class="pele-edge pele-edge-reference"
+           data-id="l2-agentflow-3-L_draft_guide_0"
+           id="g42">
+          <path
+             d="m 226.05,192 c 0,24 106.69,24 106.69,48"
+             stroke-dasharray="3, 4"
+             id="path42" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-3-L_check_ok_0"
+           id="g44">
+          <path
+             d="m 221.37,472 v 41"
+             id="path43" />
+          <path
+             class="pele-marker"
+             d="m 221.37,520 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path44" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-3-L_brief_writer_0"
+           id="g46">
+          <path
+             d="M 221.37,56 V 97"
+             id="path45" />
+          <path
+             class="pele-marker"
+             d="m 221.37,104 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path46" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-3-L_writer_reviewer_0"
+           id="g48">
+          <path
+             d="m 221.37,318 v 41"
+             id="path47" />
+          <path
+             class="pele-marker"
+             d="m 221.37,366 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path48" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-3-L_ok_publish_0"
+           id="g50">
+          <path
+             d="m 221.37,607.02 v 81"
+             id="path49" />
+          <path
+             class="pele-marker"
+             d="m 221.37,695.02 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path50" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g59">
+        <g
+           class="pele-node pele-shape-lean-r pele-kind-input"
+           data-id="l2-agentflow-3-brief"
+           transform="translate(221.37,32)"
+           id="g52">
+          <polygon
+             points="-90,24 -78,-24 90,-24 78,24 "
+             fill="#e45756"
+             fill-opacity="0.14"
+             stroke="#e45756"
+             id="polygon51" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text51">Release brief</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-3-draft"
+           transform="translate(226.05,168)"
+           id="g53">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect52" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text52">Draft the notes</text>
+        </g>
+        <g
+           class="pele-node pele-shape-fr-rect pele-kind-tool"
+           data-id="l2-agentflow-3-lookup"
+           transform="translate(119.37,269)"
+           id="g54">
+          <rect
+             x="-91.370003"
+             y="-24"
+             width="182.74001"
+             height="48"
+             fill="#4c78a8"
+             fill-opacity="0.14"
+             stroke="#4c78a8"
+             rx="6"
+             id="rect53" />
+          <path
+             d="M -83.37,-24 V 24 M 83.37,-24 v 48"
+             fill="none"
+             stroke="#4c78a8"
+             id="path53" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text53">changelog_search</text>
+        </g>
+        <g
+           class="pele-node pele-shape-lin-doc pele-kind-refdoc"
+           data-id="l2-agentflow-3-guide"
+           transform="translate(332.74,269)"
+           id="g55">
+          <path
+             d="M -82,-29 H 82 V 19 Q 41,7 0,19 -41,31 -82,19 Z"
+             fill="#72b7b2"
+             fill-opacity="0.14"
+             stroke="#72b7b2"
+             id="path54" />
+          <path
+             d="M -74,-29 V 23"
+             fill="none"
+             stroke="#72b7b2"
+             id="path55" />
+          <text
+             class="pele-label"
+             x="0"
+             y="0.60000002"
+             text-anchor="middle"
+             id="text55">Tone of voice</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-3-check"
+           transform="translate(221.37,439)"
+           id="g56">
+          <rect
+             x="-78"
+             y="-33"
+             width="156"
+             height="66"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect55" />
+          <text
+             class="pele-label"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text56"><tspan
+               x="0"
+               y="-4.9000001"
+               id="tspan55">Check the</tspan><tspan
+               x="0"
+               y="16.1"
+               id="tspan56">claims</tspan></text>
+        </g>
+        <g
+           class="pele-node pele-shape-diam pele-kind-decision"
+           data-id="l2-agentflow-3-ok"
+           transform="translate(221.37,563.51)"
+           id="g57">
+          <polygon
+             points="-69.62,0 0,-43.51 69.62,0 0,43.51 "
+             fill="#54a24b"
+             fill-opacity="0.14"
+             stroke="#54a24b"
+             id="polygon56" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text57">Accurate?</text>
+        </g>
+        <g
+           class="pele-node pele-shape-hex pele-kind-action"
+           data-id="l2-agentflow-3-publish"
+           transform="translate(221.37,719.02)"
+           id="g58">
+          <polygon
+             points="78,24 -78,24 -90,0 -78,-24 78,-24 90,0 "
+             fill="#b279a2"
+             fill-opacity="0.14"
+             stroke="#b279a2"
+             id="polygon57" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text58">Publish</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-agentflow-4"
+     data-sb-key="pele:example:agentflow:3"
+     data-sb-label="4. agentflow-beta LR · brief[&quot;Brief&quot;]@{ shape: input }"
+     transform="matrix(0.88901473,0,0,0.88901473,11.10561,-727.93212)">
+    <g
+       transform="matrix(0.247642,0,0,0.247642,0,1150.703)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g74">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g67">
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-4-L_brief_draft_0"
+           id="g61">
+          <path
+             d="m 182,78.5 h 47"
+             id="path60" />
+          <path
+             class="pele-marker"
+             d="m 236,78.5 -8,3.36 v -6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path61" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-4-L_draft_spellcheck_0"
+           id="g63">
+          <path
+             d="m 392,78.5 c 17.5,0 17.5,-46.5 35,-46.5 h 6"
+             id="path62" />
+          <path
+             class="pele-marker"
+             d="m 440,32 -8,3.36 v -6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path63" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-4-L_spellcheck_publish_0"
+           id="g65">
+          <path
+             d="m 612,32 h 41"
+             id="path64" />
+          <path
+             class="pele-marker"
+             d="m 660,32 -8,3.36 v -6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path65" />
+        </g>
+        <g
+           class="pele-edge pele-edge-reference"
+           data-id="l2-agentflow-4-L_draft_guide_0"
+           id="g66">
+          <path
+             d="m 392,78.5 c 26,0 26,46.5 52,46.5"
+             stroke-dasharray="3, 4"
+             id="path66" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g73">
+        <g
+           class="pele-node pele-shape-lean-r pele-kind-input"
+           data-id="l2-agentflow-4-brief"
+           transform="translate(98,78.5)"
+           id="g68">
+          <polygon
+             points="90,-24 78,24 -90,24 -78,-24 "
+             fill="#e45756"
+             fill-opacity="0.14"
+             stroke="#e45756"
+             id="polygon67" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text67">Brief</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-4-draft"
+           transform="translate(314,78.5)"
+           id="g69">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect68" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text68">Draft copy</text>
+        </g>
+        <g
+           class="pele-node pele-shape-fr-rect pele-kind-tool"
+           data-id="l2-agentflow-4-spellcheck"
+           transform="translate(526,32)"
+           id="g70">
+          <rect
+             x="-86"
+             y="-24"
+             width="172"
+             height="48"
+             fill="#4c78a8"
+             fill-opacity="0.14"
+             stroke="#4c78a8"
+             rx="6"
+             id="rect69" />
+          <path
+             d="M -78,-24 V 24 M 78,-24 v 48"
+             fill="none"
+             stroke="#4c78a8"
+             id="path69" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text69">spell_check</text>
+        </g>
+        <g
+           class="pele-node pele-shape-lin-doc pele-kind-refdoc"
+           data-id="l2-agentflow-4-guide"
+           transform="translate(526,125)"
+           id="g71">
+          <path
+             d="M -82,-29 H 82 V 19 Q 41,7 0,19 -41,31 -82,19 Z"
+             fill="#72b7b2"
+             fill-opacity="0.14"
+             stroke="#72b7b2"
+             id="path70" />
+          <path
+             d="M -74,-29 V 23"
+             fill="none"
+             stroke="#72b7b2"
+             id="path71" />
+          <text
+             class="pele-label"
+             x="0"
+             y="0.60000002"
+             text-anchor="middle"
+             id="text71">Style guide</text>
+        </g>
+        <g
+           class="pele-node pele-shape-hex pele-kind-action"
+           data-id="l2-agentflow-4-publish"
+           transform="translate(750,32)"
+           id="g72">
+          <polygon
+             points="-90,0 -78,-24 78,-24 90,0 78,24 -78,24 "
+             fill="#b279a2"
+             fill-opacity="0.14"
+             stroke="#b279a2"
+             id="polygon71" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text72">Publish</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-agentflow-5"
+     data-sb-key="pele:example:agentflow:4"
+     data-sb-label="5. agentflow-beta TB · check[&quot;Tests pass?&quot;]@{ shape: decision }"
+     transform="matrix(0.45229353,0,0,0.45229353,95.150318,-355.32023)">
+    <g
+       transform="matrix(0.530303,0,0,0.530303,0,1206.821)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g90">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g81">
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-5-L_check_ship_0"
+           id="g75">
+          <path
+             d="m 225.34,103.91 c 0,12 -127.34,12 -127.34,24 v 42"
+             id="path74" />
+          <path
+             class="pele-marker"
+             d="m 98,176.91 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path75" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-5-L_check_fix_0"
+           id="g77">
+          <path
+             d="m 225.34,103.91 v 49 c 0,6.38 80.66,6.38 80.66,12.75 v 4.25"
+             id="path76" />
+          <path
+             class="pele-marker"
+             d="m 306,176.91 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path77" />
+        </g>
+        <g
+           class="pele-edge pele-edge-failure"
+           data-id="l2-agentflow-5-L_fix_check_0"
+           id="g79">
+          <path
+             d="m 306,176.91 c 0,-15.12 14.89,-15.12 14.89,-30.25 v -12.5 c 0,-10.12 -95.55,-10.12 -95.55,-20.25 v -6"
+             id="path78" />
+          <path
+             class="pele-marker"
+             d="m 221.84,111.41 7,-7 m 0,7 -7,-7"
+             id="path79" />
+        </g>
+        <g
+           class="pele-edge pele-edge-reference"
+           data-id="l2-agentflow-5-L_fix_logs_0"
+           id="g80">
+          <path
+             d="m 306,224.91 v 48"
+             stroke-dasharray="3, 4"
+             id="path80" />
+        </g>
+      </g>
+      <g
+         class="pele-edge-labels"
+         font-size="14px"
+         id="g84">
+        <g
+           class="pele-edge-label"
+           data-id="l2-agentflow-5-L_check_ship_0"
+           id="g82">
+          <rect
+             x="83.110001"
+             y="129.91"
+             width="29.780001"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect81" />
+          <text
+             x="98"
+             y="145.31"
+             text-anchor="middle"
+             id="text81">yes</text>
+        </g>
+        <g
+           class="pele-edge-label"
+           data-id="l2-agentflow-5-L_check_fix_0"
+           id="g83">
+          <rect
+             x="213.55"
+             y="129.91"
+             width="23.57"
+             height="21"
+             rx="3"
+             fill="#ffffff"
+             id="rect82" />
+          <text
+             x="225.34"
+             y="145.31"
+             text-anchor="middle"
+             id="text82">no</text>
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g89">
+        <g
+           class="pele-node pele-shape-diam pele-kind-decision"
+           data-id="l2-agentflow-5-check"
+           transform="translate(225.34,55.96)"
+           id="g85">
+          <polygon
+             points="0,47.96 -76.73,0 0,-47.95 76.73,0 "
+             fill="#54a24b"
+             fill-opacity="0.14"
+             stroke="#54a24b"
+             id="polygon84" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text84">Tests pass?</text>
+        </g>
+        <g
+           class="pele-node pele-shape-hex pele-kind-action"
+           data-id="l2-agentflow-5-ship"
+           transform="translate(98,200.91)"
+           id="g86">
+          <polygon
+             points="-78,-24 78,-24 90,0 78,24 -78,24 -90,0 "
+             fill="#b279a2"
+             fill-opacity="0.14"
+             stroke="#b279a2"
+             id="polygon85" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text85">Ship it</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-5-fix"
+           transform="translate(306,200.91)"
+           id="g87">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect86" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text86">Fix the build</text>
+        </g>
+        <g
+           class="pele-node pele-shape-lin-doc pele-kind-refdoc"
+           data-id="l2-agentflow-5-logs"
+           transform="translate(306,301.91)"
+           id="g88">
+          <path
+             d="M -82,-29 H 82 V 19 Q 41,7 0,19 -41,31 -82,19 Z"
+             fill="#72b7b2"
+             fill-opacity="0.14"
+             stroke="#72b7b2"
+             id="path87" />
+          <path
+             d="M -74,-29 V 23"
+             fill="none"
+             stroke="#72b7b2"
+             id="path88" />
+          <text
+             class="pele-label"
+             x="0"
+             y="0.60000002"
+             text-anchor="middle"
+             id="text88">Build logs</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-agentflow-6"
+     data-sb-key="pele:example:agentflow:5"
+     data-sb-label="6. agentflow-beta TB · flow team[&quot;Content Team&quot;]"
+     transform="matrix(0.347028,0,0,0.347028,128.10182,-8.0911678)">
+    <g
+       transform="matrix(0.833333,0,0,0.833333,0,1402.594)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g100">
+      <g
+         class="pele-clusters"
+         id="g94">
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-6-team"
+           id="g91">
+          <rect
+             x="8"
+             y="8"
+             width="236"
+             height="324"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect90" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="72.690002"
+             y="33.599998"
+             text-anchor="middle"
+             id="text90">Content Team</text>
+        </g>
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-6-writer"
+           id="g92">
+          <rect
+             x="28"
+             y="204"
+             width="196"
+             height="108"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect91" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="63.330002"
+             y="229.60001"
+             text-anchor="middle"
+             id="text91">Writer</text>
+        </g>
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-6-researcher"
+           id="g93">
+          <rect
+             x="28"
+             y="48"
+             width="196"
+             height="108"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect92" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="83.339996"
+             y="73.599998"
+             text-anchor="middle"
+             id="text92">Researcher</text>
+        </g>
+      </g>
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g96">
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-6-L_researcher_writer_0"
+           id="g95">
+          <path
+             d="m 126,156 v 41"
+             id="path94" />
+          <path
+             class="pele-marker"
+             d="m 126,204 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path95" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g99">
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-6-gather"
+           transform="translate(126,112)"
+           id="g97">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect96" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text96">Gather sources</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-6-compose"
+           transform="translate(126,268)"
+           id="g98">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect97" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text97">Compose draft</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-agentflow-7"
+     data-sb-key="pele:example:agentflow:6"
+     data-sb-label="7. agentflow-beta TB · global"
+     transform="matrix(0.64069471,0,0,0.64069471,6.0480945,-457.97322)">
+    <g
+       transform="matrix(0.46875,0,0,0.46875,0,1701.927)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g111">
+      <g
+         class="pele-clusters"
+         id="g103">
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-7-indexer"
+           id="g101">
+          <rect
+             x="244"
+             y="8"
+             width="196"
+             height="128"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect100" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="284.67999"
+             y="33.599998"
+             text-anchor="middle"
+             id="text100">Indexer</text>
+        </g>
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-7-summariser"
+           id="g102">
+          <rect
+             x="8"
+             y="8"
+             width="196"
+             height="128"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect101" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="65.110001"
+             y="33.599998"
+             text-anchor="middle"
+             id="text101">Summariser</text>
+        </g>
+      </g>
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g106">
+        <g
+           class="pele-edge pele-edge-reference"
+           data-id="l2-agentflow-7-L_summarise_corpus_0"
+           id="g104">
+          <path
+             d="m 106,96 v 40 c 0,24 118,24 118,48"
+             stroke-dasharray="3, 4"
+             id="path103" />
+        </g>
+        <g
+           class="pele-edge pele-edge-reference"
+           data-id="l2-agentflow-7-L_index_corpus_0"
+           id="g105">
+          <path
+             d="m 342,96 v 40 c 0,24 -118,24 -118,48"
+             stroke-dasharray="3, 4"
+             id="path104" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g110">
+        <g
+           class="pele-node pele-shape-lin-doc pele-kind-refdoc"
+           data-id="l2-agentflow-7-corpus"
+           transform="translate(224,213)"
+           id="g107">
+          <path
+             d="M -82,-29 H 82 V 19 Q 41,7 0,19 -41,31 -82,19 Z"
+             fill="#72b7b2"
+             fill-opacity="0.14"
+             stroke="#72b7b2"
+             id="path106" />
+          <path
+             d="M -74,-29 V 23"
+             fill="none"
+             stroke="#72b7b2"
+             id="path107" />
+          <text
+             class="pele-label"
+             x="0"
+             y="0.60000002"
+             text-anchor="middle"
+             id="text107">Shared corpus</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-7-summarise"
+           transform="translate(106,72)"
+           id="g108">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect107" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text108">Summarise</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-7-index"
+           transform="translate(342,72)"
+           id="g109">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect108" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text109">Build index</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-agentflow-8"
+     data-sb-key="pele:example:agentflow:7"
+     data-sb-label="8. agentflow-beta TB · flow intake[&quot;Intake&quot;]"
+     transform="matrix(0.38449575,0,0,0.38449575,15.420707,-225.78131)">
+    <g
+       transform="matrix(0.889831,0,0,0.889831,0,1835.114)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g123">
+      <g
+         class="pele-clusters"
+         id="g114">
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-8-output"
+           id="g112">
+          <rect
+             x="8"
+             y="294"
+             width="220"
+             height="128"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect111" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="46.02"
+             y="319.60001"
+             text-anchor="middle"
+             id="text111">Output</text>
+        </g>
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-8-intake"
+           id="g113">
+          <rect
+             x="8"
+             y="8"
+             width="220"
+             height="128"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect112" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="43.790001"
+             y="33.599998"
+             text-anchor="middle"
+             id="text112">Intake</text>
+        </g>
+      </g>
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g118">
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-8-L_receive_validate_0"
+           id="g115">
+          <path
+             d="m 118,96 v 81"
+             id="path114" />
+          <path
+             class="pele-marker"
+             d="m 118,184 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path115" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-8-L_enrich_publish_0"
+           id="g117">
+          <path
+             d="M 118,246 V 347"
+             id="path116" />
+          <path
+             class="pele-marker"
+             d="m 118,354 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path117" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g122">
+        <g
+           class="pele-node pele-shape-collapsed"
+           data-id="l2-agentflow-8-processing"
+           transform="translate(118,215)"
+           id="g119">
+          <rect
+             x="-78"
+             y="-31"
+             width="156"
+             height="62"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect118" />
+          <path
+             d="M -68,15 H 68"
+             fill="none"
+             stroke="#9d755d"
+             stroke-dasharray="3, 3"
+             id="path118" />
+          <path
+             class="pele-collapsed-mark"
+             d="m -10.75,23 a 1.75,1.75 0 1 0 3.5,0 1.75,1.75 0 1 0 -3.5,0 z m 9,0 a 1.75,1.75 0 1 0 3.5,0 1.75,1.75 0 1 0 -3.5,0 z m 9,0 a 1.75,1.75 0 1 0 3.5,0 1.75,1.75 0 1 0 -3.5,0 z"
+             fill="#9d755d"
+             stroke="none"
+             id="path119" />
+          <text
+             class="pele-label"
+             x="0"
+             y="-1.4"
+             text-anchor="middle"
+             id="text119">Processing</text>
+        </g>
+        <g
+           class="pele-node pele-shape-lean-r pele-kind-input"
+           data-id="l2-agentflow-8-receive"
+           transform="translate(118,72)"
+           id="g120">
+          <polygon
+             points="-78,-24 90,-24 78,24 -90,24 "
+             fill="#e45756"
+             fill-opacity="0.14"
+             stroke="#e45756"
+             id="polygon119" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text120">Receive request</text>
+        </g>
+        <g
+           class="pele-node pele-shape-hex pele-kind-action"
+           data-id="l2-agentflow-8-publish"
+           transform="translate(118,378)"
+           id="g121">
+          <polygon
+             points="-78,24 -90,0 -78,-24 78,-24 90,0 78,24 "
+             fill="#b279a2"
+             fill-opacity="0.14"
+             stroke="#b279a2"
+             id="polygon120" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text121">Publish</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-agentflow-9"
+     data-sb-key="pele:example:agentflow:8"
+     data-sb-label="9. agentflow-beta LR · connector github[&quot;GitHub API&quot;]"
+     transform="matrix(0.29387916,0,0,0.29387916,126.14269,-274.45038)">
+    <g
+       transform="matrix(1.071429,0,0,1.071429,0,2233.741)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g128">
+      <g
+         class="pele-nodes"
+         id="g127">
+        <g
+           class="pele-node pele-shape-rounded pele-kind-connector"
+           data-id="l2-agentflow-9-github"
+           transform="translate(98,32)"
+           id="g124">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#eeca3b"
+             fill-opacity="0.14"
+             stroke="#eeca3b"
+             id="rect123" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text123">GitHub API</text>
+        </g>
+        <g
+           class="pele-node pele-shape-lean-r pele-kind-input"
+           data-id="l2-agentflow-9-title"
+           transform="translate(98,120)"
+           id="g125">
+          <polygon
+             points="-90,24 -78,-24 90,-24 78,24 "
+             fill="#e45756"
+             fill-opacity="0.14"
+             stroke="#e45756"
+             id="polygon124" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text124">Issue title</text>
+        </g>
+        <g
+           class="pele-node pele-shape-fr-rect pele-kind-tool"
+           data-id="l2-agentflow-9-create"
+           transform="translate(98,208)"
+           id="g126">
+          <rect
+             x="-86"
+             y="-24"
+             width="172"
+             height="48"
+             fill="#4c78a8"
+             fill-opacity="0.14"
+             stroke="#4c78a8"
+             rx="6"
+             id="rect125" />
+          <path
+             d="M -78,-24 V 24 M 78,-24 v 48"
+             fill="none"
+             stroke="#4c78a8"
+             id="path125" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text125">create_issue</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-agentflow-10"
+     data-sb-key="pele:example:agentflow:9"
+     data-sb-label="10. agentflow-beta TB · connector llm[&quot;LLM API&quot;]"
+     transform="matrix(0.45335043,0,0,0.45335043,9.5721039,-797.48887)">
+    <g
+       transform="matrix(0.444915,0,0,0.444915,0,2506.884)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g148">
+      <g
+         class="pele-clusters"
+         id="g132">
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-10-coffee_team"
+           id="g129">
+          <rect
+             x="204"
+             y="8"
+             width="260"
+             height="640"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect128" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="264.23999"
+             y="33.599998"
+             text-anchor="middle"
+             id="text128">Coffee Team</text>
+        </g>
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-10-designer"
+           id="g130">
+          <rect
+             x="228"
+             y="396"
+             width="212"
+             height="232"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect129" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="274.01001"
+             y="421.60001"
+             text-anchor="middle"
+             id="text129">Designer</text>
+        </g>
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-10-researcher"
+           id="g131">
+          <rect
+             x="224"
+             y="48"
+             width="220"
+             height="300"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect130" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="279.34"
+             y="73.599998"
+             text-anchor="middle"
+             id="text130">Researcher</text>
+        </g>
+      </g>
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g139">
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-10-L_city_research_0"
+           id="g133">
+          <path
+             d="m 334,136 v 41"
+             id="path132" />
+          <path
+             class="pele-marker"
+             d="m 334,184 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path133" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-10-L_research_write_0"
+           id="g135">
+          <path
+             d="m 334,232 v 41"
+             id="path134" />
+          <path
+             class="pele-marker"
+             d="m 334,280 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path135" />
+        </g>
+        <g
+           class="pele-edge pele-edge-reference"
+           data-id="l2-agentflow-10-L_render_brand_0"
+           id="g136">
+          <path
+             d="m 334,484 v 48"
+             stroke-dasharray="3, 4"
+             id="path136" />
+        </g>
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-10-L_researcher_designer_0"
+           id="g138">
+          <path
+             d="m 334,348 v 41"
+             id="path137" />
+          <path
+             class="pele-marker"
+             d="m 334,396 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path138" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g147">
+        <g
+           class="pele-node pele-shape-rounded pele-kind-connector"
+           data-id="l2-agentflow-10-llm"
+           transform="translate(86,328)"
+           id="g140">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#eeca3b"
+             fill-opacity="0.14"
+             stroke="#eeca3b"
+             id="rect139" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text139">LLM API</text>
+        </g>
+        <g
+           class="pele-node pele-shape-lean-r pele-kind-input"
+           data-id="l2-agentflow-10-city"
+           transform="translate(334,112)"
+           id="g141">
+          <polygon
+             points="-78,-24 90,-24 78,24 -90,24 "
+             fill="#e45756"
+             fill-opacity="0.14"
+             stroke="#e45756"
+             id="polygon140" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text140">city</text>
+        </g>
+        <g
+           class="pele-node pele-shape-fr-rect pele-kind-tool"
+           data-id="l2-agentflow-10-research"
+           transform="translate(334,208)"
+           id="g142">
+          <rect
+             x="-89.139999"
+             y="-24"
+             width="178.27"
+             height="48"
+             fill="#4c78a8"
+             fill-opacity="0.14"
+             stroke="#4c78a8"
+             rx="6"
+             id="rect141" />
+          <path
+             d="M -81.14,-24 V 24 M 81.14,-24 v 48"
+             fill="none"
+             stroke="#4c78a8"
+             id="path141" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text141">research_location</text>
+        </g>
+        <g
+           class="pele-node pele-shape-fr-rect pele-kind-tool"
+           data-id="l2-agentflow-10-write"
+           transform="translate(334,304)"
+           id="g143">
+          <rect
+             x="-86"
+             y="-24"
+             width="172"
+             height="48"
+             fill="#4c78a8"
+             fill-opacity="0.14"
+             stroke="#4c78a8"
+             rx="6"
+             id="rect142" />
+          <path
+             d="M -78,-24 V 24 M 78,-24 v 48"
+             fill="none"
+             stroke="#4c78a8"
+             id="path142" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text142">write_copy</text>
+        </g>
+        <g
+           class="pele-node pele-shape-fr-rect pele-kind-tool"
+           data-id="l2-agentflow-10-render"
+           transform="translate(334,460)"
+           id="g144">
+          <rect
+             x="-86"
+             y="-24"
+             width="172"
+             height="48"
+             fill="#4c78a8"
+             fill-opacity="0.14"
+             stroke="#4c78a8"
+             rx="6"
+             id="rect143" />
+          <path
+             d="M -78,-24 V 24 M 78,-24 v 48"
+             fill="none"
+             stroke="#4c78a8"
+             id="path143" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text143">generate_html</text>
+        </g>
+        <g
+           class="pele-node pele-shape-lin-doc pele-kind-refdoc"
+           data-id="l2-agentflow-10-brand"
+           transform="translate(334,570)"
+           id="g146">
+          <path
+             d="M -82,-38 H 82 V 28 Q 41,16 0,28 -41,40 -82,28 Z"
+             fill="#72b7b2"
+             fill-opacity="0.14"
+             stroke="#72b7b2"
+             id="path144" />
+          <path
+             d="M -74,-38 V 32"
+             fill="none"
+             stroke="#72b7b2"
+             id="path145" />
+          <text
+             class="pele-label"
+             text-anchor="middle"
+             xml:space="preserve"
+             id="text146"><tspan
+               x="0"
+               y="-9.8999996"
+               id="tspan145">Nordic Brand</tspan><tspan
+               x="0"
+               y="11.1"
+               id="tspan146">Guide</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-agentflow-11"
+     data-sb-key="pele:example:agentflow:10"
+     data-sb-label="11. agentflow-beta TB · a[&quot;A&quot;] --&gt; b[&quot;B&quot;]"
+     transform="matrix(0.26398375,0,0,0.26398375,141.01205,-153.87333)">
+    <g
+       transform="matrix(1.22093,0,0,1.22093,0,2814.749)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g154">
+      <g
+         class="pele-edges"
+         fill="none"
+         stroke="#2e3338"
+         stroke-linecap="round"
+         id="g150">
+        <g
+           class="pele-edge pele-edge-sequence"
+           data-id="l2-agentflow-11-L_a_b_0"
+           id="g149">
+          <path
+             d="m 86,56 v 63"
+             id="path148" />
+          <path
+             class="pele-marker"
+             d="m 86,126 -3.36,-8 h 6.72 z"
+             fill="#2e3338"
+             stroke="none"
+             id="path149" />
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g153">
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-11-a"
+           transform="translate(86,32)"
+           id="g151">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect150" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text150">A</text>
+        </g>
+        <g
+           class="pele-node pele-shape-rounded pele-kind-task"
+           data-id="l2-agentflow-11-b"
+           transform="translate(86,150)"
+           id="g152">
+          <rect
+             x="-78"
+             y="-24"
+             width="156"
+             height="48"
+             rx="12"
+             fill="#f58518"
+             fill-opacity="0.14"
+             stroke="#f58518"
+             id="rect151" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text151">B</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g
+     id="l2-agentflow-12"
+     data-sb-key="pele:example:agentflow:11"
+     data-sb-label="12. agentflow-beta TB · flow tools[&quot;Tools&quot;]"
+     transform="matrix(0.45302476,0,0,0.45302476,108.7497,-1044.0162)">
+    <g
+       transform="matrix(0.477273,0,0,0.477273,0,3052.958)"
+       font-family="'-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+       font-size="16px"
+       id="g160">
+      <g
+         class="pele-clusters"
+         id="g156">
+        <g
+           class="pele-cluster pele-flow"
+           data-id="l2-agentflow-12-tools"
+           id="g155">
+          <rect
+             x="8"
+             y="8"
+             width="424"
+             height="108"
+             fill="#9d755d"
+             fill-opacity="0.06"
+             stroke="#9d755d"
+             rx="6"
+             id="rect154" />
+          <text
+             class="pele-cluster-label"
+             fill="#888888"
+             x="41.560001"
+             y="33.599998"
+             text-anchor="middle"
+             id="text154">Tools</text>
+        </g>
+      </g>
+      <g
+         class="pele-nodes"
+         id="g159">
+        <g
+           class="pele-node pele-shape-fr-rect pele-kind-tool"
+           data-id="l2-agentflow-12-a"
+           transform="translate(114,72)"
+           id="g157">
+          <rect
+             x="-86"
+             y="-24"
+             width="172"
+             height="48"
+             fill="#4c78a8"
+             fill-opacity="0.14"
+             stroke="#4c78a8"
+             rx="6"
+             id="rect156" />
+          <path
+             d="M -78,-24 V 24 M 78,-24 v 48"
+             fill="none"
+             stroke="#4c78a8"
+             id="path156" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text156">a</text>
+        </g>
+        <g
+           class="pele-node pele-shape-fr-rect pele-kind-tool"
+           data-id="l2-agentflow-12-b"
+           transform="translate(326,72)"
+           id="g158">
+          <rect
+             x="-86"
+             y="-24"
+             width="172"
+             height="48"
+             fill="#4c78a8"
+             fill-opacity="0.14"
+             stroke="#4c78a8"
+             rx="6"
+             id="rect157" />
+          <path
+             d="M -78,-24 V 24 M 78,-24 v 48"
+             fill="none"
+             stroke="#4c78a8"
+             id="path157" />
+          <text
+             class="pele-label"
+             x="0"
+             y="5.5999999"
+             text-anchor="middle"
+             id="text157">b</text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

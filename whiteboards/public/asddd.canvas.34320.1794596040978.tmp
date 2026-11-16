@@ -1,0 +1,100 @@
+{
+  "nodes": [
+    {
+      "id": "ellipse-1",
+      "type": "group",
+      "x": 224.368896925859,
+      "y": 319.6347338824422,
+      "width": 62.3869801084991,
+      "height": 40.08438818565401,
+      "x-superboard": {
+        "kind": "shape",
+        "shape": "ellipse",
+        "style": {
+          "fill": "#ffffff",
+          "stroke": "#1d1d1d",
+          "strokeWidth": 2
+        }
+      }
+    },
+    {
+      "id": "rect-1",
+      "type": "group",
+      "x": 675.7101591598832,
+      "y": 355.08333016321734,
+      "width": 91.95402298850581,
+      "height": 75.23510971786831,
+      "x-superboard": {
+        "kind": "shape",
+        "shape": "rect",
+        "style": {
+          "fill": "#ffffff",
+          "stroke": "#1d1d1d",
+          "strokeWidth": 2
+        }
+      }
+    },
+    {
+      "id": "markdown-2",
+      "type": "text",
+      "x": 516.7696607573067,
+      "y": 561.8589057472145,
+      "width": 181.3839819943641,
+      "height": 183.6934488935389,
+      "text": "# 新 Markdown\n\n在这里输入内容。",
+      "x-superboard": {
+        "kind": "markdown",
+        "markdownLocked": true,
+        "contentScale": 1,
+        "ratioLocked": false
+      }
+    },
+    {
+      "id": "markdown-1",
+      "type": "text",
+      "x": 122.02255038325322,
+      "y": 275.5341397647948,
+      "width": 267.07242551998684,
+      "height": 573.2222010214474,
+      "text": "# test123新 Markdown\n\n在这里输入内容。多少啊\n\n# 新 Markdown\n\n### 你好\n\n你是**谁**\n\n> 酸奶哦按时到\n\n在这里输入内容。多少啊在这里输入内容。多少啊在这里输入内容。多少啊在这里输入内容。多少啊\n\n# 新 Markdown\n\n在这里输入内容。多\n\n- 行内：$sqrt(2)$\n- 块级：\n\n$$\nsum_(i=1)^n i\n$$\n",
+      "x-superboard": {
+        "kind": "markdown",
+        "markdownLocked": true,
+        "ratioLocked": false,
+        "contentScale": 1,
+        "rotation": 359.8
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "fromNode": "markdown-1",
+      "toNode": "markdown-2",
+      "fromSide": "right",
+      "toSide": "left",
+      "fromEnd": "none",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "edge-2",
+      "fromNode": "markdown-1",
+      "toNode": "rect-1",
+      "fromSide": "right",
+      "toSide": "top",
+      "fromEnd": "none",
+      "toEnd": "arrow"
+    }
+  ],
+  "x-superboard": {
+    "version": 1,
+    "meta": {
+      "title": "ass发",
+      "slug": "asddd",
+      "updatedAt": "2026-11-13T18:54:00.976Z"
+    },
+    "director": {
+      "frames": []
+    }
+  }
+}
