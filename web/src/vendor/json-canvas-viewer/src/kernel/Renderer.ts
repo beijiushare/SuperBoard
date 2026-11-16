@@ -12,7 +12,7 @@ const ARROW_LENGTH = 12;
 const ARROW_WIDTH = 4;
 const NODE_RADIUS = 12;
 const NODE_BORDER_WIDTH = 2;
-const DOT_RADIUS = 1; // Dot radius in CSS pixels
+const DOT_RADIUS = 1.3; // Dot radius in CSS pixels
 const DOT_BASE_GAP = 10; // Base gap between dots in CSS pixels
 const MIN_GRID_GAP = 4; // Minimum on-screen grid spacing in CSS pixels
 
@@ -349,7 +349,7 @@ export default class Renderer extends BaseModule {
 		let base = DOT_BASE_GAP * scale;
 		while (base < MIN_GRID_GAP) base *= 2;
 		const levels: Array<{ step: number; alpha: number }> = [
-			{ step: base, alpha: 0.16 },
+			{ step: base, alpha: 0.38 },
 		];
 		for (let index = 1; index <= 3; index += 1) {
 			const step = base / 2 ** index;
@@ -357,7 +357,7 @@ export default class Renderer extends BaseModule {
 			const start = 20 * 2 ** (index - 1);
 			const end = 40 * 2 ** (index - 1);
 			const t = Math.max(0, Math.min(1, (base - start) / (end - start)));
-			const alpha = (t * t * (3 - 2 * t)) * 0.12;
+			const alpha = (t * t * (3 - 2 * t)) * 0.24;
 			if (alpha > 0.002) levels.push({ step, alpha });
 		}
 		return levels;
@@ -378,7 +378,7 @@ export default class Renderer extends BaseModule {
 		this.ctx.save();
 		this.ctx.strokeStyle = color;
 		this.ctx.fillStyle = color;
-		this.ctx.lineWidth = 1;
+		this.ctx.lineWidth = 1.2;
 		for (const level of levels) {
 			const step = level.step;
 			const startX = ((offsetX % step) + step) % step;
