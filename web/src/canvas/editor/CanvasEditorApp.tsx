@@ -68,9 +68,9 @@ import { InputDialog } from '../../shared/ui/InputDialog'
 import { DEFAULT_BLOCK_SIZES, blockKind, isRatioLocked } from './blocks'
 import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
+import { CanvasToolPalette } from './CanvasToolPalette'
 import { CanvasStylePanel } from './CanvasStylePanel'
-import { downloadCanvasHtml, downloadCanvasPng, downloadCanvasSvg } from './export'
-import { TOOL_SHORTCUTS, TOOLS, detectMediaKind, type EditorTool } from './tools'
+import { TOOL_SHORTCUTS, detectMediaKind, type EditorTool } from './tools'
 import {
   collectBlocks,
   collectDescendants,
@@ -118,7 +118,7 @@ export function CanvasEditorApp() {
       : 'public',
   )
   const [stylePanelOpen, setStylePanelOpen] = useState(false)
-  const [menuPanelOpen, setMenuPanelOpen] = useState(false)
+  const [menuPanelOpen, setMenuPanelOpen] = useState(true)
   const [directorMode, setDirectorMode] = useState(false)
   const [presentation, setPresentation] = useState(false)
   const [presentationMenu, setPresentationMenu] = useState<{ x: number; y: number } | null>(
@@ -465,7 +465,7 @@ export function CanvasEditorApp() {
     const target = event.target as HTMLElement
     if (
       target.closest(
-        'button, input, textarea, select, .sb-style-panel, .sb-modal-backdrop, .canvas-editor-toolstrip, .sb-director-overlay, .sb-frame-controller, .canvas-editor-toolbar, .JCV-controls, .JCV-minimap-container',
+        'button, input, textarea, select, .sb-style-panel, .sb-modal-backdrop, .canvas-tool-palette, .canvas-tool-flyout, .sb-director-overlay, .sb-frame-controller, .JCV-controls, .JCV-minimap-container',
       )
     ) {
       return
@@ -1212,7 +1212,7 @@ export function CanvasEditorApp() {
       if (!target) return
       if (
         target.closest(
-          '.sb-style-panel, .sb-modal-backdrop, .canvas-editor-toolstrip, .JCV-controls, .JCV-minimap-container',
+          '.sb-style-panel, .sb-modal-backdrop, .canvas-tool-palette, .canvas-tool-flyout, .JCV-controls, .JCV-minimap-container',
         )
       ) {
         return
@@ -1433,7 +1433,7 @@ export function CanvasEditorApp() {
       if (!ok) return
     }
     setTreeOpen(true)
-    setMenuPanelOpen(false)
+    setMenuPanelOpen(true)
     setStylePanelOpen(false)
     const nextItems = items.filter((item) => item.scope === nextScope)
     const target =
@@ -1781,7 +1781,7 @@ export function CanvasEditorApp() {
         stylePanelOpen={stylePanelOpen}
         onToggleStylePanel={() => setStylePanelOpen((open) => !open)}
         menuPanelOpen={menuPanelOpen}
-        menuPanelLabel={menuPanelOpen ? '隐藏顶部操作栏' : '显示顶部操作栏'}
+        menuPanelLabel={menuPanelOpen ? '隐藏操作栏' : '显示操作栏'}
         onToggleMenuPanel={() => setMenuPanelOpen((open) => !open)}
         directorMode={directorMode}
         onToggleDirector={toggleDirector}
@@ -1809,108 +1809,6 @@ export function CanvasEditorApp() {
 
         <main className="sb-canvas">
           <div className="canvas-editor">
-            {menuPanelOpen && canvas ? (
-              <header className="canvas-editor-toolbar">
-                <strong>{canvas['x-superboard']?.meta.title}</strong>
-                <select
-                  className="canvas-editor-board-select"
-                  value={selectedSlug}
-                  title="切换白板"
-                  onChange={(event) => void openBoard(event.target.value, scope)}
-                >
-                  {scopedItems.map((item) => (
-                    <option key={item.slug} value={item.slug}>
-                      {item.title || item.slug}
-                    </option>
-                  ))}
-                </select>
-                <span className="canvas-editor-meta">
-                  {selectedIds.length > 0
-                    ? `已选 ${selectedIds.length} 项`
-                    : activeItem?.scope === 'private'
-                      ? '私有'
-                      : '公开'}
-                </span>
-                <div className="canvas-editor-actions">
-                  <button type="button" onClick={undo} disabled={!historyState.canUndo}>
-                    撤销
-                  </button>
-                  <button type="button" onClick={redo} disabled={!historyState.canRedo}>
-                    重做
-                  </button>
-                  <button
-                    type="button"
-                    onClick={toggleGroup}
-                    disabled={!canGroup && !canUngroup}
-                    title="Ctrl+G / Ctrl+Shift+G"
-                  >
-                    编组
-                  </button>
-                  <button
-                    type="button"
-                    onClick={ungroupSelection}
-                    disabled={!canUngroup}
-                    title="Ctrl+Shift+G"
-                  >
-                    解组
-                  </button>
-                  <button
-                    type="button"
-                    onClick={toggleLockSelection}
-                    disabled={selectedIds.length === 0}
-                    title="Shift+L"
-                  >
-                    锁定
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => reorderSelection('front')}
-                    disabled={selectedIds.length === 0}
-                    title="]"
-                  >
-                    置顶
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => reorderSelection('back')}
-                    disabled={selectedIds.length === 0}
-                    title="["
-                  >
-                    置底
-                  </button>
-                  <button
-                    type="button"
-                    onClick={unlockAllLocked}
-                    disabled={!hasLocked}
-                    title="解锁全部锁定元素"
-                  >
-                    解锁全部
-                  </button>
-                  <button type="button" onClick={() => downloadCanvasSvg(canvas)}>
-                    导出 SVG
-                  </button>
-                  <button type="button" onClick={() => downloadCanvasPng(canvas)}>
-                    导出 PNG
-                  </button>
-                  <button
-                    type="button"
-                    title="静态 SVG 快照，Markdown/Pele 等富内容会近似导出"
-                    onClick={() => downloadCanvasHtml(canvas)}
-                  >
-                    导出 HTML
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void save()}
-                    disabled={saveState === 'saved' || saveState === 'saving'}
-                    title="Ctrl+S"
-                  >
-                    {saveLabel}
-                  </button>
-                </div>
-              </header>
-            ) : null}
-
             <div
               ref={stageRef}
               className="canvas-editor-stage"
@@ -2039,32 +1937,15 @@ export function CanvasEditorApp() {
                       onClose={() => setFrameControllerOpen(false)}
                     />
                   ) : null}
-                  <div className="canvas-editor-toolstrip">
-                    {TOOLS.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className={tool === item.id ? 'is-active' : undefined}
-                        title={`${item.label}（${item.shortcut}）`}
-                        onClick={() => setTool(item.id)}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                    <span className="canvas-editor-tool-sep" />
-                    <button type="button" onClick={() => insertTextBlock('markdown')}>
-                      插入 Markdown
-                    </button>
-                    <button type="button" onClick={() => openPeleDialog()}>
-                      插入 Pele
-                    </button>
-                    <button type="button" onClick={() => insertScheduleBlock()}>
-                      插入日程表
-                    </button>
-                    <button type="button" onClick={() => openMediaDialog()}>
-                      插入媒体
-                    </button>
-                  </div>
+                  {menuPanelOpen ? (
+                    <CanvasToolPalette
+                      tool={tool}
+                      onToolChange={setTool}
+                      onInsertMarkdown={() => insertTextBlock('markdown')}
+                      onInsertPele={() => openPeleDialog()}
+                      onInsertSchedule={() => insertScheduleBlock()}
+                    />
+                  ) : null}
                 </>
               ) : (
                 <div className="sb-canvas-empty">

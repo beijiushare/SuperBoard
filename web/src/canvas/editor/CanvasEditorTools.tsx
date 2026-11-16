@@ -598,7 +598,7 @@ export function CanvasEditorTools({
     onChange()
   }
 
-  function commitShape(shape: 'rect' | 'ellipse' | 'diamond' | 'line') {
+  function commitShape(shape: 'rect' | 'rounded-rect' | 'ellipse' | 'diamond' | 'line') {
     const current = draft
     if (!current) return
     const scale = internals()?.dm.data.scale ?? 1
@@ -610,14 +610,20 @@ export function CanvasEditorTools({
     }
     const x = Math.min(current.startX, current.currentX)
     const y = Math.min(current.startY, current.currentY)
-    const id = nextFreeId(existingIds(), shape)
+    const shapeKind = shape === 'rounded-rect' ? 'rect' : shape
+    const id = nextFreeId(existingIds(), shapeKind)
     const extension: SuperBoardNodeExtension = {
       kind: 'shape',
-      shape,
+      shape: shapeKind,
       style:
         shape === 'line'
           ? { fill: 'none', stroke: '#1d1d1d', strokeWidth: 2 }
-          : { fill: '#ffffff', stroke: '#1d1d1d', strokeWidth: 2 },
+          : {
+              fill: '#ffffff',
+              stroke: '#1d1d1d',
+              strokeWidth: 2,
+              cornerRadius: shape === 'rounded-rect' ? 8 : 0,
+            },
     }
     if (shape === 'line') {
       extension.lineFlip = {
@@ -749,7 +755,13 @@ export function CanvasEditorTools({
       startEditing(hit, point.worldX, point.worldY)
       return
     }
-    if (tool === 'rect' || tool === 'ellipse' || tool === 'diamond' || tool === 'line') {
+    if (
+      tool === 'rect' ||
+      tool === 'rounded-rect' ||
+      tool === 'ellipse' ||
+      tool === 'diamond' ||
+      tool === 'line'
+    ) {
       setDraft({
         startX: point.worldX,
         startY: point.worldY,
@@ -829,7 +841,13 @@ export function CanvasEditorTools({
       return
     }
     if (event.button !== 0) return
-    if (tool === 'rect' || tool === 'ellipse' || tool === 'diamond' || tool === 'line') {
+    if (
+      tool === 'rect' ||
+      tool === 'rounded-rect' ||
+      tool === 'ellipse' ||
+      tool === 'diamond' ||
+      tool === 'line'
+    ) {
       commitShape(tool)
       return
     }
@@ -974,6 +992,7 @@ export function CanvasEditorTools({
                 y={shapePreview.top}
                 width={shapePreview.width}
                 height={shapePreview.height}
+                rx={tool === 'rounded-rect' ? 8 : 0}
               />
             )
           ) : null}

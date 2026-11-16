@@ -258,7 +258,7 @@ export function CanvasEditorOverlay({
       const target = event.target as HTMLElement | null
       if (
         target?.closest(
-          '.sb-editor-selection, .sb-editor-hitbox, .sb-editor-edge-hit, .sb-editor-edge-endpoint, .sb-block-actions, .sb-md-editor, .sb-style-panel, .sb-modal-backdrop, .canvas-editor-toolstrip, .JCV-overlay-container, .JCV-controls, .JCV-minimap-container, .sb-frame-controller, button, a, input, textarea, [contenteditable="true"]',
+          '.sb-editor-selection, .sb-editor-hitbox, .sb-editor-edge-hit, .sb-editor-edge-endpoint, .sb-block-actions, .sb-md-editor, .sb-style-panel, .sb-modal-backdrop, .canvas-tool-palette, .canvas-tool-flyout, .JCV-overlay-container, .JCV-controls, .JCV-minimap-container, .sb-frame-controller, button, a, input, textarea, [contenteditable="true"]',
         )
       ) {
         return

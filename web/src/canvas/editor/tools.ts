@@ -4,6 +4,7 @@ export type EditorTool =
   | 'select'
   | 'text'
   | 'rect'
+  | 'rounded-rect'
   | 'ellipse'
   | 'diamond'
   | 'line'
@@ -20,7 +21,7 @@ export interface ToolDefinition {
 export const TOOLS: ToolDefinition[] = [
   { id: 'select', label: '选择', shortcut: 'V' },
   { id: 'text', label: '文本', shortcut: 'T' },
-  { id: 'rect', label: '矩形', shortcut: 'R' },
+  { id: 'rect', label: '正方形', shortcut: 'R' },
   { id: 'ellipse', label: '椭圆', shortcut: 'O' },
   { id: 'diamond', label: '菱形', shortcut: 'Y' },
   { id: 'line', label: '线条', shortcut: 'L' },
