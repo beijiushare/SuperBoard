@@ -611,7 +611,7 @@ export function CanvasEditorApp() {
         }
       }
       if (hit) {
-        setSelectedIds([hit.id])
+        if (!selectedIds.includes(hit.id)) setSelectedIds([hit.id])
         setSelectedEdgeId(null)
       } else if (edgeId) {
         setSelectedIds([])

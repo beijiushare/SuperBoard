@@ -214,6 +214,8 @@ export function CanvasEditorOverlay({
   const dragRef = useRef<DragState | null>(null)
   const marqueeStartRef = useRef<{ x: number; y: number } | null>(null)
   const marqueeAdditiveRef = useRef(false)
+  const marqueeMovedRef = useRef(false)
+  const suppressClickRef = useRef(false)
 
   useEffect(() => {
     const clearDrag = () => {
@@ -292,6 +294,7 @@ export function CanvasEditorOverlay({
       event.preventDefault()
       event.stopPropagation()
       marqueeAdditiveRef.current = isAdditiveSelection(event)
+      marqueeMovedRef.current = false
       marqueeStartRef.current = { x: event.clientX, y: event.clientY }
       setMarquee({ left: event.clientX - bounds.left, top: event.clientY - bounds.top, width: 0, height: 0 })
     }
@@ -304,11 +307,14 @@ export function CanvasEditorOverlay({
       const bounds = overlay.getBoundingClientRect()
       const x = event.clientX - bounds.left
       const y = event.clientY - bounds.top
+      const width = Math.abs(x - (start.x - bounds.left))
+      const height = Math.abs(y - (start.y - bounds.top))
+      if (width > 2 || height > 2) marqueeMovedRef.current = true
       setMarquee({
         left: Math.min(start.x - bounds.left, x),
         top: Math.min(start.y - bounds.top, y),
-        width: Math.abs(x - (start.x - bounds.left)),
-        height: Math.abs(y - (start.y - bounds.top)),
+        width,
+        height,
       })
     }
 
@@ -347,6 +353,8 @@ export function CanvasEditorOverlay({
         for (const id of selectedIds) ids.add(id)
       }
       marqueeAdditiveRef.current = false
+      suppressClickRef.current = marqueeMovedRef.current
+      marqueeMovedRef.current = false
       onSelect([...ids])
       setMarquee(null)
     }
@@ -363,6 +371,10 @@ export function CanvasEditorOverlay({
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
+      if (suppressClickRef.current) {
+        suppressClickRef.current = false
+        return
+      }
       const dm = dmRef.current
       const target = event.target as HTMLElement | null
       if (!dm || !target) return
