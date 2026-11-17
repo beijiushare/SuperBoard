@@ -1172,7 +1172,8 @@
   position: absolute;
   border: 1px dashed #2f80ed;
   border-radius: 8px;
-  pointer-events: none;
+  cursor: move;
+  pointer-events: auto;
 }
 
 .sb-md-editing-placeholder {

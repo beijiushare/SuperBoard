@@ -301,7 +301,6 @@ export function CanvasEditorApp() {
         if (cancelled) return
         historyRef.current = { past: [], future: [] }
         setHistoryState({ canUndo: false, canRedo: false })
-        clipboardRef.current = null
         setSelectedIds([])
         setTool('select')
         normalizeMarkdownLocks(next)
@@ -547,7 +546,7 @@ export function CanvasEditorApp() {
       const map = nodeMapOf(nodes)
       for (let index = nodes.length - 1; index >= 0; index -= 1) {
         const root = selectableAncestor(nodes[index], map, focusedGroupId)
-        if (isLocked(root, map)) continue
+        if (isLocked(root, map) && !selectedIds.includes(root.id)) continue
         if (
           x >= root.x &&
           x <= root.x + root.width &&
@@ -598,6 +597,24 @@ export function CanvasEditorApp() {
       const worldX = (event.clientX - bounds.left - dm.data.offsetX) / dm.data.scale
       const worldY = (event.clientY - bounds.top - dm.data.offsetY) / dm.data.scale
       event.preventDefault()
+      if (
+        target.closest('.sb-editor-multi-selection') &&
+        selectedIds.length > 1
+      ) {
+        const primary = canvas.nodes.find(
+          (node) => node.id === selectedIds[0],
+        )
+        if (primary) {
+          setCanvasMenu({
+            x: event.clientX,
+            y: event.clientY,
+            worldX,
+            worldY,
+            nodeId: primary.id,
+          })
+          return
+        }
+      }
       const hit = nodeAtWorldPoint(worldX, worldY)
       let edgeId: string | null = null
       if (!hit) {
@@ -968,7 +985,9 @@ export function CanvasEditorApp() {
     for (const node of canvas.nodes) {
       if (!ids.has(node.id)) continue
       copied.set(node.id, node)
-      for (const child of collectDescendants(node, canvas.nodes)) copied.set(child.id, child)
+      for (const child of collectDescendants(node, canvas.nodes)) {
+        copied.set(child.id, child)
+      }
     }
     clipboardRef.current = {
       nodes: [...copied.values()].map((node) => structuredClone(node)),
@@ -1026,8 +1045,59 @@ export function CanvasEditorApp() {
   }
 
   function duplicateSelection() {
-    copySelection()
-    pasteClipboard()
+    if (!canvas || selectedIds.length === 0) return
+    const selected = new Set(selectedIds)
+    const copied = new Map<string, CanvasNode>()
+    for (const node of canvas.nodes) {
+      if (!selected.has(node.id)) continue
+      copied.set(node.id, node)
+      for (const child of collectDescendants(node, canvas.nodes)) {
+        copied.set(child.id, child)
+      }
+    }
+    if (copied.size === 0) return
+    recordHistory()
+    const offset = 24
+    const existing = new Set<string>([
+      ...canvas.nodes.map((node) => node.id),
+      ...canvas.edges.map((edge) => edge.id),
+    ])
+    const idMap = new Map<string, string>()
+    const nodes = [...copied.values()].map((node) => {
+      const clone = structuredClone(node)
+      clone.id = nextId(existing, node.id)
+      clone.x = node.x + offset
+      clone.y = node.y + offset
+      idMap.set(node.id, clone.id)
+      return clone
+    })
+    for (const node of nodes) {
+      const extension = node['x-superboard']
+      if (!extension?.groupId) continue
+      const mapped = idMap.get(extension.groupId)
+      if (mapped) extension.groupId = mapped
+      else delete extension.groupId
+    }
+    const edges = canvas.edges
+      .filter((edge) => copied.has(edge.fromNode) && copied.has(edge.toNode))
+      .map((edge) => {
+        const clone = structuredClone(edge)
+        clone.id = nextId(existing, edge.id)
+        clone.fromNode = idMap.get(edge.fromNode) ?? edge.fromNode
+        clone.toNode = idMap.get(edge.toNode) ?? edge.toNode
+        return clone
+      })
+    applyDocument({
+      ...canvas,
+      nodes: [...canvas.nodes, ...nodes],
+      edges: [...canvas.edges, ...edges],
+    })
+    const clonedIds = new Set(nodes.map((node) => node.id))
+    const roots = nodes.filter((node) => {
+      const groupId = node['x-superboard']?.groupId
+      return !groupId || !clonedIds.has(groupId)
+    })
+    if (roots.length > 0) setSelectedIds(roots.map((node) => node.id))
   }
 
   function deleteSelection(
@@ -1194,7 +1264,7 @@ export function CanvasEditorApp() {
       else extension.locked = true
     }
     markDirty()
-    setSelectedIds(allLocked ? [...selectedIds] : [])
+    setSelectedIds([...selectedIds])
   }
 
   function unlockAllLocked() {
@@ -1527,7 +1597,6 @@ export function CanvasEditorApp() {
   function activateCanvas(item: CanvasListItem, next: CanvasDocument) {
     historyRef.current = { past: [], future: [] }
     setHistoryState({ canUndo: false, canRedo: false })
-    clipboardRef.current = null
     normalizeMarkdownLocks(next)
     setSelectedIds([])
     setSelectedEdgeId(null)
@@ -1924,7 +1993,9 @@ export function CanvasEditorApp() {
   const menuNode = canvasMenu?.nodeId ? nodeMap.get(canvasMenu.nodeId) ?? null : null
   const menuDefinition = menuNode ? blockDefinition(menuNode) : null
   const menuEditable = Boolean(
-    menuDefinition && menuDefinition.editor !== 'schedule',
+    menuDefinition &&
+      menuDefinition.editor !== 'schedule' &&
+      !isLocked(menuNode!, nodeMap),
   )
 
   return (
@@ -2184,20 +2255,11 @@ export function CanvasEditorApp() {
               <button
                 type="button"
                 onClick={() => {
-                  copySelection()
-                  setCanvasMenu(null)
-                }}
-              >
-                复制到剪贴板
-              </button>
-              <button
-                type="button"
-                onClick={() => {
                   duplicateSelection()
                   setCanvasMenu(null)
                 }}
               >
-                立即创建副本
+                生成副本
               </button>
               <button
                 type="button"
@@ -2314,17 +2376,6 @@ export function CanvasEditorApp() {
                 插入媒体
               </button>
             </>
-          ) : null}
-          {clipboardRef.current ? (
-            <button
-              type="button"
-              onClick={() => {
-                pasteClipboard()
-                setCanvasMenu(null)
-              }}
-            >
-              粘贴
-            </button>
           ) : null}
           <button
             type="button"

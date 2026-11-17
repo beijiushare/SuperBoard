@@ -485,6 +485,47 @@ export function CanvasEditorOverlay({
     event.currentTarget.setPointerCapture(event.pointerId)
   }
 
+  function beginMultiMove(event: ReactPointerEvent, selection: CanvasNode[]) {
+    if (event.button !== 0 && event.button !== 2) return
+    if (selection.length < 2) return
+    event.preventDefault()
+    event.stopPropagation()
+    const dm = dmRef.current
+    if (!dm) return
+    const allNodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
+    const map = nodeMapOf(allNodes)
+    if (selection.some((node) => isLocked(node, map))) return
+    const seen = new Set<string>()
+    const dragNodes: DragNode[] = []
+    for (const root of selection) {
+      for (const item of [root, ...collectDescendants(root, allNodes)]) {
+        if (seen.has(item.id)) continue
+        seen.add(item.id)
+        dragNodes.push({
+          node: item,
+          startX: item.x,
+          startY: item.y,
+          startWidth: item.width,
+          startHeight: item.height,
+        })
+      }
+    }
+    const primary = selection[0]
+    dragRef.current = {
+      kind: 'move',
+      nodes: dragNodes,
+      primary,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startX: primary.x,
+      startY: primary.y,
+      startWidth: primary.width,
+      startHeight: primary.height,
+      scale: dm.data.scale,
+    }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
   function ensureExtension(node: CanvasNode) {
     if (!node['x-superboard']) {
       node['x-superboard'] = {
@@ -1153,6 +1194,9 @@ function cornerRatioScale(
             width: (selectedBounds.right - selectedBounds.left) * scale,
             height: (selectedBounds.bottom - selectedBounds.top) * scale,
           }}
+          onPointerDown={(event) => beginMultiMove(event, selectedNodes)}
+          onPointerMove={movePointer}
+          onPointerUp={endDrag}
         >
           {SELECTION_CORNERS.map((corner) => (
             <span
