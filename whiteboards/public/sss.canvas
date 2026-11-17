@@ -1,0 +1,21 @@
+{
+  "nodes": [],
+  "edges": [],
+  "x-superboard": {
+    "version": 1,
+    "meta": {
+      "title": "asd",
+      "slug": "sss",
+      "updatedAt": "2026-11-16T19:18:10.026Z"
+    },
+    "settings": {
+      "stylePanelOpen": true,
+      "toolPaletteOpen": false,
+      "viewport": {
+        "offsetX": 451,
+        "offsetY": 374,
+        "scale": 1
+      }
+    }
+  }
+}
