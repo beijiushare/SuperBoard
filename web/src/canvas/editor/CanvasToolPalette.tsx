@@ -324,19 +324,16 @@ export function CanvasToolPalette({
           ) : null}
           {flyout.kind === 'export' ? (
             <>
-              {['导出 SVG', '导出 PDF', '导出 HTML'].map((label) => (
-                <button
-                  key={label}
-                  type="button"
-                  className="canvas-tool-flyout-item"
-                  onClick={() => {
-                    setFlyout(null)
-                    window.alert('功能开发中')
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
+              <button
+                type="button"
+                className="canvas-tool-flyout-item"
+                onClick={() => {
+                  setFlyout(null)
+                  window.alert('功能开发中')
+                }}
+              >
+                导出 HTML
+              </button>
             </>
           ) : null}
         </div>

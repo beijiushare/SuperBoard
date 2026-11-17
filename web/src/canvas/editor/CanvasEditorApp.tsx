@@ -1896,6 +1896,12 @@ export function CanvasEditorApp() {
   const hasLocked = canvas
     ? canvas.nodes.some((node) => isLocked(node, nodeMap))
     : false
+  const allSelectedLocked =
+    selectedIds.length > 0 &&
+    selectedIds.every((id) => {
+      const node = nodeMap.get(id)
+      return Boolean(node?.['x-superboard']?.locked)
+    })
   const activeItem = items.find(
     (entry) => entry.slug === selectedSlug && entry.scope === scope,
   )
@@ -2164,7 +2170,7 @@ export function CanvasEditorApp() {
           ) : null}
           {menuNode ? (
             <>
-              {menuEditable ? (
+              {menuEditable && selectedIds.length === 1 ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -2182,7 +2188,7 @@ export function CanvasEditorApp() {
                   setCanvasMenu(null)
                 }}
               >
-                复制
+                复制到剪贴板
               </button>
               <button
                 type="button"
@@ -2191,7 +2197,7 @@ export function CanvasEditorApp() {
                   setCanvasMenu(null)
                 }}
               >
-                创建副本
+                立即创建副本
               </button>
               <button
                 type="button"
@@ -2219,7 +2225,7 @@ export function CanvasEditorApp() {
                   setCanvasMenu(null)
                 }}
               >
-                锁定
+                {allSelectedLocked ? '解锁' : '锁定'}
               </button>
               <button
                 type="button"
@@ -2228,7 +2234,7 @@ export function CanvasEditorApp() {
                   setCanvasMenu(null)
                 }}
               >
-                置顶
+                移至最前
               </button>
               <button
                 type="button"
@@ -2237,7 +2243,25 @@ export function CanvasEditorApp() {
                   setCanvasMenu(null)
                 }}
               >
-                置底
+                移至最后
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  reorderSelection('forward')
+                  setCanvasMenu(null)
+                }}
+              >
+                向前一层
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  reorderSelection('backward')
+                  setCanvasMenu(null)
+                }}
+              >
+                向后一层
               </button>
               <div className="sb-canvas-menu-sep" />
             </>
@@ -2304,6 +2328,7 @@ export function CanvasEditorApp() {
           ) : null}
           <button
             type="button"
+            style={{ display: selectedIds.length > 0 ? 'none' : undefined }}
             onClick={() => {
               selectAllUnlocked()
               setCanvasMenu(null)
