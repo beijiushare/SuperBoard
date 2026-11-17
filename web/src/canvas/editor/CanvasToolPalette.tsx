@@ -117,6 +117,7 @@ interface CanvasToolPaletteProps {
   onInsertMarkdown: () => void
   onInsertPele: () => void
   onInsertSchedule: () => void
+  onInsertMedia: () => void
 }
 
 export function CanvasToolPalette({
@@ -125,6 +126,7 @@ export function CanvasToolPalette({
   onInsertMarkdown,
   onInsertPele,
   onInsertSchedule,
+  onInsertMedia,
 }: CanvasToolPaletteProps) {
   const { rootRef, position, handleProps } = useFloatingPanel()
   const [flyout, setFlyout] = useState<Flyout | null>(null)
@@ -318,7 +320,17 @@ export function CanvasToolPalette({
                   onInsertSchedule()
                 }}
               >
-                插入日程
+                插入日程表
+              </button>
+              <button
+                type="button"
+                className="canvas-tool-flyout-item"
+                onClick={() => {
+                  setFlyout(null)
+                  onInsertMedia()
+                }}
+              >
+                插入媒体
               </button>
             </>
           ) : null}

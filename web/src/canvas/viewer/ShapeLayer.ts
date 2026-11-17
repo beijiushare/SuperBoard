@@ -113,9 +113,10 @@ export class ShapeLayer extends BaseModule {
       const style = ext.style ?? {}
       const shape = ext.shape ?? 'rect'
       const opacity = style.opacity ?? 1
+      const fillAlpha = opacity * (style.backgroundOpacity ?? 1)
+      const strokeAlpha = opacity * (style.borderOpacity ?? 1)
 
       this.ctx.save()
-      this.ctx.globalAlpha = opacity
       const rotation = ext.rotation ?? 0
       if (rotation) {
         const centerX = node.x + node.width / 2
@@ -140,7 +141,9 @@ export class ShapeLayer extends BaseModule {
           0,
           Math.PI * 2,
         )
+        this.ctx.globalAlpha = fillAlpha
         this.ctx.fill()
+        this.ctx.globalAlpha = strokeAlpha
         this.ctx.stroke()
       } else if (shape === 'diamond') {
         this.ctx.beginPath()
@@ -149,7 +152,9 @@ export class ShapeLayer extends BaseModule {
         this.ctx.lineTo(node.x + node.width / 2, node.y + node.height)
         this.ctx.lineTo(node.x, node.y + node.height / 2)
         this.ctx.closePath()
+        this.ctx.globalAlpha = fillAlpha
         this.ctx.fill()
+        this.ctx.globalAlpha = strokeAlpha
         this.ctx.stroke()
       } else if (shape === 'line') {
         const flip = ext.lineFlip
@@ -160,10 +165,13 @@ export class ShapeLayer extends BaseModule {
         this.ctx.beginPath()
         this.ctx.moveTo(startX, startY)
         this.ctx.lineTo(endX, endY)
+        this.ctx.globalAlpha = strokeAlpha
         this.ctx.stroke()
       } else {
         roundedRect(this.ctx, node.x, node.y, node.width, node.height, style.cornerRadius ?? 8)
+        this.ctx.globalAlpha = fillAlpha
         this.ctx.fill()
+        this.ctx.globalAlpha = strokeAlpha
         this.ctx.stroke()
       }
       this.ctx.restore()

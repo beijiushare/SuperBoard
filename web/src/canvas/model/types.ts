@@ -104,6 +104,9 @@ export interface SuperBoardStyle {
   cornerRadius?: number
   fontFamily?: string
   fontSize?: number
+  fontWeight?: number | string
+  fontStyle?: 'normal' | 'italic'
+  textDecoration?: 'none' | 'underline'
   textAlign?: 'left' | 'center' | 'right'
   lineHeight?: number
   fill?: string

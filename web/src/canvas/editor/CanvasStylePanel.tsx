@@ -180,14 +180,37 @@ export function CanvasStylePanel({
   }
 
   function updateCommonStyle(patch: Partial<SuperBoardStyle>) {
+    const dashFor = (style: string | undefined) =>
+      style === 'dashed' ? [7, 4] : style === 'dotted' ? [2, 4] : []
     applyTo(nodes, (node) => {
-      if (kindOf(node) !== 'shape') return withStyle(node, patch)
-      const { borderColor, borderWidth, ...rest } = patch
+      const kind = kindOf(node)
+      if (kind !== 'shape' && kind !== 'drawing') {
+        return withStyle(node, patch)
+      }
+      const {
+        backgroundColor,
+        backgroundOpacity,
+        borderColor,
+        borderOpacity,
+        borderWidth,
+        borderStyle,
+        ...rest
+      } = patch
       return withStyle(node, {
         ...rest,
+        ...(kind === 'shape' && backgroundColor !== undefined
+          ? { fill: backgroundColor }
+          : {}),
+        ...(kind === 'shape' && backgroundOpacity !== undefined
+          ? { backgroundOpacity }
+          : {}),
         ...(borderColor !== undefined ? { stroke: borderColor } : {}),
+        ...(borderOpacity !== undefined ? { borderOpacity } : {}),
         ...(borderWidth !== undefined
           ? { strokeWidth: Number(borderWidth) || 0 }
+          : {}),
+        ...(borderStyle !== undefined
+          ? { borderStyle, strokeDash: dashFor(borderStyle) }
           : {}),
       })
     })
@@ -360,13 +383,26 @@ export function CanvasStylePanel({
 
   const firstNode = nodes[0]
   const firstStyle = firstNode?.['x-superboard']?.style
-  const firstIsShape = firstNode ? kindOf(firstNode) === 'shape' : false
+  const firstKind = firstNode?.['x-superboard']?.kind
+  const firstIsShape = firstKind === 'shape'
+  const firstIsDrawing = firstKind === 'drawing'
+  const firstIsLine =
+    firstIsShape && firstNode?.['x-superboard']?.shape === 'line'
   const firstBorderColor =
     firstStyle?.borderColor ?? firstStyle?.stroke ?? '#1d1d1d'
   const firstBorderWidth = Number(
     firstStyle?.borderWidth ??
       firstStyle?.strokeWidth ??
       (firstIsShape ? 2 : 0),
+  )
+  const firstBorderOpacity = Math.round(
+    (firstStyle?.borderOpacity ?? 1) * 100,
+  )
+  const firstBorderStyle = firstStyle?.borderStyle ?? 'solid'
+  const firstBackgroundColor =
+    firstStyle?.backgroundColor ?? firstStyle?.fill ?? '#ffffff'
+  const firstBackgroundOpacity = Math.round(
+    (firstStyle?.backgroundOpacity ?? 1) * 100,
   )
   const firstOpacity = Math.round((firstStyle?.opacity ?? 1) * 100)
   const firstShape = shapes[0]
@@ -438,6 +474,32 @@ export function CanvasStylePanel({
               slider
               onChange={(value) => updateCommonStyle({ opacity: value / 100 })}
             />
+            {!firstIsDrawing && !firstIsLine ? (
+              <>
+                <ColorPicker
+                  label="背景颜色(C)"
+                  value={firstBackgroundColor}
+                  allowNone
+                  recentColors={boardSettings.recentColors}
+                  onChange={(backgroundColor) =>
+                    updateCommonStyle({ backgroundColor })
+                  }
+                  onColorUsed={onRememberColor}
+                />
+                <StyleNumberControl
+                  label="背景透明度"
+                  value={firstBackgroundOpacity}
+                  min={0}
+                  max={100}
+                  step={1}
+                  unit="%"
+                  slider
+                  onChange={(value) =>
+                    updateCommonStyle({ backgroundOpacity: value / 100 })
+                  }
+                />
+              </>
+            ) : null}
             <ColorPicker
               label="边框颜色(C)"
               value={firstBorderColor}
@@ -445,6 +507,18 @@ export function CanvasStylePanel({
               recentColors={boardSettings.recentColors}
               onChange={(borderColor) => updateCommonStyle({ borderColor })}
               onColorUsed={onRememberColor}
+            />
+            <StyleNumberControl
+              label="边框透明度"
+              value={firstBorderOpacity}
+              min={0}
+              max={100}
+              step={1}
+              unit="%"
+              slider
+              onChange={(value) =>
+                updateCommonStyle({ borderOpacity: value / 100 })
+              }
             />
             <StyleNumberControl
               label="边框粗细"
@@ -455,6 +529,27 @@ export function CanvasStylePanel({
               unit="px"
               onChange={(borderWidth) => updateCommonStyle({ borderWidth })}
             />
+            {!firstIsDrawing ? (
+              <div className="sb-style-row">
+                <span>线条类型</span>
+                <div className="sb-style-buttons">
+                  {([
+                    ['solid', '实线'],
+                    ['dashed', '虚线'],
+                    ['dotted', '点线'],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={firstBorderStyle === value ? 'is-active' : undefined}
+                      onClick={() => updateCommonStyle({ borderStyle: value })}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </section>
         </>
       ) : null}
@@ -822,6 +917,21 @@ export function CanvasStylePanel({
         <section>
           <h3>文本</h3>
           <div className="sb-style-row">
+            <span>字体</span>
+            <select
+              className="sb-style-select"
+              value={firstText?.['x-superboard']?.style?.fontFamily ?? ''}
+              onChange={(event) =>
+                styleText(texts, { fontFamily: event.target.value || undefined })
+              }
+            >
+              <option value="">默认</option>
+              <option value="PingFang SC, Microsoft YaHei, sans-serif">苹方</option>
+              <option value="Georgia, serif">Georgia</option>
+              <option value="ui-monospace, Consolas, monospace">等宽</option>
+            </select>
+          </div>
+          <div className="sb-style-row">
             <span>字号</span>
             <div className="sb-style-buttons">
               {[14, 16, 20, 28].map((value) => (
@@ -847,6 +957,70 @@ export function CanvasStylePanel({
             onChange={(color) => styleAll(texts, { color })}
             onColorUsed={onRememberColor}
           />
+          <div className="sb-style-row">
+            <span>样式</span>
+            <div className="sb-style-buttons">
+              <button
+                type="button"
+                className={
+                  Number(firstText?.['x-superboard']?.style?.fontWeight ?? 400) >=
+                  700
+                    ? 'is-active'
+                    : undefined
+                }
+                onClick={() =>
+                  styleAll(texts, {
+                    fontWeight:
+                      Number(
+                        firstText?.['x-superboard']?.style?.fontWeight ?? 400,
+                      ) >= 700
+                        ? 400
+                        : 700,
+                  })
+                }
+              >
+                <strong>B</strong>
+              </button>
+              <button
+                type="button"
+                className={
+                  firstText?.['x-superboard']?.style?.fontStyle === 'italic'
+                    ? 'is-active'
+                    : undefined
+                }
+                onClick={() =>
+                  styleAll(texts, {
+                    fontStyle:
+                      firstText?.['x-superboard']?.style?.fontStyle === 'italic'
+                        ? 'normal'
+                        : 'italic',
+                  })
+                }
+              >
+                <em>I</em>
+              </button>
+              <button
+                type="button"
+                className={
+                  firstText?.['x-superboard']?.style?.textDecoration ===
+                  'underline'
+                    ? 'is-active'
+                    : undefined
+                }
+                onClick={() =>
+                  styleAll(texts, {
+                    textDecoration:
+                      firstText?.['x-superboard']?.style?.textDecoration ===
+                      'underline'
+                        ? 'none'
+                        : 'underline',
+                  })
+                }
+              >
+                <u>U</u>
+              </button>
+            </div>
+          </div>
           <div className="sb-style-row">
             <span>对齐</span>
             <div className="sb-style-buttons">
@@ -875,23 +1049,7 @@ export function CanvasStylePanel({
         </section>
       ) : null}
 
-      {blocks.length > 0 ? (
-        <section>
-          <h3>块颜色</h3>
-          <div className="sb-style-swatches">
-            {BLOCK_COLORS.map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                title={item.label}
-                className={(firstBlock?.color ?? '0') === item.value ? 'is-active' : undefined}
-                style={{ background: item.css }}
-                onClick={() => setBlockColor(item.value)}
-              />
-            ))}
-          </div>
-        </section>
-      ) : null}
+
 
       {mediaNodes.length > 0 ? (
         <section>

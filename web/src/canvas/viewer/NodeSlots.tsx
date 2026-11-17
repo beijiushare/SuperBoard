@@ -22,6 +22,9 @@ function textStyle(node: JSONCanvasTextNode) {
     color: style?.color,
     fontFamily: style?.fontFamily,
     fontSize: style?.fontSize,
+    fontWeight: style?.fontWeight,
+    fontStyle: style?.fontStyle,
+    textDecoration: style?.textDecoration,
     textAlign: style?.textAlign,
     lineHeight: style?.lineHeight,
     whiteSpace: 'pre-wrap' as const,
@@ -51,16 +54,31 @@ function BlockSurface({
   const markdown = ext?.kind === 'markdown'
   const style = ext?.style
   const borderWidth = Number(style?.borderWidth ?? 0)
+  const borderOpacity = style?.borderOpacity ?? 1
+  const backgroundOpacity = style?.backgroundOpacity ?? 1
+  const borderColor = style?.borderColor ?? '#1d1d1d'
+  const backgroundColor = style?.backgroundColor
   return (
     <div
       className={`sb-block-scale${markdown ? ' sb-markdown-block-scale' : ''}`}
       style={{
         border: borderWidth
-          ? `${borderWidth}px ${style?.borderStyle ?? 'solid'} ${
-              style?.borderColor ?? '#1d1d1d'
-            }`
+          ? `${borderWidth}px ${style?.borderStyle ?? 'solid'} color-mix(in srgb, ${borderColor} ${
+              borderOpacity * 100
+            }%, transparent)`
+          : undefined,
+        backgroundColor: backgroundColor
+          ? `color-mix(in srgb, ${backgroundColor} ${
+              backgroundOpacity * 100
+            }%, transparent)`
           : undefined,
         opacity: style?.opacity ?? 1,
+        ...(backgroundColor
+          ? {
+              ['--sb-block-bg-color' as string]: backgroundColor,
+              ['--sb-block-bg-opacity' as string]: `${backgroundOpacity * 100}%`,
+            }
+          : {}),
       }}
     >
       {children}

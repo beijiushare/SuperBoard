@@ -2184,6 +2184,7 @@ export function CanvasEditorApp() {
                       onInsertMarkdown={() => insertTextBlock('markdown')}
                       onInsertPele={() => openPeleDialog()}
                       onInsertSchedule={() => insertScheduleBlock()}
+                      onInsertMedia={() => openMediaDialog()}
                     />
                   ) : null}
                 </>

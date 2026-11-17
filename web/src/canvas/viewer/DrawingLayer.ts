@@ -1,6 +1,6 @@
 import { BaseModule, internal, type BaseArgs } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { getStroke } from 'perfect-freehand'
-import type { SuperBoardStroke } from '../model'
+import type { SuperBoardStroke, SuperBoardStyle } from '../model'
 
 type DataManager = {
   data: {
@@ -16,7 +16,11 @@ type DataManager = {
           y: number
           width: number
           height: number
-          'x-superboard'?: { strokes?: SuperBoardStroke[]; rotation?: number }
+          'x-superboard'?: {
+            strokes?: SuperBoardStroke[]
+            rotation?: number
+            style?: SuperBoardStyle
+          }
         }
       }
     >
@@ -86,9 +90,11 @@ export class DrawingLayer extends BaseModule {
     for (const item of Object.values(nodeMap)) {
       const node = item.ref
       const rotation = node['x-superboard']?.rotation ?? 0
+      const style = node['x-superboard']?.style
       const strokes = node['x-superboard']?.strokes
       if (!strokes?.length) continue
       this.ctx.save()
+      this.ctx.globalAlpha = style?.opacity ?? 1
       if (rotation) {
         const centerX = node.x + node.width / 2
         const centerY = node.y + node.height / 2
@@ -103,7 +109,7 @@ export class DrawingLayer extends BaseModule {
             pressure === undefined ? [x, y] : [x, y, pressure],
           ) as number[][],
           {
-            size: stroke.size,
+            size: style?.strokeWidth ?? stroke.size,
             thinning: stroke.thinning,
             smoothing: stroke.smoothing,
             streamline: stroke.streamline,
@@ -119,7 +125,7 @@ export class DrawingLayer extends BaseModule {
           this.ctx.lineTo(outline[index][0], outline[index][1])
         }
         this.ctx.closePath()
-        this.ctx.fillStyle = stroke.color
+        this.ctx.fillStyle = style?.stroke ?? style?.color ?? stroke.color
         this.ctx.fill()
       }
       this.ctx.restore()
