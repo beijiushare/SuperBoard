@@ -396,7 +396,7 @@ export function CanvasEditorOverlay({
   }, [onSelect, onSelectEdge])
 
   function beginMove(event: ReactPointerEvent, node: CanvasNode) {
-    if (event.button !== 0) return
+    if (event.button !== 0 && event.button !== 2) return
     event.preventDefault()
     event.stopPropagation()
     const dm = dmRef.current
