@@ -1120,6 +1120,33 @@ function cornerRatioScale(
           />
         ))}
 
+      {nodes
+        .filter(
+          (node) =>
+            isLocked(node, map) &&
+            node.id === selectableAncestor(node, map, focusedGroupId)?.id,
+        )
+        .map((node) => (
+          <div
+            key={`locked-hit-${node.id}`}
+            className="sb-editor-hitbox sb-editor-locked-hitbox"
+            style={screenStyle(node, offsetX, offsetY, scale)}
+            onPointerDown={(event) => {
+              if (event.button !== 0) return
+              event.preventDefault()
+              event.stopPropagation()
+              onSelect(
+                isAdditiveSelection(event)
+                  ? selectedIds.includes(node.id)
+                    ? selectedIds.filter((id) => id !== node.id)
+                    : [...selectedIds, node.id]
+                  : [node.id],
+              )
+              onSelectEdge?.(null)
+            }}
+          />
+        ))}
+
       {selectionBoxNodes.map((node) => (
         <div
           key={node.id}
@@ -1210,18 +1237,6 @@ function cornerRatioScale(
           ))}
         </div>
       ) : null}
-
-      {nodes
-        .filter((node) => node['x-superboard']?.locked)
-        .map((node) => (
-          <div
-            key={`locked-${node.id}`}
-            className="sb-editor-locked"
-            style={screenStyle(node, offsetX, offsetY, scale)}
-          >
-            <span className="sb-editor-locked-badge">锁定</span>
-          </div>
-        ))}
 
       {nodes
         .filter(

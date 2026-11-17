@@ -305,10 +305,14 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 		);
 		const rotation = ` translate(${worldX || 0}px, ${worldY || 0}px) rotate(${angle || 0}deg) translate(${-(worldX || 0)}px, ${-(worldY || 0)}px)`;
 		this.overlaysLayer.style.transform = `translate(${data.offsetX}px, ${data.offsetY}px) scale(${data.scale})${rotation}`;
+		const order = new Map(
+			Object.keys(data.nodeMap).map((id, index) => [id, index + 1]),
+		);
 		Object.entries(this.overlays).forEach(([id, element]) => {
 			const item = data.nodeMap[id];
 			if (!item) return;
 			const node = item.ref;
+			element.style.zIndex = String(order.get(id) ?? 1);
 			this.applyNodeTransform(element, node);
 		});
 		this.syncOverlays();
@@ -358,6 +362,9 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 		if (!element) {
 			element = this.constructOverlay(...args);
 			if (this.aborted) return;
+			element.style.zIndex = String(
+				Object.keys(this.DM.data.nodeMap).indexOf(node.id) + 1,
+			);
 			this.overlaysLayer.appendChild(element);
 			this.overlays[node.id] = element;
 			this.applyNodeTransform(element, node);
