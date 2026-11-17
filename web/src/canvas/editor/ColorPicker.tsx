@@ -61,7 +61,6 @@ export function ColorPicker({
   const choose = (color: string) => {
     onChange(color)
     onColorUsed?.(color)
-    setOpen(false)
   }
 
   const EyeDropper = (

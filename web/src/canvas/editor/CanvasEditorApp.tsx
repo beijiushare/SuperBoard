@@ -585,7 +585,7 @@ export function CanvasEditorApp() {
     const target = event.target as HTMLElement
     if (
       target.closest(
-        'button, input, textarea, select, .sb-style-panel, .sb-modal-backdrop, .canvas-tool-palette, .canvas-tool-flyout, .sb-director-overlay, .sb-frame-controller, .JCV-controls, .JCV-minimap-container',
+        'button, input, textarea, select, .sb-style-panel, .sb-color-popover, .sb-color-trigger, .sb-modal-backdrop, .canvas-tool-palette, .canvas-tool-flyout, .sb-director-overlay, .sb-frame-controller, .JCV-controls, .JCV-minimap-container',
       )
     ) {
       return
@@ -1376,7 +1376,7 @@ export function CanvasEditorApp() {
       if (!target) return
       if (
         target.closest(
-          '.sb-style-panel, .sb-modal-backdrop, .canvas-tool-palette, .canvas-tool-flyout, .JCV-controls, .JCV-minimap-container',
+          '.sb-style-panel, .sb-color-popover, .sb-color-trigger, .sb-modal-backdrop, .canvas-tool-palette, .canvas-tool-flyout, .JCV-controls, .JCV-minimap-container',
         )
       ) {
         return

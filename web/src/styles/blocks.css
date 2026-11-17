@@ -21,12 +21,7 @@
   height: 100%;
   flex-direction: column;
   overflow: hidden;
-  border: var(--sb-block-border-width, 1px) var(--sb-block-border-style, solid)
-    color-mix(
-      in srgb,
-      var(--sb-block-border-color, var(--sb-card-border)) var(--sb-block-border-opacity, 100%),
-      transparent
-    );
+  border: 0;
   border-radius: var(--sb-card-radius);
   background: color-mix(
     in srgb,
