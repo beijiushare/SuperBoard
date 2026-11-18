@@ -1059,7 +1059,9 @@
 }
 
 .sb-preferences-dialog {
-  width: min(460px, calc(100vw - 40px));
+  width: min(920px, calc(100vw - 40px));
+  height: 85vh;
+  max-height: 85vh;
 }
 
 .sb-preferences-note {
@@ -1081,7 +1083,10 @@
 
 .sb-preferences-dialog .sb-style-number-slider {
   width: auto;
-  height: auto;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .sb-preferences-dialog .sb-style-spin input {
