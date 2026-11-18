@@ -1,0 +1,46 @@
+{
+  "nodes": [
+    {
+      "id": "welcome-text",
+      "type": "text",
+      "x": 120,
+      "y": 120,
+      "width": 420,
+      "height": 72,
+      "text": "SuperBoard",
+      "x-superboard": {
+        "kind": "text",
+        "style": {
+          "fontSize": 32,
+          "fontWeight": 700,
+          "color": "#1f1e1c"
+        }
+      }
+    },
+    {
+      "id": "welcome-note",
+      "type": "text",
+      "x": 120,
+      "y": 220,
+      "width": 520,
+      "height": 120,
+      "text": "这是一个可公开分享的示例白板。\n复制 info/public 中的 .canvas 文件即可创建自己的示例。",
+      "x-superboard": {
+        "kind": "text",
+        "style": {
+          "fontSize": 16,
+          "color": "#5c584e"
+        }
+      }
+    }
+  ],
+  "edges": [],
+  "x-superboard": {
+    "version": 1,
+    "meta": {
+      "title": "欢迎使用 SuperBoard",
+      "slug": "welcome",
+      "updatedAt": "2026-11-19T00:00:00.000Z"
+    }
+  }
+}

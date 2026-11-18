@@ -2,7 +2,9 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { parseCanvas, serializeCanvas } from '../web/src/canvas/model'
 
-const sourceDir = path.resolve(process.argv[2] ?? 'whiteboards/public')
+const sourceDir = path.resolve(
+  process.argv[2] ?? process.env.WHITEBOARDS_DIR ?? 'whiteboards/public',
+)
 const outputDir = path.resolve(
   process.argv[3] ?? 'node_modules/.cache/superboard/canvas',
 )
