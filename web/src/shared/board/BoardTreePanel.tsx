@@ -10,7 +10,7 @@ import {
 import { BoardTree, type BoardTreeContextTarget } from './BoardTree'
 import type { BoardTreeNode } from './types'
 
-const MIN_TREE_WIDTH = 200
+const MIN_TREE_WIDTH = 133
 const MAX_TREE_WIDTH = 480
 const DEFAULT_TREE_WIDTH = 264
 
