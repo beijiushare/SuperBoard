@@ -6,7 +6,7 @@ export type BlockKind = (typeof BLOCK_KINDS)[number]
 export type BlockEditor = 'text' | 'markdown' | 'pele' | 'schedule' | 'media'
 
 export const DEFAULT_BLOCK_SIZES = {
-  text: { width: 360, height: 220 },
+  text: { width: 240, height: 36 },
   markdown: { width: 360, height: 220 },
   pele: { width: 580, height: 380 },
   schedule: { width: 900, height: 600 },

@@ -38,15 +38,6 @@ export function TransformFields({
         onChange={onRotation}
       />
       <StyleNumberControl
-        label="宽度"
-        value={width}
-        min={1}
-        max={10000}
-        step={1}
-        unit="px"
-        onChange={onWidth}
-      />
-      <StyleNumberControl
         label="高度"
         value={height}
         min={1}
@@ -54,6 +45,15 @@ export function TransformFields({
         step={1}
         unit="px"
         onChange={onHeight}
+      />
+      <StyleNumberControl
+        label="宽度"
+        value={width}
+        min={1}
+        max={10000}
+        step={1}
+        unit="px"
+        onChange={onWidth}
       />
     </section>
   )
@@ -314,6 +314,16 @@ export function TextFields({
         recentColors={recentColors}
         onChange={(color) => onChange({ color })}
         onColorUsed={onColorUsed}
+      />
+      <StyleNumberControl
+        label="透明度"
+        value={Math.round((style.opacity ?? 1) * 100)}
+        min={0}
+        max={100}
+        step={1}
+        unit="%"
+        slider
+        onChange={(value) => onChange({ opacity: value / 100 })}
       />
       <div className="sb-style-row">
         <span>样式</span>

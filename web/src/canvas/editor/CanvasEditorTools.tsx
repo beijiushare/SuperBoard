@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { getStroke } from 'perfect-freehand'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
-import type {
-  CanvasDocument,
-  CanvasEdge,
-  CanvasNode,
-  CanvasSide,
-  SuperBoardNodeExtension,
-  SuperBoardStroke,
+import {
+  TEXT_LINE_HEIGHT,
+  TEXT_MIN_HEIGHT,
+  TEXT_PADDING_X,
+  TEXT_PADDING_Y,
+  type CanvasDocument,
+  type CanvasEdge,
+  type CanvasNode,
+  type CanvasSide,
+  type SuperBoardNodeExtension,
+  type SuperBoardStroke,
 } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
-import { blockEditor } from './blocks'
+import { DEFAULT_BLOCK_SIZES, blockEditor } from './blocks'
 import { isLocked, nextFreeId, nodeMapOf, topAncestor } from './hierarchy'
 import { detectMediaKind, type EditorTool } from './tools'
 
@@ -64,6 +68,7 @@ interface Editing {
   fontSize: number
   fontFamily?: string
   color?: string
+  opacity?: number
   textAlign?: 'left' | 'center' | 'right'
 }
 
@@ -432,6 +437,7 @@ export function CanvasEditorTools({
         fontSize: style?.fontSize ?? 16,
         fontFamily: style?.fontFamily,
         color: style?.color,
+        opacity: style?.opacity ?? 1,
         textAlign: style?.textAlign,
       })
       return
@@ -441,10 +447,15 @@ export function CanvasEditorTools({
       kind: 'text',
       x,
       y,
-      width: canvas['x-superboard']?.settings?.defaultBlockWidth ?? 260,
-      height: canvas['x-superboard']?.settings?.defaultBlockHeight ?? 120,
+      width:
+        canvas['x-superboard']?.settings?.defaultBlockWidth ??
+        DEFAULT_BLOCK_SIZES.text.width,
+      height:
+        canvas['x-superboard']?.settings?.defaultBlockHeight ??
+        DEFAULT_BLOCK_SIZES.text.height,
       value: '',
       fontSize: 16,
+      opacity: 1,
     })
   }
 
@@ -453,7 +464,10 @@ export function CanvasEditorTools({
     if (!current) return
     const textarea = textareaRef.current
     const scale = internals()?.dm.data.scale ?? 1
-    const measured = Math.max(40, (textarea?.scrollHeight ?? current.height * scale) / scale)
+    const measured = Math.max(
+      TEXT_MIN_HEIGHT,
+      (textarea?.scrollHeight ?? current.height * scale) / scale,
+    )
     updateEditing(null)
     if (current.id) {
       const index = canvas.nodes.findIndex((item) => item.id === current.id)
@@ -939,9 +953,11 @@ export function CanvasEditorTools({
           width: editing.width * scale,
           height: editing.height * scale,
           fontSize: editing.fontSize * scale,
-          padding: `${14 * scale}px ${16 * scale}px`,
+          padding: `${TEXT_PADDING_Y * scale}px ${TEXT_PADDING_X * scale}px`,
           color: editing.color,
+          opacity: editing.opacity ?? 1,
           fontFamily: editing.fontFamily,
+          lineHeight: TEXT_LINE_HEIGHT,
           textAlign: editing.textAlign,
         }
       })()
@@ -1044,7 +1060,13 @@ export function CanvasEditorTools({
           value={editing.value}
           onChange={(event) => {
             const current = editingRef.current
-            if (current) updateEditing({ ...current, value: event.target.value })
+            if (!current) return
+            const scale = internals()?.dm.data.scale ?? 1
+            const height = Math.max(
+              TEXT_MIN_HEIGHT,
+              event.currentTarget.scrollHeight / scale,
+            )
+            updateEditing({ ...current, value: event.target.value, height })
           }}
           onBlur={commitEditing}
           onPointerDown={(event) => event.stopPropagation()}

@@ -3,6 +3,9 @@ import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import {
   resolveNodeStyle,
+  TEXT_LINE_HEIGHT,
+  TEXT_PADDING_X,
+  TEXT_PADDING_Y,
   type SuperBoardMedia,
   type SuperBoardNodeExtension,
   type SuperBoardScheduleEvent,
@@ -29,15 +32,16 @@ function extension(node: object) {
 function textStyle(node: JSONCanvasTextNode) {
   const style = extension(node)?.style
   return {
-    padding: '14px 16px',
+    padding: `${TEXT_PADDING_Y}px ${TEXT_PADDING_X}px`,
     color: style?.color,
+    opacity: style?.opacity ?? 1,
     fontFamily: style?.fontFamily,
     fontSize: style?.fontSize,
     fontWeight: style?.fontWeight,
     fontStyle: style?.fontStyle,
     textDecoration: style?.textDecoration,
     textAlign: style?.textAlign,
-    lineHeight: style?.lineHeight,
+    lineHeight: style?.lineHeight ?? TEXT_LINE_HEIGHT,
     whiteSpace: 'pre-wrap' as const,
     overflowWrap: 'anywhere' as const,
   }
@@ -56,9 +60,11 @@ function useNodeSelection(
 
 function BlockSurface({
   node,
+  plain = false,
   children,
 }: {
   node: object
+  plain?: boolean
   children: ReactNode
 }) {
   const ext = extension(node)
@@ -68,25 +74,29 @@ function BlockSurface({
   return (
     <div
       className={`sb-block-scale${markdown ? ' sb-markdown-block-scale' : ''}`}
-      style={{
-        border: style.borderWidth
-          ? `${style.borderWidth}px ${style.borderStyle} color-mix(in srgb, ${borderColor} ${
-              style.borderOpacity * 100
-            }%, transparent)`
-          : undefined,
-        backgroundColor: style.background
-          ? `color-mix(in srgb, ${style.background} ${
-              style.backgroundOpacity * 100
-            }%, transparent)`
-          : undefined,
-        opacity: style.opacity,
-        ...(style.background
-          ? {
-              ['--sb-block-bg-color' as string]: style.background,
-              ['--sb-block-bg-opacity' as string]: `${style.backgroundOpacity * 100}%`,
+      style={
+        plain
+          ? undefined
+          : {
+              border: style.borderWidth
+                ? `${style.borderWidth}px ${style.borderStyle} color-mix(in srgb, ${borderColor} ${
+                    style.borderOpacity * 100
+                  }%, transparent)`
+                : undefined,
+              backgroundColor: style.background
+                ? `color-mix(in srgb, ${style.background} ${
+                    style.backgroundOpacity * 100
+                  }%, transparent)`
+                : undefined,
+              opacity: style.opacity,
+              ...(style.background
+                ? {
+                    ['--sb-block-bg-color' as string]: style.background,
+                    ['--sb-block-bg-opacity' as string]: `${style.backgroundOpacity * 100}%`,
+                  }
+                : {}),
             }
-          : {}),
-      }}
+      }
     >
       {children}
     </div>
@@ -127,7 +137,11 @@ export function TextSlot({
     ) : (
       <div style={textStyle(node)}>{node.text}</div>
     )
-  return <BlockSurface node={node}>{content}</BlockSurface>
+  return (
+    <BlockSurface node={node} plain={!ext?.kind || ext.kind === 'text'}>
+      {content}
+    </BlockSurface>
+  )
 }
 
 function clampPercent(value: number | undefined, fallback: number) {

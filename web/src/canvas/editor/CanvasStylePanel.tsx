@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   resolveNodeStyle,
+  textBlockHeight,
   type CanvasDocument,
   type CanvasEdge,
   type CanvasNode,
@@ -132,10 +133,23 @@ export function CanvasStylePanel({
       nodes: canvas.nodes.map((node) => {
         if (!targetIds.has(node.id)) return node
         const extension = node['x-superboard'] ?? { kind: fallbackKind(node) }
+        const width = patch.width ?? node.width
+        const plainText =
+          node.type === 'text' &&
+          (!extension.kind || extension.kind === 'text')
+        const height =
+          patch.height ??
+          (plainText && patch.width !== undefined
+            ? textBlockHeight(
+                node.text,
+                width,
+                extension.style?.fontSize ?? 16,
+              )
+            : node.height)
         return {
           ...node,
-          width: patch.width ?? node.width,
-          height: patch.height ?? node.height,
+          width,
+          height,
           'x-superboard': {
             ...extension,
             rotation: patch.rotation ?? extension.rotation,
@@ -191,21 +205,9 @@ export function CanvasStylePanel({
       (node) => {
         const next = withStyle(node, patch)
         if (node.type !== 'text' || !patch.fontSize) return next
-        const fontSize = patch.fontSize
-        const charsPerLine = Math.max(
-          1,
-          Math.floor((node.width - 32) / (fontSize * 0.62)),
-        )
-        const lines = node.text
-          .split('\n')
-          .reduce(
-            (sum, line) =>
-              sum + Math.max(1, Math.ceil(Array.from(line).length / charsPerLine)),
-            0,
-          )
         return {
           ...next,
-          height: Math.max(40, Math.round(lines * fontSize * 1.45 + 28)),
+          height: textBlockHeight(node.text, node.width, patch.fontSize),
         }
       },
       patchHistoryKey('style', patch),
@@ -326,6 +328,8 @@ export function CanvasStylePanel({
 
   const firstNode = nodes[0]
   const firstKind = firstNode?.['x-superboard']?.kind
+  const firstIsPlainText =
+    firstNode?.type === 'text' && (!firstKind || firstKind === 'text')
   const firstIsShape = firstKind === 'shape'
   const firstIsDrawing = firstKind === 'drawing'
   const firstIsLine =
@@ -374,7 +378,7 @@ export function CanvasStylePanel({
             onWidth={(width) => updateGeometry({ width })}
             onHeight={(height) => updateGeometry({ height })}
           />
-          {!firstIsDrawing && !firstIsLine ? (
+          {!firstIsDrawing && !firstIsLine && !firstIsPlainText ? (
             <BackgroundFields
               color={firstBackgroundColor}
               opacity={firstBackgroundOpacity}
@@ -388,21 +392,23 @@ export function CanvasStylePanel({
               onColorUsed={onRememberColor}
             />
           ) : null}
-          <BorderFields
-            color={firstBorderColor}
-            opacity={firstBorderOpacity}
-            width={firstBorderWidth}
-            style={firstBorderStyle}
-            showStyle={!firstIsDrawing}
-            recentColors={boardSettings.recentColors}
-            onColor={(borderColor) => updateCommonStyle({ borderColor })}
-            onOpacity={(value) =>
-              updateCommonStyle({ borderOpacity: value / 100 })
-            }
-            onWidth={(borderWidth) => updateCommonStyle({ borderWidth })}
-            onStyle={(borderStyle) => updateCommonStyle({ borderStyle })}
-            onColorUsed={onRememberColor}
-          />
+          {!firstIsPlainText ? (
+            <BorderFields
+              color={firstBorderColor}
+              opacity={firstBorderOpacity}
+              width={firstBorderWidth}
+              style={firstBorderStyle}
+              showStyle={!firstIsDrawing}
+              recentColors={boardSettings.recentColors}
+              onColor={(borderColor) => updateCommonStyle({ borderColor })}
+              onOpacity={(value) =>
+                updateCommonStyle({ borderOpacity: value / 100 })
+              }
+              onWidth={(borderWidth) => updateCommonStyle({ borderWidth })}
+              onStyle={(borderStyle) => updateCommonStyle({ borderStyle })}
+              onColorUsed={onRememberColor}
+            />
+          ) : null}
           {firstIsRoundedRect ? (
             <section>
               <h3>圆角</h3>
