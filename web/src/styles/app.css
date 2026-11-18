@@ -1151,6 +1151,13 @@
   pointer-events: none;
 }
 
+.sb-editor-world {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: 0 0;
+}
+
 .sb-editor-hitbox {
   position: absolute;
   pointer-events: auto;

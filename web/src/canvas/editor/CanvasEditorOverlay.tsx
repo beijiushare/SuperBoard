@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -181,6 +182,7 @@ export function CanvasEditorOverlay({
   onToggleRatioLock,
 }: CanvasEditorOverlayProps) {
   const [tick, setTick] = useState(0)
+  const [view, setView] = useState({ offsetX: 0, offsetY: 0, scale: 1 })
   const [marquee, setMarquee] = useState<Marquee | null>(null)
   const [guides, setGuides] = useState<{ x?: number; y?: number } | null>(null)
   const [actionsVisible, setActionsVisible] = useState(true)
@@ -209,6 +211,9 @@ export function CanvasEditorOverlay({
     fixedY: number
   } | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
+  const worldRef = useRef<HTMLDivElement>(null)
+  const viewRef = useRef(view)
+  const pendingViewRef = useRef<{ offsetX: number; offsetY: number; scale: number } | null>(null)
   const dmRef = useRef<DataManager | null>(null)
   const controllerRef = useRef<Controller | null>(null)
   const dragRef = useRef<DragState | null>(null)
@@ -233,10 +238,59 @@ export function CanvasEditorOverlay({
     }
   }, [])
 
+  useLayoutEffect(() => {
+    if (worldRef.current) worldRef.current.style.transform = ''
+  }, [view])
+
   useEffect(() => {
     let disposed = false
     let timer: number | undefined
     let unsubscribe: (() => void) | undefined
+    let frame = 0
+    let commitTimer: number | undefined
+
+    const update = () => {
+      frame = 0
+      const dm = dmRef.current
+      if (!dm) return
+      const next = {
+        offsetX: dm.data.offsetX,
+        offsetY: dm.data.offsetY,
+        scale: dm.data.scale,
+      }
+      const current = viewRef.current
+      if (
+        next.offsetX === current.offsetX &&
+        next.offsetY === current.offsetY &&
+        next.scale === current.scale
+      ) {
+        setTick((value) => value + 1)
+        return
+      }
+      pendingViewRef.current = next
+      const factor = next.scale / current.scale
+      const translateX = next.offsetX - current.offsetX * factor
+      const translateY = next.offsetY - current.offsetY * factor
+      if (worldRef.current) {
+        worldRef.current.style.transformOrigin = '0 0'
+        worldRef.current.style.transform = `translate(${translateX}px, ${translateY}px) scale(${factor})`
+      }
+      if (!commitTimer) {
+        commitTimer = window.setTimeout(() => {
+          commitTimer = undefined
+          const target = pendingViewRef.current
+          if (!target) return
+          pendingViewRef.current = null
+          viewRef.current = target
+          setView(target)
+        }, 120)
+      }
+    }
+
+    const schedule = () => {
+      if (frame) return
+      frame = requestAnimationFrame(update)
+    }
 
     const attach = () => {
       if (disposed) return
@@ -250,7 +304,15 @@ export function CanvasEditorOverlay({
       try {
         dmRef.current = viewer.container.get(internal.DataManager as never) as DataManager
         controllerRef.current = viewer.container.get(internal.Controller as never) as Controller
-        unsubscribe = controllerRef.current.onRefresh.subscribe(() => setTick((value) => value + 1))
+        unsubscribe = controllerRef.current.onRefresh.subscribe(schedule)
+        const initial = {
+          offsetX: dmRef.current.data.offsetX,
+          offsetY: dmRef.current.data.offsetY,
+          scale: dmRef.current.data.scale,
+        }
+        pendingViewRef.current = null
+        viewRef.current = initial
+        setView(initial)
         setTick((value) => value + 1)
       } catch {
         timer = window.setTimeout(attach, 100)
@@ -261,11 +323,14 @@ export function CanvasEditorOverlay({
     return () => {
       disposed = true
       if (timer) window.clearTimeout(timer)
+      if (frame) cancelAnimationFrame(frame)
+      if (commitTimer) window.clearTimeout(commitTimer)
       unsubscribe?.()
+      pendingViewRef.current = null
       dmRef.current = null
       controllerRef.current = null
     }
-  }, [canvas, viewerRef])
+  }, [viewerRef])
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -972,7 +1037,7 @@ function cornerRatioScale(
 
   const dm = dmRef.current
   if (!dm) return null
-  const { offsetX, offsetY, scale } = dm.data
+  const { offsetX, offsetY, scale } = view
   const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
   const map = nodeMapOf(nodes)
   const selectedNodes = nodes.filter((node) => selectedIds.includes(node.id))
@@ -1012,6 +1077,7 @@ function cornerRatioScale(
       data-tick={tick}
       style={selectionChromeStyle}
     >
+      <div ref={worldRef} className="sb-editor-world">
       <svg className="sb-editor-edge-layer">
         <g transform={`translate(${offsetX} ${offsetY}) scale(${scale})`}>
           {canvas.edges.map((edge) => {
@@ -1280,6 +1346,7 @@ function cornerRatioScale(
       ) : null}
 
       {marquee ? <div className="sb-editor-marquee" style={marquee} /> : null}
+      </div>
     </div>
   )
 }

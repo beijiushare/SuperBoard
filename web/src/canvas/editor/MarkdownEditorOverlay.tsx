@@ -1,4 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
@@ -39,12 +45,41 @@ export function MarkdownEditorOverlay({
 }: MarkdownEditorOverlayProps) {
   const node = canvas.nodes.find((item) => item.id === nodeId)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const innerRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef(onRequestClose)
-  const [view, setView] = useState({ offsetX: 0, offsetY: 0, scale: 1 })
+  const nodeRef = useRef(node)
+  const viewRef = useRef({ offsetX: 0, offsetY: 0, scale: 1 })
   const [viewReady, setViewReady] = useState(false)
-  const [tick, setTick] = useState(0)
 
   closeRef.current = onRequestClose
+  nodeRef.current = node
+
+  const applyLayout = useCallback(() => {
+    const current = nodeRef.current
+    const wrapper = wrapperRef.current
+    const inner = innerRef.current
+    if (!current || current.type !== 'text' || !wrapper || !inner) return
+    const { offsetX, offsetY, scale } = viewRef.current
+    const width = Math.max(160, current.width)
+    const height = Math.max(140, current.height)
+    const screenWidth = width * scale
+    const screenHeight = height * scale
+    const centerX = offsetX + (current.x + current.width / 2) * scale
+    const centerY = offsetY + (current.y + current.height / 2) * scale
+    const rotation = current['x-superboard']?.rotation ?? 0
+    wrapper.style.left = `${centerX - screenWidth / 2}px`
+    wrapper.style.top = `${centerY - screenHeight / 2}px`
+    wrapper.style.width = `${screenWidth}px`
+    wrapper.style.height = `${screenHeight}px`
+    wrapper.style.transform = rotation ? `rotate(${rotation}deg)` : ''
+    inner.style.width = `${width}px`
+    inner.style.height = `${height}px`
+    inner.style.transform = `scale(${scale})`
+  }, [])
+
+  useLayoutEffect(() => {
+    if (viewReady) applyLayout()
+  })
 
   useLayoutEffect(() => {
     let disposed = false
@@ -62,19 +97,16 @@ export function MarkdownEditorOverlay({
         const controller = viewer.container.get(
           internal.Controller as never,
         ) as Controller
-        unsubscribe = controller.onRefresh.subscribe(() => {
-          setView({
+        const sync = () => {
+          viewRef.current = {
             offsetX: dm.data.offsetX,
             offsetY: dm.data.offsetY,
             scale: dm.data.scale,
-          })
-          setTick((value) => value + 1)
-        })
-        setView({
-          offsetX: dm.data.offsetX,
-          offsetY: dm.data.offsetY,
-          scale: dm.data.scale,
-        })
+          }
+          applyLayout()
+        }
+        unsubscribe = controller.onRefresh.subscribe(sync)
+        sync()
         setViewReady(true)
       } catch {
         timer = window.setTimeout(attach, 100)
@@ -86,7 +118,7 @@ export function MarkdownEditorOverlay({
       if (timer) window.clearTimeout(timer)
       unsubscribe?.()
     }
-  }, [viewerRef, canvas])
+  }, [applyLayout, nodeId, viewerRef])
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -101,29 +133,14 @@ export function MarkdownEditorOverlay({
 
   if (!node || node.type !== 'text') return null
 
-  const width = Math.max(160, node.width)
-  const height = Math.max(140, node.height)
   const contentScale = node['x-superboard']?.contentScale ?? 1
-  const screenWidth = width * view.scale
-  const screenHeight = height * view.scale
-  const centerX = view.offsetX + (node.x + node.width / 2) * view.scale
-  const centerY = view.offsetY + (node.y + node.height / 2) * view.scale
-  const left = centerX - screenWidth / 2
-  const top = centerY - screenHeight / 2
-  const rotation = node['x-superboard']?.rotation ?? 0
 
   return (
     <div
       ref={wrapperRef}
       className="sb-md-editor sb-md-docs"
-      data-tick={tick}
       style={{
-        left,
-        top,
-        width: screenWidth,
-        height: screenHeight,
         visibility: viewReady ? 'visible' : 'hidden',
-        transform: rotation ? `rotate(${rotation}deg)` : undefined,
         transformOrigin: 'center center',
         ['--sb-content-scale' as string]: String(contentScale),
         ['--sb-markdown-font-size' as string]: `${16 * contentScale}px`,
@@ -136,13 +153,9 @@ export function MarkdownEditorOverlay({
       onWheel={(event) => event.stopPropagation()}
     >
       <div
+        ref={innerRef}
         className="sb-md-editor-inner"
-        style={{
-          width,
-          height,
-          transform: `scale(${view.scale})`,
-          transformOrigin: 'top left',
-        }}
+        style={{ transformOrigin: 'top left' }}
       >
         <MarkdownVditor
           key={nodeId}
