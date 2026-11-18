@@ -1626,6 +1626,19 @@
   display: none;
 }
 
+.JCV-overlay-container:has(.sb-plain-text) {
+  border-radius: 0;
+  background-color: transparent;
+}
+
+.JCV-overlay-container:has(.sb-plain-text) .JCV-overlay-border {
+  display: none;
+}
+
+.sb-text-editing-hidden {
+  visibility: hidden;
+}
+
 .sb-canvas-empty {
   display: grid;
   height: 100%;

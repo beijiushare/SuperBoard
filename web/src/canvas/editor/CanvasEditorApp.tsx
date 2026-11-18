@@ -1912,7 +1912,16 @@ export function CanvasEditorApp() {
                     viewerRef={viewerRef}
                     selectedIds={selectedIds}
                     onSelect={setSelectedIds}
-                    onChange={markDirty}
+                    onChange={() => {
+                      markDirty()
+                      if (textEditingId) {
+                        setCanvas((current) =>
+                          current
+                            ? { ...current, nodes: [...current.nodes] }
+                            : current,
+                        )
+                      }
+                    }}
                     onBeforeChange={recordHistory}
                     interactive={tool === 'select'}
                     selectedEdgeId={selectedEdgeId}

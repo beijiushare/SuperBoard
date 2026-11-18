@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { getStroke } from 'perfect-freehand'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import {
+  DEFAULT_TEXT_FONT,
   TEXT_LINE_HEIGHT,
   TEXT_MIN_HEIGHT,
   TEXT_PADDING_X,
@@ -186,6 +187,7 @@ export function CanvasEditorTools({
   const strokeRef = useRef<number[][] | null>(null)
   const arrowRef = useRef<ArrowDraft | null>(null)
   const editingRef = useRef<Editing | null>(null)
+  const suppressTextCreateRef = useRef(false)
   const eraserRef = useRef<{ changed: boolean } | null>(null)
   const panModeRef = useRef(false)
   const panGestureRef = useRef<{
@@ -238,7 +240,17 @@ export function CanvasEditorTools({
     }
   }
 
+  function setTextOverlayHidden(id: string | null, hidden: boolean) {
+    if (!id) return
+    document.getElementById(id)?.classList.toggle('sb-text-editing-hidden', hidden)
+  }
+
   function updateEditing(next: Editing | null) {
+    const previous = editingRef.current
+    if (previous?.id && (!next || next.id !== previous.id)) {
+      setTextOverlayHidden(previous.id, false)
+    }
+    if (next?.id) setTextOverlayHidden(next.id, true)
     editingRef.current = next
     setEditing(next)
   }
@@ -248,12 +260,21 @@ export function CanvasEditorTools({
   }, [editing?.id, onEditingChange])
 
   useEffect(() => {
+    return () => {
+      if (editingRef.current?.id) {
+        setTextOverlayHidden(editingRef.current.id, false)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     setDraft(null)
     setArrowDraft(null)
     strokeRef.current = null
     arrowRef.current = null
     eraserRef.current = null
     panGestureRef.current = null
+    suppressTextCreateRef.current = false
     updateEditing(null)
   }, [tool])
 
@@ -340,6 +361,26 @@ export function CanvasEditorTools({
     onCreateRequestHandled?.()
   }, [createRequest, onCreateRequestHandled])
 
+  useEffect(() => {
+    const current = editingRef.current
+    if (!current?.id) return
+    const node = canvas.nodes.find((item) => item.id === current.id)
+    if (!node) return
+    const style = node['x-superboard']?.style
+    updateEditing({
+      ...current,
+      x: node.x,
+      y: node.y,
+      width: node.width,
+      height: node.height,
+      fontSize: style?.fontSize ?? current.fontSize,
+      fontFamily: style?.fontFamily ?? current.fontFamily,
+      color: style?.color ?? current.color,
+      opacity: style?.opacity ?? current.opacity,
+      textAlign: style?.textAlign ?? current.textAlign,
+    })
+  }, [canvas])
+
   function editKindOf(node: CanvasNode): Editing['kind'] | null {
     const editor = blockEditor(node)
     if (!editor || editor === 'schedule') return null
@@ -423,6 +464,7 @@ export function CanvasEditorTools({
   }
 
   function startEditing(node: CanvasNode | null, x: number, y: number) {
+    suppressTextCreateRef.current = false
     const kind = node ? editKindOf(node) : null
     if (node && kind) {
       const style = node['x-superboard']?.style
@@ -435,7 +477,7 @@ export function CanvasEditorTools({
         height: node.height,
         value: editingValue(node, kind),
         fontSize: style?.fontSize ?? 16,
-        fontFamily: style?.fontFamily,
+        fontFamily: style?.fontFamily ?? DEFAULT_TEXT_FONT,
         color: style?.color,
         opacity: style?.opacity ?? 1,
         textAlign: style?.textAlign,
@@ -455,6 +497,7 @@ export function CanvasEditorTools({
         DEFAULT_BLOCK_SIZES.text.height,
       value: '',
       fontSize: 16,
+      fontFamily: DEFAULT_TEXT_FONT,
       opacity: 1,
     })
   }
@@ -462,6 +505,7 @@ export function CanvasEditorTools({
   function commitEditing() {
     const current = editingRef.current
     if (!current) return
+    suppressTextCreateRef.current = true
     const textarea = textareaRef.current
     const scale = internals()?.dm.data.scale ?? 1
     const measured = Math.max(
@@ -758,6 +802,12 @@ export function CanvasEditorTools({
     if (event.button !== 0) return
     if (editingRef.current) {
       commitEditing()
+      onExitTool()
+      return
+    }
+    if (suppressTextCreateRef.current) {
+      suppressTextCreateRef.current = false
+      onExitTool()
       return
     }
     const point = surfacePoint(event)
@@ -1075,11 +1125,13 @@ export function CanvasEditorTools({
               event.preventDefault()
               event.stopPropagation()
               commitEditing()
+              onExitTool()
               return
             }
             if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
               event.preventDefault()
               commitEditing()
+              onExitTool()
             }
           }}
         />

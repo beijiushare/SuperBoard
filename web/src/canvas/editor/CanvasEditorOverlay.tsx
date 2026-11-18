@@ -7,12 +7,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
-import {
-  textBlockHeight,
-  type CanvasDocument,
-  type CanvasEdge,
-  type CanvasNode,
-} from '../model'
+import type { CanvasDocument, CanvasEdge, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
   blockKind,
@@ -773,14 +768,6 @@ export function CanvasEditorOverlay({
     setTick((value) => value + 1)
   }
 
-  function reflowTextHeight(node: CanvasNode) {
-    if (node.type !== 'text') return
-    const kind = node['x-superboard']?.kind
-    if (kind && kind !== 'text') return
-    const fontSize = node['x-superboard']?.style?.fontSize ?? 16
-    node.height = textBlockHeight(node.text, node.width, fontSize)
-  }
-
 function cornerRatioScale(
   width: number,
   height: number,
@@ -1006,7 +993,6 @@ function cornerRatioScale(
         }
         applyContentScale(drag, ratioScale)
       }
-      if (drag.nodes.length === 1 && !drag.ratioLocked) reflowTextHeight(drag.primary)
     }
     const dmNow = dmRef.current
     if (focusedGroupId && dmNow) {
@@ -1043,7 +1029,8 @@ function cornerRatioScale(
   const selectedNodes = nodes.filter((node) => selectedIds.includes(node.id))
   const selectionBoxNodes = selectedNodes.filter(
     (node) =>
-      node.id !== activeEditingId && node.id !== selectionSuppressedId,
+      node.id !== selectionSuppressedId &&
+      (node.id !== activeEditingId || blockKind(node) === 'text'),
   )
   const focusedNode = focusedGroupId ? map.get(focusedGroupId) ?? null : null
   const selectedEdge = selectedEdgeId
@@ -1217,7 +1204,9 @@ function cornerRatioScale(
         <div
           key={node.id}
           className={`sb-editor-selection${
-            hasIframeContent(node) ? ' is-interactive' : ''
+            hasIframeContent(node) || activeEditingId === node.id
+              ? ' is-interactive'
+              : ''
           }`}
           style={screenStyle(node, offsetX, offsetY, scale)}
           onPointerDown={(event) => beginMove(event, node)}

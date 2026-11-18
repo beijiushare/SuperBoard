@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import {
+  DEFAULT_TEXT_FONT,
   resolveNodeStyle,
   TEXT_LINE_HEIGHT,
   TEXT_PADDING_X,
@@ -35,7 +36,7 @@ function textStyle(node: JSONCanvasTextNode) {
     padding: `${TEXT_PADDING_Y}px ${TEXT_PADDING_X}px`,
     color: style?.color,
     opacity: style?.opacity ?? 1,
-    fontFamily: style?.fontFamily,
+    fontFamily: style?.fontFamily ?? DEFAULT_TEXT_FONT,
     fontSize: style?.fontSize,
     fontWeight: style?.fontWeight,
     fontStyle: style?.fontStyle,
@@ -135,7 +136,7 @@ export function TextSlot({
         />
       </Suspense>
     ) : (
-      <div style={textStyle(node)}>{node.text}</div>
+      <div className="sb-plain-text" style={textStyle(node)}>{node.text}</div>
     )
   return (
     <BlockSurface node={node} plain={!ext?.kind || ext.kind === 'text'}>

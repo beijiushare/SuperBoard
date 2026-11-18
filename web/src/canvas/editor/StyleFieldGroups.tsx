@@ -1,8 +1,9 @@
-import type {
-  CanvasNode,
-  SuperBoardCanvasSettings,
-  SuperBoardGridMode,
-  SuperBoardStyle,
+import {
+  DEFAULT_TEXT_FONT,
+  type CanvasNode,
+  type SuperBoardCanvasSettings,
+  type SuperBoardGridMode,
+  type SuperBoardStyle,
 } from '../model'
 import { ColorPicker } from './ColorPicker'
 import { StyleNumberControl } from './StyleNumberControl'
@@ -282,32 +283,31 @@ export function TextFields({
         <span>字体</span>
         <select
           className="sb-style-select"
-          value={style.fontFamily ?? ''}
+          value={style.fontFamily ?? DEFAULT_TEXT_FONT}
           onChange={(event) =>
             onChange({ fontFamily: event.target.value || undefined })
           }
         >
-          <option value="">默认</option>
-          <option value="PingFang SC, Microsoft YaHei, sans-serif">苹方</option>
-          <option value="Georgia, serif">Georgia</option>
+          <option value="PingFang SC, Microsoft YaHei, sans-serif">
+            苹方 / 微软雅黑
+          </option>
+          <option value="Noto Sans SC, Source Han Sans SC, sans-serif">
+            思源黑体
+          </option>
+          <option value="Arial, Helvetica, sans-serif">Arial</option>
+          <option value="Georgia, 'Times New Roman', serif">Georgia</option>
           <option value="ui-monospace, Consolas, monospace">等宽</option>
         </select>
       </div>
-      <div className="sb-style-row">
-        <span>字号</span>
-        <div className="sb-style-buttons">
-          {[14, 16, 20, 28].map((value) => (
-            <button
-              key={value}
-              type="button"
-              className={(style.fontSize ?? 16) === value ? 'is-active' : undefined}
-              onClick={() => onChange({ fontSize: value })}
-            >
-              {value}
-            </button>
-          ))}
-        </div>
-      </div>
+      <StyleNumberControl
+        label="字号"
+        value={style.fontSize ?? 16}
+        min={8}
+        max={200}
+        step={1}
+        unit="px"
+        onChange={(fontSize) => onChange({ fontSize })}
+      />
       <ColorPicker
         label="颜色"
         value={style.color ?? '#1d1d1d'}

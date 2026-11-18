@@ -133,23 +133,10 @@ export function CanvasStylePanel({
       nodes: canvas.nodes.map((node) => {
         if (!targetIds.has(node.id)) return node
         const extension = node['x-superboard'] ?? { kind: fallbackKind(node) }
-        const width = patch.width ?? node.width
-        const plainText =
-          node.type === 'text' &&
-          (!extension.kind || extension.kind === 'text')
-        const height =
-          patch.height ??
-          (plainText && patch.width !== undefined
-            ? textBlockHeight(
-                node.text,
-                width,
-                extension.style?.fontSize ?? 16,
-              )
-            : node.height)
         return {
           ...node,
-          width,
-          height,
+          width: patch.width ?? node.width,
+          height: patch.height ?? node.height,
           'x-superboard': {
             ...extension,
             rotation: patch.rotation ?? extension.rotation,

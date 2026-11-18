@@ -1,3 +1,4 @@
+export const DEFAULT_TEXT_FONT = 'PingFang SC, Microsoft YaHei, sans-serif'
 export const TEXT_PADDING_X = 6
 export const TEXT_PADDING_Y = 4
 export const TEXT_LINE_HEIGHT = 1.35
