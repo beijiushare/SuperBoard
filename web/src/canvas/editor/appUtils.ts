@@ -78,6 +78,50 @@ export function writeViewport(handle: CanvasViewerHandle | null, viewport: Viewp
   }
 }
 
+const VIEWPORT_STORAGE_PREFIX = 'superboard:viewport:'
+
+function viewportStorageKey(slug: string, scope: BoardScope) {
+  return `${VIEWPORT_STORAGE_PREFIX}${scope}:${slug}`
+}
+
+function isViewport(value: unknown): value is Viewport {
+  if (!value || typeof value !== 'object') return false
+  const candidate = value as Partial<Viewport>
+  return (
+    Number.isFinite(candidate.offsetX) &&
+    Number.isFinite(candidate.offsetY) &&
+    Number.isFinite(candidate.scale)
+  )
+}
+
+export function readStoredViewport(slug: string, scope: BoardScope): Viewport | null {
+  if (!slug) return null
+  try {
+    const raw = window.localStorage.getItem(viewportStorageKey(slug, scope))
+    if (!raw) return null
+    const value: unknown = JSON.parse(raw)
+    return isViewport(value) ? value : null
+  } catch {
+    return null
+  }
+}
+
+export function writeStoredViewport(
+  slug: string,
+  scope: BoardScope,
+  viewport: Viewport,
+) {
+  if (!slug) return
+  try {
+    window.localStorage.setItem(
+      viewportStorageKey(slug, scope),
+      JSON.stringify(viewport),
+    )
+  } catch {
+    return
+  }
+}
+
 export function updateEditorUrl(
   slug: string | null,
   scope: BoardScope,

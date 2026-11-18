@@ -45,8 +45,10 @@ import {
   nextId,
   normalizeMarkdownLocks,
   normalizeMediaUrl,
+  readStoredViewport,
   readViewport,
   updateEditorUrl,
+  writeStoredViewport,
   writeViewport,
   type BoardDialogState,
   type CanvasListItem,
@@ -213,11 +215,16 @@ export function CanvasEditorApp() {
     return () => window.removeEventListener('pointerdown', onPointerDown, true)
   }, [])
 
-  function applyCanvasUiSettings(next: CanvasDocument) {
+  function applyCanvasUiSettings(
+    next: CanvasDocument,
+    slug: string,
+    targetScope: BoardScope,
+  ) {
     const settings = next['x-superboard']?.settings
     setStylePanelOpen(settings?.stylePanelOpen ?? true)
     setMenuPanelOpen(settings?.toolPaletteOpen ?? true)
-    pendingViewportRef.current = settings?.viewport ?? null
+    pendingViewportRef.current =
+      readStoredViewport(slug, targetScope) ?? settings?.viewport ?? null
   }
 
   const handleNodeSelect = useCallback(
@@ -306,7 +313,7 @@ export function CanvasEditorApp() {
         normalizeMarkdownLocks(next)
         setSelectedSlug(first.slug)
         setScope(first.scope)
-        applyCanvasUiSettings(next)
+        applyCanvasUiSettings(next, first.slug, first.scope)
         setCanvas(next)
         resetMarkdownEditing()
         setTextEditingId(null)
@@ -331,7 +338,10 @@ export function CanvasEditorApp() {
     if (!viewport) return
     pendingViewportRef.current = null
     writeViewport(viewerRef.current, viewport)
-  }, [canvas])
+    if (selectedSlug) {
+      writeStoredViewport(selectedSlug, scope, viewport)
+    }
+  }, [canvas, scope, selectedSlug])
 
   useEffect(() => {
     const current = canvasRef.current
@@ -362,54 +372,30 @@ export function CanvasEditorApp() {
   }, [canvas, menuPanelOpen, stylePanelOpen])
 
   useEffect(() => {
+    if (!selectedSlug) return
     const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
     if (!viewer?.container) return
-    let dm: DataManagerLike
     let controller: {
       onRefresh: { subscribe: (callback: () => void) => () => void }
     }
     try {
-      dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
       controller = viewer.container.get(internal.Controller as never) as {
         onRefresh: { subscribe: (callback: () => void) => () => void }
       }
     } catch {
       return
     }
+    let latestViewport: Viewport | null = null
     const saveViewport = () => {
+      latestViewport = readViewport(viewerRef.current)
       if (viewportSaveTimerRef.current) {
         window.clearTimeout(viewportSaveTimerRef.current)
       }
       viewportSaveTimerRef.current = window.setTimeout(() => {
         viewportSaveTimerRef.current = null
-        const document = canvasRef.current
-        if (!document) return
-        const root = document['x-superboard']
-        if (!root) return
-        const viewport = {
-          offsetX: dm.data.offsetX,
-          offsetY: dm.data.offsetY,
-          scale: dm.data.scale,
+        if (latestViewport) {
+          writeStoredViewport(selectedSlug, scope, latestViewport)
         }
-        const previous = root.settings?.viewport
-        if (
-          previous &&
-          previous.offsetX === viewport.offsetX &&
-          previous.offsetY === viewport.offsetY &&
-          previous.scale === viewport.scale
-        ) {
-          return
-        }
-        const next = {
-          ...document,
-          'x-superboard': {
-            ...root,
-            settings: { ...root.settings, viewport },
-          },
-        }
-        canvasRef.current = next
-        setCanvas(next)
-        markDirty()
       }, 500)
     }
     const unsubscribe = controller.onRefresh.subscribe(saveViewport)
@@ -419,8 +405,11 @@ export function CanvasEditorApp() {
         window.clearTimeout(viewportSaveTimerRef.current)
         viewportSaveTimerRef.current = null
       }
+      if (latestViewport) {
+        writeStoredViewport(selectedSlug, scope, latestViewport)
+      }
     }
-  }, [canvas])
+  }, [scope, selectedSlug])
 
   useEffect(() => {
     const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
@@ -1611,7 +1600,7 @@ export function CanvasEditorApp() {
     setFrameControllerOpen(false)
     setSelectedSlug(item.slug)
     setScope(item.scope)
-    applyCanvasUiSettings(next)
+    applyCanvasUiSettings(next, item.slug, item.scope)
     setCanvas(next)
     setSaveState('saved')
     expandPath(item.path)
