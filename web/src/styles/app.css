@@ -1064,8 +1064,37 @@
   max-height: 85vh;
 }
 
+.sb-preferences-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sb-preferences-header h2 {
+  margin-bottom: 4px;
+}
+
 .sb-preferences-note {
   margin-bottom: 4px !important;
+}
+
+.sb-preferences-reset {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #dedbd2;
+  border-radius: 7px;
+  background: #fff;
+  color: #6f6d66;
+  cursor: pointer;
+}
+
+.sb-preferences-reset:hover {
+  background: #f1eee5;
+  color: #1f1e1c;
 }
 
 .sb-preferences-dialog section {

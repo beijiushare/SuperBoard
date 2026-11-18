@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { RefreshIcon } from './BlockActionIcons'
 import { ColorPicker } from './ColorPicker'
 import {
   DEFAULT_PREFERENCES,
@@ -29,6 +30,10 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
+  useEffect(() => {
+    savePreferences(draft)
+  }, [draft])
+
   function updateBlock(patch: Partial<EditorPreferences['block']>) {
     setDraft((current) => ({
       ...current,
@@ -56,10 +61,23 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
         aria-label="偏好设置"
         onClick={(event) => event.stopPropagation()}
       >
-        <h2>偏好设置</h2>
-        <p className="sb-preferences-note">
-          保存在当前浏览器，只影响之后新建的块。
-        </p>
+        <div className="sb-preferences-header">
+          <div>
+            <h2>偏好设置</h2>
+            <p className="sb-preferences-note">
+              保存在当前浏览器，只影响之后新建的块。
+            </p>
+          </div>
+          <button
+            type="button"
+            className="sb-preferences-reset"
+            title="恢复默认"
+            aria-label="恢复默认"
+            onClick={() => setDraft(structuredClone(DEFAULT_PREFERENCES))}
+          >
+            <RefreshIcon size={16} />
+          </button>
+        </div>
 
         <BackgroundFields
           color={draft.block.backgroundColor}
@@ -165,26 +183,6 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           />
         </section>
 
-        <div className="canvas-editor-dialog-actions">
-          <button
-            type="button"
-            onClick={() => setDraft(structuredClone(DEFAULT_PREFERENCES))}
-          >
-            恢复默认
-          </button>
-          <button type="button" onClick={onClose}>
-            取消
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              savePreferences(draft)
-              onClose()
-            }}
-          >
-            保存
-          </button>
-        </div>
       </div>
     </div>,
     document.body,
