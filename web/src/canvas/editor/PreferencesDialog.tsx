@@ -21,14 +21,17 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
   const [draft, setDraft] = useState<EditorPreferences>(() =>
     structuredClone(getPreferences()),
   )
+  const [confirmReset, setConfirmReset] = useState(false)
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key !== 'Escape') return
+      if (confirmReset) setConfirmReset(false)
+      else onClose()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
+  }, [confirmReset, onClose])
 
   useEffect(() => {
     savePreferences(draft)
@@ -49,6 +52,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
   }
 
   return createPortal(
+    <>
     <div
       className="canvas-editor-dialog-backdrop"
       onClick={onClose}
@@ -73,7 +77,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
             className="sb-preferences-reset"
             title="恢复默认"
             aria-label="恢复默认"
-            onClick={() => setDraft(structuredClone(DEFAULT_PREFERENCES))}
+            onClick={() => setConfirmReset(true)}
           >
             <RefreshIcon size={16} />
           </button>
@@ -184,7 +188,40 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
         </section>
 
       </div>
-    </div>,
+    </div>
+    {confirmReset ? (
+      <div
+        className="canvas-editor-dialog-backdrop is-nested"
+        role="presentation"
+        onClick={() => setConfirmReset(false)}
+      >
+        <div
+          className="canvas-editor-dialog sb-confirm-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-label="恢复默认设置"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <h2>恢复默认设置？</h2>
+          <p>所有默认样式将恢复为初始值，已有块不会改变。</p>
+          <div className="canvas-editor-dialog-actions">
+            <button type="button" onClick={() => setConfirmReset(false)}>
+              取消
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDraft(structuredClone(DEFAULT_PREFERENCES))
+                setConfirmReset(false)
+              }}
+            >
+              恢复默认
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : null}
+    </>,
     document.body,
   )
 }

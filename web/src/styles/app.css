@@ -1085,16 +1085,26 @@
   height: 30px;
   flex: none;
   place-items: center;
-  border: 1px solid #dedbd2;
-  border-radius: 7px;
-  background: #fff;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #6f6d66;
   cursor: pointer;
 }
 
 .sb-preferences-reset:hover {
-  background: #f1eee5;
+  background: transparent;
   color: #1f1e1c;
+}
+
+.canvas-editor-dialog-backdrop.is-nested {
+  z-index: 10003;
+}
+
+.sb-confirm-dialog {
+  width: min(360px, calc(100vw - 40px));
+  height: auto;
+  max-height: calc(100dvh - 40px);
 }
 
 .sb-preferences-dialog section {
