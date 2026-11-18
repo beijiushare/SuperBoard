@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { ColorPaletteIcon } from './ColorPaletteIcon'
 import { EyedropperIcon } from './EyedropperIcon'
 
 const THEME_COLORS = [
@@ -151,8 +152,8 @@ export function ColorPicker({
                   value={current === 'transparent' ? '#000000' : current}
                   onChange={(event) => choose(event.target.value)}
                 />
-                <span className="sb-color-more-icon" />
-                其他颜色(M)...
+                <ColorPaletteIcon />
+                其他颜色
               </label>
               {allowNone ? (
                 <button

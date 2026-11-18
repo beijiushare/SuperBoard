@@ -1744,6 +1744,7 @@
 }
 
 .sb-color-more {
+  position: relative;
   display: flex;
   width: 100%;
   align-items: center;
@@ -1760,19 +1761,22 @@
 }
 
 .sb-color-more input[type='color'] {
-  width: 18px;
-  height: 18px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
   padding: 0;
   border: 0;
-  background: transparent;
+  opacity: 0;
   cursor: pointer;
 }
 
 .sb-color-more-icon {
+  display: block;
   width: 16px;
   height: 16px;
-  border: 1.5px solid #3b3933;
-  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .sb-color-eyedropper {
