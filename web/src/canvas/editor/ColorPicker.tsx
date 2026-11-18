@@ -46,8 +46,8 @@ export function ColorPicker({
       if (target?.closest('.sb-color-popover, .sb-color-trigger')) return
       setOpen(false)
     }
-    document.addEventListener('pointerdown', close, true)
-    return () => document.removeEventListener('pointerdown', close, true)
+    window.addEventListener('pointerdown', close, true)
+    return () => window.removeEventListener('pointerdown', close, true)
   }, [open])
 
   const openPicker = () => {
