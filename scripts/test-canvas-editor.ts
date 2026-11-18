@@ -11,6 +11,11 @@ import {
   topAncestor,
 } from '../web/src/canvas/editor/hierarchy'
 import type { CanvasDocument, CanvasEdge, CanvasNode } from '../web/src/canvas/model'
+import {
+  intersectsViewport,
+  nodeWorldRect,
+  viewportWorldRect,
+} from '../web/src/canvas/viewer/culling'
 
 const nodes: CanvasNode[] = [
   {
@@ -131,5 +136,29 @@ const html = buildCanvasHtml(canvas)
 assert.ok(html.startsWith('<!doctype html>'))
 assert.ok(html.endsWith('</html>'))
 assert.ok(html.includes('<svg'))
+
+const viewport = viewportWorldRect({
+  container: { clientWidth: 800, clientHeight: 600 } as HTMLElement,
+  offsetX: -100,
+  offsetY: -50,
+  scale: 1,
+})
+assert.deepEqual(viewport, {
+  left: 20,
+  top: -30,
+  right: 980,
+  bottom: 730,
+})
+const visible = nodeWorldRect({ x: 100, y: 100, width: 100, height: 50 })
+const hidden = nodeWorldRect({ x: 2000, y: 2000, width: 100, height: 50 })
+const rotated = nodeWorldRect({ x: 100, y: 100, width: 100, height: 50 }, 90)
+assert.equal(intersectsViewport(visible, viewport), true)
+assert.equal(intersectsViewport(hidden, viewport), false)
+assert.deepEqual(rotated, {
+  left: 125,
+  top: 75,
+  right: 175,
+  bottom: 175,
+})
 
 console.log('canvas editor tests passed')

@@ -1,6 +1,19 @@
 import { BaseModule, internal, type BaseArgs } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { getStroke } from 'perfect-freehand'
 import type { SuperBoardStroke, SuperBoardStyle } from '../model'
+import { intersectsViewport, nodeWorldRect, viewportWorldRect } from './culling'
+
+type DrawingNode = {
+  x: number
+  y: number
+  width: number
+  height: number
+  'x-superboard'?: {
+    strokes?: SuperBoardStroke[]
+    rotation?: number
+    style?: SuperBoardStyle
+  }
+}
 
 type DataManager = {
   data: {
@@ -8,27 +21,17 @@ type DataManager = {
     offsetX: number
     offsetY: number
     scale: number
-    nodeMap: Record<
-      string,
-      {
-        ref: {
-          x: number
-          y: number
-          width: number
-          height: number
-          'x-superboard'?: {
-            strokes?: SuperBoardStroke[]
-            rotation?: number
-            style?: SuperBoardStyle
-          }
-        }
-      }
-    >
+    nodeMap: Record<string, { ref: DrawingNode }>
   }
 }
 
 type Controller = {
   onRefresh: { subscribe: (callback: () => void) => () => void }
+}
+
+interface CachedOutline {
+  width: number
+  outline: number[][]
 }
 
 export class DrawingLayer extends BaseModule {
@@ -37,6 +40,7 @@ export class DrawingLayer extends BaseModule {
   private readonly canvas: HTMLCanvasElement
   private readonly ctx: CanvasRenderingContext2D
   private readonly unsubscribe: () => void
+  private readonly outlineCache = new WeakMap<SuperBoardStroke, CachedOutline>()
 
   constructor(...args: BaseArgs) {
     super(...args)
@@ -80,9 +84,31 @@ export class DrawingLayer extends BaseModule {
     this.draw()
   }
 
+  private outlineFor(stroke: SuperBoardStroke, width: number) {
+    const cached = this.outlineCache.get(stroke)
+    if (cached?.width === width) return cached.outline
+    const outline = getStroke(
+      stroke.points.map(([x, y, pressure]) =>
+        pressure === undefined ? [x, y] : [x, y, pressure],
+      ) as number[][],
+      {
+        size: width,
+        thinning: stroke.thinning,
+        smoothing: stroke.smoothing,
+        streamline: stroke.streamline,
+        simulatePressure: stroke.simulatePressure,
+        start: stroke.start === undefined ? undefined : { taper: stroke.start },
+        end: stroke.end === undefined ? undefined : { taper: stroke.end },
+      },
+    )
+    this.outlineCache.set(stroke, { width, outline })
+    return outline
+  }
+
   private readonly draw = () => {
     this.resize()
     const { offsetX, offsetY, scale, nodeMap } = this.dm.data
+    const viewport = viewportWorldRect(this.dm.data, 120)
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     this.ctx.save()
     this.ctx.translate(offsetX, offsetY)
@@ -93,6 +119,9 @@ export class DrawingLayer extends BaseModule {
       const style = node['x-superboard']?.style
       const strokes = node['x-superboard']?.strokes
       if (!strokes?.length) continue
+      if (!intersectsViewport(nodeWorldRect(node, rotation, 16), viewport)) {
+        continue
+      }
       this.ctx.save()
       this.ctx.globalAlpha = style?.opacity ?? 1
       if (rotation) {
@@ -104,20 +133,8 @@ export class DrawingLayer extends BaseModule {
       }
       this.ctx.translate(node.x, node.y)
       for (const stroke of strokes) {
-        const outline = getStroke(
-          stroke.points.map(([x, y, pressure]) =>
-            pressure === undefined ? [x, y] : [x, y, pressure],
-          ) as number[][],
-          {
-            size: style?.strokeWidth ?? stroke.size,
-            thinning: stroke.thinning,
-            smoothing: stroke.smoothing,
-            streamline: stroke.streamline,
-            simulatePressure: stroke.simulatePressure,
-            start: stroke.start === undefined ? undefined : { taper: stroke.start },
-            end: stroke.end === undefined ? undefined : { taper: stroke.end },
-          },
-        )
+        const width = style?.strokeWidth ?? stroke.size
+        const outline = this.outlineFor(stroke, width)
         if (outline.length < 3) continue
         this.ctx.beginPath()
         this.ctx.moveTo(outline[0][0], outline[0][1])

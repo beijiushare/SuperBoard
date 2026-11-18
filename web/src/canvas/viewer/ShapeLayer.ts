@@ -1,5 +1,9 @@
 import { BaseModule, internal, type BaseArgs } from '../../vendor/json-canvas-viewer/src/index.ts'
-import type { SuperBoardNodeExtension } from '../model'
+import type {
+  SuperBoardNodeExtension,
+  SuperBoardShapeKind,
+} from '../model'
+import { intersectsViewport, nodeWorldRect, viewportWorldRect } from './culling'
 
 type ShapeNode = {
   x: number
@@ -23,12 +27,24 @@ type Controller = {
   onRefresh: { subscribe: (callback: () => void) => () => void }
 }
 
+interface CachedShapePath {
+  x: number
+  y: number
+  width: number
+  height: number
+  shape: SuperBoardShapeKind
+  cornerRadius: number
+  flipX: boolean
+  flipY: boolean
+  path: Path2D
+}
+
 function dash(ctx: CanvasRenderingContext2D, values?: number[]) {
   ctx.setLineDash(values ?? [])
 }
 
-function roundedRect(
-  ctx: CanvasRenderingContext2D,
+function roundedRectPath(
+  path: Path2D,
   x: number,
   y: number,
   width: number,
@@ -36,17 +52,62 @@ function roundedRect(
   radius: number,
 ) {
   const r = Math.min(radius, width / 2, height / 2)
-  ctx.beginPath()
-  ctx.moveTo(x + r, y)
-  ctx.lineTo(x + width - r, y)
-  ctx.quadraticCurveTo(x + width, y, x + width, y + r)
-  ctx.lineTo(x + width, y + height - r)
-  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height)
-  ctx.lineTo(x + r, y + height)
-  ctx.quadraticCurveTo(x, y + height, x, y + height - r)
-  ctx.lineTo(x, y + r)
-  ctx.quadraticCurveTo(x, y, x + r, y)
-  ctx.closePath()
+  path.moveTo(x + r, y)
+  path.lineTo(x + width - r, y)
+  path.quadraticCurveTo(x + width, y, x + width, y + r)
+  path.lineTo(x + width, y + height - r)
+  path.quadraticCurveTo(x + width, y + height, x + width - r, y + height)
+  path.lineTo(x + r, y + height)
+  path.quadraticCurveTo(x, y + height, x, y + height - r)
+  path.lineTo(x, y + r)
+  path.quadraticCurveTo(x, y, x + r, y)
+  path.closePath()
+}
+
+function buildShapePath(
+  node: ShapeNode,
+  extension: SuperBoardNodeExtension,
+  shape: SuperBoardShapeKind,
+  cornerRadius: number,
+) {
+  const path = new Path2D()
+  if (shape === 'ellipse') {
+    path.ellipse(
+      node.x + node.width / 2,
+      node.y + node.height / 2,
+      Math.abs(node.width / 2),
+      Math.abs(node.height / 2),
+      0,
+      0,
+      Math.PI * 2,
+    )
+  } else if (shape === 'diamond') {
+    path.moveTo(node.x + node.width / 2, node.y)
+    path.lineTo(node.x + node.width, node.y + node.height / 2)
+    path.lineTo(node.x + node.width / 2, node.y + node.height)
+    path.lineTo(node.x, node.y + node.height / 2)
+    path.closePath()
+  } else if (shape === 'line') {
+    const flip = extension.lineFlip
+    path.moveTo(
+      node.x + (flip?.x ? node.width : 0),
+      node.y + (flip?.y ? node.height : 0),
+    )
+    path.lineTo(
+      node.x + (flip?.x ? 0 : node.width),
+      node.y + (flip?.y ? 0 : node.height),
+    )
+  } else {
+    roundedRectPath(
+      path,
+      node.x,
+      node.y,
+      node.width,
+      node.height,
+      cornerRadius,
+    )
+  }
+  return path
 }
 
 export class ShapeLayer extends BaseModule {
@@ -55,6 +116,7 @@ export class ShapeLayer extends BaseModule {
   private readonly canvas: HTMLCanvasElement
   private readonly ctx: CanvasRenderingContext2D
   private readonly unsubscribe: () => void
+  private readonly pathCache = new WeakMap<ShapeNode, CachedShapePath>()
 
   constructor(...args: BaseArgs) {
     super(...args)
@@ -98,9 +160,47 @@ export class ShapeLayer extends BaseModule {
     this.draw()
   }
 
+  private shapePath(
+    node: ShapeNode,
+    extension: SuperBoardNodeExtension,
+    shape: SuperBoardShapeKind,
+    cornerRadius: number,
+  ) {
+    const flipX = extension.lineFlip?.x ?? false
+    const flipY = extension.lineFlip?.y ?? false
+    const cached = this.pathCache.get(node)
+    if (
+      cached &&
+      cached.x === node.x &&
+      cached.y === node.y &&
+      cached.width === node.width &&
+      cached.height === node.height &&
+      cached.shape === shape &&
+      cached.cornerRadius === cornerRadius &&
+      cached.flipX === flipX &&
+      cached.flipY === flipY
+    ) {
+      return cached.path
+    }
+    const path = buildShapePath(node, extension, shape, cornerRadius)
+    this.pathCache.set(node, {
+      x: node.x,
+      y: node.y,
+      width: node.width,
+      height: node.height,
+      shape,
+      cornerRadius,
+      flipX,
+      flipY,
+      path,
+    })
+    return path
+  }
+
   private readonly draw = () => {
     this.resize()
     const { offsetX, offsetY, scale, nodeMap } = this.dm.data
+    const viewport = viewportWorldRect(this.dm.data, 120)
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     this.ctx.save()
     this.ctx.translate(offsetX, offsetY)
@@ -112,12 +212,21 @@ export class ShapeLayer extends BaseModule {
       if (ext?.kind !== 'shape') continue
       const style = ext.style ?? {}
       const shape = ext.shape ?? 'rect'
+      const rotation = ext.rotation ?? 0
+      const strokeWidth = style.strokeWidth ?? 2
+      if (
+        !intersectsViewport(
+          nodeWorldRect(node, rotation, Math.max(4, strokeWidth)),
+          viewport,
+        )
+      ) {
+        continue
+      }
       const opacity = style.opacity ?? 1
       const fillAlpha = opacity * (style.backgroundOpacity ?? 1)
       const strokeAlpha = opacity * (style.borderOpacity ?? 1)
 
       this.ctx.save()
-      const rotation = ext.rotation ?? 0
       if (rotation) {
         const centerX = node.x + node.width / 2
         const centerY = node.y + node.height / 2
@@ -127,52 +236,23 @@ export class ShapeLayer extends BaseModule {
       }
       this.ctx.fillStyle = style.fill && style.fill !== 'none' ? style.fill : 'transparent'
       this.ctx.strokeStyle = style.stroke ?? '#1d1d1d'
-      this.ctx.lineWidth = style.strokeWidth ?? 2
+      this.ctx.lineWidth = strokeWidth
       dash(this.ctx, style.strokeDash)
 
-      if (shape === 'ellipse') {
-        this.ctx.beginPath()
-        this.ctx.ellipse(
-          node.x + node.width / 2,
-          node.y + node.height / 2,
-          Math.abs(node.width / 2),
-          Math.abs(node.height / 2),
-          0,
-          0,
-          Math.PI * 2,
-        )
-        this.ctx.globalAlpha = fillAlpha
-        this.ctx.fill()
+      const path = this.shapePath(
+        node,
+        ext,
+        shape,
+        style.cornerRadius ?? 8,
+      )
+      if (shape === 'line') {
         this.ctx.globalAlpha = strokeAlpha
-        this.ctx.stroke()
-      } else if (shape === 'diamond') {
-        this.ctx.beginPath()
-        this.ctx.moveTo(node.x + node.width / 2, node.y)
-        this.ctx.lineTo(node.x + node.width, node.y + node.height / 2)
-        this.ctx.lineTo(node.x + node.width / 2, node.y + node.height)
-        this.ctx.lineTo(node.x, node.y + node.height / 2)
-        this.ctx.closePath()
-        this.ctx.globalAlpha = fillAlpha
-        this.ctx.fill()
-        this.ctx.globalAlpha = strokeAlpha
-        this.ctx.stroke()
-      } else if (shape === 'line') {
-        const flip = ext.lineFlip
-        const startX = node.x + (flip?.x ? node.width : 0)
-        const startY = node.y + (flip?.y ? node.height : 0)
-        const endX = node.x + (flip?.x ? 0 : node.width)
-        const endY = node.y + (flip?.y ? 0 : node.height)
-        this.ctx.beginPath()
-        this.ctx.moveTo(startX, startY)
-        this.ctx.lineTo(endX, endY)
-        this.ctx.globalAlpha = strokeAlpha
-        this.ctx.stroke()
+        this.ctx.stroke(path)
       } else {
-        roundedRect(this.ctx, node.x, node.y, node.width, node.height, style.cornerRadius ?? 8)
         this.ctx.globalAlpha = fillAlpha
-        this.ctx.fill()
+        this.ctx.fill(path)
         this.ctx.globalAlpha = strokeAlpha
-        this.ctx.stroke()
+        this.ctx.stroke(path)
       }
       this.ctx.restore()
     }
