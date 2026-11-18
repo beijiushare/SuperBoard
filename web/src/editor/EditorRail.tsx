@@ -64,7 +64,7 @@ export function EditorRail({
         aria-pressed={treeMode && treeOpen}
         onClick={onToggleTree}
       >
-        <SidebarIcon size={26} />
+        <SidebarIcon size={17} />
       </button>
 
       {editing ? (
@@ -75,7 +75,7 @@ export function EditorRail({
           aria-label={scopeLabel}
           onClick={onSwitchScope}
         >
-          <GitBranchIcon size={32} />
+          <GitBranchIcon size={21} />
         </button>
       ) : null}
 
@@ -88,7 +88,7 @@ export function EditorRail({
           disabled={!canSave}
           onClick={onSave}
         >
-          <CheckCircleIcon size={32} />
+          <CheckCircleIcon size={21} />
         </button>
       ) : null}
 
@@ -101,7 +101,7 @@ export function EditorRail({
           aria-pressed={stylePanelOpen}
           onClick={onToggleStylePanel}
         >
-          <ApertureIcon size={32} />
+          <ApertureIcon size={21} />
         </button>
       ) : null}
 
@@ -114,7 +114,7 @@ export function EditorRail({
           aria-pressed={menuPanelOpen}
           onClick={onToggleMenuPanel}
         >
-          <CommandIcon size={32} />
+          <CommandIcon size={21} />
         </button>
       ) : null}
 
@@ -126,7 +126,7 @@ export function EditorRail({
         aria-pressed={directorMode}
         onClick={onToggleDirector}
       >
-        <FilmIcon size={32} />
+        <FilmIcon size={21} />
       </button>
 
       {editing ? (
@@ -137,7 +137,7 @@ export function EditorRail({
           aria-label="提交并推送"
           onClick={onDeploy}
         >
-          <UploadCloudIcon size={32} />
+          <UploadCloudIcon size={21} />
         </button>
       ) : null}
     </aside>
