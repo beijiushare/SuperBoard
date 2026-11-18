@@ -13,7 +13,7 @@ function siteBase(value: string) {
   return result
 }
 
-export default defineConfig(({ command, isPreview }) => ({
+export default defineConfig(({ command, isPreview, mode }) => ({
   base: command === 'build' || isPreview ? siteBase(process.env.BASE_PATH || '') : '/',
   plugins: [react(), boardFsPlugin(), canvasFsPlugin(), gitDeployPlugin(), vditorAssetsPlugin()],
   resolve: {
@@ -52,10 +52,11 @@ export default defineConfig(({ command, isPreview }) => ({
     rollupOptions:
       command === 'build'
         ? {
-            input: {
-              viewer: resolve(process.cwd(), 'web/src/viewer/main.tsx'),
-              editor: resolve(process.cwd(), 'editor.html'),
-            },
+            input: (mode === 'editor'
+              ? { editor: resolve(process.cwd(), 'editor.html') }
+              : {
+                  viewer: resolve(process.cwd(), 'web/src/viewer/main.tsx'),
+                }) as Record<string, string>,
           }
         : undefined,
   },

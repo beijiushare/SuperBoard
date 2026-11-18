@@ -132,7 +132,7 @@ export function EditorRail({
         <FilmIcon size={21} />
       </button>
 
-      {editing ? (
+      {editing && onDeploy ? (
         <button
           type="button"
           className="sb-rail-button"

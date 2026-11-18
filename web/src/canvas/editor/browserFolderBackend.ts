@@ -192,17 +192,42 @@ async function boardFile(scope: BoardScope, slug: string) {
   return find(current)
 }
 
+async function writeTextFile(
+  dir: DirHandle,
+  name: string,
+  text: string,
+) {
+  const file = await dir.getFileHandle(name, { create: true })
+  const writable = await file.createWritable()
+  await writable.write(text)
+  await writable.close()
+}
+
 async function writeFile(
   scope: BoardScope,
   folder: string,
   slug: string,
   canvas: CanvasDocument,
 ) {
+  const text = serializeCanvas(canvas)
+  parseCanvas(text)
   const dir = await folderDirectory(scope, folder, true)
-  const file = await dir.getFileHandle(`${slug}.canvas`, { create: true })
-  const writable = await file.createWritable()
-  await writable.write(serializeCanvas(canvas))
-  await writable.close()
+  let backup: string | null = null
+  try {
+    const current = await dir.getFileHandle(`${slug}.canvas`)
+    backup = await (await current.getFile()).text()
+    await writeTextFile(dir, `${slug}.canvas.bak`, backup)
+  } catch {
+    backup = null
+  }
+  try {
+    await writeTextFile(dir, `${slug}.canvas`, text)
+  } catch (error) {
+    if (backup !== null) {
+      await writeTextFile(dir, `${slug}.canvas`, backup).catch(() => {})
+    }
+    throw error
+  }
 }
 
 function blankCanvas(title: string, slug: string): CanvasDocument {
@@ -277,6 +302,12 @@ async function handleCanvases(url: URL, init?: RequestInit) {
     if (!/^[a-z0-9][a-z0-9-]*$/.test(nextSlug)) return response({ error: 'slug 非法' }, 400)
     const board = await findBoard(scope, slug)
     const nextFolder = body.folder === undefined ? String(board?.path ?? '') : normalizeFolder(body.folder)
+    if (
+      (nextSlug !== slug || nextFolder !== String(board?.path ?? '')) &&
+      (await findBoard(scope, nextSlug))
+    ) {
+      return response({ error: `slug 已存在: ${nextSlug}` }, 409)
+    }
     const nextCanvas: CanvasDocument = {
       ...canvas,
       'x-superboard': {
@@ -371,9 +402,26 @@ async function handleFolders(url: URL, init?: RequestInit) {
     const sourceParent = await folderDirectory(scope, currentParent)
     const source = await sourceParent.getDirectoryHandle(sourcePath.split('/').pop()!)
     const targetParent = await folderDirectory(scope, parent, true)
-    const target = await targetParent.getDirectoryHandle(name, { create: true })
-    await copyDirectory(source, target)
-    await sourceParent.removeEntry(sourcePath.split('/').pop()!, { recursive: true })
+    let target: DirHandle
+    try {
+      target = await targetParent.getDirectoryHandle(name)
+      return response({ error: `文件夹已存在: ${name}` }, 409)
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'NotFoundError') {
+        target = await targetParent.getDirectoryHandle(name, { create: true })
+      } else {
+        throw error
+      }
+    }
+    try {
+      await copyDirectory(source, target)
+      await sourceParent.removeEntry(sourcePath.split('/').pop()!, {
+        recursive: true,
+      })
+    } catch (error) {
+      await targetParent.removeEntry(name, { recursive: true }).catch(() => {})
+      throw error
+    }
     return response({ ok: true, path: parent ? `${parent}/${name}` : name })
   }
   if (url.pathname === '/__folders' && method === 'DELETE') {
@@ -409,6 +457,10 @@ export async function restoreBrowserWorkspace() {
   await scopeDirectory('public', true)
   await scopeDirectory('private', true)
   return handle
+}
+
+export function isBrowserFolderMode() {
+  return installed
 }
 
 export function installBrowserFolderBackend() {

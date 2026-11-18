@@ -62,6 +62,7 @@ import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { PeleCreateDialog } from './PeleCreateDialog'
 import { PreferencesDialog } from './PreferencesDialog'
 import { blockStyleFromPreferences } from './preferences'
+import { isBrowserFolderMode } from './browserFolderBackend'
 import {
   rememberRecentColor,
   updateUiState,
@@ -1892,7 +1893,11 @@ export function CanvasEditorApp() {
         }
         directorMode={directorMode}
         onToggleDirector={toggleDirector}
-        onDeploy={() => setDeployDialogOpen(true)}
+        onDeploy={
+          isBrowserFolderMode()
+            ? undefined
+            : () => setDeployDialogOpen(true)
+        }
         onOpenPreferences={() => setPreferencesOpen(true)}
       />
 
