@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import type {
-  CanvasDocument,
-  CanvasEdge,
-  CanvasNode,
-  SuperBoardMedia,
-  SuperBoardStyle,
+import {
+  resolveNodeStyle,
+  type CanvasDocument,
+  type CanvasEdge,
+  type CanvasNode,
+  type SuperBoardMedia,
+  type SuperBoardStyle,
 } from '../model'
 import { collectDescendants } from './hierarchy'
 import { ColorPicker } from './ColorPicker'
@@ -136,43 +137,20 @@ export function CanvasStylePanel({
     }, selectedIds)
   }
 
+  function withCommonStyle(node: CanvasNode, patch: Partial<SuperBoardStyle>) {
+    const next = withStyle(node, patch)
+    if (patch.borderStyle === undefined) return next
+    const extension = next['x-superboard']
+    if (!extension?.style) return next
+    const style = { ...extension.style }
+    delete style.strokeDash
+    return { ...next, 'x-superboard': { ...extension, style } }
+  }
+
   function updateCommonStyle(patch: Partial<SuperBoardStyle>) {
-    const dashFor = (style: string | undefined) =>
-      style === 'dashed' ? [7, 4] : style === 'dotted' ? [2, 4] : []
     applyTo(
       nodes,
-      (node) => {
-        const kind = kindOf(node)
-        if (kind !== 'shape' && kind !== 'drawing') {
-          return withStyle(node, patch)
-        }
-        const {
-          backgroundColor,
-          backgroundOpacity,
-          borderColor,
-          borderOpacity,
-          borderWidth,
-          borderStyle,
-          ...rest
-        } = patch
-        return withStyle(node, {
-          ...rest,
-          ...(kind === 'shape' && backgroundColor !== undefined
-            ? { fill: backgroundColor }
-            : {}),
-          ...(kind === 'shape' && backgroundOpacity !== undefined
-            ? { backgroundOpacity }
-            : {}),
-          ...(borderColor !== undefined ? { stroke: borderColor } : {}),
-          ...(borderOpacity !== undefined ? { borderOpacity } : {}),
-          ...(borderWidth !== undefined
-            ? { strokeWidth: Number(borderWidth) || 0 }
-            : {}),
-          ...(borderStyle !== undefined
-            ? { borderStyle, strokeDash: dashFor(borderStyle) }
-            : {}),
-        })
-      },
+      (node) => withCommonStyle(node, patch),
       patchHistoryKey('style', patch),
     )
   }
@@ -348,30 +326,21 @@ export function CanvasStylePanel({
   }
 
   const firstNode = nodes[0]
-  const firstStyle = firstNode?.['x-superboard']?.style
   const firstKind = firstNode?.['x-superboard']?.kind
   const firstIsShape = firstKind === 'shape'
   const firstIsDrawing = firstKind === 'drawing'
   const firstIsLine =
     firstIsShape && firstNode?.['x-superboard']?.shape === 'line'
-  const firstBorderColor =
-    firstStyle?.borderColor ?? firstStyle?.stroke ?? '#1d1d1d'
-  const firstBorderWidth = Number(
-    firstStyle?.borderWidth ??
-      firstStyle?.strokeWidth ??
-      (firstIsShape ? 2 : 0),
-  )
-  const firstBorderOpacity = Math.round(
-    (firstStyle?.borderOpacity ?? 1) * 100,
-  )
-  const firstBorderStyle = firstStyle?.borderStyle ?? 'solid'
-  const firstBackgroundColor =
-    firstStyle?.backgroundColor ?? firstStyle?.fill ?? '#ffffff'
-  const firstBackgroundOpacity = Math.round(
-    (firstStyle?.backgroundOpacity ?? 1) * 100,
-  )
-  const firstOpacity = Math.round((firstStyle?.opacity ?? 1) * 100)
+  const firstResolved = resolveNodeStyle(firstNode?.['x-superboard']?.style)
+  const firstBorderColor = firstResolved.borderColor ?? '#1d1d1d'
+  const firstBorderWidth = firstResolved.borderWidth ?? (firstIsShape ? 2 : 0)
+  const firstBorderOpacity = Math.round(firstResolved.borderOpacity * 100)
+  const firstBorderStyle = firstResolved.borderStyle
+  const firstBackgroundColor = firstResolved.background ?? '#ffffff'
+  const firstBackgroundOpacity = Math.round(firstResolved.backgroundOpacity * 100)
+  const firstOpacity = Math.round(firstResolved.opacity * 100)
   const firstShape = shapes[0]
+  const firstShapeResolved = resolveNodeStyle(firstShape?.['x-superboard']?.style)
   const firstText = texts[0]
   const firstMedia = mediaNodes[0]?.['x-superboard']?.media
 
@@ -812,18 +781,18 @@ export function CanvasStylePanel({
           <h3>形状</h3>
           <ColorPicker
             label="填充(C)"
-            value={firstShape?.['x-superboard']?.style?.fill ?? '#ffffff'}
+            value={firstShapeResolved.background ?? '#ffffff'}
             allowNone
             recentColors={boardSettings.recentColors}
-            onChange={(fill) => styleAll(shapes, { fill })}
+            onChange={(backgroundColor) => styleAll(shapes, { backgroundColor })}
             onColorUsed={onRememberColor}
           />
           <ColorPicker
             label="描边(C)"
-            value={firstShape?.['x-superboard']?.style?.stroke ?? '#1d1d1d'}
+            value={firstShapeResolved.borderColor ?? '#1d1d1d'}
             allowNone
             recentColors={boardSettings.recentColors}
-            onChange={(stroke) => styleAll(shapes, { stroke })}
+            onChange={(borderColor) => styleAll(shapes, { borderColor })}
             onColorUsed={onRememberColor}
           />
           <div className="sb-style-row">
@@ -833,8 +802,8 @@ export function CanvasStylePanel({
                 <button
                   key={value}
                   type="button"
-                  className={firstShape?.['x-superboard']?.style?.strokeWidth === value ? 'is-active' : undefined}
-                  onClick={() => styleAll(shapes, { strokeWidth: value })}
+                  className={firstShapeResolved.borderWidth === value ? 'is-active' : undefined}
+                  onClick={() => styleAll(shapes, { borderWidth: value })}
                 >
                   {value}
                 </button>
@@ -848,7 +817,7 @@ export function CanvasStylePanel({
                 <button
                   key={value}
                   type="button"
-                  className={firstShape?.['x-superboard']?.style?.cornerRadius === value ? 'is-active' : undefined}
+                  className={firstShapeResolved.cornerRadius === value ? 'is-active' : undefined}
                   onClick={() => styleAll(shapes, { cornerRadius: value })}
                 >
                   {value}
@@ -864,7 +833,7 @@ export function CanvasStylePanel({
                   key={value}
                   type="button"
                   className={
-                    (firstShape?.['x-superboard']?.style?.opacity ?? 1) === value
+                    firstShapeResolved.opacity === value
                       ? 'is-active'
                       : undefined
                   }

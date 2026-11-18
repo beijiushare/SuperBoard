@@ -10,7 +10,12 @@ import {
   selectableAncestor,
   topAncestor,
 } from '../web/src/canvas/editor/hierarchy'
-import type { CanvasDocument, CanvasEdge, CanvasNode } from '../web/src/canvas/model'
+import {
+  resolveNodeStyle,
+  type CanvasDocument,
+  type CanvasEdge,
+  type CanvasNode,
+} from '../web/src/canvas/model'
 import {
   intersectsViewport,
   nodeWorldRect,
@@ -160,5 +165,60 @@ assert.deepEqual(rotated, {
   right: 175,
   bottom: 175,
 })
+
+const legacyStyle = resolveNodeStyle({
+  fill: '#abc',
+  stroke: '#def',
+  borderWidth: '3',
+  strokeDash: [2, 4],
+})
+assert.equal(legacyStyle.background, '#abc')
+assert.equal(legacyStyle.borderColor, '#def')
+assert.equal(legacyStyle.borderWidth, 3)
+assert.deepEqual(legacyStyle.borderDash, [2, 4])
+
+const semanticStyle = resolveNodeStyle({
+  backgroundColor: '#123',
+  borderColor: '#456',
+  borderWidth: 0,
+  borderStyle: 'dashed',
+})
+assert.equal(semanticStyle.background, '#123')
+assert.equal(semanticStyle.borderColor, '#456')
+assert.equal(semanticStyle.borderWidth, 0)
+assert.deepEqual(semanticStyle.borderDash, [7, 4])
+
+const solidStyle = resolveNodeStyle({ borderStyle: 'solid', strokeDash: [] })
+assert.equal(solidStyle.borderDash, undefined)
+
+const styledCanvas: CanvasDocument = {
+  nodes: [
+    {
+      id: 'shape',
+      type: 'group',
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 60,
+      'x-superboard': {
+        kind: 'shape',
+        shape: 'rect',
+        style: {
+          backgroundColor: '#112233',
+          borderColor: '#445566',
+          borderWidth: 4,
+          borderStyle: 'dashed',
+        },
+      },
+    },
+  ],
+  edges: [],
+  'x-superboard': { version: 1, meta: { title: '样式', slug: 'style' } },
+}
+const styledSvg = buildCanvasSvg(styledCanvas)
+assert.ok(styledSvg.includes('fill="#112233"'))
+assert.ok(styledSvg.includes('stroke="#445566"'))
+assert.ok(styledSvg.includes('stroke-width="4"'))
+assert.ok(styledSvg.includes('stroke-dasharray="7 4"'))
 
 console.log('canvas editor tests passed')

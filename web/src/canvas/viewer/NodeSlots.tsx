@@ -2,10 +2,11 @@ import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import { PeleView } from '../../shared/pele/PeleView'
-import type {
-  SuperBoardMedia,
-  SuperBoardNodeExtension,
-  SuperBoardScheduleEvent,
+import {
+  resolveNodeStyle,
+  type SuperBoardMedia,
+  type SuperBoardNodeExtension,
+  type SuperBoardScheduleEvent,
 } from '../model'
 import '../../styles/markdown.css'
 import '../../styles/pele.css'
@@ -57,31 +58,27 @@ function BlockSurface({
 }) {
   const ext = extension(node)
   const markdown = ext?.kind === 'markdown'
-  const style = ext?.style
-  const borderWidth = Number(style?.borderWidth ?? 0)
-  const borderOpacity = style?.borderOpacity ?? 1
-  const backgroundOpacity = style?.backgroundOpacity ?? 1
-  const borderColor = style?.borderColor ?? '#1d1d1d'
-  const backgroundColor = style?.backgroundColor
+  const style = resolveNodeStyle(ext?.style)
+  const borderColor = style.borderColor ?? '#1d1d1d'
   return (
     <div
       className={`sb-block-scale${markdown ? ' sb-markdown-block-scale' : ''}`}
       style={{
-        border: borderWidth
-          ? `${borderWidth}px ${style?.borderStyle ?? 'solid'} color-mix(in srgb, ${borderColor} ${
-              borderOpacity * 100
+        border: style.borderWidth
+          ? `${style.borderWidth}px ${style.borderStyle} color-mix(in srgb, ${borderColor} ${
+              style.borderOpacity * 100
             }%, transparent)`
           : undefined,
-        backgroundColor: backgroundColor
-          ? `color-mix(in srgb, ${backgroundColor} ${
-              backgroundOpacity * 100
+        backgroundColor: style.background
+          ? `color-mix(in srgb, ${style.background} ${
+              style.backgroundOpacity * 100
             }%, transparent)`
           : undefined,
-        opacity: style?.opacity ?? 1,
-        ...(backgroundColor
+        opacity: style.opacity,
+        ...(style.background
           ? {
-              ['--sb-block-bg-color' as string]: backgroundColor,
-              ['--sb-block-bg-opacity' as string]: `${backgroundOpacity * 100}%`,
+              ['--sb-block-bg-color' as string]: style.background,
+              ['--sb-block-bg-opacity' as string]: `${style.backgroundOpacity * 100}%`,
             }
           : {}),
       }}

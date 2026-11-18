@@ -1,7 +1,8 @@
 import { BaseModule, internal, type BaseArgs } from '../../vendor/json-canvas-viewer/src/index.ts'
-import type {
-  SuperBoardNodeExtension,
-  SuperBoardShapeKind,
+import {
+  resolveNodeStyle,
+  type SuperBoardNodeExtension,
+  type SuperBoardShapeKind,
 } from '../model'
 import { intersectsViewport, nodeWorldRect, viewportWorldRect } from './culling'
 
@@ -210,10 +211,10 @@ export class ShapeLayer extends BaseModule {
       const node = item.ref
       const ext = node['x-superboard']
       if (ext?.kind !== 'shape') continue
-      const style = ext.style ?? {}
+      const style = resolveNodeStyle(ext.style)
       const shape = ext.shape ?? 'rect'
       const rotation = ext.rotation ?? 0
-      const strokeWidth = style.strokeWidth ?? 2
+      const strokeWidth = style.borderWidth ?? 2
       if (
         !intersectsViewport(
           nodeWorldRect(node, rotation, Math.max(4, strokeWidth)),
@@ -222,9 +223,8 @@ export class ShapeLayer extends BaseModule {
       ) {
         continue
       }
-      const opacity = style.opacity ?? 1
-      const fillAlpha = opacity * (style.backgroundOpacity ?? 1)
-      const strokeAlpha = opacity * (style.borderOpacity ?? 1)
+      const fillAlpha = style.opacity * style.backgroundOpacity
+      const strokeAlpha = style.opacity * style.borderOpacity
 
       this.ctx.save()
       if (rotation) {
@@ -234,10 +234,13 @@ export class ShapeLayer extends BaseModule {
         this.ctx.rotate((rotation * Math.PI) / 180)
         this.ctx.translate(-centerX, -centerY)
       }
-      this.ctx.fillStyle = style.fill && style.fill !== 'none' ? style.fill : 'transparent'
-      this.ctx.strokeStyle = style.stroke ?? '#1d1d1d'
+      this.ctx.fillStyle =
+        style.background && style.background !== 'none'
+          ? style.background
+          : 'transparent'
+      this.ctx.strokeStyle = style.borderColor ?? '#1d1d1d'
       this.ctx.lineWidth = strokeWidth
-      dash(this.ctx, style.strokeDash)
+      dash(this.ctx, style.borderDash)
 
       const path = this.shapePath(
         node,

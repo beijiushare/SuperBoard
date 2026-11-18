@@ -1,9 +1,10 @@
 import { getStroke } from 'perfect-freehand'
-import type {
-  CanvasDocument,
-  CanvasEdge,
-  CanvasNode,
-  SuperBoardStyle,
+import {
+  resolveNodeStyle,
+  type CanvasDocument,
+  type CanvasEdge,
+  type CanvasNode,
+  type SuperBoardStyle,
 } from '../model'
 import { edgeGeometry } from './edges'
 
@@ -162,15 +163,15 @@ function textMarkup(node: CanvasNode) {
 function shapeMarkup(node: CanvasNode) {
   const extension = node['x-superboard']
   if (extension?.kind !== 'shape') return ''
-  const style = extension.style ?? {}
+  const style = resolveNodeStyle(extension.style)
   const shape = extension.shape ?? 'rect'
-  const fill = svgColor(style.fill, shape === 'line' ? 'none' : '#ffffff')
-  const stroke = svgColor(style.stroke, '#1d1d1d')
-  const strokeWidth = typeof style.strokeWidth === 'number' ? style.strokeWidth : 2
-  const dash = style.strokeDash?.length
-    ? ` stroke-dasharray="${style.strokeDash.join(' ')}"`
+  const fill = svgColor(style.background, shape === 'line' ? 'none' : '#ffffff')
+  const stroke = svgColor(style.borderColor, '#1d1d1d')
+  const strokeWidth = style.borderWidth ?? 2
+  const dash = style.borderDash?.length
+    ? ` stroke-dasharray="${style.borderDash.join(' ')}"`
     : ''
-  const opacity = style.opacity ?? 1
+  const opacity = style.opacity
   const rotation = rotateAttr(node)
   const common = `fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"${dash} opacity="${opacity}"${rotation}`
   if (shape === 'ellipse') {

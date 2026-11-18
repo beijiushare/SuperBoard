@@ -1,6 +1,10 @@
 import { BaseModule, internal, type BaseArgs } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { getStroke } from 'perfect-freehand'
-import type { SuperBoardStroke, SuperBoardStyle } from '../model'
+import {
+  resolveNodeStyle,
+  type SuperBoardStroke,
+  type SuperBoardStyle,
+} from '../model'
 import { intersectsViewport, nodeWorldRect, viewportWorldRect } from './culling'
 
 type DrawingNode = {
@@ -117,13 +121,14 @@ export class DrawingLayer extends BaseModule {
       const node = item.ref
       const rotation = node['x-superboard']?.rotation ?? 0
       const style = node['x-superboard']?.style
+      const resolved = resolveNodeStyle(style)
       const strokes = node['x-superboard']?.strokes
       if (!strokes?.length) continue
       if (!intersectsViewport(nodeWorldRect(node, rotation, 16), viewport)) {
         continue
       }
       this.ctx.save()
-      this.ctx.globalAlpha = style?.opacity ?? 1
+      this.ctx.globalAlpha = resolved.opacity
       if (rotation) {
         const centerX = node.x + node.width / 2
         const centerY = node.y + node.height / 2
@@ -133,7 +138,7 @@ export class DrawingLayer extends BaseModule {
       }
       this.ctx.translate(node.x, node.y)
       for (const stroke of strokes) {
-        const width = style?.strokeWidth ?? stroke.size
+        const width = resolved.borderWidth ?? stroke.size
         const outline = this.outlineFor(stroke, width)
         if (outline.length < 3) continue
         this.ctx.beginPath()
@@ -142,7 +147,7 @@ export class DrawingLayer extends BaseModule {
           this.ctx.lineTo(outline[index][0], outline[index][1])
         }
         this.ctx.closePath()
-        this.ctx.fillStyle = style?.stroke ?? style?.color ?? stroke.color
+        this.ctx.fillStyle = resolved.borderColor ?? style?.color ?? stroke.color
         this.ctx.fill()
       }
       this.ctx.restore()
