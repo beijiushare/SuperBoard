@@ -1,11 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import UseAnimations from 'react-useanimations'
-import hash from 'react-useanimations/lib/hash'
-import lock from 'react-useanimations/lib/lock'
-import refresh from 'react-useanimations/lib/refresh'
-import trash2 from 'react-useanimations/lib/trash2'
-import typeIcon from 'react-useanimations/lib/type'
 import type { CanvasNode } from '../model'
+import { HashIcon, LockIcon, RefreshIcon, TrashIcon, TypeIcon } from './BlockActionIcons'
 import { blockDefinition, isRatioLocked } from './blocks'
 
 interface BlockActionsProps {
@@ -118,12 +113,7 @@ export function BlockActions({
         }}
       >
         <span className={`sb-block-check${ratioLocked ? ' is-checked' : ''}`} />
-        <UseAnimations
-          animation={lock}
-          size={16}
-          active={ratioLocked}
-          interaction="click-replay"
-        />
+        <LockIcon size={16} />
       </button>
       {canEdit ? (
         <button
@@ -136,12 +126,7 @@ export function BlockActions({
           }}
         >
           <span className={`sb-block-check${editing ? ' is-checked' : ''}`} />
-          <UseAnimations
-            animation={typeIcon}
-            size={16}
-            active={editing}
-            interaction="click-replay"
-          />
+          <TypeIcon size={16} />
         </button>
       ) : null}
       {markdownBlock ? (
@@ -154,7 +139,7 @@ export function BlockActions({
             onFocusBlockEdit?.(node.id)
           }}
         >
-          <UseAnimations animation={hash} size={16} interaction="click-replay" />
+          <HashIcon size={16} />
         </button>
       ) : null}
       <button
@@ -166,7 +151,7 @@ export function BlockActions({
           onResetBlockSize?.(node.id)
         }}
       >
-        <UseAnimations animation={refresh} size={16} interaction="click-replay" />
+        <RefreshIcon size={16} />
       </button>
       <button
         type="button"
@@ -177,7 +162,7 @@ export function BlockActions({
           onDeleteBlock?.(node.id)
         }}
       >
-        <UseAnimations animation={trash2} size={16} interaction="click-replay" />
+        <TrashIcon size={16} />
       </button>
     </div>
   )
