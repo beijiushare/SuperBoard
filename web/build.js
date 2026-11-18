@@ -205,7 +205,10 @@ async function main() {
     readCanvases(),
   ])
 
-  const entry = Object.values(manifest).find((item) => item.isEntry)
+  const entry =
+    Object.values(manifest).find(
+      (item) => item.isEntry && item.name === 'viewer',
+    ) ?? Object.values(manifest).find((item) => item.isEntry)
   if (!entry) throw new Error('找不到 Vite manifest entry')
 
   const cssFiles = new Set()

@@ -54,6 +54,7 @@ export default defineConfig(({ command, isPreview }) => ({
         ? {
             input: {
               viewer: resolve(process.cwd(), 'web/src/viewer/main.tsx'),
+              editor: resolve(process.cwd(), 'editor.html'),
             },
           }
         : undefined,
