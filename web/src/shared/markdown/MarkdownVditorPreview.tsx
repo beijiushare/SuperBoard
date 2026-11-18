@@ -3,10 +3,28 @@ import { MarkdownView } from './MarkdownView'
 import { loadMathJax } from './mathjax'
 import { vditorCdn } from './vditorAssets'
 
+const HTML_CACHE_LIMIT = 100
 const htmlCache = new Map<string, Promise<string>>()
 
-async function renderHtml(source: string) {
+function cachedHtml(source: string) {
   const cached = htmlCache.get(source)
+  if (!cached) return undefined
+  htmlCache.delete(source)
+  htmlCache.set(source, cached)
+  return cached
+}
+
+function cacheHtml(source: string, promise: Promise<string>) {
+  htmlCache.set(source, promise)
+  while (htmlCache.size > HTML_CACHE_LIMIT) {
+    const oldest = htmlCache.keys().next().value
+    if (oldest === undefined) break
+    htmlCache.delete(oldest)
+  }
+}
+
+async function renderHtml(source: string) {
+  const cached = cachedHtml(source)
   if (cached) return cached
   const promise = (async () => {
     await import('vditor/dist/index.css')
@@ -22,8 +40,10 @@ async function renderHtml(source: string) {
       },
     })
   })()
-  htmlCache.set(source, promise)
-  promise.catch(() => htmlCache.delete(source))
+  cacheHtml(source, promise)
+  promise.catch(() => {
+    if (htmlCache.get(source) === promise) htmlCache.delete(source)
+  })
   return promise
 }
 
