@@ -64,7 +64,7 @@ export function EditorRail({
         aria-pressed={treeMode && treeOpen}
         onClick={onToggleTree}
       >
-        <SidebarIcon size={32} />
+        <SidebarIcon size={28} />
       </button>
 
       {editing ? (
