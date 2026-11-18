@@ -1,11 +1,12 @@
-import UseAnimations from 'react-useanimations'
-import aperture from 'react-useanimations/lib/aperture'
-import checkCircle from 'react-useanimations/lib/checkCircle'
-import command from 'react-useanimations/lib/command'
-import film from 'react-useanimations/lib/film'
-import gitBranch from 'react-useanimations/lib/gitBranch'
-import sidebar from 'react-useanimations/lib/sidebar'
-import uploadCloud from 'react-useanimations/lib/uploadCloud'
+import {
+  ApertureIcon,
+  CheckCircleIcon,
+  CommandIcon,
+  FilmIcon,
+  GitBranchIcon,
+  SidebarIcon,
+  UploadCloudIcon,
+} from './EditorRailIcons'
 import type { SaveState } from './saveState'
 
 interface EditorRailProps {
@@ -60,14 +61,10 @@ export function EditorRail({
         className="sb-rail-button"
         data-tooltip={sidebarLabel}
         aria-label={sidebarLabel}
+        aria-pressed={treeMode && treeOpen}
         onClick={onToggleTree}
       >
-        <UseAnimations
-          animation={sidebar}
-          size={32}
-          interaction="click-toggle"
-          active={treeMode && treeOpen}
-        />
+        <SidebarIcon size={32} />
       </button>
 
       {editing ? (
@@ -78,7 +75,7 @@ export function EditorRail({
           aria-label={scopeLabel}
           onClick={onSwitchScope}
         >
-          <UseAnimations animation={gitBranch} size={32} />
+          <GitBranchIcon size={32} />
         </button>
       ) : null}
 
@@ -91,7 +88,7 @@ export function EditorRail({
           disabled={!canSave}
           onClick={onSave}
         >
-          <UseAnimations animation={checkCircle} size={32} />
+          <CheckCircleIcon size={32} />
         </button>
       ) : null}
 
@@ -104,7 +101,7 @@ export function EditorRail({
           aria-pressed={stylePanelOpen}
           onClick={onToggleStylePanel}
         >
-          <UseAnimations animation={aperture} size={32} interaction="click-replay" />
+          <ApertureIcon size={32} />
         </button>
       ) : null}
 
@@ -117,7 +114,7 @@ export function EditorRail({
           aria-pressed={menuPanelOpen}
           onClick={onToggleMenuPanel}
         >
-          <UseAnimations animation={command} size={32} interaction="click-replay" />
+          <CommandIcon size={32} />
         </button>
       ) : null}
 
@@ -129,7 +126,7 @@ export function EditorRail({
         aria-pressed={directorMode}
         onClick={onToggleDirector}
       >
-        <UseAnimations animation={film} size={32} interaction="click-toggle" active={directorMode} />
+        <FilmIcon size={32} />
       </button>
 
       {editing ? (
@@ -140,7 +137,7 @@ export function EditorRail({
           aria-label="提交并推送"
           onClick={onDeploy}
         >
-          <UseAnimations animation={uploadCloud} size={32} />
+          <UploadCloudIcon size={32} />
         </button>
       ) : null}
     </aside>
