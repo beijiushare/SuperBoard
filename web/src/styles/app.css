@@ -1058,6 +1058,36 @@
   margin-top: 14px;
 }
 
+.sb-preferences-dialog {
+  width: min(460px, calc(100vw - 40px));
+}
+
+.sb-preferences-note {
+  margin-bottom: 4px !important;
+}
+
+.sb-preferences-dialog section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e6e2d8;
+}
+
+.sb-preferences-dialog section h3 {
+  margin: 0 0 8px;
+  color: #5c584e;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sb-preferences-dialog .sb-style-number-slider {
+  width: auto;
+  height: auto;
+}
+
+.sb-preferences-dialog .sb-style-spin input {
+  height: auto;
+}
+
 .canvas-editor-dialog-actions button {
   padding: 6px 12px;
   border: 1px solid #dedbd2;
@@ -1740,7 +1770,7 @@
 
 .sb-color-popover {
   position: fixed;
-  z-index: 100;
+  z-index: 10002;
   width: 280px;
   padding: 10px;
   border: 1px solid #d8d4ca;

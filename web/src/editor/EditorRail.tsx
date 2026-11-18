@@ -4,6 +4,7 @@ import {
   CommandIcon,
   FilmIcon,
   GitBranchIcon,
+  SettingsIcon,
   SidebarIcon,
   UploadCloudIcon,
 } from './EditorRailIcons'
@@ -29,6 +30,7 @@ interface EditorRailProps {
   directorMode: boolean
   onToggleDirector: () => void
   onDeploy?: () => void
+  onOpenPreferences?: () => void
 }
 
 export function EditorRail({
@@ -51,6 +53,7 @@ export function EditorRail({
   directorMode,
   onToggleDirector,
   onDeploy,
+  onOpenPreferences,
 }: EditorRailProps) {
   const editing = mode === 'edit'
 
@@ -138,6 +141,18 @@ export function EditorRail({
           onClick={onDeploy}
         >
           <UploadCloudIcon size={21} />
+        </button>
+      ) : null}
+
+      {onOpenPreferences ? (
+        <button
+          type="button"
+          className="sb-rail-button"
+          data-tooltip="设置"
+          aria-label="设置"
+          onClick={onOpenPreferences}
+        >
+          <SettingsIcon size={21} />
         </button>
       ) : null}
     </aside>

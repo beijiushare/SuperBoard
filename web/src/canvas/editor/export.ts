@@ -194,7 +194,7 @@ function shapeMarkup(node: CanvasNode) {
     const y2 = node.y + (flip?.y ? 0 : node.height)
     return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${strokeWidth}"${dash} opacity="${opacity}"${rotation}/>`
   }
-  const radius = style.cornerRadius ?? 8
+  const radius = style.cornerRadius ?? 0
   return `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="${radius}" ${common}/>`
 }
 

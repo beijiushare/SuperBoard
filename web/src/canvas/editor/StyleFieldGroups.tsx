@@ -6,6 +6,7 @@ import {
   type SuperBoardStyle,
 } from '../model'
 import { ColorPicker } from './ColorPicker'
+import { FONT_OPTIONS, usePreferences } from './preferences'
 import { StyleNumberControl } from './StyleNumberControl'
 
 interface TransformFieldsProps {
@@ -275,7 +276,11 @@ export function TextFields({
   onChange,
   onColorUsed,
 }: TextFieldsProps) {
-  const style = node?.['x-superboard']?.style ?? {}
+  const preferences = usePreferences()
+  const style = {
+    ...preferences.text,
+    ...node?.['x-superboard']?.style,
+  }
   return (
     <section>
       <h3>文本</h3>
@@ -288,15 +293,11 @@ export function TextFields({
             onChange({ fontFamily: event.target.value || undefined })
           }
         >
-          <option value="PingFang SC, Microsoft YaHei, sans-serif">
-            苹方 / 微软雅黑
-          </option>
-          <option value="Noto Sans SC, Source Han Sans SC, sans-serif">
-            思源黑体
-          </option>
-          <option value="Arial, Helvetica, sans-serif">Arial</option>
-          <option value="Georgia, 'Times New Roman', serif">Georgia</option>
-          <option value="ui-monospace, Consolas, monospace">等宽</option>
+          {FONT_OPTIONS.map((font) => (
+            <option key={font.value} value={font.value}>
+              {font.label}
+            </option>
+          ))}
         </select>
       </div>
       <StyleNumberControl

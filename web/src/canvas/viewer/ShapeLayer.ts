@@ -1,4 +1,5 @@
 import { BaseModule, internal, type BaseArgs } from '../../vendor/json-canvas-viewer/src/index.ts'
+import { getPreferences } from '../editor/preferences'
 import {
   resolveNodeStyle,
   type SuperBoardNodeExtension,
@@ -212,19 +213,36 @@ export class ShapeLayer extends BaseModule {
       const ext = node['x-superboard']
       if (ext?.kind !== 'shape') continue
       const style = resolveNodeStyle(ext.style)
+      const preferences = getPreferences()
+      const blockDefaults = preferences.block
       const shape = ext.shape ?? 'rect'
       const rotation = ext.rotation ?? 0
-      const strokeWidth = style.borderWidth ?? 2
+      const background = style.background ?? blockDefaults.backgroundColor
+      const backgroundOpacity = style.background
+        ? style.backgroundOpacity
+        : blockDefaults.backgroundOpacity
+      const borderColor = style.borderColor ?? blockDefaults.borderColor
+      const borderWidth = style.borderWidth ?? blockDefaults.borderWidth
+      const borderOpacity = style.borderColor
+        ? style.borderOpacity
+        : blockDefaults.borderOpacity
+      const defaultDash =
+        blockDefaults.borderStyle === 'dashed'
+          ? [7, 4]
+          : blockDefaults.borderStyle === 'dotted'
+            ? [2, 4]
+            : undefined
+      const borderDash = style.borderColor ? style.borderDash : defaultDash
       if (
         !intersectsViewport(
-          nodeWorldRect(node, rotation, Math.max(4, strokeWidth)),
+          nodeWorldRect(node, rotation, Math.max(4, borderWidth)),
           viewport,
         )
       ) {
         continue
       }
-      const fillAlpha = style.opacity * style.backgroundOpacity
-      const strokeAlpha = style.opacity * style.borderOpacity
+      const fillAlpha = style.opacity * backgroundOpacity
+      const strokeAlpha = style.opacity * borderOpacity
 
       this.ctx.save()
       if (rotation) {
@@ -235,18 +253,17 @@ export class ShapeLayer extends BaseModule {
         this.ctx.translate(-centerX, -centerY)
       }
       this.ctx.fillStyle =
-        style.background && style.background !== 'none'
-          ? style.background
-          : 'transparent'
-      this.ctx.strokeStyle = style.borderColor ?? '#1d1d1d'
-      this.ctx.lineWidth = strokeWidth
-      dash(this.ctx, style.borderDash)
+        background && background !== 'none' ? background : 'transparent'
+      this.ctx.strokeStyle = borderColor
+      this.ctx.lineWidth = borderWidth
+      dash(this.ctx, borderDash)
 
       const path = this.shapePath(
         node,
         ext,
         shape,
-        style.cornerRadius ?? 8,
+        style.cornerRadius ??
+          (shape === 'rect' ? preferences.shapeCornerRadius : 0),
       )
       if (shape === 'line') {
         this.ctx.globalAlpha = strokeAlpha

@@ -60,6 +60,7 @@ import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
 import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { PeleCreateDialog } from './PeleCreateDialog'
+import { PreferencesDialog } from './PreferencesDialog'
 import { InputDialog } from '../../shared/ui/InputDialog'
 import {
   DEFAULT_BLOCK_SIZES,
@@ -126,6 +127,7 @@ export function CanvasEditorApp() {
   )
   const [stylePanelOpen, setStylePanelOpen] = useState(true)
   const [menuPanelOpen, setMenuPanelOpen] = useState(true)
+  const [preferencesOpen, setPreferencesOpen] = useState(false)
   const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
   const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
@@ -1867,6 +1869,7 @@ export function CanvasEditorApp() {
         directorMode={directorMode}
         onToggleDirector={toggleDirector}
         onDeploy={() => setDeployDialogOpen(true)}
+        onOpenPreferences={() => setPreferencesOpen(true)}
       />
 
       <div className="sb-workspace">
@@ -2303,6 +2306,15 @@ export function CanvasEditorApp() {
           onClose={() => {
             setMediaDialogOpen(false)
             setMediaInsertPoint(null)
+          }}
+        />
+      ) : null}
+
+      {preferencesOpen ? (
+        <PreferencesDialog
+          onClose={() => {
+            setPreferencesOpen(false)
+            viewerRef.current?.viewer?.refresh?.()
           }}
         />
       ) : null}

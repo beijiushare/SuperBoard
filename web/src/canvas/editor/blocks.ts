@@ -1,4 +1,5 @@
 import type { CanvasNode } from '../model'
+import { getPreferences } from './preferences'
 
 export const BLOCK_KINDS = ['text', 'markdown', 'pele', 'schedule', 'media'] as const
 
@@ -100,7 +101,11 @@ export function isShapeNode(node: CanvasNode) {
 export function isRoundedRect(node: CanvasNode) {
   const extension = node['x-superboard']
   if (extension?.kind !== 'shape' || extension.shape !== 'rect') return false
-  return extension.roundedRect === true || (extension.style?.cornerRadius ?? 0) > 0
+  return (
+    extension.roundedRect === true ||
+    (extension.style?.cornerRadius ?? 0) > 0 ||
+    getPreferences().shapeCornerRadius > 0
+  )
 }
 
 export function isActionableNode(node: CanvasNode) {

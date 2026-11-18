@@ -1,8 +1,8 @@
 import { lazy, Suspense, useEffect, type ReactNode } from 'react'
+import { usePreferences } from '../editor/preferences'
 import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import {
-  DEFAULT_TEXT_FONT,
   resolveNodeStyle,
   TEXT_LINE_HEIGHT,
   TEXT_PADDING_X,
@@ -30,18 +30,27 @@ function extension(node: object) {
   return (node as { 'x-superboard'?: SuperBoardNodeExtension })['x-superboard']
 }
 
-function textStyle(node: JSONCanvasTextNode) {
+function textStyle(
+  node: JSONCanvasTextNode,
+  defaults: {
+    fontFamily: string
+    fontSize: number
+    color: string
+    opacity: number
+    textAlign: 'left' | 'center' | 'right'
+  },
+) {
   const style = extension(node)?.style
   return {
     padding: `${TEXT_PADDING_Y}px ${TEXT_PADDING_X}px`,
-    color: style?.color,
-    opacity: style?.opacity ?? 1,
-    fontFamily: style?.fontFamily ?? DEFAULT_TEXT_FONT,
-    fontSize: style?.fontSize,
+    color: style?.color ?? defaults.color,
+    opacity: style?.opacity ?? defaults.opacity,
+    fontFamily: style?.fontFamily ?? defaults.fontFamily,
+    fontSize: style?.fontSize ?? defaults.fontSize,
     fontWeight: style?.fontWeight,
     fontStyle: style?.fontStyle,
     textDecoration: style?.textDecoration,
-    textAlign: style?.textAlign,
+    textAlign: style?.textAlign ?? defaults.textAlign,
     lineHeight: style?.lineHeight ?? TEXT_LINE_HEIGHT,
     whiteSpace: 'pre-wrap' as const,
     overflowWrap: 'anywhere' as const,
@@ -71,7 +80,20 @@ function BlockSurface({
   const ext = extension(node)
   const markdown = ext?.kind === 'markdown'
   const style = resolveNodeStyle(ext?.style)
-  const borderColor = style.borderColor ?? '#1d1d1d'
+  const preferences = usePreferences()
+  const blockDefaults = preferences.block
+  const background = style.background ?? blockDefaults.backgroundColor
+  const backgroundOpacity = style.background
+    ? style.backgroundOpacity
+    : blockDefaults.backgroundOpacity
+  const borderColor = style.borderColor ?? blockDefaults.borderColor
+  const borderWidth = style.borderWidth ?? blockDefaults.borderWidth
+  const borderOpacity = style.borderColor
+    ? style.borderOpacity
+    : blockDefaults.borderOpacity
+  const borderStyle = style.borderColor
+    ? style.borderStyle
+    : blockDefaults.borderStyle
   return (
     <div
       className={`sb-block-scale${markdown ? ' sb-markdown-block-scale' : ''}`}
@@ -79,21 +101,21 @@ function BlockSurface({
         plain
           ? undefined
           : {
-              border: style.borderWidth
-                ? `${style.borderWidth}px ${style.borderStyle} color-mix(in srgb, ${borderColor} ${
-                    style.borderOpacity * 100
+              border: borderWidth
+                ? `${borderWidth}px ${borderStyle} color-mix(in srgb, ${borderColor} ${
+                    borderOpacity * 100
                   }%, transparent)`
                 : undefined,
-              backgroundColor: style.background
-                ? `color-mix(in srgb, ${style.background} ${
-                    style.backgroundOpacity * 100
+              backgroundColor: background
+                ? `color-mix(in srgb, ${background} ${
+                    backgroundOpacity * 100
                   }%, transparent)`
                 : undefined,
               opacity: style.opacity,
-              ...(style.background
+              ...(background
                 ? {
-                    ['--sb-block-bg-color' as string]: style.background,
-                    ['--sb-block-bg-opacity' as string]: `${style.backgroundOpacity * 100}%`,
+                    ['--sb-block-bg-color' as string]: background,
+                    ['--sb-block-bg-opacity' as string]: `${backgroundOpacity * 100}%`,
                   }
                 : {}),
             }
@@ -117,6 +139,7 @@ export function TextSlot({
 }) {
   useNodeSelection(node.id, onActive, onSelect)
   const ext = extension(node)
+  const preferences = usePreferences()
   const content =
     ext?.kind === 'markdown' && ext.markdownLocked === false ? (
       <div className="sb-md-editing-placeholder" />
@@ -136,7 +159,9 @@ export function TextSlot({
         />
       </Suspense>
     ) : (
-      <div className="sb-plain-text" style={textStyle(node)}>{node.text}</div>
+      <div className="sb-plain-text" style={textStyle(node, preferences.text)}>
+        {node.text}
+      </div>
     )
   return (
     <BlockSurface node={node} plain={!ext?.kind || ext.kind === 'text'}>
@@ -189,9 +214,24 @@ export function LinkSlot({
   const media = extension(node)?.media
   if (!media) {
     return (
-      <a href={node.url} target="_blank" rel="noopener noreferrer">
-        {node.url}
-      </a>
+      <BlockSurface node={node}>
+        <a
+          href={node.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            padding: '12px',
+            overflow: 'hidden',
+            color: 'inherit',
+            boxSizing: 'border-box',
+          }}
+        >
+          {node.url}
+        </a>
+      </BlockSurface>
     )
   }
 

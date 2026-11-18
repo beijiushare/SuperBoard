@@ -10,6 +10,7 @@ import {
 } from '../model'
 import { isRoundedRect } from './blocks'
 import { collectDescendants } from './hierarchy'
+import { usePreferences } from './preferences'
 import { ColorPicker } from './ColorPicker'
 import {
   BackgroundFields,
@@ -99,6 +100,7 @@ export function CanvasStylePanel({
     alignRight: true,
     centerVertically: true,
   })
+  const preferences = usePreferences()
   const selected = new Set(selectedIds)
   const nodes = canvas.nodes.filter((node) => selected.has(node.id))
   const edge = selectedEdgeId
@@ -323,16 +325,32 @@ export function CanvasStylePanel({
     firstIsShape && firstNode?.['x-superboard']?.shape === 'line'
   const firstResolved = resolveNodeStyle(firstNode?.['x-superboard']?.style)
   const firstIsRoundedRect = firstNode ? isRoundedRect(firstNode) : false
-  const firstCornerRadius = firstResolved.cornerRadius ?? 0
+  const firstCornerRadius =
+    firstResolved.cornerRadius ?? preferences.shapeCornerRadius
   const maxCornerRadius = firstNode
     ? Math.max(1, Math.floor(Math.min(firstNode.width, firstNode.height) / 2))
     : 100
-  const firstBorderColor = firstResolved.borderColor ?? '#1d1d1d'
-  const firstBorderWidth = firstResolved.borderWidth ?? (firstIsShape ? 2 : 0)
-  const firstBorderOpacity = Math.round(firstResolved.borderOpacity * 100)
-  const firstBorderStyle = firstResolved.borderStyle
-  const firstBackgroundColor = firstResolved.background ?? '#ffffff'
-  const firstBackgroundOpacity = Math.round(firstResolved.backgroundOpacity * 100)
+  const hasExplicitBorder = firstResolved.borderColor !== undefined
+  const hasExplicitBackground = firstResolved.background !== undefined
+  const firstBorderColor =
+    firstResolved.borderColor ?? preferences.block.borderColor
+  const firstBorderWidth =
+    firstResolved.borderWidth ?? preferences.block.borderWidth
+  const firstBorderOpacity = Math.round(
+    (hasExplicitBorder
+      ? firstResolved.borderOpacity
+      : preferences.block.borderOpacity) * 100,
+  )
+  const firstBorderStyle = hasExplicitBorder
+    ? firstResolved.borderStyle
+    : preferences.block.borderStyle
+  const firstBackgroundColor =
+    firstResolved.background ?? preferences.block.backgroundColor
+  const firstBackgroundOpacity = Math.round(
+    (hasExplicitBackground
+      ? firstResolved.backgroundOpacity
+      : preferences.block.backgroundOpacity) * 100,
+  )
   const firstText = texts[0]
   const firstMedia = mediaNodes[0]?.['x-superboard']?.media
 

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { getStroke } from 'perfect-freehand'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import {
-  DEFAULT_TEXT_FONT,
   TEXT_LINE_HEIGHT,
   TEXT_MIN_HEIGHT,
   TEXT_PADDING_X,
@@ -17,6 +16,7 @@ import {
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { DEFAULT_BLOCK_SIZES, blockEditor } from './blocks'
 import { isLocked, nextFreeId, nodeMapOf, topAncestor } from './hierarchy'
+import { getPreferences } from './preferences'
 import { detectMediaKind, type EditorTool } from './tools'
 
 type DataManager = {
@@ -465,6 +465,7 @@ export function CanvasEditorTools({
 
   function startEditing(node: CanvasNode | null, x: number, y: number) {
     suppressTextCreateRef.current = false
+    const textDefaults = getPreferences().text
     const kind = node ? editKindOf(node) : null
     if (node && kind) {
       const style = node['x-superboard']?.style
@@ -476,11 +477,11 @@ export function CanvasEditorTools({
         width: node.width,
         height: node.height,
         value: editingValue(node, kind),
-        fontSize: style?.fontSize ?? 16,
-        fontFamily: style?.fontFamily ?? DEFAULT_TEXT_FONT,
-        color: style?.color,
-        opacity: style?.opacity ?? 1,
-        textAlign: style?.textAlign,
+        fontSize: style?.fontSize ?? textDefaults.fontSize,
+        fontFamily: style?.fontFamily ?? textDefaults.fontFamily,
+        color: style?.color ?? textDefaults.color,
+        opacity: style?.opacity ?? textDefaults.opacity,
+        textAlign: style?.textAlign ?? textDefaults.textAlign,
       })
       return
     }
@@ -496,9 +497,11 @@ export function CanvasEditorTools({
         canvas['x-superboard']?.settings?.defaultBlockHeight ??
         DEFAULT_BLOCK_SIZES.text.height,
       value: '',
-      fontSize: 16,
-      fontFamily: DEFAULT_TEXT_FONT,
-      opacity: 1,
+      fontSize: textDefaults.fontSize,
+      fontFamily: textDefaults.fontFamily,
+      color: textDefaults.color,
+      opacity: textDefaults.opacity,
+      textAlign: textDefaults.textAlign,
     })
   }
 
@@ -677,13 +680,10 @@ export function CanvasEditorTools({
       ...(shape === 'rounded-rect' ? { roundedRect: true } : {}),
       style:
         shape === 'line'
-          ? { fill: 'none', stroke: '#1d1d1d', strokeWidth: 2 }
-          : {
-              fill: '#ffffff',
-              stroke: '#1d1d1d',
-              strokeWidth: 2,
-              cornerRadius: shape === 'rounded-rect' ? 8 : 0,
-            },
+          ? { fill: 'none' }
+          : shape === 'rounded-rect'
+            ? { cornerRadius: 8 }
+            : undefined,
     }
     if (shape === 'line') {
       extension.lineFlip = {
