@@ -248,6 +248,7 @@ export function CanvasEditorOverlay({
     let unsubscribe: (() => void) | undefined
     let frame = 0
     let commitTimer: number | undefined
+    let actionsTimer: number | undefined
 
     const update = () => {
       frame = 0
@@ -266,6 +267,14 @@ export function CanvasEditorOverlay({
       ) {
         setTick((value) => value + 1)
         return
+      }
+      if (next.scale !== current.scale) {
+        setActionsVisible(false)
+        if (actionsTimer) window.clearTimeout(actionsTimer)
+        actionsTimer = window.setTimeout(() => {
+          actionsTimer = undefined
+          if (!dragRef.current) setActionsVisible(true)
+        }, 200)
       }
       pendingViewRef.current = next
       const factor = next.scale / current.scale
@@ -325,6 +334,7 @@ export function CanvasEditorOverlay({
       if (timer) window.clearTimeout(timer)
       if (frame) cancelAnimationFrame(frame)
       if (commitTimer) window.clearTimeout(commitTimer)
+      if (actionsTimer) window.clearTimeout(actionsTimer)
       unsubscribe?.()
       pendingViewRef.current = null
       dmRef.current = null
