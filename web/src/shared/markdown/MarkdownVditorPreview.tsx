@@ -1,7 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
-import { MarkdownView } from './MarkdownView'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { loadMathJax } from './mathjax'
 import { vditorCdn } from './vditorAssets'
+
+const MarkdownView = lazy(() =>
+  import('./MarkdownView').then((module) => ({ default: module.MarkdownView })),
+)
 
 const HTML_CACHE_LIMIT = 100
 const htmlCache = new Map<string, Promise<string>>()
@@ -110,10 +113,12 @@ export function MarkdownVditorPreview({
 
   if (useLegacyRenderer || failed) {
     return (
-      <MarkdownView
-        source={source}
-        className={`sb-md-docs ${className}`.trim()}
-      />
+      <Suspense fallback={null}>
+        <MarkdownView
+          source={source}
+          className={`sb-md-docs ${className}`.trim()}
+        />
+      </Suspense>
     )
   }
 
