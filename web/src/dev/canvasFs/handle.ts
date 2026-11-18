@@ -10,6 +10,7 @@ import {
   blankCanvas,
   canvasContentHash,
   findCanvasFile,
+  forgetCanvasFile,
   listCanvases,
   writeCanvasFile,
 } from './files'
@@ -90,7 +91,7 @@ export async function handleCanvasFsRequest(
         slug: body.slug,
         updatedAt: new Date().toISOString(),
       })
-      await writeCanvasFile(file, canvas)
+      await writeCanvasFile(file, canvas, folder)
       sendJson(res, 201, {
         ok: true,
         canvas,
@@ -132,7 +133,7 @@ export async function handleCanvasFsRequest(
         meta.updatedAt = new Date().toISOString()
       }
 
-      await writeCanvasFile(found.file, payload)
+      await writeCanvasFile(found.file, payload, found.folder)
       sendJson(res, 200, {
         ok: true,
         hash: nextHash,
@@ -185,9 +186,10 @@ export async function handleCanvasFsRequest(
         }
       }
 
-      await writeCanvasFile(nextFile, nextCanvas)
+      await writeCanvasFile(nextFile, nextCanvas, nextFolder)
       if (nextFile !== found.file) {
         await fs.unlink(found.file)
+        forgetCanvasFile(found.file)
         await removeEmptyParents(root, scope, found.file)
       }
       sendJson(res, 200, {
@@ -202,6 +204,7 @@ export async function handleCanvasFsRequest(
 
     if (req.method === 'DELETE') {
       await fs.unlink(found.file)
+      forgetCanvasFile(found.file)
       await removeEmptyParents(root, scope, found.file)
       sendJson(res, 200, { ok: true })
       return

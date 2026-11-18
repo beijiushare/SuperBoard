@@ -17,6 +17,30 @@ export interface CanvasListItem extends CanvasMeta {
   scope: BoardScope
 }
 
+interface CachedCanvasFile {
+  mtimeMs: number
+  ctimeMs: number
+  size: number
+  scan: ScannedCanvas
+}
+
+const canvasFileCache = new Map<string, CachedCanvasFile>()
+
+function cacheKey(file: string) {
+  return path.resolve(file)
+}
+
+function sameFile(
+  cached: CachedCanvasFile,
+  stats: { mtimeMs: number; ctimeMs: number; size: number },
+) {
+  return (
+    cached.mtimeMs === stats.mtimeMs &&
+    cached.ctimeMs === stats.ctimeMs &&
+    cached.size === stats.size
+  )
+}
+
 function canvasMeta(canvas: CanvasDocument, slug: string): CanvasMeta {
   const meta = canvas['x-superboard']?.meta
   return {
@@ -56,15 +80,36 @@ export async function scanCanvasFiles(root: string, scope: BoardScope): Promise<
   await visit(dir, '')
 
   const canvases: ScannedCanvas[] = []
+  const seen = new Set<string>()
   for (const item of files) {
+    const key = cacheKey(item.file)
+    seen.add(key)
     try {
-      const canvas = parseCanvas(await fs.readFile(item.file, 'utf8'))
-      const fallbackSlug = path.basename(item.file, '.canvas')
+      const stats = await fs.stat(key)
+      const cached = canvasFileCache.get(key)
+      if (cached && sameFile(cached, stats)) {
+        canvases.push(cached.scan)
+        continue
+      }
+      const canvas = parseCanvas(await fs.readFile(key, 'utf8'))
+      const fallbackSlug = path.basename(key, '.canvas')
       const meta = canvasMeta(canvas, fallbackSlug)
-      canvases.push({ ...item, canvas, meta })
+      const scan = { ...item, file: key, canvas, meta }
+      canvasFileCache.set(key, {
+        mtimeMs: stats.mtimeMs,
+        ctimeMs: stats.ctimeMs,
+        size: stats.size,
+        scan,
+      })
+      canvases.push(scan)
     } catch {
-      // Ignore malformed canvases in the picker.
+      canvasFileCache.delete(key)
     }
+  }
+
+  const prefix = `${path.resolve(dir)}${path.sep}`
+  for (const key of canvasFileCache.keys()) {
+    if (key.startsWith(prefix) && !seen.has(key)) canvasFileCache.delete(key)
   }
   return canvases
 }
@@ -98,11 +143,29 @@ export function canvasContentHash(canvas: CanvasDocument) {
     .digest('hex')
 }
 
-export async function writeCanvasFile(file: string, canvas: CanvasDocument) {
+export async function writeCanvasFile(file: string, canvas: CanvasDocument, folder = '') {
   await fs.mkdir(path.dirname(file), { recursive: true })
   const tempFile = `${file}.${process.pid}.${Date.now()}.tmp`
   await fs.writeFile(tempFile, serializeCanvas(canvas), 'utf8')
   await fs.rename(tempFile, file)
+  const key = cacheKey(file)
+  try {
+    const fallbackSlug = path.basename(key, '.canvas')
+    const meta = canvasMeta(canvas, fallbackSlug)
+    const stats = await fs.stat(key)
+    canvasFileCache.set(key, {
+      mtimeMs: stats.mtimeMs,
+      ctimeMs: stats.ctimeMs,
+      size: stats.size,
+      scan: { file: key, folder, canvas, meta },
+    })
+  } catch {
+    canvasFileCache.delete(key)
+  }
+}
+
+export function forgetCanvasFile(file: string) {
+  canvasFileCache.delete(cacheKey(file))
 }
 
 export function blankCanvas(meta: CanvasMeta): CanvasDocument {
