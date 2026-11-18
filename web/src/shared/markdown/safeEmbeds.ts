@@ -37,10 +37,6 @@ function normalizeEmbedSrc(value: unknown): string | null {
   }
 }
 
-function isAllowedEmbed(value: unknown) {
-  return normalizeEmbedSrc(value) !== null
-}
-
 export function rehypeSafeEmbeds() {
   return (tree: HastNode) => {
     visit(tree as never, (node: HastNode) => {

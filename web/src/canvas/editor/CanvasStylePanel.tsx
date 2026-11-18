@@ -21,53 +21,6 @@ interface CanvasStylePanelProps {
   onRememberColor?: (color: string) => void
 }
 
-const EDGE_COLORS = [
-  { value: '#6b7280', label: '灰色' },
-  { value: '#1d1d1d', label: '黑色' },
-  { value: '#2f80ed', label: '蓝色' },
-  { value: '#e03131', label: '红色' },
-  { value: '#2f9e44', label: '绿色' },
-]
-
-const FILLS = [
-  { value: '#ffffff', label: '白色' },
-  { value: '#f6f5f1', label: '纸色' },
-  { value: '#fecaca', label: '红色' },
-  { value: '#fed7aa', label: '橙色' },
-  { value: '#fef08a', label: '黄色' },
-  { value: '#bbf7d0', label: '绿色' },
-  { value: '#bfdbfe', label: '蓝色' },
-  { value: '#e9d5ff', label: '紫色' },
-  { value: 'none', label: '无填充' },
-]
-
-const STROKES = [
-  { value: '#1d1d1d', label: '黑色' },
-  { value: '#6b7280', label: '灰色' },
-  { value: '#2f80ed', label: '蓝色' },
-  { value: '#e03131', label: '红色' },
-  { value: '#2f9e44', label: '绿色' },
-  { value: 'none', label: '无描边' },
-]
-
-const TEXT_COLORS = [
-  { value: '#1d1d1d', label: '黑色' },
-  { value: '#6b7280', label: '灰色' },
-  { value: '#2f80ed', label: '蓝色' },
-  { value: '#e03131', label: '红色' },
-  { value: '#2f9e44', label: '绿色' },
-]
-
-const BLOCK_COLORS = [
-  { value: '0', label: '默认', css: '#ffffff' },
-  { value: '1', label: '红', css: '#fecaca' },
-  { value: '2', label: '橙', css: '#fed7aa' },
-  { value: '3', label: '黄', css: '#fef08a' },
-  { value: '4', label: '绿', css: '#bbf7d0' },
-  { value: '5', label: '蓝', css: '#bfdbfe' },
-  { value: '6', label: '紫', css: '#e9d5ff' },
-]
-
 function kindOf(node: CanvasNode) {
   return node['x-superboard']?.kind
 }
@@ -226,10 +179,6 @@ export function CanvasStylePanel({
 
   const shapes = nodes.filter((node) => kindOf(node) === 'shape')
   const texts = nodes.filter((node) => node.type === 'text' && (!kindOf(node) || kindOf(node) === 'text'))
-  const blocks = nodes.filter((node) => {
-    const kind = kindOf(node)
-    return kind === 'markdown' || kind === 'pele' || kind === 'media'
-  })
   const mediaNodes = nodes.filter(
     (node) => node['x-superboard']?.kind === 'media' && node['x-superboard']?.media,
   )
@@ -315,14 +264,6 @@ export function CanvasStylePanel({
         }
       },
       patchHistoryKey('media', patch),
-    )
-  }
-
-  function setBlockColor(color: string) {
-    applyTo(blocks, (node) =>
-      color === '0'
-        ? { ...node, color: undefined }
-        : { ...node, color },
     )
   }
 
@@ -432,7 +373,6 @@ export function CanvasStylePanel({
   const firstOpacity = Math.round((firstStyle?.opacity ?? 1) * 100)
   const firstShape = shapes[0]
   const firstText = texts[0]
-  const firstBlock = blocks[0]
   const firstMedia = mediaNodes[0]?.['x-superboard']?.media
 
   return (

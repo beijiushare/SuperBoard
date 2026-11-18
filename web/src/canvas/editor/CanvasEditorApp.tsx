@@ -22,7 +22,6 @@ import { BoardTreePanel } from '../../shared/board/BoardTreePanel'
 import type {
   BoardListItem,
   BoardScope,
-  BoardTreeFile,
   BoardTreeFolder,
 } from '../../shared/board/types'
 import { buildBoardTree } from '../../shared/board/tree'
@@ -32,7 +31,6 @@ import { PresentationOverlay } from '../../shared/director/PresentationOverlay'
 import {
   parseCanvas,
   type CanvasDocument,
-  type CanvasEdge,
   type CanvasNode,
   type SuperBoardScheduleEvent,
 } from '../model'
@@ -112,7 +110,6 @@ export function CanvasEditorApp() {
   const [canvasMenu, setCanvasMenu] = useState<CanvasMenuState | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [historyState, setHistoryState] = useState({ canUndo: false, canRedo: false })
   const [treeMode, setTreeMode] = useState(() =>
     new URLSearchParams(window.location.search).has('tree'),
   )
@@ -304,7 +301,6 @@ export function CanvasEditorApp() {
         if (cancelled) return
         historyRef.current = { past: [], future: [] }
         historyMergeRef.current = null
-        setHistoryState({ canUndo: false, canRedo: false })
         setSelectedIds([])
         setTool('select')
         normalizeMarkdownLocks(next)
@@ -403,13 +399,6 @@ export function CanvasEditorApp() {
     }
   }, [canvas, selectedEdgeId])
 
-  function syncHistoryState() {
-    setHistoryState({
-      canUndo: historyRef.current.past.length > 0,
-      canRedo: historyRef.current.future.length > 0,
-    })
-  }
-
   function recordHistory(mergeKey?: string) {
     if (!canvas) return
     const now = Date.now()
@@ -427,7 +416,6 @@ export function CanvasEditorApp() {
     history.past.push(structuredClone(canvas))
     if (history.past.length > HISTORY_LIMIT) history.past.shift()
     history.future.length = 0
-    syncHistoryState()
   }
 
   function rememberBoardColor(color: string) {
@@ -907,7 +895,6 @@ export function CanvasEditorApp() {
     const previous = history.past.pop()
     if (!previous) return
     history.future.push(structuredClone(canvas))
-    syncHistoryState()
     applyDocument(previous)
   }
 
@@ -918,7 +905,6 @@ export function CanvasEditorApp() {
     const next = history.future.pop()
     if (!next) return
     history.past.push(structuredClone(canvas))
-    syncHistoryState()
     applyDocument(next)
   }
 
@@ -1479,7 +1465,6 @@ export function CanvasEditorApp() {
   function activateCanvas(item: CanvasListItem, next: CanvasDocument) {
     historyRef.current = { past: [], future: [] }
     historyMergeRef.current = null
-    setHistoryState({ canUndo: false, canRedo: false })
     normalizeMarkdownLocks(next)
     setSelectedIds([])
     setSelectedEdgeId(null)
@@ -1794,14 +1779,6 @@ export function CanvasEditorApp() {
   const activeItem = items.find(
     (entry) => entry.slug === selectedSlug && entry.scope === scope,
   )
-  const saveLabel =
-    saveState === 'saving'
-      ? '保存中…'
-      : saveState === 'dirty'
-        ? '保存'
-        : saveState === 'error'
-          ? '重试保存'
-          : '已保存'
   const railSaveLabel =
     saveState === 'error'
       ? '保存失败'

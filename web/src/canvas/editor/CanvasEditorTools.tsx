@@ -885,9 +885,6 @@ export function CanvasEditorTools({
           endY: view.offsetY + arrowDraft.currentY * view.scale,
         }
       : null
-  const arrowFrom = arrowDraft
-    ? canvas.nodes.find((node) => node.id === arrowDraft.fromId) ?? null
-    : null
   const arrowTarget = arrowDraft
     ? findNodeAt(arrowDraft.currentX, arrowDraft.currentY, (node) => node.id !== arrowDraft.fromId)
     : null

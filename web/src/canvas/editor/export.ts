@@ -244,28 +244,6 @@ function nodeMarkup(node: CanvasNode) {
   return textMarkup(node)
 }
 
-function anchor(node: CanvasNode, side: CanvasEdge['fromSide']) {
-  if (side === 'top') return { x: node.x + node.width / 2, y: node.y }
-  if (side === 'bottom') return { x: node.x + node.width / 2, y: node.y + node.height }
-  if (side === 'left') return { x: node.x, y: node.y + node.height / 2 }
-  if (side === 'right') return { x: node.x + node.width, y: node.y + node.height / 2 }
-  return { x: node.x + node.width / 2, y: node.y + node.height / 2 }
-}
-
-function nearestSide(from: CanvasNode, to: CanvasNode): CanvasEdge['fromSide'] {
-  const dx = to.x + to.width / 2 - (from.x + from.width / 2)
-  const dy = to.y + to.height / 2 - (from.y + from.height / 2)
-  if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? 'right' : 'left'
-  return dy >= 0 ? 'bottom' : 'top'
-}
-
-function opposite(side: CanvasEdge['fromSide']): CanvasEdge['fromSide'] {
-  if (side === 'top') return 'bottom'
-  if (side === 'bottom') return 'top'
-  if (side === 'left') return 'right'
-  return 'left'
-}
-
 function arrowHead(
   tip: { x: number; y: number },
   from: { x: number; y: number },

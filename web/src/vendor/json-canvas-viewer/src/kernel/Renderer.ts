@@ -76,12 +76,6 @@ export default class Renderer extends BaseModule {
 		this.ctx.restore();
 	};
 
-	private readonly isInside = (inner: Box, outer: Box) =>
-		inner.left > outer.left &&
-		inner.top > outer.top &&
-		inner.right < outer.right &&
-		inner.bottom < outer.bottom;
-
 	private readonly isOutside = (inner: Box, outer: Box) =>
 		inner.right < outer.left ||
 		inner.bottom < outer.top ||
