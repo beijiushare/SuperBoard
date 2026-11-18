@@ -58,7 +58,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
       >
         <h2>偏好设置</h2>
         <p className="sb-preferences-note">
-          保存在当前浏览器，作为所有未单独设置样式的块的默认值。
+          保存在当前浏览器，只影响之后新建的块。
         </p>
 
         <BackgroundFields

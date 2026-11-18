@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import { DEFAULT_TEXT_FONT } from '../model'
+import { DEFAULT_TEXT_FONT, type SuperBoardStyle } from '../model'
 
 export type BorderStyle = 'solid' | 'dashed' | 'dotted'
 export type TextAlign = 'left' | 'center' | 'right'
@@ -95,6 +95,29 @@ export function loadPreferences(): EditorPreferences {
 
 export function getPreferences() {
   return cached
+}
+
+export function blockStyleFromPreferences(): Partial<SuperBoardStyle> {
+  const block = getPreferences().block
+  return {
+    backgroundColor: block.backgroundColor,
+    backgroundOpacity: block.backgroundOpacity,
+    borderColor: block.borderColor,
+    borderOpacity: block.borderOpacity,
+    borderWidth: block.borderWidth,
+    borderStyle: block.borderStyle,
+  }
+}
+
+export function textStyleFromPreferences(): Partial<SuperBoardStyle> {
+  const text = getPreferences().text
+  return {
+    fontFamily: text.fontFamily,
+    fontSize: text.fontSize,
+    color: text.color,
+    opacity: text.opacity,
+    textAlign: text.textAlign,
+  }
 }
 
 export function savePreferences(next: EditorPreferences) {

@@ -6,7 +6,7 @@ import {
   type SuperBoardStyle,
 } from '../model'
 import { ColorPicker } from './ColorPicker'
-import { FONT_OPTIONS, usePreferences } from './preferences'
+import { DEFAULT_PREFERENCES, FONT_OPTIONS } from './preferences'
 import { StyleNumberControl } from './StyleNumberControl'
 
 interface TransformFieldsProps {
@@ -276,9 +276,8 @@ export function TextFields({
   onChange,
   onColorUsed,
 }: TextFieldsProps) {
-  const preferences = usePreferences()
   const style = {
-    ...preferences.text,
+    ...DEFAULT_PREFERENCES.text,
     ...node?.['x-superboard']?.style,
   }
   return (

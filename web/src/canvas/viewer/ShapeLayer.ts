@@ -1,5 +1,5 @@
 import { BaseModule, internal, type BaseArgs } from '../../vendor/json-canvas-viewer/src/index.ts'
-import { getPreferences } from '../editor/preferences'
+import { DEFAULT_PREFERENCES } from '../editor/preferences'
 import {
   resolveNodeStyle,
   type SuperBoardNodeExtension,
@@ -213,7 +213,7 @@ export class ShapeLayer extends BaseModule {
       const ext = node['x-superboard']
       if (ext?.kind !== 'shape') continue
       const style = resolveNodeStyle(ext.style)
-      const preferences = getPreferences()
+      const preferences = DEFAULT_PREFERENCES
       const blockDefaults = preferences.block
       const shape = ext.shape ?? 'rect'
       const rotation = ext.rotation ?? 0

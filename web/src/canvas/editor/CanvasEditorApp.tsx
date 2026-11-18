@@ -61,6 +61,7 @@ import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
 import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { PeleCreateDialog } from './PeleCreateDialog'
 import { PreferencesDialog } from './PreferencesDialog'
+import { blockStyleFromPreferences } from './preferences'
 import { InputDialog } from '../../shared/ui/InputDialog'
 import {
   DEFAULT_BLOCK_SIZES,
@@ -783,6 +784,7 @@ export function CanvasEditorApp() {
             'x-superboard': {
               kind: 'markdown',
               markdownLocked: false,
+              style: blockStyleFromPreferences(),
             },
           }
         : {
@@ -793,7 +795,12 @@ export function CanvasEditorApp() {
             width: size.width,
             height: size.height,
             text: `\`\`\`mermaid\n${code}\n\`\`\``,
-            'x-superboard': { kind: 'pele', diagram: 'flowchart', code },
+            'x-superboard': {
+              kind: 'pele',
+              diagram: 'flowchart',
+              code,
+              style: blockStyleFromPreferences(),
+            },
           }
     recordHistory()
     applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
@@ -870,7 +877,12 @@ export function CanvasEditorApp() {
       width: size.width,
       height: size.height,
       text,
-      'x-superboard': { kind: 'pele', diagram, code },
+      'x-superboard': {
+        kind: 'pele',
+        diagram,
+        code,
+        style: blockStyleFromPreferences(),
+      },
     }
     recordHistory()
     applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
@@ -896,7 +908,11 @@ export function CanvasEditorApp() {
       width: size.width,
       height: size.height,
       text: '',
-      'x-superboard': { kind: 'schedule', scheduleEvents: [] },
+      'x-superboard': {
+        kind: 'schedule',
+        scheduleEvents: [],
+        style: blockStyleFromPreferences(),
+      },
     }
     recordHistory()
     applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
@@ -926,6 +942,7 @@ export function CanvasEditorApp() {
       'x-superboard': {
         kind: 'media',
         media: { kind: detectMediaKind(url), url },
+        style: blockStyleFromPreferences(),
       },
     }
     recordHistory()

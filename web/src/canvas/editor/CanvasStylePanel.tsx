@@ -10,7 +10,7 @@ import {
 } from '../model'
 import { isRoundedRect } from './blocks'
 import { collectDescendants } from './hierarchy'
-import { usePreferences } from './preferences'
+import { DEFAULT_PREFERENCES } from './preferences'
 import { ColorPicker } from './ColorPicker'
 import {
   BackgroundFields,
@@ -100,7 +100,7 @@ export function CanvasStylePanel({
     alignRight: true,
     centerVertically: true,
   })
-  const preferences = usePreferences()
+  const preferences = DEFAULT_PREFERENCES
   const selected = new Set(selectedIds)
   const nodes = canvas.nodes.filter((node) => selected.has(node.id))
   const edge = selectedEdgeId

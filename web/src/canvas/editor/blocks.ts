@@ -1,5 +1,5 @@
 import type { CanvasNode } from '../model'
-import { getPreferences } from './preferences'
+import { DEFAULT_PREFERENCES } from './preferences'
 
 export const BLOCK_KINDS = ['text', 'markdown', 'pele', 'schedule', 'media'] as const
 
@@ -104,7 +104,7 @@ export function isRoundedRect(node: CanvasNode) {
   return (
     extension.roundedRect === true ||
     (extension.style?.cornerRadius ?? 0) > 0 ||
-    getPreferences().shapeCornerRadius > 0
+    DEFAULT_PREFERENCES.shapeCornerRadius > 0
   )
 }
 

@@ -16,7 +16,12 @@ import {
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { DEFAULT_BLOCK_SIZES, blockEditor } from './blocks'
 import { isLocked, nextFreeId, nodeMapOf, topAncestor } from './hierarchy'
-import { getPreferences } from './preferences'
+import {
+  DEFAULT_PREFERENCES,
+  blockStyleFromPreferences,
+  getPreferences,
+  textStyleFromPreferences,
+} from './preferences'
 import { detectMediaKind, type EditorTool } from './tools'
 
 type DataManager = {
@@ -465,7 +470,8 @@ export function CanvasEditorTools({
 
   function startEditing(node: CanvasNode | null, x: number, y: number) {
     suppressTextCreateRef.current = false
-    const textDefaults = getPreferences().text
+    const textDefaults = DEFAULT_PREFERENCES.text
+    const newTextDefaults = getPreferences().text
     const kind = node ? editKindOf(node) : null
     if (node && kind) {
       const style = node['x-superboard']?.style
@@ -497,11 +503,11 @@ export function CanvasEditorTools({
         canvas['x-superboard']?.settings?.defaultBlockHeight ??
         DEFAULT_BLOCK_SIZES.text.height,
       value: '',
-      fontSize: textDefaults.fontSize,
-      fontFamily: textDefaults.fontFamily,
-      color: textDefaults.color,
-      opacity: textDefaults.opacity,
-      textAlign: textDefaults.textAlign,
+      fontSize: newTextDefaults.fontSize,
+      fontFamily: newTextDefaults.fontFamily,
+      color: newTextDefaults.color,
+      opacity: newTextDefaults.opacity,
+      textAlign: newTextDefaults.textAlign,
     })
   }
 
@@ -579,7 +585,10 @@ export function CanvasEditorTools({
       width: current.width,
       height: measured,
       text: current.value,
-      'x-superboard': { kind: 'text' },
+      'x-superboard': {
+        kind: 'text',
+        style: textStyleFromPreferences(),
+      },
     }
     onBeforeChange()
     onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
@@ -678,12 +687,15 @@ export function CanvasEditorTools({
       kind: 'shape',
       shape: shapeKind,
       ...(shape === 'rounded-rect' ? { roundedRect: true } : {}),
-      style:
-        shape === 'line'
-          ? { fill: 'none' }
-          : shape === 'rounded-rect'
-            ? { cornerRadius: 8 }
-            : undefined,
+      style: {
+        ...blockStyleFromPreferences(),
+        ...(shape === 'line' ? { backgroundColor: 'transparent' } : {}),
+        ...(shape === 'rounded-rect'
+          ? { cornerRadius: 8 }
+          : shape === 'rect'
+            ? { cornerRadius: getPreferences().shapeCornerRadius }
+            : {}),
+      },
     }
     if (shape === 'line') {
       extension.lineFlip = {

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, type ReactNode } from 'react'
-import { usePreferences } from '../editor/preferences'
+import { DEFAULT_PREFERENCES } from '../editor/preferences'
 import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import {
@@ -80,8 +80,7 @@ function BlockSurface({
   const ext = extension(node)
   const markdown = ext?.kind === 'markdown'
   const style = resolveNodeStyle(ext?.style)
-  const preferences = usePreferences()
-  const blockDefaults = preferences.block
+  const blockDefaults = DEFAULT_PREFERENCES.block
   const background = style.background ?? blockDefaults.backgroundColor
   const backgroundOpacity = style.background
     ? style.backgroundOpacity
@@ -139,7 +138,6 @@ export function TextSlot({
 }) {
   useNodeSelection(node.id, onActive, onSelect)
   const ext = extension(node)
-  const preferences = usePreferences()
   const content =
     ext?.kind === 'markdown' && ext.markdownLocked === false ? (
       <div className="sb-md-editing-placeholder" />
@@ -159,7 +157,10 @@ export function TextSlot({
         />
       </Suspense>
     ) : (
-      <div className="sb-plain-text" style={textStyle(node, preferences.text)}>
+      <div
+        className="sb-plain-text"
+        style={textStyle(node, DEFAULT_PREFERENCES.text)}
+      >
         {node.text}
       </div>
     )
