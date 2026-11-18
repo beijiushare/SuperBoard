@@ -4,12 +4,21 @@ import { useDialogEscape } from './useDialogEscape'
 
 interface RenameFolderDialogProps {
   folder: BoardTreeFolder
+  folders?: string[]
   onClose: () => void
-  onSubmit: (name: string) => Promise<void>
+  onSubmit: (name: string, parent: string) => Promise<void>
 }
 
-export function RenameFolderDialog({ folder, onClose, onSubmit }: RenameFolderDialogProps) {
+export function RenameFolderDialog({
+  folder,
+  folders = [],
+  onClose,
+  onSubmit,
+}: RenameFolderDialogProps) {
   const [name, setName] = useState(folder.name)
+  const [parent, setParent] = useState(
+    folder.path.split('/').slice(0, -1).join('/'),
+  )
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -21,7 +30,7 @@ export function RenameFolderDialog({ folder, onClose, onSubmit }: RenameFolderDi
     setBusy(true)
     setError('')
     try {
-      await onSubmit(name.trim())
+      await onSubmit(name.trim(), parent)
       onClose()
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : String(submitError))
@@ -60,7 +69,23 @@ export function RenameFolderDialog({ folder, onClose, onSubmit }: RenameFolderDi
               autoFocus
               disabled={busy}
             />
-            <small>只修改当前目录名，目录内的白板和子目录会一起移动。</small>
+            <small>目录内的白板和子目录会一起移动。</small>
+          </label>
+          <label className="sb-field">
+            <span>父文件夹</span>
+            <select
+              value={parent}
+              onChange={(event) => setParent(event.target.value)}
+              disabled={busy}
+            >
+              <option value="">根目录</option>
+              {folders.map((path) => (
+                <option key={path} value={path}>
+                  {path}
+                </option>
+              ))}
+            </select>
+            <small>修改父文件夹会把整个目录移动到新位置。</small>
           </label>
           {error ? <p className="sb-dialog-error">{error}</p> : null}
         </div>

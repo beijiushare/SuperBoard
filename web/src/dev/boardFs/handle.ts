@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { deleteFolder, renameFolder } from './folders'
+import { createFolder, deleteFolder, listFolders, renameFolder } from './folders'
 import { HttpError, readJsonBody, sendJson } from './http'
-import type { RenameFolderBody } from './types'
+import type { CreateFolderBody, RenameFolderBody } from './types'
 
 export async function handleBoardFsRequest(
   root: string,
@@ -16,6 +16,16 @@ export async function handleBoardFsRequest(
   }
 
   try {
+    if (req.method === 'GET') {
+      sendJson(res, 200, { folders: await listFolders(root) })
+      return
+    }
+    if (req.method === 'POST') {
+      const body = await readJsonBody<CreateFolderBody>(req)
+      const folder = await createFolder(root, body)
+      sendJson(res, 201, { ok: true, path: folder.path })
+      return
+    }
     if (req.method === 'PATCH') {
       const body = await readJsonBody<RenameFolderBody>(req)
       const renamed = await renameFolder(root, body)

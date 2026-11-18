@@ -6,12 +6,20 @@ import { useDialogEscape } from './useDialogEscape'
 interface BoardDialogProps {
   mode: 'create' | 'rename'
   board?: BoardListItem
+  folders?: string[]
   defaultFolder?: string
   onClose: () => void
   onSubmit: (values: BoardFormValues) => Promise<void>
 }
 
-export function BoardDialog({ mode, board, defaultFolder = '', onClose, onSubmit }: BoardDialogProps) {
+export function BoardDialog({
+  mode,
+  board,
+  folders = [],
+  defaultFolder = '',
+  onClose,
+  onSubmit,
+}: BoardDialogProps) {
   const [title, setTitle] = useState(board?.title ?? '')
   const [slug, setSlug] = useState(board?.slug ?? '')
   const [folder, setFolder] = useState(board?.path ?? defaultFolder)
@@ -79,17 +87,23 @@ export function BoardDialog({ mode, board, defaultFolder = '', onClose, onSubmit
           </label>
 
           <label className="sb-field">
-            <span>文件夹路径</span>
-            <input
+            <span>文件夹</span>
+            <select
               value={folder}
               onChange={(event) => setFolder(event.target.value)}
-              placeholder="例如：notes/2026，留空表示根目录"
               disabled={busy}
-            />
+            >
+              <option value="">根目录</option>
+              {folders.map((path) => (
+                <option key={path} value={path}>
+                  {path}
+                </option>
+              ))}
+            </select>
             <small>
               {mode === 'create'
-                ? '使用真实目录，可填写多级路径。'
-                : '修改路径会把文件移动到新文件夹，留空表示根目录。'}
+                ? '默认放在右键位置，也可以改到其他文件夹。'
+                : '修改文件夹会把白板移动到新位置。'}
             </small>
           </label>
 

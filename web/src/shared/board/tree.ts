@@ -54,8 +54,25 @@ function finalize(folder: FolderBuilder): BoardTreeNode[] {
   return [...folders, ...files]
 }
 
-export function buildBoardTree(boards: BoardListItem[]): BoardTreeNode[] {
+export function buildBoardTree(
+  boards: BoardListItem[],
+  folderPaths: Array<{ path: string }> = [],
+): BoardTreeNode[] {
   const root = createFolder('', '')
+
+  for (const item of folderPaths) {
+    const parts = normalizeFolderPath(item.path).split('/').filter(Boolean)
+    let current = root
+    for (const part of parts) {
+      const childPath = current.path ? `${current.path}/${part}` : part
+      let child = current.folders.get(part)
+      if (!child) {
+        child = createFolder(part, childPath)
+        current.folders.set(part, child)
+      }
+      current = child
+    }
+  }
 
   for (const board of boards) {
     const parts = normalizeFolderPath(board.path).split('/').filter(Boolean)

@@ -96,6 +96,9 @@ import {
 
 export function CanvasEditorApp() {
   const [items, setItems] = useState<CanvasListItem[]>([])
+  const [folders, setFolders] = useState<
+    Array<{ path: string; scope: 'public' | 'private' }>
+  >([])
   const [selectedSlug, setSelectedSlug] = useState('')
   const [canvas, setCanvas] = useState<CanvasDocument | null>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -137,6 +140,7 @@ export function CanvasEditorApp() {
   const [preferencesOpen, setPreferencesOpen] = useState(false)
   const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
   const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
+  const [newFolderParent, setNewFolderParent] = useState<string | null>(null)
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
   const [pendingDeleteFolder, setPendingDeleteFolder] = useState<BoardTreeFolder | null>(
     null,
@@ -217,7 +221,18 @@ export function CanvasEditorApp() {
     () => items.filter((item) => item.scope === scope),
     [items, scope],
   )
-  const treeNodes = useMemo(() => buildBoardTree(scopedItems), [scopedItems])
+  const scopedFolders = useMemo(
+    () => folders.filter((folder) => folder.scope === scope),
+    [folders, scope],
+  )
+  const folderPaths = useMemo(
+    () => scopedFolders.map((folder) => folder.path).sort((a, b) => a.localeCompare(b, 'zh-CN')),
+    [scopedFolders],
+  )
+  const treeNodes = useMemo(
+    () => buildBoardTree(scopedItems, scopedFolders),
+    [scopedItems, scopedFolders],
+  )
   const { expanded, toggleFolder, expandPath, renameExpandedPath } =
     useTreeExpansion(scopedItems)
   canvasRef.current = canvas
@@ -1540,11 +1555,24 @@ export function CanvasEditorApp() {
   }
 
   async function refreshItems() {
-    const response = await fetch('/__canvases')
-    if (!response.ok) throw new Error(`加载失败（${response.status}）`)
-    const data = (await response.json()) as { canvases: CanvasListItem[] }
+    const [boardsResponse, foldersResponse] = await Promise.all([
+      fetch('/__canvases'),
+      fetch('/__folders'),
+    ])
+    if (!boardsResponse.ok) {
+      throw new Error(`加载失败（${boardsResponse.status}）`)
+    }
+    const data = (await boardsResponse.json()) as {
+      canvases: CanvasListItem[]
+    }
     const list = data.canvases ?? []
     setItems(list)
+    if (foldersResponse.ok) {
+      const folderData = (await foldersResponse.json()) as {
+        folders: Array<{ path: string; scope: 'public' | 'private' }>
+      }
+      setFolders(folderData.folders ?? [])
+    }
     return list
   }
 
@@ -1704,7 +1732,21 @@ export function CanvasEditorApp() {
     }
   }
 
-  async function handleRenameFolder(name: string) {
+  async function handleCreateFolder(name: string) {
+    if (newFolderParent === null) return
+    const parent = newFolderParent
+    const response = await fetch('/__folders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ parent, name, scope }),
+    })
+    if (!response.ok) throw new Error(`新建文件夹失败（${response.status}）`)
+    await refreshItems()
+    if (parent) expandPath(parent)
+    setNewFolderParent(null)
+  }
+
+  async function handleRenameFolder(name: string, parent: string) {
     if (!folderDialog) return
     if (saveState !== 'saved') {
       const ok = await save()
@@ -1713,7 +1755,12 @@ export function CanvasEditorApp() {
     const response = await fetch('/__folders', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: folderDialog.path, scope, name }),
+      body: JSON.stringify({
+        path: folderDialog.path,
+        scope,
+        name,
+        parent,
+      }),
     })
     if (!response.ok) throw new Error(`重命名失败（${response.status}）`)
     const data = (await response.json()) as { path: string }
@@ -2301,6 +2348,7 @@ export function CanvasEditorApp() {
           target={contextMenu.target}
           onClose={() => setContextMenu(null)}
           onCreate={(folder) => setBoardDialog({ mode: 'create', folder })}
+          onCreateFolder={(folder) => setNewFolderParent(folder)}
           onRename={(node) => setBoardDialog({ mode: 'rename', board: node })}
           onRenameFolder={(folder) => setFolderDialog(folder)}
           onDelete={(node) => setPendingDelete(node)}
@@ -2317,6 +2365,7 @@ export function CanvasEditorApp() {
           }
           mode={boardDialog.mode}
           board={boardDialog.mode === 'rename' ? boardDialog.board : undefined}
+          folders={folderPaths}
           defaultFolder={
             boardDialog.mode === 'create'
               ? boardDialog.folder ?? ''
@@ -2331,8 +2380,28 @@ export function CanvasEditorApp() {
         <RenameFolderDialog
           key={folderDialog.path}
           folder={folderDialog}
+          folders={folderPaths.filter(
+            (path) =>
+              path !== folderDialog.path &&
+              !path.startsWith(`${folderDialog.path}/`),
+          )}
           onClose={() => setFolderDialog(null)}
           onSubmit={handleRenameFolder}
+        />
+      ) : null}
+
+      {newFolderParent !== null ? (
+        <InputDialog
+          title="新建文件夹"
+          description={
+            newFolderParent
+              ? `将创建在 ${newFolderParent} 下`
+              : '将创建在根目录'
+          }
+          placeholder="文件夹名称"
+          confirmText="创建"
+          onConfirm={(value) => void handleCreateFolder(value)}
+          onClose={() => setNewFolderParent(null)}
         />
       ) : null}
 

@@ -10,6 +10,7 @@ interface BoardContextMenuProps {
   target: BoardContextTarget
   onClose: () => void
   onCreate: (folder: string) => void
+  onCreateFolder: (folder: string) => void
   onRename: (board: BoardTreeFile) => void
   onRenameFolder: (folder: BoardTreeFolder) => void
   onDelete: (board: BoardTreeFile) => void
@@ -22,6 +23,7 @@ export function BoardContextMenu({
   target,
   onClose,
   onCreate,
+  onCreateFolder,
   onRename,
   onRenameFolder,
   onDelete,
@@ -142,6 +144,15 @@ export function BoardContextMenu({
               title={folder ? `在 ${folder} 中新建白板` : '在根目录新建白板'}
             >
               <span className="sb-context-menu-label">{target.type === 'folder' ? '在此新建白板…' : '新建白板…'}</span>
+            </button>
+            <button
+              className="sb-context-menu-item"
+              type="button"
+              role="menuitem"
+              onClick={() => run(() => onCreateFolder(folder))}
+              title={folder ? `在 ${folder} 中新建文件夹` : '在根目录新建文件夹'}
+            >
+              <span className="sb-context-menu-label">新建文件夹</span>
             </button>
           </div>
           {target.type === 'folder' ? (
