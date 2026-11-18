@@ -51,6 +51,7 @@ export interface CanvasMenuState {
   worldY: number
   nodeId: string | null
   edgeId?: string | null
+  quick?: boolean
 }
 
 export function readViewport(handle: CanvasViewerHandle | null): Viewport | null {

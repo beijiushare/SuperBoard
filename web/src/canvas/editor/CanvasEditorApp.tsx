@@ -97,6 +97,11 @@ export function CanvasEditorApp() {
   const [textEditingId, setTextEditingId] = useState<string | null>(null)
   const [tool, setTool] = useState<EditorTool>('select')
   const [editRequest, setEditRequest] = useState<{ id: string; nonce: number } | null>(null)
+  const [textCreateRequest, setTextCreateRequest] = useState<{
+    x: number
+    y: number
+    nonce: number
+  } | null>(null)
   const [peleDialog, setPeleDialog] = useState<
     | { mode: 'create'; point?: { x: number; y: number } }
     | { mode: 'edit'; nodeId: string }
@@ -578,6 +583,40 @@ export function CanvasEditorApp() {
     }
   }
 
+  function openQuickMenu(event: ReactMouseEvent<HTMLDivElement>) {
+    if (!canvas || directorMode || tool !== 'select') return
+    const target = event.target as HTMLElement
+    if (
+      target.closest(
+        'button, input, textarea, select, .sb-style-panel, .sb-color-popover, .sb-color-trigger, .sb-modal-backdrop, .canvas-tool-palette, .canvas-tool-flyout, .sb-director-overlay, .sb-frame-controller, .JCV-controls, .JCV-minimap-container, .sb-editor-tool-surface, .sb-editor-text-input, .sb-editor-selection, .sb-editor-hitbox, .sb-block-actions, .JCV-overlay-container',
+      )
+    ) {
+      return
+    }
+    try {
+      const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
+      if (!viewer?.container) return
+      const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
+      const bounds = event.currentTarget.getBoundingClientRect()
+      const worldX = (event.clientX - bounds.left - dm.data.offsetX) / dm.data.scale
+      const worldY = (event.clientY - bounds.top - dm.data.offsetY) / dm.data.scale
+      if (nodeAtWorldPoint(worldX, worldY)) return
+      event.preventDefault()
+      setSelectedIds([])
+      setSelectedEdgeId(null)
+      setCanvasMenu({
+        x: event.clientX,
+        y: event.clientY,
+        worldX,
+        worldY,
+        nodeId: null,
+        quick: true,
+      })
+    } catch {
+      // ignore
+    }
+  }
+
   function openBlockEditor(id: string) {
     const document = canvasRef.current
     const node = document?.nodes.find((item) => item.id === id)
@@ -711,11 +750,10 @@ export function CanvasEditorApp() {
   }
 
   function insertTextBlock(
-    kind: 'markdown' | 'pele',
+    kind: 'text' | 'markdown' | 'pele',
     point?: { x: number; y: number },
   ) {
     if (!canvas) return
-    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), kind)
     const size = defaultBlockSize(kind)
     const position = point
       ? {
@@ -723,6 +761,12 @@ export function CanvasEditorApp() {
           y: Math.round(point.y - size.height / 2),
         }
       : viewportCenter(size.width, size.height)
+    if (kind === 'text') {
+      setTool('text')
+      setTextCreateRequest({ x: position.x, y: position.y, nonce: Date.now() })
+      return
+    }
+    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), kind)
     const code = 'flowchart LR\n    A[开始] --> B[结束]'
     const node: CanvasNode =
       kind === 'markdown'
@@ -1474,6 +1518,7 @@ export function CanvasEditorApp() {
     setFocusedGroupId(null)
     resetMarkdownEditing()
     setTextEditingId(null)
+    setTextCreateRequest(null)
     setTool('select')
     resetDirectorSession()
     setSelectedSlug(item.slug)
@@ -1849,6 +1894,7 @@ export function CanvasEditorApp() {
               ref={stageRef}
               className="canvas-editor-stage"
               onContextMenu={openCanvasMenu}
+              onDoubleClick={openQuickMenu}
             >
               {canvas ? (
                 <>
@@ -1895,6 +1941,8 @@ export function CanvasEditorApp() {
                     onExitTool={() => setTool('select')}
                     editRequest={editRequest}
                     onEditRequestHandled={() => setEditRequest(null)}
+                    createRequest={textCreateRequest}
+                    onCreateRequestHandled={() => setTextCreateRequest(null)}
                     onEditMarkdown={openMarkdownEditor}
                     onEditingChange={setTextEditingId}
                   />
@@ -2134,6 +2182,18 @@ export function CanvasEditorApp() {
               <button
                 type="button"
                 onClick={() => {
+                  insertTextBlock('text', {
+                    x: canvasMenu.worldX,
+                    y: canvasMenu.worldY,
+                  })
+                  setCanvasMenu(null)
+                }}
+              >
+                输入文本
+              </button>
+              <button
+                type="button"
+                onClick={() => {
                   insertTextBlock('markdown', {
                     x: canvasMenu.worldX,
                     y: canvasMenu.worldY,
@@ -2141,7 +2201,7 @@ export function CanvasEditorApp() {
                   setCanvasMenu(null)
                 }}
               >
-                插入 Markdown
+                创建 Markdown 块
               </button>
               <button
                 type="button"
@@ -2153,7 +2213,7 @@ export function CanvasEditorApp() {
                   setCanvasMenu(null)
                 }}
               >
-                插入 Pele
+                创建图表
               </button>
               <button
                 type="button"
@@ -2165,39 +2225,45 @@ export function CanvasEditorApp() {
                   setCanvasMenu(null)
                 }}
               >
-                插入日程表
+                创建日程表
               </button>
+              {!canvasMenu.quick ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    openMediaDialog({ x: canvasMenu.worldX, y: canvasMenu.worldY })
+                    setCanvasMenu(null)
+                  }}
+                >
+                  插入媒体
+                </button>
+              ) : null}
+            </>
+          ) : null}
+          {!canvasMenu.quick ? (
+            <>
               <button
                 type="button"
+                style={{ display: selectedIds.length > 0 ? 'none' : undefined }}
                 onClick={() => {
-                  openMediaDialog({ x: canvasMenu.worldX, y: canvasMenu.worldY })
+                  selectAllUnlocked()
                   setCanvasMenu(null)
                 }}
               >
-                插入媒体
+                全选
               </button>
+              {hasLocked ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    unlockAllLocked()
+                    setCanvasMenu(null)
+                  }}
+                >
+                  解锁全部
+                </button>
+              ) : null}
             </>
-          ) : null}
-          <button
-            type="button"
-            style={{ display: selectedIds.length > 0 ? 'none' : undefined }}
-            onClick={() => {
-              selectAllUnlocked()
-              setCanvasMenu(null)
-            }}
-          >
-            全选
-          </button>
-          {hasLocked ? (
-            <button
-              type="button"
-              onClick={() => {
-                unlockAllLocked()
-                setCanvasMenu(null)
-              }}
-            >
-              解锁全部
-            </button>
           ) : null}
         </div>
       ) : null}

@@ -77,6 +77,8 @@ interface CanvasEditorToolsProps {
   onExitTool: () => void
   editRequest?: { id: string; nonce: number } | null
   onEditRequestHandled?: () => void
+  createRequest?: { x: number; y: number; nonce: number } | null
+  onCreateRequestHandled?: () => void
   onEditMarkdown?: (id: string) => void
   onEditingChange?: (id: string | null) => void
 }
@@ -168,6 +170,8 @@ export function CanvasEditorTools({
   onExitTool,
   editRequest,
   onEditRequestHandled,
+  createRequest,
+  onCreateRequestHandled,
   onEditMarkdown,
   onEditingChange,
 }: CanvasEditorToolsProps) {
@@ -324,6 +328,12 @@ export function CanvasEditorTools({
     if (node) startEditing(node, node.x, node.y)
     onEditRequestHandled?.()
   }, [editRequest, canvas])
+
+  useEffect(() => {
+    if (!createRequest) return
+    startEditing(null, createRequest.x, createRequest.y)
+    onCreateRequestHandled?.()
+  }, [createRequest, onCreateRequestHandled])
 
   function editKindOf(node: CanvasNode): Editing['kind'] | null {
     const editor = blockEditor(node)
@@ -513,10 +523,6 @@ export function CanvasEditorTools({
     onBeforeChange()
     onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
     onExitTool()
-  }
-
-  function cancelEditing() {
-    updateEditing(null)
   }
 
   function hitStroke(
@@ -743,6 +749,8 @@ export function CanvasEditorTools({
     const point = surfacePoint(event)
     if (!point) return
     if (tool === 'text') {
+      event.preventDefault()
+      event.stopPropagation()
       const hit = findNodeAt(point.worldX, point.worldY, (node) => editKindOf(node) !== null)
       if (hit?.['x-superboard']?.kind === 'markdown' && onEditMarkdown) {
         onEditMarkdown(hit.id)
@@ -1030,6 +1038,7 @@ export function CanvasEditorTools({
       {editing && textPreview ? (
         <textarea
           ref={textareaRef}
+          autoFocus
           className="sb-editor-text-input"
           style={textPreview}
           value={editing.value}
@@ -1038,11 +1047,12 @@ export function CanvasEditorTools({
             if (current) updateEditing({ ...current, value: event.target.value })
           }}
           onBlur={commitEditing}
+          onPointerDown={(event) => event.stopPropagation()}
           onKeyDown={(event) => {
             if (event.key === 'Escape') {
               event.preventDefault()
               event.stopPropagation()
-              cancelEditing()
+              commitEditing()
               return
             }
             if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
