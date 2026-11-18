@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { EyedropperIcon } from './EyedropperIcon'
 
 const THEME_COLORS = [
   '#000000', '#ffffff', '#e7e6e6', '#44546a', '#4472c4', '#ed7d31', '#a5a5a5', '#ffc000', '#5b9bd5', '#70ad47',
@@ -175,7 +176,7 @@ export function ColorPicker({
                     }
                   }}
                 >
-                  <span className="sb-color-eyedropper" />
+                  <EyedropperIcon />
                   取色器
                 </button>
               ) : null}
