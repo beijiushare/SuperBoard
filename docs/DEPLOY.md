@@ -42,10 +42,17 @@ vercel deploy dist --prod
 
 ## 浏览器编辑器
 
-构建产物同时包含：
+编辑器单独构建：
 
-- `index.html` / `tree.html` / `boards/*`：只读 viewer
-- `editor.html`：浏览器编辑器
+```bash
+npm run build:editor
+```
+
+产物是 `dist/editor.html`。  
+viewer 构建不再包含编辑器代码。
+
+- `npm run build:info` / `npm run build:data`：只读 viewer
+- `npm run build:editor`：浏览器编辑器
 
 `editor.html` 使用 File System Access API 打开本地工作区：
 
