@@ -610,6 +610,7 @@ export function CanvasEditorTools({
     const extension: SuperBoardNodeExtension = {
       kind: 'shape',
       shape: shapeKind,
+      ...(shape === 'rounded-rect' ? { roundedRect: true } : {}),
       style:
         shape === 'line'
           ? { fill: 'none', stroke: '#1d1d1d', strokeWidth: 2 }
@@ -686,7 +687,7 @@ export function CanvasEditorTools({
       },
     }
     onBeforeChange()
-    onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [])
   }
 
   function commitArrow() {

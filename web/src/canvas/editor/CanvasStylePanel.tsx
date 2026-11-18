@@ -7,8 +7,16 @@ import {
   type SuperBoardMedia,
   type SuperBoardStyle,
 } from '../model'
+import { isRoundedRect } from './blocks'
 import { collectDescendants } from './hierarchy'
 import { ColorPicker } from './ColorPicker'
+import {
+  BackgroundFields,
+  BorderFields,
+  CanvasFields,
+  TextFields,
+  TransformFields,
+} from './StyleFieldGroups'
 import { StyleNumberControl } from './StyleNumberControl'
 import { useFloatingPanel } from './useFloatingPanel'
 import { WindowDragHandle } from './WindowDragHandle'
@@ -155,7 +163,6 @@ export function CanvasStylePanel({
     )
   }
 
-  const shapes = nodes.filter((node) => kindOf(node) === 'shape')
   const texts = nodes.filter((node) => node.type === 'text' && (!kindOf(node) || kindOf(node) === 'text'))
   const mediaNodes = nodes.filter(
     (node) => node['x-superboard']?.kind === 'media' && node['x-superboard']?.media,
@@ -175,14 +182,6 @@ export function CanvasStylePanel({
         nodes: canvas.nodes.map((node) => (targetIds.has(node.id) ? change(node) : node)),
       },
       selectedIds,
-    )
-  }
-
-  function styleAll(targets: CanvasNode[], patch: Partial<SuperBoardStyle>) {
-    applyTo(
-      targets,
-      (node) => withStyle(node, patch),
-      patchHistoryKey('style', patch),
     )
   }
 
@@ -332,15 +331,17 @@ export function CanvasStylePanel({
   const firstIsLine =
     firstIsShape && firstNode?.['x-superboard']?.shape === 'line'
   const firstResolved = resolveNodeStyle(firstNode?.['x-superboard']?.style)
+  const firstIsRoundedRect = firstNode ? isRoundedRect(firstNode) : false
+  const firstCornerRadius = firstResolved.cornerRadius ?? 0
+  const maxCornerRadius = firstNode
+    ? Math.max(1, Math.floor(Math.min(firstNode.width, firstNode.height) / 2))
+    : 100
   const firstBorderColor = firstResolved.borderColor ?? '#1d1d1d'
   const firstBorderWidth = firstResolved.borderWidth ?? (firstIsShape ? 2 : 0)
   const firstBorderOpacity = Math.round(firstResolved.borderOpacity * 100)
   const firstBorderStyle = firstResolved.borderStyle
   const firstBackgroundColor = firstResolved.background ?? '#ffffff'
   const firstBackgroundOpacity = Math.round(firstResolved.backgroundOpacity * 100)
-  const firstOpacity = Math.round(firstResolved.opacity * 100)
-  const firstShape = shapes[0]
-  const firstShapeResolved = resolveNodeStyle(firstShape?.['x-superboard']?.style)
   const firstText = texts[0]
   const firstMedia = mediaNodes[0]?.['x-superboard']?.media
 
@@ -365,179 +366,73 @@ export function CanvasStylePanel({
       <div className="sb-style-panel-content">
       {firstNode ? (
         <>
-          <section>
-            <h3>变换</h3>
-            <StyleNumberControl
-              label="角度"
-              value={firstNode['x-superboard']?.rotation ?? 0}
-              min={-360}
-              max={360}
-              step={1}
-              unit="°"
-              slider
-              onChange={(rotation) => updateGeometry({ rotation })}
-            />
-            <StyleNumberControl
-              label="宽度"
-              value={firstNode.width}
-              min={1}
-              max={10000}
-              step={1}
-              unit="px"
-              onChange={(width) => updateGeometry({ width })}
-            />
-            <StyleNumberControl
-              label="高度"
-              value={firstNode.height}
-              min={1}
-              max={10000}
-              step={1}
-              unit="px"
-              onChange={(height) => updateGeometry({ height })}
-            />
-          </section>
-          <section>
-            <h3>外观</h3>
-            <StyleNumberControl
-              label="透明度"
-              value={firstOpacity}
-              min={0}
-              max={100}
-              step={1}
-              unit="%"
-              slider
-              onChange={(value) => updateCommonStyle({ opacity: value / 100 })}
-            />
-            {!firstIsDrawing && !firstIsLine ? (
-              <>
-                <ColorPicker
-                  label="背景颜色(C)"
-                  value={firstBackgroundColor}
-                  allowNone
-                  recentColors={boardSettings.recentColors}
-                  onChange={(backgroundColor) =>
-                    updateCommonStyle({ backgroundColor })
-                  }
-                  onColorUsed={onRememberColor}
-                />
-                <StyleNumberControl
-                  label="背景透明度"
-                  value={firstBackgroundOpacity}
-                  min={0}
-                  max={100}
-                  step={1}
-                  unit="%"
-                  slider
-                  onChange={(value) =>
-                    updateCommonStyle({ backgroundOpacity: value / 100 })
-                  }
-                />
-              </>
-            ) : null}
-            <ColorPicker
-              label="边框颜色(C)"
-              value={firstBorderColor}
-              allowNone
+          <TransformFields
+            rotation={firstNode['x-superboard']?.rotation ?? 0}
+            width={firstNode.width}
+            height={firstNode.height}
+            onRotation={(rotation) => updateGeometry({ rotation })}
+            onWidth={(width) => updateGeometry({ width })}
+            onHeight={(height) => updateGeometry({ height })}
+          />
+          {!firstIsDrawing && !firstIsLine ? (
+            <BackgroundFields
+              color={firstBackgroundColor}
+              opacity={firstBackgroundOpacity}
               recentColors={boardSettings.recentColors}
-              onChange={(borderColor) => updateCommonStyle({ borderColor })}
+              onColor={(backgroundColor) =>
+                updateCommonStyle({ backgroundColor })
+              }
+              onOpacity={(value) =>
+                updateCommonStyle({ backgroundOpacity: value / 100 })
+              }
               onColorUsed={onRememberColor}
             />
-            <StyleNumberControl
-              label="边框透明度"
-              value={firstBorderOpacity}
-              min={0}
-              max={100}
-              step={1}
-              unit="%"
-              slider
-              onChange={(value) =>
-                updateCommonStyle({ borderOpacity: value / 100 })
-              }
-            />
-            <StyleNumberControl
-              label="边框粗细"
-              value={firstBorderWidth}
-              min={0}
-              max={40}
-              step={0.5}
-              unit="px"
-              onChange={(borderWidth) => updateCommonStyle({ borderWidth })}
-            />
-            {!firstIsDrawing ? (
-              <div className="sb-style-row">
-                <span>线条类型</span>
-                <div className="sb-style-buttons">
-                  {([
-                    ['solid', '实线'],
-                    ['dashed', '虚线'],
-                    ['dotted', '点线'],
-                  ] as const).map(([value, label]) => (
-                    <button
-                      key={value}
-                      type="button"
-                      className={firstBorderStyle === value ? 'is-active' : undefined}
-                      onClick={() => updateCommonStyle({ borderStyle: value })}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </section>
+          ) : null}
+          <BorderFields
+            color={firstBorderColor}
+            opacity={firstBorderOpacity}
+            width={firstBorderWidth}
+            style={firstBorderStyle}
+            showStyle={!firstIsDrawing}
+            recentColors={boardSettings.recentColors}
+            onColor={(borderColor) => updateCommonStyle({ borderColor })}
+            onOpacity={(value) =>
+              updateCommonStyle({ borderOpacity: value / 100 })
+            }
+            onWidth={(borderWidth) => updateCommonStyle({ borderWidth })}
+            onStyle={(borderStyle) => updateCommonStyle({ borderStyle })}
+            onColorUsed={onRememberColor}
+          />
+          {firstIsRoundedRect ? (
+            <section>
+              <h3>圆角</h3>
+              <StyleNumberControl
+                label="圆角"
+                value={firstCornerRadius}
+                min={0}
+                max={maxCornerRadius}
+                step={1}
+                unit="px"
+                slider
+                onChange={(cornerRadius) => updateCommonStyle({ cornerRadius })}
+              />
+            </section>
+          ) : null}
         </>
       ) : null}
       {!hasSelection ? (
         <>
-          <section>
-            <h3>画布</h3>
-            <ColorPicker
-              label="背景(C)"
-              value={boardSettings.background ?? '#ffffff'}
-              recentColors={boardSettings.recentColors}
-              onChange={(background) => updateBoardSettings({ background })}
-              onColorUsed={onRememberColor}
-            />
-            <div className="sb-style-row">
-              <span>网格</span>
-              <div className="sb-style-buttons">
-                {([
-                  ['none', '无'],
-                  ['dots', '点'],
-                  ['lines', '线'],
-                ] as const).map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={
-                      (boardSettings.grid ?? 'dots') === value
-                        ? 'is-active'
-                        : undefined
-                    }
-                    onClick={() => updateBoardSettings({ grid: value })}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="sb-style-row">
-              <span>对齐提示</span>
-              <button
-                type="button"
-                className={`sb-style-toggle${
-                  (boardSettings.guides ?? true) ? ' is-active' : ''
-                }`}
-                onClick={() =>
-                  updateBoardSettings({
-                    guides: !(boardSettings.guides ?? true),
-                  })
-                }
-              >
-                {(boardSettings.guides ?? true) ? '开启' : '关闭'}
-              </button>
-            </div>
-          </section>
+          <CanvasFields
+            background={boardSettings.background ?? '#ffffff'}
+            backgroundOpacity={Math.round(
+              (boardSettings.backgroundOpacity ?? 1) * 100,
+            )}
+            grid={boardSettings.grid ?? 'dots'}
+            guides={boardSettings.guides ?? true}
+            recentColors={boardSettings.recentColors}
+            onUpdate={updateBoardSettings}
+            onColorUsed={onRememberColor}
+          />
           <section>
             <h3>缩放</h3>
             <div className="sb-style-row">
@@ -618,7 +513,7 @@ export function CanvasStylePanel({
         <section>
           <h3>箭头</h3>
           <ColorPicker
-            label="颜色(C)"
+            label="颜色"
             value={edge.color ?? '#1d1d1d'}
             recentColors={boardSettings.recentColors}
             onChange={(color) => updateEdge({ color })}
@@ -747,25 +642,29 @@ export function CanvasStylePanel({
       {nodes.length >= 2 ? (
         <section>
           <h3>排列</h3>
-          <div className="sb-style-buttons">
+          <div className="sb-style-buttons is-row">
             <button type="button" onClick={() => align('left')}>
               左对齐
-            </button>
-            <button type="button" onClick={() => align('hcenter')}>
-              水平居中
             </button>
             <button type="button" onClick={() => align('right')}>
               右对齐
             </button>
             <button type="button" onClick={() => align('top')}>
-              顶部
+              顶部对齐
             </button>
+            <button type="button" onClick={() => align('bottom')}>
+              底部对齐
+            </button>
+          </div>
+          <div className="sb-style-buttons is-row">
             <button type="button" onClick={() => align('vcenter')}>
               垂直居中
             </button>
-            <button type="button" onClick={() => align('bottom')}>
-              底部
+            <button type="button" onClick={() => align('hcenter')}>
+              水平居中
             </button>
+          </div>
+          <div className="sb-style-buttons is-row">
             <button type="button" onClick={() => distribute('h')}>
               横向分布
             </button>
@@ -776,211 +675,13 @@ export function CanvasStylePanel({
         </section>
       ) : null}
 
-      {shapes.length > 0 ? (
-        <section>
-          <h3>形状</h3>
-          <ColorPicker
-            label="填充(C)"
-            value={firstShapeResolved.background ?? '#ffffff'}
-            allowNone
-            recentColors={boardSettings.recentColors}
-            onChange={(backgroundColor) => styleAll(shapes, { backgroundColor })}
-            onColorUsed={onRememberColor}
-          />
-          <ColorPicker
-            label="描边(C)"
-            value={firstShapeResolved.borderColor ?? '#1d1d1d'}
-            allowNone
-            recentColors={boardSettings.recentColors}
-            onChange={(borderColor) => styleAll(shapes, { borderColor })}
-            onColorUsed={onRememberColor}
-          />
-          <div className="sb-style-row">
-            <span>线宽</span>
-            <div className="sb-style-buttons">
-              {[1, 2, 4].map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={firstShapeResolved.borderWidth === value ? 'is-active' : undefined}
-                  onClick={() => styleAll(shapes, { borderWidth: value })}
-                >
-                  {value}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="sb-style-row">
-            <span>圆角</span>
-            <div className="sb-style-buttons">
-              {[0, 8, 16].map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={firstShapeResolved.cornerRadius === value ? 'is-active' : undefined}
-                  onClick={() => styleAll(shapes, { cornerRadius: value })}
-                >
-                  {value}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="sb-style-row">
-            <span>透明</span>
-            <div className="sb-style-buttons">
-              {[1, 0.7, 0.4].map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={
-                    firstShapeResolved.opacity === value
-                      ? 'is-active'
-                      : undefined
-                  }
-                  onClick={() => styleAll(shapes, { opacity: value })}
-                >
-                  {Math.round(value * 100)}%
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
       {texts.length > 0 ? (
-        <section>
-          <h3>文本</h3>
-          <div className="sb-style-row">
-            <span>字体</span>
-            <select
-              className="sb-style-select"
-              value={firstText?.['x-superboard']?.style?.fontFamily ?? ''}
-              onChange={(event) =>
-                styleText(texts, { fontFamily: event.target.value || undefined })
-              }
-            >
-              <option value="">默认</option>
-              <option value="PingFang SC, Microsoft YaHei, sans-serif">苹方</option>
-              <option value="Georgia, serif">Georgia</option>
-              <option value="ui-monospace, Consolas, monospace">等宽</option>
-            </select>
-          </div>
-          <div className="sb-style-row">
-            <span>字号</span>
-            <div className="sb-style-buttons">
-              {[14, 16, 20, 28].map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={
-                    (firstText?.['x-superboard']?.style?.fontSize ?? 16) === value
-                      ? 'is-active'
-                      : undefined
-                  }
-                  onClick={() => styleText(texts, { fontSize: value })}
-                >
-                  {value}
-                </button>
-              ))}
-            </div>
-          </div>
-          <ColorPicker
-            label="颜色(C)"
-            value={firstText?.['x-superboard']?.style?.color ?? '#1d1d1d'}
-            recentColors={boardSettings.recentColors}
-            onChange={(color) => styleAll(texts, { color })}
-            onColorUsed={onRememberColor}
-          />
-          <div className="sb-style-row">
-            <span>样式</span>
-            <div className="sb-style-buttons">
-              <button
-                type="button"
-                className={
-                  Number(firstText?.['x-superboard']?.style?.fontWeight ?? 400) >=
-                  700
-                    ? 'is-active'
-                    : undefined
-                }
-                onClick={() =>
-                  styleAll(texts, {
-                    fontWeight:
-                      Number(
-                        firstText?.['x-superboard']?.style?.fontWeight ?? 400,
-                      ) >= 700
-                        ? 400
-                        : 700,
-                  })
-                }
-              >
-                <strong>B</strong>
-              </button>
-              <button
-                type="button"
-                className={
-                  firstText?.['x-superboard']?.style?.fontStyle === 'italic'
-                    ? 'is-active'
-                    : undefined
-                }
-                onClick={() =>
-                  styleAll(texts, {
-                    fontStyle:
-                      firstText?.['x-superboard']?.style?.fontStyle === 'italic'
-                        ? 'normal'
-                        : 'italic',
-                  })
-                }
-              >
-                <em>I</em>
-              </button>
-              <button
-                type="button"
-                className={
-                  firstText?.['x-superboard']?.style?.textDecoration ===
-                  'underline'
-                    ? 'is-active'
-                    : undefined
-                }
-                onClick={() =>
-                  styleAll(texts, {
-                    textDecoration:
-                      firstText?.['x-superboard']?.style?.textDecoration ===
-                      'underline'
-                        ? 'none'
-                        : 'underline',
-                  })
-                }
-              >
-                <u>U</u>
-              </button>
-            </div>
-          </div>
-          <div className="sb-style-row">
-            <span>对齐</span>
-            <div className="sb-style-buttons">
-              {(
-                [
-                  ['left', '左'],
-                  ['center', '中'],
-                  ['right', '右'],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={
-                    (firstText?.['x-superboard']?.style?.textAlign ?? 'left') === value
-                      ? 'is-active'
-                      : undefined
-                  }
-                  onClick={() => styleAll(texts, { textAlign: value })}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
+        <TextFields
+          node={firstText}
+          recentColors={boardSettings.recentColors}
+          onChange={(patch) => styleText(texts, patch)}
+          onColorUsed={onRememberColor}
+        />
       ) : null}
 
 

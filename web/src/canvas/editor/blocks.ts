@@ -97,6 +97,12 @@ export function isShapeNode(node: CanvasNode) {
   return node['x-superboard']?.kind === 'shape'
 }
 
+export function isRoundedRect(node: CanvasNode) {
+  const extension = node['x-superboard']
+  if (extension?.kind !== 'shape' || extension.shape !== 'rect') return false
+  return extension.roundedRect === true || (extension.style?.cornerRadius ?? 0) > 0
+}
+
 export function isActionableNode(node: CanvasNode) {
   return isBlockNode(node) || isShapeNode(node)
 }

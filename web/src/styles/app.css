@@ -805,10 +805,11 @@
 }
 
 .sb-style-row > span {
-  width: 32px;
+  width: 62px;
   flex-shrink: 0;
   color: #8b877d;
   font-size: 11px;
+  white-space: nowrap;
 }
 
 .sb-style-swatches {
@@ -835,6 +836,19 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+.sb-style-buttons.is-row {
+  flex-wrap: nowrap;
+  margin-bottom: 4px;
+}
+
+.sb-style-buttons.is-row button {
+  min-width: 0;
+  flex: 1 1 0;
+  padding-right: 2px;
+  padding-left: 2px;
+  white-space: nowrap;
 }
 
 .sb-style-buttons button {
@@ -1639,10 +1653,11 @@
 }
 
 .sb-color-control-label {
-  width: 32px;
+  width: 62px;
   flex-shrink: 0;
   color: #8b877d;
   font-size: 11px;
+  white-space: nowrap;
 }
 
 .sb-color-presets {
@@ -1794,10 +1809,11 @@
 }
 
 .sb-style-number-label {
-  width: 42px;
+  width: 62px;
   flex-shrink: 0;
   color: #8b877d;
   font-size: 11px;
+  white-space: nowrap;
 }
 
 .sb-style-number-slider {

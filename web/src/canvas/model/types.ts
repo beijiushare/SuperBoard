@@ -162,6 +162,7 @@ export interface SuperBoardNodeExtension {
   contentScale?: number
   style?: SuperBoardStyle
   shape?: SuperBoardShapeKind
+  roundedRect?: boolean
   lineFlip?: { x: boolean; y: boolean }
   media?: SuperBoardMedia
   strokes?: SuperBoardStroke[]
@@ -175,6 +176,7 @@ export type SuperBoardGridMode = 'none' | 'dots' | 'lines'
 
 export interface SuperBoardCanvasSettings {
   background?: string
+  backgroundOpacity?: number
   grid?: SuperBoardGridMode
   guides?: boolean
   zoomMin?: number

@@ -325,7 +325,11 @@ export default class Renderer extends BaseModule {
 		(
 			this.DM.data.canvasData as {
 				'x-superboard'?: {
-					settings?: { background?: string; grid?: 'none' | 'dots' | 'lines' }
+					settings?: {
+						background?: string;
+						backgroundOpacity?: number;
+						grid?: 'none' | 'dots' | 'lines';
+					}
 				}
 			}
 		)['x-superboard']?.settings;
@@ -333,7 +337,12 @@ export default class Renderer extends BaseModule {
 	private readonly applyGridBackground = () => {
 		const container = this.DM.data.container;
 		const settings = this.gridSettings();
-		container.style.backgroundColor = settings?.background ?? '#ffffff';
+		const background = settings?.background ?? '#ffffff';
+		const opacity = Math.max(0, Math.min(1, settings?.backgroundOpacity ?? 1));
+		container.style.backgroundColor =
+			opacity >= 1
+				? background
+				: `color-mix(in srgb, ${background} ${opacity * 100}%, transparent)`;
 		container.style.backgroundImage = 'none';
 		container.style.backgroundSize = '';
 		container.style.backgroundPosition = '';
