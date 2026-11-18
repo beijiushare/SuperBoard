@@ -113,7 +113,7 @@ export function BlockActions({
         }}
       >
         <span className={`sb-block-check${ratioLocked ? ' is-checked' : ''}`} />
-        <LockIcon size={16} />
+        <LockIcon size={14} />
       </button>
       {canEdit ? (
         <button
@@ -126,7 +126,7 @@ export function BlockActions({
           }}
         >
           <span className={`sb-block-check${editing ? ' is-checked' : ''}`} />
-          <TypeIcon size={16} />
+          <TypeIcon size={14} />
         </button>
       ) : null}
       {markdownBlock ? (
@@ -139,7 +139,7 @@ export function BlockActions({
             onFocusBlockEdit?.(node.id)
           }}
         >
-          <HashIcon size={16} />
+          <HashIcon size={14} />
         </button>
       ) : null}
       <button
@@ -151,7 +151,7 @@ export function BlockActions({
           onResetBlockSize?.(node.id)
         }}
       >
-        <RefreshIcon size={16} />
+        <RefreshIcon size={14} />
       </button>
       <button
         type="button"
@@ -162,7 +162,7 @@ export function BlockActions({
           onDeleteBlock?.(node.id)
         }}
       >
-        <TrashIcon size={16} />
+        <TrashIcon size={14} />
       </button>
     </div>
   )
