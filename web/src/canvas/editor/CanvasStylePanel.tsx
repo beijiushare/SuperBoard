@@ -20,6 +20,7 @@ import {
   TransformFields,
 } from './StyleFieldGroups'
 import { StyleNumberControl } from './StyleNumberControl'
+import { updateUiState, useUiState } from './uiState'
 import { useFloatingPanel } from './useFloatingPanel'
 import { WindowDragHandle } from './WindowDragHandle'
 
@@ -101,6 +102,7 @@ export function CanvasStylePanel({
     centerVertically: true,
   })
   const preferences = DEFAULT_PREFERENCES
+  const uiState = useUiState()
   const selected = new Set(selectedIds)
   const nodes = canvas.nodes.filter((node) => selected.has(node.id))
   const edge = selectedEdgeId
@@ -387,7 +389,7 @@ export function CanvasStylePanel({
             <BackgroundFields
               color={firstBackgroundColor}
               opacity={firstBackgroundOpacity}
-              recentColors={boardSettings.recentColors}
+              recentColors={uiState.recentColors}
               onColor={(backgroundColor) =>
                 updateCommonStyle({ backgroundColor })
               }
@@ -404,7 +406,7 @@ export function CanvasStylePanel({
               width={firstBorderWidth}
               style={firstBorderStyle}
               showStyle={!firstIsDrawing}
-              recentColors={boardSettings.recentColors}
+              recentColors={uiState.recentColors}
               onColor={(borderColor) => updateCommonStyle({ borderColor })}
               onOpacity={(value) =>
                 updateCommonStyle({ borderOpacity: value / 100 })
@@ -439,9 +441,12 @@ export function CanvasStylePanel({
               (boardSettings.backgroundOpacity ?? 1) * 100,
             )}
             grid={boardSettings.grid ?? 'dots'}
-            guides={boardSettings.guides ?? true}
-            recentColors={boardSettings.recentColors}
+            guides={uiState.guides}
+            recentColors={uiState.recentColors}
             onUpdate={updateBoardSettings}
+            onToggleGuides={() =>
+              updateUiState({ guides: !uiState.guides })
+            }
             onColorUsed={onRememberColor}
           />
           <section>
@@ -526,7 +531,7 @@ export function CanvasStylePanel({
           <ColorPicker
             label="颜色"
             value={edge.color ?? '#1d1d1d'}
-            recentColors={boardSettings.recentColors}
+            recentColors={uiState.recentColors}
             onChange={(color) => updateEdge({ color })}
             onColorUsed={onRememberColor}
           />
@@ -689,7 +694,7 @@ export function CanvasStylePanel({
       {texts.length > 0 ? (
         <TextFields
           node={firstText}
-          recentColors={boardSettings.recentColors}
+          recentColors={uiState.recentColors}
           onChange={(patch) => styleText(texts, patch)}
           onColorUsed={onRememberColor}
         />

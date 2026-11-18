@@ -62,6 +62,11 @@ import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { PeleCreateDialog } from './PeleCreateDialog'
 import { PreferencesDialog } from './PreferencesDialog'
 import { blockStyleFromPreferences } from './preferences'
+import {
+  rememberRecentColor,
+  updateUiState,
+  useUiState,
+} from './uiState'
 import { InputDialog } from '../../shared/ui/InputDialog'
 import {
   DEFAULT_BLOCK_SIZES,
@@ -126,8 +131,9 @@ export function CanvasEditorApp() {
       ? 'private'
       : 'public',
   )
-  const [stylePanelOpen, setStylePanelOpen] = useState(true)
-  const [menuPanelOpen, setMenuPanelOpen] = useState(true)
+  const uiState = useUiState()
+  const stylePanelOpen = uiState.stylePanelOpen
+  const menuPanelOpen = uiState.toolPaletteOpen
   const [preferencesOpen, setPreferencesOpen] = useState(false)
   const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
   const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
@@ -159,8 +165,6 @@ export function CanvasEditorApp() {
     selectedSlug,
     scope,
     viewerRef,
-    setStylePanelOpen,
-    setMenuPanelOpen,
   })
   const { saveState, setSaveState, save, markDirty, savingRef } = useCanvasSave({
     canvas,
@@ -336,34 +340,6 @@ export function CanvasEditorApp() {
   }, [])
 
   useEffect(() => {
-    const current = canvasRef.current
-    if (!current) return
-    const root = current['x-superboard']
-    if (!root) return
-    const settings = root.settings
-    if (
-      (settings?.stylePanelOpen ?? true) === stylePanelOpen &&
-      (settings?.toolPaletteOpen ?? true) === menuPanelOpen
-    ) {
-      return
-    }
-    const next = {
-      ...current,
-      'x-superboard': {
-        ...root,
-        settings: {
-          ...settings,
-          stylePanelOpen,
-          toolPaletteOpen: menuPanelOpen,
-        },
-      },
-    }
-    canvasRef.current = next
-    setCanvas(next)
-    markDirty()
-  }, [canvas, menuPanelOpen, stylePanelOpen])
-
-  useEffect(() => {
     const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
     if (!viewer?.container) return
     let dm: DataManagerLike
@@ -428,26 +404,7 @@ export function CanvasEditorApp() {
   }
 
   function rememberBoardColor(color: string) {
-    if (!color || color === 'transparent') return
-    setCanvas((current) => {
-      if (!current) return current
-      const root = current['x-superboard']
-      if (!root) return current
-      const recent = (root.settings?.recentColors ?? []).filter(
-        (item) => item.toLowerCase() !== color.toLowerCase(),
-      )
-      return {
-        ...current,
-        'x-superboard': {
-          ...root,
-          settings: {
-            ...root.settings,
-            recentColors: [color, ...recent].slice(0, 5),
-          },
-        },
-      }
-    })
-    markDirty()
+    rememberRecentColor(color)
   }
 
   function applyDocument(next: CanvasDocument, selection: string[] = []) {
@@ -1598,8 +1555,7 @@ export function CanvasEditorApp() {
       if (!ok) return
     }
     setTreeOpen(true)
-    setMenuPanelOpen(true)
-    setStylePanelOpen(false)
+    updateUiState({ stylePanelOpen: false, toolPaletteOpen: true })
     const nextItems = items.filter((item) => item.scope === nextScope)
     const target =
       nextItems.find((item) => item.slug === selectedSlug) ?? nextItems[0]
@@ -1879,10 +1835,14 @@ export function CanvasEditorApp() {
         canSave={Boolean(canvas) && saveState !== 'saving'}
         onSave={() => void save()}
         stylePanelOpen={stylePanelOpen}
-        onToggleStylePanel={() => setStylePanelOpen((open) => !open)}
+        onToggleStylePanel={() =>
+          updateUiState({ stylePanelOpen: !stylePanelOpen })
+        }
         menuPanelOpen={menuPanelOpen}
         menuPanelLabel={menuPanelOpen ? '隐藏操作栏' : '显示操作栏'}
-        onToggleMenuPanel={() => setMenuPanelOpen((open) => !open)}
+        onToggleMenuPanel={() =>
+          updateUiState({ toolPaletteOpen: !menuPanelOpen })
+        }
         directorMode={directorMode}
         onToggleDirector={toggleDirector}
         onDeploy={() => setDeployDialogOpen(true)}
@@ -1951,9 +1911,7 @@ export function CanvasEditorApp() {
                     }}
                     focusedGroupId={focusedGroupId}
                     activeEditingId={markdownEditingId ?? textEditingId}
-                    guidesEnabled={
-                      canvas['x-superboard']?.settings?.guides ?? true
-                    }
+                    guidesEnabled={uiState.guides}
                     onToggleBlockEdit={toggleBlockEdit}
                     onFocusBlockEdit={openMarkdownFocus}
                     onDeleteBlock={deleteBlock}

@@ -13,6 +13,17 @@ import type { BoardTreeNode } from './types'
 const MIN_TREE_WIDTH = 160
 const MAX_TREE_WIDTH = 480
 const DEFAULT_TREE_WIDTH = 264
+const TREE_WIDTH_STORAGE_KEY = 'superboard.treeWidth'
+
+function readTreeWidth() {
+  try {
+    const value = Number(window.localStorage.getItem(TREE_WIDTH_STORAGE_KEY))
+    if (!Number.isFinite(value)) return DEFAULT_TREE_WIDTH
+    return Math.max(MIN_TREE_WIDTH, Math.min(MAX_TREE_WIDTH, value))
+  } catch {
+    return DEFAULT_TREE_WIDTH
+  }
+}
 
 interface BoardTreePanelProps {
   nodes: BoardTreeNode[]
@@ -41,8 +52,16 @@ export function BoardTreePanel({
   headerMeta,
   emptyLabel,
 }: BoardTreePanelProps) {
-  const [width, setWidth] = useState(DEFAULT_TREE_WIDTH)
+  const [width, setWidth] = useState(readTreeWidth)
   const resizeRef = useRef<{ startX: number; startWidth: number } | null>(null)
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(TREE_WIDTH_STORAGE_KEY, String(width))
+    } catch {
+      // Keep the current width for this session if storage is unavailable.
+    }
+  }, [width])
 
   useEffect(
     () => () => document.body.classList.remove('sb-tree-resizing'),

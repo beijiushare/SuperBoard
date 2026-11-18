@@ -196,6 +196,7 @@ interface CanvasFieldsProps {
   guides: boolean
   recentColors?: string[]
   onUpdate: (patch: Partial<SuperBoardCanvasSettings>) => void
+  onToggleGuides: () => void
   onColorUsed?: (value: string) => void
 }
 
@@ -206,6 +207,7 @@ export function CanvasFields({
   guides,
   recentColors,
   onUpdate,
+  onToggleGuides,
   onColorUsed,
 }: CanvasFieldsProps) {
   return (
@@ -254,7 +256,7 @@ export function CanvasFields({
         <button
           type="button"
           className={`sb-style-toggle${guides ? ' is-active' : ''}`}
-          onClick={() => onUpdate({ guides: !guides })}
+          onClick={onToggleGuides}
         >
           {guides ? '开启' : '关闭'}
         </button>

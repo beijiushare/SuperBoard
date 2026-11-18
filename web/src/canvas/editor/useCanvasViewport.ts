@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  type Dispatch,
-  type RefObject,
-  type SetStateAction,
-} from 'react'
+import { useCallback, useEffect, useRef, type RefObject } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { BoardScope } from '../../shared/board/types'
 import type { CanvasDocument } from '../model'
@@ -24,8 +17,6 @@ interface UseCanvasViewportOptions {
   selectedSlug: string
   scope: BoardScope
   viewerRef: RefObject<CanvasViewerHandle | null>
-  setStylePanelOpen: Dispatch<SetStateAction<boolean>>
-  setMenuPanelOpen: Dispatch<SetStateAction<boolean>>
 }
 
 export function useCanvasViewport({
@@ -33,8 +24,6 @@ export function useCanvasViewport({
   selectedSlug,
   scope,
   viewerRef,
-  setStylePanelOpen,
-  setMenuPanelOpen,
 }: UseCanvasViewportOptions) {
   const pendingViewportRef = useRef<Viewport | null>(null)
   const viewportSaveTimerRef = useRef<number | null>(null)
@@ -42,12 +31,10 @@ export function useCanvasViewport({
   const applyCanvasUiSettings = useCallback(
     (next: CanvasDocument, slug: string, targetScope: BoardScope) => {
       const settings = next['x-superboard']?.settings
-      setStylePanelOpen(settings?.stylePanelOpen ?? true)
-      setMenuPanelOpen(settings?.toolPaletteOpen ?? true)
       pendingViewportRef.current =
         readStoredViewport(slug, targetScope) ?? settings?.viewport ?? null
     },
-    [setMenuPanelOpen, setStylePanelOpen],
+    [],
   )
 
   const captureViewport = useCallback(() => {

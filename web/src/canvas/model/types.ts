@@ -178,19 +178,15 @@ export interface SuperBoardCanvasSettings {
   background?: string
   backgroundOpacity?: number
   grid?: SuperBoardGridMode
-  guides?: boolean
   zoomMin?: number
   zoomMax?: number
   defaultBlockWidth?: number
   defaultBlockHeight?: number
-  stylePanelOpen?: boolean
-  toolPaletteOpen?: boolean
   viewport?: {
     offsetX: number
     offsetY: number
     scale: number
   }
-  recentColors?: string[]
 }
 
 export interface SuperBoardRootExtension {
