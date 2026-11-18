@@ -167,8 +167,12 @@ export function ColorPicker({
                   type="button"
                   className="sb-color-more"
                   onClick={async () => {
-                    const result = await new EyeDropper().open()
-                    choose(result.sRGBHex)
+                    try {
+                      const result = await new EyeDropper().open()
+                      choose(result.sRGBHex)
+                    } catch {
+                      return
+                    }
                   }}
                 >
                   <span className="sb-color-eyedropper" />
