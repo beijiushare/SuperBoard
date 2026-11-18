@@ -16,7 +16,7 @@ interface CanvasStylePanelProps {
   canvas: CanvasDocument
   selectedIds: string[]
   selectedEdgeId?: string | null
-  onBeforeChange: () => void
+  onBeforeChange: (mergeKey?: string) => void
   onApply: (next: CanvasDocument, selection?: string[]) => void
   onRememberColor?: (color: string) => void
 }
@@ -74,6 +74,10 @@ function kindOf(node: CanvasNode) {
 
 function fallbackKind(node: CanvasNode) {
   return node.type === 'text' ? 'text' : node.type === 'group' ? 'group' : 'media'
+}
+
+function patchHistoryKey(prefix: string, patch: object) {
+  return `${prefix}:${Object.keys(patch).sort().join(',')}`
 }
 
 function CropSlider({
@@ -143,7 +147,7 @@ export function CanvasStylePanel({
   function updateBoardSettings(patch: NonNullable<typeof boardSettings>) {
     const root = canvas['x-superboard']
     if (!root) return
-    onBeforeChange()
+    onBeforeChange(patchHistoryKey('board', patch))
     onApply({
       ...canvas,
       'x-superboard': {
@@ -160,7 +164,7 @@ export function CanvasStylePanel({
   }) {
     if (nodes.length === 0) return
     const targetIds = new Set(nodes.map((node) => node.id))
-    onBeforeChange()
+    onBeforeChange(patchHistoryKey('geometry', patch))
     onApply({
       ...canvas,
       nodes: canvas.nodes.map((node) => {
@@ -182,38 +186,42 @@ export function CanvasStylePanel({
   function updateCommonStyle(patch: Partial<SuperBoardStyle>) {
     const dashFor = (style: string | undefined) =>
       style === 'dashed' ? [7, 4] : style === 'dotted' ? [2, 4] : []
-    applyTo(nodes, (node) => {
-      const kind = kindOf(node)
-      if (kind !== 'shape' && kind !== 'drawing') {
-        return withStyle(node, patch)
-      }
-      const {
-        backgroundColor,
-        backgroundOpacity,
-        borderColor,
-        borderOpacity,
-        borderWidth,
-        borderStyle,
-        ...rest
-      } = patch
-      return withStyle(node, {
-        ...rest,
-        ...(kind === 'shape' && backgroundColor !== undefined
-          ? { fill: backgroundColor }
-          : {}),
-        ...(kind === 'shape' && backgroundOpacity !== undefined
-          ? { backgroundOpacity }
-          : {}),
-        ...(borderColor !== undefined ? { stroke: borderColor } : {}),
-        ...(borderOpacity !== undefined ? { borderOpacity } : {}),
-        ...(borderWidth !== undefined
-          ? { strokeWidth: Number(borderWidth) || 0 }
-          : {}),
-        ...(borderStyle !== undefined
-          ? { borderStyle, strokeDash: dashFor(borderStyle) }
-          : {}),
-      })
-    })
+    applyTo(
+      nodes,
+      (node) => {
+        const kind = kindOf(node)
+        if (kind !== 'shape' && kind !== 'drawing') {
+          return withStyle(node, patch)
+        }
+        const {
+          backgroundColor,
+          backgroundOpacity,
+          borderColor,
+          borderOpacity,
+          borderWidth,
+          borderStyle,
+          ...rest
+        } = patch
+        return withStyle(node, {
+          ...rest,
+          ...(kind === 'shape' && backgroundColor !== undefined
+            ? { fill: backgroundColor }
+            : {}),
+          ...(kind === 'shape' && backgroundOpacity !== undefined
+            ? { backgroundOpacity }
+            : {}),
+          ...(borderColor !== undefined ? { stroke: borderColor } : {}),
+          ...(borderOpacity !== undefined ? { borderOpacity } : {}),
+          ...(borderWidth !== undefined
+            ? { strokeWidth: Number(borderWidth) || 0 }
+            : {}),
+          ...(borderStyle !== undefined
+            ? { borderStyle, strokeDash: dashFor(borderStyle) }
+            : {}),
+        })
+      },
+      patchHistoryKey('style', patch),
+    )
   }
 
   const shapes = nodes.filter((node) => kindOf(node) === 'shape')
@@ -226,10 +234,14 @@ export function CanvasStylePanel({
     (node) => node['x-superboard']?.kind === 'media' && node['x-superboard']?.media,
   )
 
-  function applyTo(targets: CanvasNode[], change: (node: CanvasNode) => CanvasNode) {
+  function applyTo(
+    targets: CanvasNode[],
+    change: (node: CanvasNode) => CanvasNode,
+    historyKey?: string,
+  ) {
     if (targets.length === 0) return
     const targetIds = new Set(targets.map((node) => node.id))
-    onBeforeChange()
+    onBeforeChange(historyKey)
     onApply(
       {
         ...canvas,
@@ -240,34 +252,43 @@ export function CanvasStylePanel({
   }
 
   function styleAll(targets: CanvasNode[], patch: Partial<SuperBoardStyle>) {
-    applyTo(targets, (node) => withStyle(node, patch))
+    applyTo(
+      targets,
+      (node) => withStyle(node, patch),
+      patchHistoryKey('style', patch),
+    )
   }
 
   function styleText(targets: CanvasNode[], patch: Partial<SuperBoardStyle>) {
-    applyTo(targets, (node) => {
-      const next = withStyle(node, patch)
-      if (node.type !== 'text' || !patch.fontSize) return next
-      const fontSize = patch.fontSize
-      const charsPerLine = Math.max(
-        1,
-        Math.floor((node.width - 32) / (fontSize * 0.62)),
-      )
-      const lines = node.text
-        .split('\n')
-        .reduce(
-          (sum, line) => sum + Math.max(1, Math.ceil(Array.from(line).length / charsPerLine)),
-          0,
+    applyTo(
+      targets,
+      (node) => {
+        const next = withStyle(node, patch)
+        if (node.type !== 'text' || !patch.fontSize) return next
+        const fontSize = patch.fontSize
+        const charsPerLine = Math.max(
+          1,
+          Math.floor((node.width - 32) / (fontSize * 0.62)),
         )
-      return {
-        ...next,
-        height: Math.max(40, Math.round(lines * fontSize * 1.45 + 28)),
-      }
-    })
+        const lines = node.text
+          .split('\n')
+          .reduce(
+            (sum, line) =>
+              sum + Math.max(1, Math.ceil(Array.from(line).length / charsPerLine)),
+            0,
+          )
+        return {
+          ...next,
+          height: Math.max(40, Math.round(lines * fontSize * 1.45 + 28)),
+        }
+      },
+      patchHistoryKey('style', patch),
+    )
   }
 
   function updateEdge(patch: Partial<CanvasEdge>) {
     if (!edge) return
-    onBeforeChange()
+    onBeforeChange(patchHistoryKey('edge', patch))
     onApply(
       {
         ...canvas,
@@ -280,17 +301,21 @@ export function CanvasStylePanel({
   }
 
   function setMediaCrop(patch: Partial<SuperBoardMedia>) {
-    applyTo(mediaNodes, (node) => {
-      const extension = node['x-superboard']
-      if (!extension?.media) return node
-      return {
-        ...node,
-        'x-superboard': {
-          ...extension,
-          media: { ...extension.media, ...patch },
-        },
-      }
-    })
+    applyTo(
+      mediaNodes,
+      (node) => {
+        const extension = node['x-superboard']
+        if (!extension?.media) return node
+        return {
+          ...node,
+          'x-superboard': {
+            ...extension,
+            media: { ...extension.media, ...patch },
+          },
+        }
+      },
+      patchHistoryKey('media', patch),
+    )
   }
 
   function setBlockColor(color: string) {

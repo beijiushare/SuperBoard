@@ -41,6 +41,7 @@ import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
   AUTOSAVE_DELAY,
   HISTORY_LIMIT,
+  HISTORY_MERGE_MS,
   PASTE_OFFSET,
   nextId,
   normalizeMarkdownLocks,
@@ -159,6 +160,7 @@ export function CanvasEditorApp() {
     past: [],
     future: [],
   })
+  const historyMergeRef = useRef<{ key: string; at: number } | null>(null)
   const clipboardRef = useRef<Clipboard | null>(null)
   const pasteCountRef = useRef(0)
   const pendingViewportRef = useRef<Viewport | null>(null)
@@ -307,6 +309,7 @@ export function CanvasEditorApp() {
         const next = await parseCanvas(await canvasResponse.text())
         if (cancelled) return
         historyRef.current = { past: [], future: [] }
+        historyMergeRef.current = null
         setHistoryState({ canUndo: false, canRedo: false })
         setSelectedIds([])
         setTool('select')
@@ -463,8 +466,19 @@ export function CanvasEditorApp() {
     })
   }
 
-  function recordHistory() {
+  function recordHistory(mergeKey?: string) {
     if (!canvas) return
+    const now = Date.now()
+    if (mergeKey) {
+      const merged = historyMergeRef.current
+      if (merged?.key === mergeKey && now - merged.at < HISTORY_MERGE_MS) {
+        merged.at = now
+        return
+      }
+      historyMergeRef.current = { key: mergeKey, at: now }
+    } else {
+      historyMergeRef.current = null
+    }
     const history = historyRef.current
     history.past.push(structuredClone(canvas))
     if (history.past.length > HISTORY_LIMIT) history.past.shift()
@@ -949,6 +963,7 @@ export function CanvasEditorApp() {
 
   function undo() {
     if (!canvas) return
+    historyMergeRef.current = null
     const history = historyRef.current
     const previous = history.past.pop()
     if (!previous) return
@@ -959,6 +974,7 @@ export function CanvasEditorApp() {
 
   function redo() {
     if (!canvas) return
+    historyMergeRef.current = null
     const history = historyRef.current
     const next = history.future.pop()
     if (!next) return
@@ -1585,6 +1601,7 @@ export function CanvasEditorApp() {
 
   function activateCanvas(item: CanvasListItem, next: CanvasDocument) {
     historyRef.current = { past: [], future: [] }
+    historyMergeRef.current = null
     setHistoryState({ canUndo: false, canRedo: false })
     normalizeMarkdownLocks(next)
     setSelectedIds([])

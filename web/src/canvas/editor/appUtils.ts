@@ -34,6 +34,7 @@ export type ControllerLike = {
 }
 
 export const HISTORY_LIMIT = 100
+export const HISTORY_MERGE_MS = 700
 export const PASTE_OFFSET = 24
 export const AUTOSAVE_DELAY = 1200
 
