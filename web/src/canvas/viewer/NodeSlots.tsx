@@ -1,8 +1,7 @@
-import { useEffect, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import { PeleView } from '../../shared/pele/PeleView'
-import { ScheduleBlock } from '../../shared/schedule/ScheduleBlock'
 import type {
   SuperBoardMedia,
   SuperBoardNodeExtension,
@@ -10,6 +9,12 @@ import type {
 } from '../model'
 import '../../styles/markdown.css'
 import '../../styles/pele.css'
+
+const ScheduleBlock = lazy(() =>
+  import('../../shared/schedule/ScheduleBlock').then((module) => ({
+    default: module.ScheduleBlock,
+  })),
+)
 
 function extension(node: object) {
   return (node as { 'x-superboard'?: SuperBoardNodeExtension })['x-superboard']
@@ -109,10 +114,12 @@ export function TextSlot({
         <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />
       </div>
     ) : ext?.kind === 'schedule' ? (
-      <ScheduleBlock
-        events={ext.scheduleEvents}
-        onEventsChange={onScheduleEventsChange}
-      />
+      <Suspense fallback={<div className="sb-schedule" />}>
+        <ScheduleBlock
+          events={ext.scheduleEvents}
+          onEventsChange={onScheduleEventsChange}
+        />
+      </Suspense>
     ) : (
       <div style={textStyle(node)}>{node.text}</div>
     )
