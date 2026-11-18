@@ -239,7 +239,10 @@ export function CanvasEditorOverlay({
   }, [])
 
   useLayoutEffect(() => {
-    if (worldRef.current) worldRef.current.style.transform = ''
+    const world = worldRef.current
+    if (!world) return
+    world.style.transform = ''
+    world.style.removeProperty('--sb-actions-inverse')
   }, [view])
 
   useEffect(() => {
@@ -248,7 +251,6 @@ export function CanvasEditorOverlay({
     let unsubscribe: (() => void) | undefined
     let frame = 0
     let commitTimer: number | undefined
-    let actionsTimer: number | undefined
 
     const update = () => {
       frame = 0
@@ -268,14 +270,6 @@ export function CanvasEditorOverlay({
         setTick((value) => value + 1)
         return
       }
-      if (next.scale !== current.scale) {
-        setActionsVisible(false)
-        if (actionsTimer) window.clearTimeout(actionsTimer)
-        actionsTimer = window.setTimeout(() => {
-          actionsTimer = undefined
-          if (!dragRef.current) setActionsVisible(true)
-        }, 200)
-      }
       pendingViewRef.current = next
       const factor = next.scale / current.scale
       const translateX = next.offsetX - current.offsetX * factor
@@ -283,6 +277,8 @@ export function CanvasEditorOverlay({
       if (worldRef.current) {
         worldRef.current.style.transformOrigin = '0 0'
         worldRef.current.style.transform = `translate(${translateX}px, ${translateY}px) scale(${factor})`
+        // Keep the action bar at a stable screen size while the overlay follows the zoom transform.
+        worldRef.current.style.setProperty('--sb-actions-inverse', String(1 / factor))
       }
       if (!commitTimer) {
         commitTimer = window.setTimeout(() => {
@@ -334,7 +330,6 @@ export function CanvasEditorOverlay({
       if (timer) window.clearTimeout(timer)
       if (frame) cancelAnimationFrame(frame)
       if (commitTimer) window.clearTimeout(commitTimer)
-      if (actionsTimer) window.clearTimeout(actionsTimer)
       unsubscribe?.()
       pendingViewRef.current = null
       dmRef.current = null

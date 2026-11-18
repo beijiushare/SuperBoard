@@ -85,7 +85,7 @@ export function BlockActions({
     return {
       left,
       top,
-      transform: `translateX(-50%) rotate(${displayRotation}deg)`,
+      transform: `translateX(-50%) rotate(${displayRotation}deg) scale(var(--sb-actions-inverse, 1))`,
     }
   })()
 
