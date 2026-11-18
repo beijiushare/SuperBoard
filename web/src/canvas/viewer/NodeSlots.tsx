@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
-import { PeleView } from '../../shared/pele/PeleView'
 import {
   resolveNodeStyle,
   type SuperBoardMedia,
@@ -10,6 +9,12 @@ import {
 } from '../model'
 import '../../styles/markdown.css'
 import '../../styles/pele.css'
+
+const PeleView = lazy(() =>
+  import('../../shared/pele/PeleView').then((module) => ({
+    default: module.PeleView,
+  })),
+)
 
 const ScheduleBlock = lazy(() =>
   import('../../shared/schedule/ScheduleBlock').then((module) => ({
@@ -108,7 +113,9 @@ export function TextSlot({
       <MarkdownVditorPreview source={node.text} />
     ) : ext?.kind === 'pele' ? (
       <div className="sb-card sb-card-pele">
-        <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />
+        <Suspense fallback={<div className="sb-pele-loading">渲染中...</div>}>
+          <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />
+        </Suspense>
       </div>
     ) : ext?.kind === 'schedule' ? (
       <Suspense fallback={<div className="sb-schedule" />}>
