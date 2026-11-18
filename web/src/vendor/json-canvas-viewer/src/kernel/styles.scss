@@ -83,7 +83,7 @@
 		user-select: none;
 		contain: strict;
 		content-visibility: auto;
-		background-color: var(--overlay-card);
+		background-color: transparent;
 		transition: var(--containerTransition);
 		.JCV-overlay-border {
 			box-sizing: border-box;
@@ -94,7 +94,7 @@
 			left: 0;
 			width: 100%;
 			height: 100%;
-			border-width: var(--overlay-border-width);
+			border-width: 0;
 			border-style: solid;
 			border-radius: 12px;
 			transition: var(--containerTransition);
