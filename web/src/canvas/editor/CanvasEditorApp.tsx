@@ -33,34 +33,29 @@ import {
   parseCanvas,
   type CanvasDocument,
   type CanvasEdge,
-  type CanvasFrame,
   type CanvasNode,
   type SuperBoardScheduleEvent,
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
-  AUTOSAVE_DELAY,
   HISTORY_LIMIT,
   HISTORY_MERGE_MS,
   PASTE_OFFSET,
   nextId,
   normalizeMarkdownLocks,
   normalizeMediaUrl,
-  readStoredViewport,
-  readViewport,
   updateEditorUrl,
-  writeStoredViewport,
-  writeViewport,
   type BoardDialogState,
   type CanvasListItem,
   type CanvasMenuState,
   type Clipboard,
   type ControllerLike,
   type DataManagerLike,
-  type SaveState,
   type ViewerInternals,
-  type Viewport,
 } from './appUtils'
+import { useCanvasSave } from './useCanvasSave'
+import { useCanvasViewport } from './useCanvasViewport'
+import { useDirectorSession } from './useDirectorSession'
 import { useMarkdownEditingSession } from './useMarkdownEditingSession'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
@@ -117,8 +112,6 @@ export function CanvasEditorApp() {
   const [canvasMenu, setCanvasMenu] = useState<CanvasMenuState | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [saveState, setSaveState] = useState<SaveState>('saved')
-  const [saveRequest, setSaveRequest] = useState(0)
   const [historyState, setHistoryState] = useState({ canUndo: false, canRedo: false })
   const [treeMode, setTreeMode] = useState(() =>
     new URLSearchParams(window.location.search).has('tree'),
@@ -131,15 +124,6 @@ export function CanvasEditorApp() {
   )
   const [stylePanelOpen, setStylePanelOpen] = useState(true)
   const [menuPanelOpen, setMenuPanelOpen] = useState(true)
-  const [directorMode, setDirectorMode] = useState(false)
-  const [presentation, setPresentation] = useState(false)
-  const [presentationMenu, setPresentationMenu] = useState<{ x: number; y: number } | null>(
-    null,
-  )
-  const [frameIndex, setFrameIndex] = useState(0)
-  const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null)
-  const [frameControllerOpen, setFrameControllerOpen] = useState(false)
-  const [directorTick, setDirectorTick] = useState(0)
   const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
   const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
@@ -163,11 +147,38 @@ export function CanvasEditorApp() {
   const historyMergeRef = useRef<{ key: string; at: number } | null>(null)
   const clipboardRef = useRef<Clipboard | null>(null)
   const pasteCountRef = useRef(0)
-  const pendingViewportRef = useRef<Viewport | null>(null)
-  const viewportSaveTimerRef = useRef<number | null>(null)
-  const revisionRef = useRef(0)
-  const savingRef = useRef(false)
   const canvasRef = useRef<CanvasDocument | null>(null)
+  const { applyCanvasUiSettings, captureViewport } = useCanvasViewport({
+    canvas,
+    selectedSlug,
+    scope,
+    viewerRef,
+    setStylePanelOpen,
+    setMenuPanelOpen,
+  })
+  const { saveState, setSaveState, save, markDirty, savingRef } = useCanvasSave({
+    canvas,
+    items,
+    selectedSlug,
+    scope,
+  })
+  const {
+    directorMode,
+    presentation,
+    presentationMenu,
+    selectedFrameId,
+    frameControllerOpen,
+    directorFrames,
+    setPresentationMenu,
+    setSelectedFrameId,
+    setFrameControllerOpen,
+    updateDirectorFrames,
+    startPresentation,
+    advancePresentation,
+    exitPresentation,
+    toggleDirector,
+    resetDirectorSession,
+  } = useDirectorSession({ canvas, viewerRef, markDirty })
   const {
     markdownEditingId,
     markdownFocusId,
@@ -201,11 +212,6 @@ export function CanvasEditorApp() {
     useTreeExpansion(scopedItems)
   canvasRef.current = canvas
 
-  const directorFrames = useMemo(() => {
-    const frames = canvas?.['x-superboard']?.director?.frames ?? []
-    return [...frames].sort((a, b) => a.order - b.order)
-  }, [canvas, directorTick])
-
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
       shiftRef.current = event.shiftKey
@@ -216,18 +222,6 @@ export function CanvasEditorApp() {
     window.addEventListener('pointerdown', onPointerDown, true)
     return () => window.removeEventListener('pointerdown', onPointerDown, true)
   }, [])
-
-  function applyCanvasUiSettings(
-    next: CanvasDocument,
-    slug: string,
-    targetScope: BoardScope,
-  ) {
-    const settings = next['x-superboard']?.settings
-    setStylePanelOpen(settings?.stylePanelOpen ?? true)
-    setMenuPanelOpen(settings?.toolPaletteOpen ?? true)
-    pendingViewportRef.current =
-      readStoredViewport(slug, targetScope) ?? settings?.viewport ?? null
-  }
 
   const handleNodeSelect = useCallback(
     (id: string) => {
@@ -256,7 +250,7 @@ export function CanvasEditorApp() {
       const node = document?.nodes.find((item) => item.id === id)
       if (!document || !node) return
       recordHistory()
-      pendingViewportRef.current = readViewport(viewerRef.current)
+      captureViewport()
       const next: CanvasDocument = {
         ...document,
         nodes: document.nodes.map((item) =>
@@ -337,16 +331,6 @@ export function CanvasEditorApp() {
   }, [])
 
   useEffect(() => {
-    const viewport = pendingViewportRef.current
-    if (!viewport) return
-    pendingViewportRef.current = null
-    writeViewport(viewerRef.current, viewport)
-    if (selectedSlug) {
-      writeStoredViewport(selectedSlug, scope, viewport)
-    }
-  }, [canvas, scope, selectedSlug])
-
-  useEffect(() => {
     const current = canvasRef.current
     if (!current) return
     const root = current['x-superboard']
@@ -373,46 +357,6 @@ export function CanvasEditorApp() {
     setCanvas(next)
     markDirty()
   }, [canvas, menuPanelOpen, stylePanelOpen])
-
-  useEffect(() => {
-    if (!selectedSlug) return
-    const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
-    if (!viewer?.container) return
-    let controller: {
-      onRefresh: { subscribe: (callback: () => void) => () => void }
-    }
-    try {
-      controller = viewer.container.get(internal.Controller as never) as {
-        onRefresh: { subscribe: (callback: () => void) => () => void }
-      }
-    } catch {
-      return
-    }
-    let latestViewport: Viewport | null = null
-    const saveViewport = () => {
-      latestViewport = readViewport(viewerRef.current)
-      if (viewportSaveTimerRef.current) {
-        window.clearTimeout(viewportSaveTimerRef.current)
-      }
-      viewportSaveTimerRef.current = window.setTimeout(() => {
-        viewportSaveTimerRef.current = null
-        if (latestViewport) {
-          writeStoredViewport(selectedSlug, scope, latestViewport)
-        }
-      }, 500)
-    }
-    const unsubscribe = controller.onRefresh.subscribe(saveViewport)
-    return () => {
-      unsubscribe()
-      if (viewportSaveTimerRef.current) {
-        window.clearTimeout(viewportSaveTimerRef.current)
-        viewportSaveTimerRef.current = null
-      }
-      if (latestViewport) {
-        writeStoredViewport(selectedSlug, scope, latestViewport)
-      }
-    }
-  }, [scope, selectedSlug])
 
   useEffect(() => {
     const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
@@ -486,11 +430,6 @@ export function CanvasEditorApp() {
     syncHistoryState()
   }
 
-  function markDirty() {
-    revisionRef.current += 1
-    setSaveState('dirty')
-  }
-
   function rememberBoardColor(color: string) {
     if (!color || color === 'transparent') return
     setCanvas((current) => {
@@ -515,7 +454,7 @@ export function CanvasEditorApp() {
   }
 
   function applyDocument(next: CanvasDocument, selection: string[] = []) {
-    pendingViewportRef.current = readViewport(viewerRef.current)
+    captureViewport()
     setSelectedIds(selection)
     setCanvas(next)
     markDirty()
@@ -735,7 +674,7 @@ export function CanvasEditorApp() {
       return
     }
     recordHistory()
-    pendingViewportRef.current = readViewport(viewerRef.current)
+    captureViewport()
     const next: CanvasDocument = {
       ...document,
       nodes: document.nodes.map((item) =>
@@ -763,7 +702,7 @@ export function CanvasEditorApp() {
     const document = canvasRef.current
     const node = document?.nodes.find((item) => item.id === id)
     if (!document || !node || node.type !== 'text') return
-    pendingViewportRef.current = readViewport(viewerRef.current)
+    captureViewport()
     setCanvas({
       ...document,
       nodes: document.nodes.map((item) =>
@@ -1529,68 +1468,6 @@ export function CanvasEditorApp() {
     return () => window.removeEventListener('pointerdown', onPointerDown, true)
   }, [canvasMenu])
 
-  useEffect(() => {
-    if (saveState !== 'dirty') return
-    const timer = window.setTimeout(() => {
-      if (savingRef.current) {
-        setSaveRequest((value) => value + 1)
-        return
-      }
-      void save()
-    }, AUTOSAVE_DELAY)
-    return () => window.clearTimeout(timer)
-  }, [saveState, canvas, selectedSlug, saveRequest])
-
-  useEffect(() => {
-    const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (saveState === 'saved') return
-      event.preventDefault()
-      event.returnValue = ''
-    }
-    window.addEventListener('beforeunload', onBeforeUnload)
-    return () => window.removeEventListener('beforeunload', onBeforeUnload)
-  }, [saveState])
-
-  async function save(): Promise<boolean> {
-    if (!canvas || savingRef.current) return false
-    if (saveState === 'saved') return true
-    const meta = canvas['x-superboard']?.meta
-    if (!meta) return false
-    const item = items.find(
-      (entry) => entry.slug === selectedSlug && entry.scope === scope,
-    )
-    if (!item) return false
-    const revision = revisionRef.current
-    savingRef.current = true
-    setSaveState('saving')
-    try {
-      const response = await fetch(
-        `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(canvas),
-        },
-      )
-      if (!response.ok) {
-        setSaveState('error')
-        return false
-      }
-      if (revisionRef.current === revision) {
-        setSaveState('saved')
-      } else {
-        setSaveState('dirty')
-        setSaveRequest((value) => value + 1)
-      }
-      return true
-    } catch {
-      setSaveState('error')
-      return false
-    } finally {
-      savingRef.current = false
-    }
-  }
-
   async function fetchCanvasDocument(item: CanvasListItem) {
     const response = await fetch(
       `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}`,
@@ -1610,11 +1487,7 @@ export function CanvasEditorApp() {
     resetMarkdownEditing()
     setTextEditingId(null)
     setTool('select')
-    setDirectorMode(false)
-    setPresentation(false)
-    setPresentationMenu(null)
-    setSelectedFrameId(null)
-    setFrameControllerOpen(false)
+    resetDirectorSession()
     setSelectedSlug(item.slug)
     setScope(item.scope)
     applyCanvasUiSettings(next, item.slug, item.scope)
@@ -1683,8 +1556,7 @@ export function CanvasEditorApp() {
       setCanvas(null)
       setSelectedSlug('')
       setSaveState('saved')
-      setDirectorMode(false)
-      setPresentation(false)
+      resetDirectorSession()
       updateEditorUrl(null, nextScope, treeMode)
       return
     }
@@ -1875,51 +1747,6 @@ export function CanvasEditorApp() {
     }
   }
 
-  function updateDirectorFrames(frames: CanvasFrame[]) {
-    if (!canvas) return
-    const root = canvas['x-superboard']
-    if (!root) return
-    root.director = { ...(root.director ?? { frames: [] }), frames }
-    markDirty()
-    setDirectorTick((value) => value + 1)
-    viewerRef.current?.viewer?.refresh?.()
-  }
-
-  function startPresentation(startIndex = 0) {
-    if (directorFrames.length === 0) return
-    const index = Math.max(0, Math.min(startIndex, directorFrames.length - 1))
-    setPresentation(true)
-    setPresentationMenu(null)
-    setFrameIndex(index)
-    void viewerRef.current?.viewer?.playDirectorFrame?.(directorFrames[index], true)
-  }
-
-  function advancePresentation() {
-    if (!presentation) return
-    const next = frameIndex + 1
-    if (next >= directorFrames.length) {
-      setPresentation(false)
-      viewerRef.current?.viewer?.restoreDirectorCamera?.()
-      if (directorMode) viewerRef.current?.viewer?.setDirectorVisible?.(true)
-      return
-    }
-    setFrameIndex(next)
-    void viewerRef.current?.viewer?.playDirectorFrame?.(directorFrames[next], true)
-  }
-
-  function exitPresentation() {
-    setPresentation(false)
-    setPresentationMenu(null)
-    viewerRef.current?.viewer?.restoreDirectorCamera?.()
-    if (directorMode) viewerRef.current?.viewer?.setDirectorVisible?.(true)
-  }
-
-  useEffect(() => {
-    const viewer = viewerRef.current?.viewer
-    viewer?.setDirectorVisible?.(directorMode && !presentation)
-    if (!directorMode) viewer?.restoreDirectorCamera?.()
-  }, [directorMode, presentation, canvas])
-
   if (loading) return <div className="sb-screen-message">正在加载画布…</div>
   if (error) {
     return (
@@ -1928,19 +1755,6 @@ export function CanvasEditorApp() {
         <p>{error}</p>
       </div>
     )
-  }
-  function toggleDirector() {
-    if (directorMode) {
-      setDirectorMode(false)
-      setPresentation(false)
-      setPresentationMenu(null)
-      setSelectedFrameId(null)
-      setFrameControllerOpen(false)
-      viewerRef.current?.viewer?.setDirectorVisible?.(false)
-      viewerRef.current?.viewer?.restoreDirectorCamera?.()
-      return
-    }
-    setDirectorMode(true)
   }
 
   const nodeMap = canvas ? nodeMapOf(canvas.nodes) : new Map<string, CanvasNode>()
