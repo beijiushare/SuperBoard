@@ -201,7 +201,9 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 		this.pending.add(node.id);
 		try {
 			if (node.type === 'text') {
-				const content = await this.parse(node.text);
+				const content = this.options.nodeComponents?.text
+					? node.text
+					: await this.parse(node.text);
 				if (this.aborted || !this.wanted.has(node.id)) return;
 				this.createOverlay(node, content, 'text');
 				return;
