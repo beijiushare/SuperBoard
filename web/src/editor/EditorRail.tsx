@@ -64,7 +64,7 @@ export function EditorRail({
         aria-pressed={treeMode && treeOpen}
         onClick={onToggleTree}
       >
-        <SidebarIcon size={17} />
+        <SidebarIcon size={16} />
       </button>
 
       {editing ? (
@@ -75,7 +75,7 @@ export function EditorRail({
           aria-label={scopeLabel}
           onClick={onSwitchScope}
         >
-          <GitBranchIcon size={21} />
+          <GitBranchIcon size={22} />
         </button>
       ) : null}
 
