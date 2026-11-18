@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
-import { parseCanvas, serializeCanvas, type CanvasDocument, type CanvasMeta } from '../../canvas/model'
+import { parseCanvas, stringifyCanvas, type CanvasDocument, type CanvasMeta } from '../../canvas/model'
 import type { BoardScope } from '../../shared/board/types'
 import { resolveScopeDir } from '../boardFs/paths'
 
@@ -10,6 +10,7 @@ export interface ScannedCanvas {
   folder: string
   canvas: CanvasDocument
   meta: CanvasMeta
+  hash: string
 }
 
 export interface CanvasListItem extends CanvasMeta {
@@ -94,7 +95,13 @@ export async function scanCanvasFiles(root: string, scope: BoardScope): Promise<
       const canvas = parseCanvas(await fs.readFile(key, 'utf8'))
       const fallbackSlug = path.basename(key, '.canvas')
       const meta = canvasMeta(canvas, fallbackSlug)
-      const scan = { ...item, file: key, canvas, meta }
+      const scan = {
+        ...item,
+        file: key,
+        canvas,
+        meta,
+        hash: canvasContentHash(canvas),
+      }
       canvasFileCache.set(key, {
         mtimeMs: stats.mtimeMs,
         ctimeMs: stats.ctimeMs,
@@ -143,10 +150,15 @@ export function canvasContentHash(canvas: CanvasDocument) {
     .digest('hex')
 }
 
-export async function writeCanvasFile(file: string, canvas: CanvasDocument, folder = '') {
+export async function writeCanvasFile(
+  file: string,
+  canvas: CanvasDocument,
+  folder = '',
+  hash = canvasContentHash(canvas),
+) {
   await fs.mkdir(path.dirname(file), { recursive: true })
   const tempFile = `${file}.${process.pid}.${Date.now()}.tmp`
-  await fs.writeFile(tempFile, serializeCanvas(canvas), 'utf8')
+  await fs.writeFile(tempFile, stringifyCanvas(canvas), 'utf8')
   await fs.rename(tempFile, file)
   const key = cacheKey(file)
   try {
@@ -157,7 +169,7 @@ export async function writeCanvasFile(file: string, canvas: CanvasDocument, fold
       mtimeMs: stats.mtimeMs,
       ctimeMs: stats.ctimeMs,
       size: stats.size,
-      scan: { file: key, folder, canvas, meta },
+      scan: { file: key, folder, canvas, meta, hash },
     })
   } catch {
     canvasFileCache.delete(key)

@@ -126,14 +126,13 @@ export async function handleCanvasFsRequest(
       if (meta.slug !== slug) throw new HttpError(409, 'meta.slug 与 URL 不一致')
 
       const nextHash = canvasContentHash(payload)
-      const currentHash = canvasContentHash(found.canvas)
-      if (nextHash === currentHash) {
+      if (nextHash === found.hash) {
         meta.updatedAt = found.meta.updatedAt
       } else {
         meta.updatedAt = new Date().toISOString()
       }
 
-      await writeCanvasFile(found.file, payload, found.folder)
+      await writeCanvasFile(found.file, payload, found.folder, nextHash)
       sendJson(res, 200, {
         ok: true,
         hash: nextHash,
@@ -186,7 +185,7 @@ export async function handleCanvasFsRequest(
         }
       }
 
-      await writeCanvasFile(nextFile, nextCanvas, nextFolder)
+      await writeCanvasFile(nextFile, nextCanvas, nextFolder, found.hash)
       if (nextFile !== found.file) {
         await fs.unlink(found.file)
         forgetCanvasFile(found.file)

@@ -164,9 +164,13 @@ export function parseCanvas(text: string): CanvasDocument {
   return validateCanvas(value)
 }
 
+export function stringifyCanvas(document: CanvasDocument): string {
+  return `${JSON.stringify(document, null, 2)}\n`
+}
+
 export function serializeCanvas(document: CanvasDocument): string {
   validateCanvas(document)
-  return `${JSON.stringify(document, null, 2)}\n`
+  return stringifyCanvas(document)
 }
 
 export function getNodeExtension(node: CanvasNode) {
