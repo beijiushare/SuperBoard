@@ -1,7 +1,6 @@
 import { PeleCreateDialog } from './PeleCreateDialog'
 import { PreferencesDialog } from './PreferencesDialog'
 import { InputDialog } from '../../shared/ui/InputDialog'
-import { DeployDialog } from '../../editor/dialogs'
 
 type PeleDialogState =
   | { mode: 'create'; point?: { x: number; y: number } }
@@ -20,9 +19,6 @@ interface EditorInsertDialogsProps {
   onConfirmMedia: (value: string) => void
   preferencesOpen: boolean
   onClosePreferences: () => void
-  deployOpen: boolean
-  onCloseDeploy: () => void
-  onConfirmDeploy: () => void
 }
 
 export function EditorInsertDialogs({
@@ -37,9 +33,6 @@ export function EditorInsertDialogs({
   onConfirmMedia,
   preferencesOpen,
   onClosePreferences,
-  deployOpen,
-  onCloseDeploy,
-  onConfirmDeploy,
 }: EditorInsertDialogsProps) {
   return (
     <>
@@ -72,10 +65,6 @@ export function EditorInsertDialogs({
 
       {preferencesOpen ? (
         <PreferencesDialog onClose={onClosePreferences} />
-      ) : null}
-
-      {deployOpen ? (
-        <DeployDialog onClose={onCloseDeploy} onConfirm={onConfirmDeploy} />
       ) : null}
     </>
   )

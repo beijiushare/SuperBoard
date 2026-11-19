@@ -13,7 +13,7 @@ export function useEditorDialogState() {
   const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
   const [pendingDeleteFolder, setPendingDeleteFolder] =
     useState<BoardTreeFolder | null>(null)
-  const [deployDialogOpen, setDeployDialogOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [preferencesOpen, setPreferencesOpen] = useState(false)
   const [contextMenu, setContextMenu] = useState<{
     x: number
@@ -32,8 +32,8 @@ export function useEditorDialogState() {
     setPendingDelete,
     pendingDeleteFolder,
     setPendingDeleteFolder,
-    deployDialogOpen,
-    setDeployDialogOpen,
+    exportDialogOpen,
+    setExportDialogOpen,
     preferencesOpen,
     setPreferencesOpen,
     contextMenu,

@@ -29,7 +29,7 @@ interface EditorRailProps {
   onToggleMenuPanel?: () => void
   directorMode: boolean
   onToggleDirector: () => void
-  onDeploy?: () => void
+  onExport?: () => void
   onOpenPreferences?: () => void
 }
 
@@ -52,7 +52,7 @@ export function EditorRail({
   onToggleMenuPanel,
   directorMode,
   onToggleDirector,
-  onDeploy,
+  onExport,
   onOpenPreferences,
 }: EditorRailProps) {
   const editing = mode === 'edit'
@@ -132,13 +132,13 @@ export function EditorRail({
         <FilmIcon size={21} />
       </button>
 
-      {editing && onDeploy ? (
+      {editing && onExport ? (
         <button
           type="button"
           className="sb-rail-button"
-          data-tooltip="提交并推送"
-          aria-label="提交并推送"
-          onClick={onDeploy}
+          data-tooltip="导出"
+          aria-label="导出"
+          onClick={onExport}
         >
           <UploadCloudIcon size={21} />
         </button>

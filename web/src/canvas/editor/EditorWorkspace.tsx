@@ -40,7 +40,7 @@ interface EditorWorkspaceProps {
   onToggleMenuPanel: () => void
   directorMode: boolean
   onToggleDirector: () => void
-  onDeploy?: () => void
+  onExport?: () => void
   onOpenPreferences: () => void
   tree?: EditorTreeConfig
   children: ReactNode
@@ -63,7 +63,7 @@ export function EditorWorkspace({
   onToggleMenuPanel,
   directorMode,
   onToggleDirector,
-  onDeploy,
+  onExport,
   onOpenPreferences,
   tree,
   children,
@@ -97,7 +97,7 @@ export function EditorWorkspace({
         onToggleMenuPanel={onToggleMenuPanel}
         directorMode={directorMode}
         onToggleDirector={onToggleDirector}
-        onDeploy={onDeploy}
+        onExport={onExport}
         onOpenPreferences={onOpenPreferences}
       />
 

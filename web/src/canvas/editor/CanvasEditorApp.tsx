@@ -42,10 +42,10 @@ import { useBlockActions } from './useBlockActions'
 import { useCanvasInsertions } from './useCanvasInsertions'
 import { useCanvasMenu } from './useCanvasMenu'
 import { EditorInsertDialogs } from './EditorInsertDialogs'
+import { ExportDialog } from './ExportDialog'
 import { EditorBoardDialogs } from './EditorBoardDialogs'
 import { CanvasBlockMenu } from './CanvasBlockMenu'
 import { EditorWorkspace } from './EditorWorkspace'
-import { isBrowserFolderMode } from './browserFolderBackend'
 import { loadWorkspace, readBoard, WORKSPACE_VERSION_KEY } from './workspaceApi'
 import {
   rememberRecentColor,
@@ -115,8 +115,8 @@ export function CanvasEditorApp() {
     setPendingDelete,
     pendingDeleteFolder,
     setPendingDeleteFolder,
-    deployDialogOpen,
-    setDeployDialogOpen,
+    exportDialogOpen,
+    setExportDialogOpen,
     preferencesOpen,
     setPreferencesOpen,
     contextMenu,
@@ -830,11 +830,7 @@ export function CanvasEditorApp() {
         }
         directorMode={directorMode}
         onToggleDirector={toggleDirector}
-        onDeploy={
-          isBrowserFolderMode()
-            ? undefined
-            : () => setDeployDialogOpen(true)
-        }
+        onExport={() => setExportDialogOpen(true)}
         onOpenPreferences={() => setPreferencesOpen(true)}
         tree={treeConfig}
       >
@@ -1006,13 +1002,14 @@ export function CanvasEditorApp() {
           setPreferencesOpen(false)
           viewerRef.current?.viewer?.refresh?.()
         }}
-        deployOpen={deployDialogOpen}
-        onCloseDeploy={() => setDeployDialogOpen(false)}
-        onConfirmDeploy={() => {
-          setDeployDialogOpen(false)
-          void fetch('/__deploy', { method: 'POST' }).catch(() => {})
-        }}
       />
+
+      {exportDialogOpen && canvas ? (
+        <ExportDialog
+          canvas={canvas}
+          onClose={() => setExportDialogOpen(false)}
+        />
+      ) : null}
 
       <EditorBoardDialogs
         boardDialog={boardDialog}
