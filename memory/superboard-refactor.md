@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`26d7afe feat: add keyboard navigation to board tree`
+- 最近提交：`9073238 ci: publish demo site from dist-info`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -12,15 +12,13 @@
 
 ### 数据与部署
 
-- `whiteboards/` 退出 Git
-- `info/public` 作为 GitHub Pages 示例数据
-- `.github/workflows/pages.yml` 部署示例 viewer
-- `npm run build:info`：构建示例 viewer
-- `npm run build:data`：构建本地真实数据 viewer
-- `npm run build:editor`：单独构建浏览器编辑器
-- `npm run build:viewer`：只构建 viewer
-- `docs/DEPLOY.md`：GitHub Pages 与 Vercel 部署说明
-- `docs/WAILS.md`：Go/Wails 桌面端建议
+- 默认入口改为浏览器编辑器：启动即选择本地工作区
+- 工作区使用 `<workspace>/public` 与 `<workspace>/private`，兼容旧 `whiteboards/public|private`
+- `info/public` 仅作为演示数据
+- `npm run build:editor` 输出 `dist/index.html`，base 为 `/`
+- `npm run build:info` 输出 `dist-info/`
+- `npm run export:site -- --data <目录> --out <目录> --base <路径>` 可从任意目录导出站点
+- GitHub Pages 工作流改从 `dist-info` 发布
 
 ### 浏览器编辑器
 
@@ -33,10 +31,14 @@
 - 覆盖前写 `.bak`，失败时尝试恢复
 - 文件夹移动冲突检查与失败清理
 - 白板移动 slug 冲突检查
-- 浏览器模式隐藏 Git 部署按钮
-- 保存冲突检测：文件基线版本变化时返回 409
-- 多标签修改通过 BroadcastChannel 通知，冲突时停止自动保存
+- 浏览器模式原 Git 部署按钮已改为导出入口
+- 设置分为「常规 / 默认块 / 文本」，常规中可重新选择工作区文件夹
 - 工作区增删改通过 localStorage 版本号通知其他标签页刷新目录
+- 编辑器使用 Web Locks 禁止第二个标签页同时编辑
+- 文件夹移动优先原生 move，失败回退复制；移动期间整页模糊并禁止编辑/保存
+- 文件夹移动可取消，取消后清理目标
+- 保存冲突/失败横幅、重新加载磁盘版本
+- rail 部署按钮改为导出：单 HTML / SVG
 - 保存失败自动重试两次，409 不重试
 - 冲突时保存按钮显示「保存冲突，点击覆盖」，顶部横幅可覆盖或重新加载磁盘版本
 - 保存失败时顶部横幅提供「重试保存」
@@ -100,7 +102,12 @@
 - `CanvasBlockMenu.tsx`：画布右键菜单
 - `EditorWorkspace.tsx`：rail 与目录外壳
 - `useBoardTreeData.ts`：目录数据与文件夹路径
-- `useEditorDialogState.ts`：白板/文件夹/部署弹窗状态
+- `useEditorDialogState.ts`：白板/文件夹/导出弹窗状态
+- `ExportDialog.tsx`：单 HTML / SVG 导出
+- `FolderMoveOverlay.tsx`：移动期间全页遮罩
+- `useShellKeyboard.ts`：侧栏与目录的 Tab/方向键焦点
+- `browserMain.tsx`：工作区选择与 Web Locks 单标签锁
+- `scripts/export-site.mjs`：`--data` / `--out` / `--base` 站点导出
 - `useShapeArrowTools.ts`：形状与箭头草稿和提交
 - `folderMove.ts`：文件夹移动进度与取消信号
 - `styles/viewer-index.css`：viewer 独立样式入口，不含编辑器样式
@@ -126,19 +133,26 @@
 
 ### 手动验证
 
-- 浏览器编辑器：文件夹选择、恢复权限、保存 `.bak`、多标签冲突窗口
-- 文件夹移动进度与取消
-- 目录树键盘导航
-- 长文本换行后的高度
+- 浏览器编辑器：选择工作区、恢复权限、保存 `.bak`
+- 第二标签页被 Web Locks 阻止
+- 文件夹原生 move / 复制回退 / 取消
+- 侧栏与目录 Tab/方向键
+- 长文本三态 UI 一致性
 - 拖拽、缩放、旋转、框选回归
+- 站点导出与 `dist-info` 演示站
+
+### 桌面端 TODO
+
+- Wails/Go 桌面工程
+- 桌面本地 `config.json` 与单实例
+- 多文件站点导出到设置中的固定目录
+- 导出目录变更与旧产物迁移
+- 部署命令配置与执行器（暂缓）
 
 ### 可选优化
 
-- `CanvasEditorStage.tsx` 约 280 行，可继续按 Viewer/Overlay/Tools 拆
-- `CanvasEditorOverlay.tsx` 约 554 行，只剩渲染与选择框
-- `CanvasEditorTools.tsx` 约 323 行，剩余橡皮与预览组合
-- 构建脚本 `web/build.js` 与多入口关系继续解耦
-- `app.css` 仍为共享布局样式，可继续按区域拆分
+- 构建脚本多入口继续解耦
+- `app.css` 继续按区域拆分
 - 仓储层单测、浏览器 File System Access 适配测试
 - Markdown fallback `MarkdownView` 542 kB 懒加载体积优化
 
