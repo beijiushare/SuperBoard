@@ -12,6 +12,10 @@ import {
 } from './preferences'
 import { BackgroundFields, BorderFields } from './StyleFieldGroups'
 import { StyleNumberControl } from './StyleNumberControl'
+import {
+  browserWorkspaceName,
+  openBrowserWorkspace,
+} from './browserFolderBackend'
 
 interface PreferencesDialogProps {
   onClose: () => void
@@ -22,6 +26,8 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
     structuredClone(getPreferences()),
   )
   const [confirmReset, setConfirmReset] = useState(false)
+  const [tab, setTab] = useState<'general' | 'block' | 'text'>('general')
+  const [switching, setSwitching] = useState(false)
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -83,7 +89,57 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           </button>
         </div>
 
-        <BackgroundFields
+        <div className="sb-preferences-tabs" role="tablist" aria-label="设置分类">
+          {(
+            [
+              ['general', '常规'],
+              ['block', '默认块'],
+              ['text', '文本'],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={tab === value}
+              className={tab === value ? 'is-active' : undefined}
+              onClick={() => setTab(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'general' ? (
+          <section>
+            <h3>工作区</h3>
+            <p className="sb-preferences-note">
+              当前目录：{browserWorkspaceName() || '未选择'}
+            </p>
+            {'showDirectoryPicker' in window ? (
+              <button
+                type="button"
+                className="sb-button"
+                disabled={switching}
+                onClick={() => {
+                  setSwitching(true)
+                  void openBrowserWorkspace()
+                    .then(() => window.location.reload())
+                    .catch(() => setSwitching(false))
+                }}
+              >
+                {switching ? '正在切换…' : '重新选择文件夹'}
+              </button>
+            ) : null}
+            <p className="sb-preferences-note">
+              偏好保存在当前浏览器；桌面端会改为本地配置文件。
+            </p>
+          </section>
+        ) : null}
+
+        {tab === 'block' ? (
+          <>
+            <BackgroundFields
           color={draft.block.backgroundColor}
           opacity={Math.round(draft.block.backgroundOpacity * 100)}
           allowNone={false}
@@ -104,7 +160,10 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
             })
           }
         />
+          </>
+        ) : null}
 
+        {tab === 'text' ? (
         <section>
           <h3>文本默认样式</h3>
           <div className="sb-style-row">
@@ -171,7 +230,9 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
             </div>
           </div>
         </section>
+        ) : null}
 
+        {tab === 'block' ? (
         <section>
           <h3>形状默认样式</h3>
           <StyleNumberControl
@@ -186,6 +247,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
             }
           />
         </section>
+        ) : null}
 
       </div>
     </div>

@@ -1079,6 +1079,33 @@
   margin-bottom: 4px !important;
 }
 
+.sb-preferences-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 4px 0 12px;
+  padding: 3px;
+  border: 1px solid #e3ded1;
+  border-radius: 9px;
+  background: #f7f5ef;
+}
+
+.sb-preferences-tabs button {
+  flex: 1;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #6f6d66;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sb-preferences-tabs button.is-active {
+  background: #fffdf8;
+  color: #2b2924;
+  box-shadow: 0 1px 3px rgb(50 45 30 / 12%);
+}
+
 .sb-preferences-reset {
   display: grid;
   width: 30px;

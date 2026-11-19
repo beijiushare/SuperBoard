@@ -573,6 +573,10 @@ export function isBrowserFolderMode() {
   return installed
 }
 
+export function browserWorkspaceName() {
+  return root?.name ?? ''
+}
+
 export async function browserRequest(
   input: RequestInfo | URL,
   init?: RequestInit,
