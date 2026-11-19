@@ -11,7 +11,13 @@ function siteBase(value: string) {
 }
 
 export default defineConfig(({ command, isPreview, mode }) => ({
-  base: command === 'build' || isPreview ? siteBase(process.env.BASE_PATH ?? process.env.SB_BASE ?? '') : '/',
+  base: command === 'build' || isPreview
+    ? siteBase(
+        process.env.BASE_PATH ??
+          process.env.SB_BASE ??
+          (mode === 'editor' ? '/' : ''),
+      )
+    : '/',
   plugins: [react(), vditorAssetsPlugin()],
   resolve: {
     alias: [
