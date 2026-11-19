@@ -7,13 +7,7 @@ import {
   type MouseEvent as ReactMouseEvent,
 } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
-import { BoardContextMenu, type BoardContextTarget } from '../../editor/BoardContextMenu'
-import {
-  BoardDialog,
-  DeleteBoardDialog,
-  DeleteFolderDialog,
-  RenameFolderDialog,
-} from '../../editor/dialogs'
+import type { BoardContextTarget } from '../../editor/BoardContextMenu'
 import { DirectorFrameController } from '../../editor/DirectorFrameController'
 import { EditorRail } from '../../editor/EditorRail'
 import { BoardTreePanel } from '../../shared/board/BoardTreePanel'
@@ -59,6 +53,7 @@ import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
 import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { EditorInsertDialogs } from './EditorInsertDialogs'
+import { EditorBoardDialogs } from './EditorBoardDialogs'
 import { isBrowserFolderMode } from './browserFolderBackend'
 import { loadWorkspace, readBoard } from './workspaceApi'
 import {
@@ -66,7 +61,6 @@ import {
   updateUiState,
   useUiState,
 } from './uiState'
-import { InputDialog } from '../../shared/ui/InputDialog'
 import {
   blockDefinition,
   blockEditor,
@@ -1274,86 +1268,34 @@ export function CanvasEditorApp() {
         }}
       />
 
-      {contextMenu ? (
-        <BoardContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          target={contextMenu.target}
-          onClose={() => setContextMenu(null)}
-          onCreate={(folder) => setBoardDialog({ mode: 'create', folder })}
-          onCreateFolder={(folder) => setNewFolderParent(folder)}
-          onRename={(node) => setBoardDialog({ mode: 'rename', board: node })}
-          onRenameFolder={(folder) => setFolderDialog(folder)}
-          onDelete={(node) => setPendingDelete(node)}
-          onDeleteFolder={(folder) => setPendingDeleteFolder(folder)}
-        />
-      ) : null}
-
-      {boardDialog ? (
-        <BoardDialog
-          key={
-            boardDialog.mode === 'create'
-              ? `create:${boardDialog.folder ?? ''}`
-              : `rename:${boardDialog.board.slug}`
-          }
-          mode={boardDialog.mode}
-          board={boardDialog.mode === 'rename' ? boardDialog.board : undefined}
-          folders={folderPaths}
-          defaultFolder={
-            boardDialog.mode === 'create'
-              ? boardDialog.folder ?? ''
-              : boardDialog.board.path
-          }
-          onClose={() => setBoardDialog(null)}
-          onSubmit={boardDialog.mode === 'create' ? handleCreate : handleRename}
-        />
-      ) : null}
-
-      {folderDialog ? (
-        <RenameFolderDialog
-          key={folderDialog.path}
-          folder={folderDialog}
-          folders={folderPaths.filter(
-            (path) =>
-              path !== folderDialog.path &&
-              !path.startsWith(`${folderDialog.path}/`),
-          )}
-          onClose={() => setFolderDialog(null)}
-          onSubmit={handleRenameFolder}
-        />
-      ) : null}
-
-      {newFolderParent !== null ? (
-        <InputDialog
-          title="新建文件夹"
-          description={
-            newFolderParent
-              ? `将创建在 ${newFolderParent} 下`
-              : '将创建在根目录'
-          }
-          placeholder="文件夹名称"
-          confirmText="创建"
-          onConfirm={(value) => void handleCreateFolder(value)}
-          onClose={() => setNewFolderParent(null)}
-        />
-      ) : null}
-
-      {pendingDelete ? (
-        <DeleteBoardDialog
-          board={pendingDelete}
-          onClose={() => setPendingDelete(null)}
-          onConfirm={handleDelete}
-        />
-      ) : null}
-
-      {pendingDeleteFolder ? (
-        <DeleteFolderDialog
-          folder={pendingDeleteFolder}
-          scope={scope}
-          onClose={() => setPendingDeleteFolder(null)}
-          onConfirm={handleDeleteFolder}
-        />
-      ) : null}
+      <EditorBoardDialogs
+        boardDialog={boardDialog}
+        folderDialog={folderDialog}
+        newFolderParent={newFolderParent}
+        pendingDelete={pendingDelete}
+        pendingDeleteFolder={pendingDeleteFolder}
+        contextMenu={contextMenu}
+        folderPaths={folderPaths}
+        scope={scope}
+        onCloseBoardDialog={() => setBoardDialog(null)}
+        onCreateBoard={handleCreate}
+        onRenameBoard={handleRename}
+        onCloseFolderDialog={() => setFolderDialog(null)}
+        onRenameFolder={handleRenameFolder}
+        onCloseNewFolder={() => setNewFolderParent(null)}
+        onCreateFolder={handleCreateFolder}
+        onCloseDeleteBoard={() => setPendingDelete(null)}
+        onDeleteBoard={handleDelete}
+        onCloseDeleteFolder={() => setPendingDeleteFolder(null)}
+        onDeleteFolder={handleDeleteFolder}
+        onCloseContextMenu={() => setContextMenu(null)}
+        onContextCreate={(folder) => setBoardDialog({ mode: 'create', folder })}
+        onContextCreateFolder={(folder) => setNewFolderParent(folder)}
+        onContextRename={(node) => setBoardDialog({ mode: 'rename', board: node })}
+        onContextRenameFolder={(folder) => setFolderDialog(folder)}
+        onContextDelete={(node) => setPendingDelete(node)}
+        onContextDeleteFolder={(folder) => setPendingDeleteFolder(folder)}
+      />
     </div>
   )
 }
