@@ -12,7 +12,6 @@ import {
   BoardDialog,
   DeleteBoardDialog,
   DeleteFolderDialog,
-  DeployDialog,
   RenameFolderDialog,
 } from '../../editor/dialogs'
 import { DirectorFrameController } from '../../editor/DirectorFrameController'
@@ -59,8 +58,7 @@ import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
 import { MarkdownFocusDialog } from './MarkdownFocusDialog'
-import { PeleCreateDialog } from './PeleCreateDialog'
-import { PreferencesDialog } from './PreferencesDialog'
+import { EditorInsertDialogs } from './EditorInsertDialogs'
 import { isBrowserFolderMode } from './browserFolderBackend'
 import { loadWorkspace, readBoard } from './workspaceApi'
 import {
@@ -1250,44 +1248,31 @@ export function CanvasEditorApp() {
         </div>
       ) : null}
 
-      {peleDialog ? (
-        <PeleCreateDialog
-          key={
-            peleDialog.mode === 'edit'
-              ? `edit:${peleDialog.nodeId}`
-              : 'create'
-          }
-          mode={peleDialog.mode}
-          initialCode={peleInitialCode}
-          initialDiagram={peleInitialDiagram}
-          onClose={() => setPeleDialog(null)}
-          onSave={insertPele}
-        />
-      ) : null}
-
-      {mediaDialogOpen ? (
-        <InputDialog
-          title="插入媒体"
-          description="支持图片、视频链接，以及其他可嵌入的 iframe 地址。"
-          initialValue={mediaUrl}
-          placeholder="https://..."
-          confirmText="插入"
-          onConfirm={(value) => insertMedia(value)}
-          onClose={() => {
-            setMediaDialogOpen(false)
-            setMediaInsertPoint(null)
-          }}
-        />
-      ) : null}
-
-      {preferencesOpen ? (
-        <PreferencesDialog
-          onClose={() => {
-            setPreferencesOpen(false)
-            viewerRef.current?.viewer?.refresh?.()
-          }}
-        />
-      ) : null}
+      <EditorInsertDialogs
+        peleDialog={peleDialog}
+        peleInitialCode={peleInitialCode}
+        peleInitialDiagram={peleInitialDiagram}
+        onClosePele={() => setPeleDialog(null)}
+        onSavePele={insertPele}
+        mediaOpen={mediaDialogOpen}
+        mediaUrl={mediaUrl}
+        onCloseMedia={() => {
+          setMediaDialogOpen(false)
+          setMediaInsertPoint(null)
+        }}
+        onConfirmMedia={(value) => insertMedia(value)}
+        preferencesOpen={preferencesOpen}
+        onClosePreferences={() => {
+          setPreferencesOpen(false)
+          viewerRef.current?.viewer?.refresh?.()
+        }}
+        deployOpen={deployDialogOpen}
+        onCloseDeploy={() => setDeployDialogOpen(false)}
+        onConfirmDeploy={() => {
+          setDeployDialogOpen(false)
+          void fetch('/__deploy', { method: 'POST' }).catch(() => {})
+        }}
+      />
 
       {contextMenu ? (
         <BoardContextMenu
@@ -1367,16 +1352,6 @@ export function CanvasEditorApp() {
           scope={scope}
           onClose={() => setPendingDeleteFolder(null)}
           onConfirm={handleDeleteFolder}
-        />
-      ) : null}
-
-      {deployDialogOpen ? (
-        <DeployDialog
-          onClose={() => setDeployDialogOpen(false)}
-          onConfirm={() => {
-            setDeployDialogOpen(false)
-            void fetch('/__deploy', { method: 'POST' }).catch(() => {})
-          }}
         />
       ) : null}
     </div>
