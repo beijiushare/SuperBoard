@@ -11,7 +11,7 @@ function argValue(name, fallback) {
 const root = process.cwd()
 const dataDir = path.resolve(argValue('--data', 'info/public'))
 const outDir = path.resolve(argValue('--out', 'dist-site'))
-const base = argValue('--base', '/')
+const base = argValue('--base', process.env.BASE_PATH || process.env.SB_BASE || '/')
 const cacheDir = path.resolve(
   argValue('--cache', 'node_modules/.cache/superboard/canvas'),
 )
