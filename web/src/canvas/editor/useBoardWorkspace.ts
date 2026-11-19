@@ -135,6 +135,24 @@ export function useBoardWorkspace({
     }
   }
 
+  async function reloadBoard() {
+    const item = items.find(
+      (entry) => entry.slug === selectedSlug && entry.scope === scope,
+    )
+    if (!item) return false
+    setLoading(true)
+    try {
+      const next = await fetchCanvasDocument(item)
+      activateCanvas(item, next)
+      return true
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : String(loadError))
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
   async function refreshItems() {
     const data = await loadWorkspace()
     setItems(data.boards)
@@ -179,6 +197,7 @@ export function useBoardWorkspace({
     fetchCanvasDocument,
     activateCanvas,
     openBoard,
+    reloadBoard,
     refreshItems,
     switchScope,
     toggleTree,

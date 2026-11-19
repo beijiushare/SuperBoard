@@ -193,6 +193,7 @@ export function useCanvasSave({
     setSaveState,
     save,
     resolveConflict,
+    clearConflict,
     conflict,
     markDirty,
     savingRef,

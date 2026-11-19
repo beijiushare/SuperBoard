@@ -161,6 +161,7 @@ export function CanvasEditorApp() {
     setSaveState,
     save,
     resolveConflict,
+    clearConflict,
     conflict,
     markDirty,
     savingRef,
@@ -256,6 +257,7 @@ export function CanvasEditorApp() {
     fetchCanvasDocument,
     activateCanvas,
     openBoard,
+    reloadBoard,
     refreshItems,
     switchScope,
     toggleTree,
@@ -773,12 +775,32 @@ export function CanvasEditorApp() {
             <strong>保存冲突</strong>
             <span>其他标签页已修改这块白板</span>
           </div>
-          <button
-            type="button"
-            onClick={() => void resolveConflict(false)}
-          >
-            用当前内容覆盖
-          </button>
+          <div className="sb-save-conflict-actions">
+            <button
+              type="button"
+              onClick={() => void resolveConflict(false)}
+            >
+              用当前内容覆盖
+            </button>
+            <button
+              type="button"
+              className="is-secondary"
+              onClick={() => {
+                if (
+                  !window.confirm(
+                    '放弃当前未保存的修改，重新加载磁盘上的版本？',
+                  )
+                ) {
+                  return
+                }
+                void reloadBoard().then((ok) => {
+                  if (ok) clearConflict()
+                })
+              }}
+            >
+              重新加载
+            </button>
+          </div>
         </div>
       ) : saveState === 'error' ? (
         <div className="sb-save-conflict is-error" role="alert">

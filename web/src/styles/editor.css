@@ -112,6 +112,21 @@
   background: #f6ead6;
 }
 
+.sb-save-conflict-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sb-save-conflict button.is-secondary {
+  border-color: #cdbfa8;
+  background: transparent;
+  color: #756348;
+}
+
+.sb-save-conflict button.is-secondary:hover {
+  background: #f1e7d8;
+}
+
 .sb-save-conflict.is-error {
   border-color: #d9a6a6;
   background: #fff5f5;
