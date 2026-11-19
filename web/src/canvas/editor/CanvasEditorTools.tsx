@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import {
   TEXT_LINE_HEIGHT,
-  TEXT_MIN_HEIGHT,
   TEXT_PADDING_X,
   TEXT_PADDING_Y,
   type CanvasDocument,
@@ -26,6 +25,7 @@ import {
 } from './toolGeometry'
 import { createArrowEdge, createShapeNode } from './toolCreate'
 import { useTextEditing } from './useTextEditing'
+import { TextEditingOverlay } from './TextEditingOverlay'
 
 type DataManager = {
   data: {
@@ -775,38 +775,18 @@ export function CanvasEditorTools({
         </svg>
       ) : null}
       {editing && textPreview ? (
-        <textarea
-          ref={textareaRef}
-          autoFocus
-          className="sb-editor-text-input"
+        <TextEditingOverlay
           style={textPreview}
           value={editing.value}
-          onChange={(event) => {
+          textareaRef={textareaRef}
+          getScale={() => internals()?.dm.data.scale ?? 1}
+          onChange={(value, height) => {
             const current = editingRef.current
             if (!current) return
-            const scale = internals()?.dm.data.scale ?? 1
-            const height = Math.max(
-              TEXT_MIN_HEIGHT,
-              event.currentTarget.scrollHeight / scale,
-            )
-            updateEditing({ ...current, value: event.target.value, height })
+            updateEditing({ ...current, value, height })
           }}
-          onBlur={commitEditing}
-          onPointerDown={(event) => event.stopPropagation()}
-          onKeyDown={(event) => {
-            if (event.key === 'Escape') {
-              event.preventDefault()
-              event.stopPropagation()
-              commitEditing()
-              onExitTool()
-              return
-            }
-            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
-              event.preventDefault()
-              commitEditing()
-              onExitTool()
-            }
-          }}
+          onCommit={commitEditing}
+          onExitTool={onExitTool}
         />
       ) : null}
     </>
