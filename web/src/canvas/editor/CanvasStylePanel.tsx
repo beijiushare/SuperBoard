@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
   resolveNodeStyle,
-  textBlockHeight,
   type CanvasDocument,
   type CanvasEdge,
   type CanvasNode,
@@ -11,6 +10,11 @@ import {
 import { isRoundedRect } from './blocks'
 import { collectDescendants } from './hierarchy'
 import { DEFAULT_PREFERENCES } from './preferences'
+import {
+  applyGeometry,
+  applyTextStyle,
+  withCommonStyle,
+} from './styleMutations'
 import { ColorPicker } from './ColorPicker'
 import { DrawingStyleSection } from './DrawingStyleSection'
 import { patchDrawingNode, type DrawingPatch } from './drawingStyle'
@@ -37,10 +41,6 @@ interface CanvasStylePanelProps {
 
 function kindOf(node: CanvasNode) {
   return node['x-superboard']?.kind
-}
-
-function fallbackKind(node: CanvasNode) {
-  return node.type === 'text' ? 'text' : node.type === 'group' ? 'group' : 'media'
 }
 
 function patchHistoryKey(prefix: string, patch: object) {
@@ -78,17 +78,6 @@ function CropSlider({
       <em className="sb-style-value">{local}</em>
     </div>
   )
-}
-
-function withStyle(node: CanvasNode, patch: Partial<SuperBoardStyle>): CanvasNode {
-  const extension = node['x-superboard']
-  return {
-    ...node,
-    'x-superboard': {
-      ...(extension ?? { kind: fallbackKind(node) }),
-      style: { ...extension?.style, ...patch },
-    },
-  }
 }
 
 export function CanvasStylePanel({
@@ -136,30 +125,10 @@ export function CanvasStylePanel({
     onBeforeChange(patchHistoryKey('geometry', patch))
     onApply({
       ...canvas,
-      nodes: canvas.nodes.map((node) => {
-        if (!targetIds.has(node.id)) return node
-        const extension = node['x-superboard'] ?? { kind: fallbackKind(node) }
-        return {
-          ...node,
-          width: patch.width ?? node.width,
-          height: patch.height ?? node.height,
-          'x-superboard': {
-            ...extension,
-            rotation: patch.rotation ?? extension.rotation,
-          },
-        }
-      }),
+      nodes: canvas.nodes.map((node) =>
+        targetIds.has(node.id) ? applyGeometry(node, patch) : node,
+      ),
     }, selectedIds)
-  }
-
-  function withCommonStyle(node: CanvasNode, patch: Partial<SuperBoardStyle>) {
-    const next = withStyle(node, patch)
-    if (patch.borderStyle === undefined) return next
-    const extension = next['x-superboard']
-    if (!extension?.style) return next
-    const style = { ...extension.style }
-    delete style.strokeDash
-    return { ...next, 'x-superboard': { ...extension, style } }
   }
 
   function updateCommonStyle(patch: Partial<SuperBoardStyle>) {
@@ -205,14 +174,7 @@ export function CanvasStylePanel({
   function styleText(targets: CanvasNode[], patch: Partial<SuperBoardStyle>) {
     applyTo(
       targets,
-      (node) => {
-        const next = withStyle(node, patch)
-        if (node.type !== 'text' || !patch.fontSize) return next
-        return {
-          ...next,
-          height: textBlockHeight(node.text, node.width, patch.fontSize),
-        }
-      },
+      (node) => applyTextStyle(node, patch),
       patchHistoryKey('style', patch),
     )
   }
