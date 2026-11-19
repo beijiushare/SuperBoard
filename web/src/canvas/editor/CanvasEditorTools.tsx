@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import {
   TEXT_LINE_HEIGHT,
   TEXT_PADDING_X,
   TEXT_PADDING_Y,
   type CanvasDocument,
-  type CanvasEdge,
   type CanvasNode,
 } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
@@ -20,32 +18,13 @@ import {
 import { createArrowEdge, createShapeNode } from './toolCreate'
 import { applyErasure, planErasure } from './eraser'
 import { useTextEditing } from './useTextEditing'
+import { useToolViewport } from './toolViewport'
+import type { ToolController, ToolDataManager } from './toolViewport'
 import { TextEditingOverlay } from './TextEditingOverlay'
 import { ToolPreviewLayer } from './ToolPreviewLayer'
 
-type DataManager = {
-  data: {
-    offsetX: number
-    offsetY: number
-    scale: number
-    nodeMap: Record<string, { ref: CanvasNode }>
-    edgeMap: Record<string, { ref: CanvasEdge }>
-  }
-}
-
-type Controller = {
-  refresh: () => void
-}
-
-type ViewerInternals = {
-  container?: { get: (key: unknown) => unknown }
-}
-
-interface View {
-  offsetX: number
-  offsetY: number
-  scale: number
-}
+type DataManager = ToolDataManager
+type Controller = ToolController
 
 interface ShapeDraft {
   startX: number
@@ -111,6 +90,10 @@ export function CanvasEditorTools({
   } | null>(null)
   const [draft, setDraft] = useState<ShapeDraft | null>(null)
   const [arrowDraft, setArrowDraft] = useState<ArrowDraft | null>(null)
+  const { internals, getView, surfacePoint } = useToolViewport({
+    viewerRef,
+    surfaceRef,
+  })
   const {
     editing,
     editingRef,
@@ -129,44 +112,6 @@ export function CanvasEditorTools({
     onExitTool,
     onEditingChange,
   })
-
-  function internals() {
-    try {
-      const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
-      if (!viewer?.container) return null
-      const dm = viewer.container.get(internal.DataManager as never) as DataManager
-      const controller = viewer.container.get(internal.Controller as never) as Controller
-      return { dm, controller }
-    } catch {
-      return null
-    }
-  }
-
-  function getView(): View | null {
-    const data = internals()
-    if (!data) return null
-    return {
-      offsetX: data.dm.data.offsetX,
-      offsetY: data.dm.data.offsetY,
-      scale: data.dm.data.scale,
-    }
-  }
-
-  function surfacePoint(event: { clientX: number; clientY: number }) {
-    const surface = surfaceRef.current
-    const data = internals()
-    if (!surface || !data) return null
-    const bounds = surface.getBoundingClientRect()
-    const screenX = event.clientX - bounds.left
-    const screenY = event.clientY - bounds.top
-    const { offsetX, offsetY, scale } = data.dm.data
-    return {
-      screenX,
-      screenY,
-      worldX: (screenX - offsetX) / scale,
-      worldY: (screenY - offsetY) / scale,
-    }
-  }
 
   useEffect(() => {
     setDraft(null)
