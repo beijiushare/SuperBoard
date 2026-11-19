@@ -28,11 +28,10 @@ import { buildBoardTree } from '../../shared/board/tree'
 import { useTreeExpansion } from '../../shared/board/useTreeExpansion'
 import { DirectorHud } from '../../shared/director/DirectorHud'
 import { PresentationOverlay } from '../../shared/director/PresentationOverlay'
-import {
-  parseCanvas,
-  type CanvasDocument,
-  type CanvasNode,
-  type SuperBoardScheduleEvent,
+import type {
+  CanvasDocument,
+  CanvasNode,
+  SuperBoardScheduleEvent,
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
@@ -63,6 +62,16 @@ import { PeleCreateDialog } from './PeleCreateDialog'
 import { PreferencesDialog } from './PreferencesDialog'
 import { blockStyleFromPreferences } from './preferences'
 import { isBrowserFolderMode } from './browserFolderBackend'
+import {
+  createBoard,
+  createFolder,
+  deleteBoard,
+  deleteFolder,
+  loadWorkspace,
+  readBoard,
+  updateBoard,
+  updateFolder,
+} from './workspaceApi'
 import {
   rememberRecentColor,
   updateUiState,
@@ -303,12 +312,11 @@ export function CanvasEditorApp() {
     let cancelled = false
     void (async () => {
       try {
-        const response = await fetch('/__canvases')
-        if (!response.ok) throw new Error(`加载失败（${response.status}）`)
-        const data = (await response.json()) as { canvases: CanvasListItem[] }
+        const data = await loadWorkspace()
         if (cancelled) return
-        const list = data.canvases ?? []
+        const list = data.boards
         setItems(list)
+        setFolders(data.folders)
         const params = new URLSearchParams(window.location.search)
         const initialScope: BoardScope =
           params.get('scope') === 'private' ? 'private' : 'public'
@@ -322,11 +330,7 @@ export function CanvasEditorApp() {
           setLoading(false)
           return
         }
-        const canvasResponse = await fetch(
-          `/__canvases/${encodeURIComponent(first.slug)}?scope=${first.scope}`,
-        )
-        if (!canvasResponse.ok) throw new Error(`加载失败（${canvasResponse.status}）`)
-        const next = await parseCanvas(await canvasResponse.text())
+        const next = await readBoard(first)
         if (cancelled) return
         historyRef.current = { past: [], future: [] }
         historyMergeRef.current = null
@@ -1494,11 +1498,7 @@ export function CanvasEditorApp() {
   }, [canvasMenu])
 
   async function fetchCanvasDocument(item: CanvasListItem) {
-    const response = await fetch(
-      `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}`,
-    )
-    if (!response.ok) throw new Error(`加载失败（${response.status}）`)
-    return parseCanvas(await response.text())
+    return readBoard(item)
   }
 
   function activateCanvas(item: CanvasListItem, next: CanvasDocument) {
@@ -1556,25 +1556,10 @@ export function CanvasEditorApp() {
   }
 
   async function refreshItems() {
-    const [boardsResponse, foldersResponse] = await Promise.all([
-      fetch('/__canvases'),
-      fetch('/__folders'),
-    ])
-    if (!boardsResponse.ok) {
-      throw new Error(`加载失败（${boardsResponse.status}）`)
-    }
-    const data = (await boardsResponse.json()) as {
-      canvases: CanvasListItem[]
-    }
-    const list = data.canvases ?? []
-    setItems(list)
-    if (foldersResponse.ok) {
-      const folderData = (await foldersResponse.json()) as {
-        folders: Array<{ path: string; scope: 'public' | 'private' }>
-      }
-      setFolders(folderData.folders ?? [])
-    }
-    return list
+    const data = await loadWorkspace()
+    setItems(data.boards)
+    setFolders(data.folders)
+    return data.boards
   }
 
   async function switchScope(nextScope: BoardScope) {
@@ -1634,25 +1619,12 @@ export function CanvasEditorApp() {
       const ok = await save()
       if (!ok) throw new Error('当前白板保存失败，无法新建')
     }
-    const response = await fetch('/__canvases', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: values.title,
-        slug: values.slug,
-        folder: values.folder || undefined,
-        scope,
-      }),
+    const data = await createBoard({
+      title: values.title,
+      slug: values.slug,
+      folder: values.folder || undefined,
+      scope,
     })
-    if (!response.ok) {
-      const data = (await response.json().catch(() => null)) as { error?: string } | null
-      throw new Error(data?.error || `创建失败（${response.status}）`)
-    }
-    const data = (await response.json()) as {
-      canvas: CanvasDocument
-      path: string
-      scope: BoardScope
-    }
     const list = await refreshItems()
     const item = list.find(
       (entry) => entry.slug === data.canvas['x-superboard']!.meta.slug && entry.scope === scope,
@@ -1671,27 +1643,14 @@ export function CanvasEditorApp() {
       const ok = await save()
       if (!ok) throw new Error('当前白板保存失败，无法重命名')
     }
-    const response = await fetch(
-      `/__canvases/${encodeURIComponent(target.slug)}?scope=${target.scope ?? scope}`,
+    const data = await updateBoard(
+      { ...target, scope: target.scope ?? scope },
       {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: values.title,
-          slug: values.slug,
-          folder: values.folder,
-        }),
+        title: values.title,
+        slug: values.slug,
+        folder: values.folder,
       },
     )
-    if (!response.ok) {
-      const data = (await response.json().catch(() => null)) as { error?: string } | null
-      throw new Error(data?.error || `重命名失败（${response.status}）`)
-    }
-    const data = (await response.json()) as {
-      canvas: CanvasDocument
-      path: string
-      scope: BoardScope
-    }
     await refreshItems()
     expandPath(data.path)
     if (isCurrent) {
@@ -1709,11 +1668,7 @@ export function CanvasEditorApp() {
     if (!item) return
     const isCurrent = slug === selectedSlug
     if (isCurrent) setSaveState('saved')
-    const response = await fetch(
-      `/__canvases/${encodeURIComponent(slug)}?scope=${item.scope}`,
-      { method: 'DELETE' },
-    )
-    if (!response.ok) throw new Error(`删除失败（${response.status}）`)
+    await deleteBoard(item)
     const list = await refreshItems()
     if (!isCurrent) return
     const next = list.find((entry) => entry.scope === scope)
@@ -1736,12 +1691,7 @@ export function CanvasEditorApp() {
   async function handleCreateFolder(name: string) {
     if (newFolderParent === null) return
     const parent = newFolderParent
-    const response = await fetch('/__folders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ parent, name, scope }),
-    })
-    if (!response.ok) throw new Error(`新建文件夹失败（${response.status}）`)
+    await createFolder({ parent, name, scope })
     await refreshItems()
     if (parent) expandPath(parent)
     setNewFolderParent(null)
@@ -1753,18 +1703,12 @@ export function CanvasEditorApp() {
       const ok = await save()
       if (!ok) throw new Error('当前白板保存失败，无法重命名文件夹')
     }
-    const response = await fetch('/__folders', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        path: folderDialog.path,
-        scope,
-        name,
-        parent,
-      }),
+    const data = await updateFolder({
+      path: folderDialog.path,
+      scope,
+      name,
+      parent,
     })
-    if (!response.ok) throw new Error(`重命名失败（${response.status}）`)
-    const data = (await response.json()) as { path: string }
     await refreshItems()
     renameExpandedPath(folderDialog.path, data.path)
   }
@@ -1779,11 +1723,7 @@ export function CanvasEditorApp() {
       currentPath &&
         (currentPath === path || currentPath.startsWith(`${path}/`)),
     )
-    const response = await fetch(
-      `/__folders?path=${encodeURIComponent(path)}&scope=${scope}`,
-      { method: 'DELETE' },
-    )
-    if (!response.ok) throw new Error(`删除失败（${response.status}）`)
+    await deleteFolder(path, scope)
     const list = await refreshItems()
     if (!currentInside) return
     const next = list.find((entry) => entry.scope === scope)

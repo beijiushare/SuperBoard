@@ -6,6 +6,7 @@ import {
   type CanvasListItem,
   type SaveState,
 } from './appUtils'
+import { writeBoard } from './workspaceApi'
 
 interface UseCanvasSaveOptions {
   canvas: CanvasDocument | null
@@ -43,18 +44,7 @@ export function useCanvasSave({
     savingRef.current = true
     setSaveState('saving')
     try {
-      const response = await fetch(
-        `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(canvas),
-        },
-      )
-      if (!response.ok) {
-        setSaveState('error')
-        return false
-      }
+      await writeBoard(item, canvas)
       if (revisionRef.current === revision) {
         setSaveState('saved')
       } else {
