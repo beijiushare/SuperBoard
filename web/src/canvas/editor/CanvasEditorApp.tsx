@@ -35,7 +35,6 @@ import type {
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
   normalizeMarkdownLocks,
-  normalizeMediaUrl,
   updateEditorUrl,
   type BoardDialogState,
   type CanvasListItem,
@@ -54,13 +53,13 @@ import { useSelectionActions } from './useSelectionActions'
 import { useBoardWorkspace } from './useBoardWorkspace'
 import { useBoardFiles } from './useBoardFiles'
 import { useBlockActions } from './useBlockActions'
+import { useCanvasInsertions } from './useCanvasInsertions'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
 import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { PeleCreateDialog } from './PeleCreateDialog'
 import { PreferencesDialog } from './PreferencesDialog'
-import { blockStyleFromPreferences } from './preferences'
 import { isBrowserFolderMode } from './browserFolderBackend'
 import { loadWorkspace, readBoard } from './workspaceApi'
 import {
@@ -70,7 +69,6 @@ import {
 } from './uiState'
 import { InputDialog } from '../../shared/ui/InputDialog'
 import {
-  DEFAULT_BLOCK_SIZES,
   blockDefinition,
   blockEditor,
 } from './blocks'
@@ -78,11 +76,10 @@ import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
 import { CanvasToolPalette } from './CanvasToolPalette'
 import { CanvasStylePanel } from './CanvasStylePanel'
-import { detectMediaKind, type EditorTool } from './tools'
+import type { EditorTool } from './tools'
 import {
   isInsideGroup,
   isLocked,
-  nextFreeId,
   nodeMapOf,
   selectableAncestor,
 } from './hierarchy'
@@ -322,6 +319,36 @@ export function CanvasEditorApp() {
     setLoading,
   })
   const {
+    insertTextBlock,
+    openPeleDialog,
+    openPeleEditor,
+    insertPele,
+    insertScheduleBlock,
+    insertMedia,
+    openMediaDialog,
+  } = useCanvasInsertions({
+    canvas,
+    canvasRef,
+    viewerRef,
+    peleDialog,
+    setPeleDialog,
+    mediaUrl,
+    mediaInsertPoint,
+    setMediaDialogOpen,
+    setMediaUrl,
+    setMediaInsertPoint,
+    applyDocument,
+    recordHistory,
+    setSelectedIds,
+    setTool,
+    setEditRequest,
+    setTextCreateRequest,
+    startMarkdownEditing,
+    closeTextEditing,
+    closeMarkdownEditor,
+    ensureExtension,
+  })
+  const {
     openBlockEditor,
     toggleBlockEdit,
     toggleRatioLock,
@@ -514,25 +541,6 @@ export function CanvasEditorApp() {
     markDirty()
   }
 
-  function viewportCenter(width: number, height: number) {
-    try {
-      const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
-      if (!viewer?.container) return { x: 0, y: 0 }
-      const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
-      const container = dm.data.container
-      return {
-        x: Math.round(
-          (container.clientWidth / 2 - dm.data.offsetX) / dm.data.scale - width / 2,
-        ),
-        y: Math.round(
-          (container.clientHeight / 2 - dm.data.offsetY) / dm.data.scale - height / 2,
-        ),
-      }
-    } catch {
-      return { x: 0, y: 0 }
-    }
-  }
-
   function nodeAtWorldPoint(x: number, y: number) {
     try {
       const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
@@ -556,11 +564,6 @@ export function CanvasEditorApp() {
       // ignore
     }
     return null
-  }
-
-  function openMediaDialog(point?: { x: number; y: number }) {
-    setMediaInsertPoint(point ?? null)
-    setMediaDialogOpen(true)
   }
 
   function openCanvasMenu(event: ReactMouseEvent<HTMLDivElement>) {
@@ -680,215 +683,6 @@ export function CanvasEditorApp() {
   function closeTextEditing() {
     const active = document.activeElement as HTMLElement | null
     active?.blur()
-  }
-
-  function defaultBlockSize(kind: keyof typeof DEFAULT_BLOCK_SIZES) {
-    const settings = canvasRef.current?.['x-superboard']?.settings
-    const base = DEFAULT_BLOCK_SIZES[kind]
-    return {
-      width: settings?.defaultBlockWidth ?? base.width,
-      height: settings?.defaultBlockHeight ?? base.height,
-    }
-  }
-
-  function insertTextBlock(
-    kind: 'text' | 'markdown' | 'pele',
-    point?: { x: number; y: number },
-  ) {
-    if (!canvas) return
-    const size = defaultBlockSize(kind)
-    const position = point
-      ? {
-          x: Math.round(point.x - size.width / 2),
-          y: Math.round(point.y - size.height / 2),
-        }
-      : viewportCenter(size.width, size.height)
-    if (kind === 'text') {
-      setTool('text')
-      setTextCreateRequest({ x: position.x, y: position.y, nonce: Date.now() })
-      return
-    }
-    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), kind)
-    const code = 'flowchart LR\n    A[开始] --> B[结束]'
-    const node: CanvasNode =
-      kind === 'markdown'
-        ? {
-            id,
-            type: 'text',
-            x: position.x,
-            y: position.y,
-            width: size.width,
-            height: size.height,
-            text: '# 新 Markdown\n\n在这里输入内容。',
-            'x-superboard': {
-              kind: 'markdown',
-              markdownLocked: false,
-              style: blockStyleFromPreferences(),
-            },
-          }
-        : {
-            id,
-            type: 'text',
-            x: position.x,
-            y: position.y,
-            width: size.width,
-            height: size.height,
-            text: `\`\`\`mermaid\n${code}\n\`\`\``,
-            'x-superboard': {
-              kind: 'pele',
-              diagram: 'flowchart',
-              code,
-              style: blockStyleFromPreferences(),
-            },
-          }
-    recordHistory()
-    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
-    if (kind === 'markdown') {
-      setTool('select')
-      startMarkdownEditing(id)
-      return
-    }
-    setTool('text')
-    setEditRequest({ id, nonce: Date.now() })
-  }
-
-  function openPeleDialog(point?: { x: number; y: number }) {
-    setPeleDialog({ mode: 'create', point })
-  }
-
-  function openPeleEditor(id: string) {
-    const node = canvasRef.current?.nodes.find((item) => item.id === id)
-    if (node?.['x-superboard']?.kind !== 'pele') return
-    closeTextEditing()
-    closeMarkdownEditor()
-    setSelectedIds([id])
-    setTool('select')
-    setPeleDialog({ mode: 'edit', nodeId: id })
-  }
-
-  function insertPele({ code, diagram }: { code: string; diagram: string }) {
-    if (!canvas || !peleDialog) return
-    const text = `\`\`\`mermaid\n${code}\n\`\`\``
-    if (peleDialog.mode === 'edit') {
-      const target = canvas.nodes.find((node) => node.id === peleDialog.nodeId)
-      if (!target) return
-      recordHistory()
-      applyDocument(
-        {
-          ...canvas,
-          nodes: canvas.nodes.map((node) =>
-            node.id === target.id
-              ? {
-                  ...node,
-                  text,
-                  'x-superboard': {
-                    ...ensureExtension(node),
-                    kind: 'pele',
-                    code,
-                    diagram,
-                  },
-                }
-              : node,
-          ),
-        },
-        [target.id],
-      )
-      setPeleDialog(null)
-      return
-    }
-    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'pele')
-    const offset = (canvas.nodes.length % 6) * 24
-    const size = defaultBlockSize('pele')
-    const position = peleDialog.point
-      ? {
-          x: Math.round(peleDialog.point.x - size.width / 2),
-          y: Math.round(peleDialog.point.y - size.height / 2),
-        }
-      : (() => {
-          const center = viewportCenter(size.width, size.height)
-          return { x: center.x + offset, y: center.y + offset }
-        })()
-    const node: CanvasNode = {
-      id,
-      type: 'text',
-      x: position.x,
-      y: position.y,
-      width: size.width,
-      height: size.height,
-      text,
-      'x-superboard': {
-        kind: 'pele',
-        diagram,
-        code,
-        style: blockStyleFromPreferences(),
-      },
-    }
-    recordHistory()
-    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
-    setTool('select')
-    setPeleDialog(null)
-  }
-
-  function insertScheduleBlock(point?: { x: number; y: number }) {
-    if (!canvas) return
-    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'schedule')
-    const size = defaultBlockSize('schedule')
-    const position = point
-      ? {
-          x: Math.round(point.x - size.width / 2),
-          y: Math.round(point.y - size.height / 2),
-        }
-      : viewportCenter(size.width, size.height)
-    const node: CanvasNode = {
-      id,
-      type: 'text',
-      x: position.x,
-      y: position.y,
-      width: size.width,
-      height: size.height,
-      text: '',
-      'x-superboard': {
-        kind: 'schedule',
-        scheduleEvents: [],
-        style: blockStyleFromPreferences(),
-      },
-    }
-    recordHistory()
-    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
-    setTool('select')
-  }
-
-  function insertMedia(value = mediaUrl) {
-    if (!canvas) return
-    const url = normalizeMediaUrl(value)
-    if (!url) return
-    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'media')
-    const size = defaultBlockSize('media')
-    const position = mediaInsertPoint
-      ? {
-          x: Math.round(mediaInsertPoint.x - size.width / 2),
-          y: Math.round(mediaInsertPoint.y - size.height / 2),
-        }
-      : viewportCenter(size.width, size.height)
-    const node: CanvasNode = {
-      id,
-      type: 'link',
-      url,
-      x: position.x,
-      y: position.y,
-      width: size.width,
-      height: size.height,
-      'x-superboard': {
-        kind: 'media',
-        media: { kind: detectMediaKind(url), url },
-        style: blockStyleFromPreferences(),
-      },
-    }
-    recordHistory()
-    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
-    setMediaDialogOpen(false)
-    setMediaUrl('')
-    setMediaInsertPoint(null)
   }
 
   function deleteBlock(id: string) {
