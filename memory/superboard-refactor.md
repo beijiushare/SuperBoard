@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`b9782cc refactor: extract freehand tool hook`
+- 最近提交：`26d7afe feat: add keyboard navigation to board tree`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -51,6 +51,9 @@
 - 新建白板改为文件夹下拉框
 - 重命名白板可移动文件夹
 - 重命名文件夹可改父文件夹，即移动目录
+- 文件夹移动显示已复制文件数/总数
+- 文件夹移动可取消，取消后源目录保持不变
+- 浏览器端白板索引有 1.5 秒缓存，失焦/可见性变化与写操作会失效
 
 ### 样式与偏好
 
@@ -66,6 +69,13 @@
 - 画笔默认值存 `superboard.ui.v1` 的 `brush`
 - 修改绘图样式会同步更新画笔默认值，新建笔触继承上次设置
 - 预览笔触使用当前画笔颜色与透明度
+
+### 排版与可访问性
+
+- 文本高度优先用 Canvas `measureText` 逐字换行测量，Node 环境回退到估算
+- 字号与字体变化后同步重新计算块高度
+- 目录树支持 Tab 聚焦、↑/↓ 移动、←/→ 折叠展开、Home/End
+- 目录行增加 treeitem/aria-expanded/aria-selected/aria-level 与焦点样式
 
 ### 代码结构
 
@@ -89,6 +99,11 @@
 - `EditorInsertDialogs.tsx`、`EditorBoardDialogs.tsx`：编辑弹窗拆分
 - `CanvasBlockMenu.tsx`：画布右键菜单
 - `EditorWorkspace.tsx`：rail 与目录外壳
+- `useBoardTreeData.ts`：目录数据与文件夹路径
+- `useEditorDialogState.ts`：白板/文件夹/部署弹窗状态
+- `useShapeArrowTools.ts`：形状与箭头草稿和提交
+- `folderMove.ts`：文件夹移动进度与取消信号
+- `styles/viewer-index.css`：viewer 独立样式入口，不含编辑器样式
 - `CanvasDirectorLayer.tsx`、`CanvasMarkdownLayer.tsx`：导演与 Markdown 覆盖层
 - `CanvasEditorStage.tsx`：画布舞台（Viewer/Overlay/Tools/样式/导演/工具栏）
 - `useCanvasDrag.ts`：移动、缩放、单选/多选旋转、对齐参考线
@@ -109,24 +124,21 @@
 
 ## 仍待完成
 
-### 高优先级
+### 手动验证
 
-- `CanvasEditorApp.tsx` 约 1060 行，剩余状态与目录配置
+- 浏览器编辑器：文件夹选择、恢复权限、保存 `.bak`、多标签冲突窗口
+- 文件夹移动进度与取消
+- 目录树键盘导航
+- 长文本换行后的高度
+- 拖拽、缩放、旋转、框选回归
+
+### 可选优化
+
 - `CanvasEditorStage.tsx` 约 280 行，可继续按 Viewer/Overlay/Tools 拆
 - `CanvasEditorOverlay.tsx` 约 554 行，只剩渲染与选择框
-- `CanvasEditorTools.tsx` 约 397 行，剩余形状/箭头提交与状态
-
-### 中优先级
-
-- 文件夹移动进度与取消
-- 目录索引缓存，避免每次全量扫描
+- `CanvasEditorTools.tsx` 约 323 行，剩余橡皮与预览组合
 - 构建脚本 `web/build.js` 与多入口关系继续解耦
-- CSS 按职责拆分
-
-### 低优先级
-
-- 文本高度精确测量
-- 无障碍键盘导航
+- `app.css` 仍为共享布局样式，可继续按区域拆分
 - 仓储层单测、浏览器 File System Access 适配测试
 - Markdown fallback `MarkdownView` 542 kB 懒加载体积优化
 
