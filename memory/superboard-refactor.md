@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`81e3fe7 feat: capture pen pressure for freehand strokes`
+- 最近提交：`b35d16a refactor: extract freehand stroke helpers`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -34,6 +34,11 @@
 - 文件夹移动冲突检查与失败清理
 - 白板移动 slug 冲突检查
 - 浏览器模式隐藏 Git 部署按钮
+- 保存冲突检测：文件基线版本变化时返回 409
+- 多标签修改通过 BroadcastChannel 通知，冲突时停止自动保存
+- 保存失败自动重试两次，409 不重试
+- 冲突时点击保存按钮或 Ctrl+S，可确认覆盖
+- 工作区请求通过 `configureWorkspaceFetcher` 注入，不再覆盖 `window.fetch`
 - 入口：`web/src/canvas/editor/browserMain.tsx`
 - 后端：`web/src/canvas/editor/browserFolderBackend.ts`
 
@@ -55,11 +60,20 @@
 - 所有块默认白底灰边；普通文本保持纯文本
 - 偏好只影响新建块，旧块不受影响
 - 自由绘图样式面板只保留笔触：粗细、颜色、透明度、压感、平滑、流线、模拟压感、起笔、收笔
-- 绘图已开始采集 `pointer.pressure`
+- 绘图已采集 `pointer.pressure`
+- 画笔默认值存 `superboard.ui.v1` 的 `brush`
+- 修改绘图样式会同步更新画笔默认值，新建笔触继承上次设置
+- 预览笔触使用当前画笔颜色与透明度
 
 ### 代码结构
 
-- `workspaceApi.ts`：白板/文件夹 API 层
+- `workspaceApi.ts`：白板/文件夹 API 层，支持注入 fetcher
+- `useCanvasHistory.ts`：撤销/重做
+- `useEditorKeyboard.ts`：快捷键
+- `useSelectionActions.ts`：复制/粘贴/删除/分组/层级/锁定
+- `useBoardWorkspace.ts`：白板打开/切换/加载
+- `useBoardFiles.ts`：白板与文件夹增删改
+- `freehand.ts`：手绘笔触预览与节点生成
 - `drawingStyle.ts`：绘图节点样式修改
 - `DrawingStyleSection.tsx`：绘图笔触面板
 - `styleMutations.ts`：通用样式/几何/文本样式 mutation
@@ -69,15 +83,12 @@
 
 ### 高优先级
 
-- `CanvasEditorApp.tsx` 约 2400 行，拆 workspace hook、弹窗层、快捷键/剪贴板
+- `CanvasEditorApp.tsx` 约 1710 行，继续拆插入/菜单与内联 JSX
 - `CanvasEditorOverlay.tsx` 约 1340 行，拆视口、拖拽、缩放、选择层
-- `CanvasEditorTools.tsx` 约 1150 行，按文本/形状/手绘/橡皮/箭头拆
-- 浏览器端底层仍通过覆盖 `window.fetch` 接入，后续改成正式 `BoardRepository` 注入
-- 画笔默认值持久化；新建笔触继承上次设置
+- `CanvasEditorTools.tsx` 约 1070 行，按文本/形状/橡皮/箭头拆
 
 ### 中优先级
 
-- 保存冲突检测、重试、多标签互斥
 - 文件夹移动进度与取消
 - 目录索引缓存，避免每次全量扫描
 - 构建脚本 `web/build.js` 与多入口关系继续解耦
