@@ -12,6 +12,8 @@ import { isRoundedRect } from './blocks'
 import { collectDescendants } from './hierarchy'
 import { DEFAULT_PREFERENCES } from './preferences'
 import { ColorPicker } from './ColorPicker'
+import { DrawingStyleSection } from './DrawingStyleSection'
+import { patchDrawingNode, type DrawingPatch } from './drawingStyle'
 import {
   BackgroundFields,
   BorderFields,
@@ -168,59 +170,12 @@ export function CanvasStylePanel({
     )
   }
 
-  function updateDrawing(patch: {
-    size?: number
-    color?: string
-    opacity?: number
-    thinning?: number
-    smoothing?: number
-    streamline?: number
-    simulatePressure?: boolean
-    start?: number
-    end?: number
-  }) {
+  function updateDrawing(patch: DrawingPatch) {
     const targets = nodes.filter((node) => kindOf(node) === 'drawing')
     if (targets.length === 0) return
-    const { size, color, opacity, ...strokePatch } = patch
     applyTo(
       targets,
-      (node) => {
-        const extension = node['x-superboard'] ?? { kind: 'drawing' as const }
-        const style = { ...extension.style }
-        if (size !== undefined) style.borderWidth = size
-        if (color !== undefined) style.borderColor = color
-        if (opacity !== undefined) style.opacity = opacity
-        return {
-          ...node,
-          'x-superboard': {
-            ...extension,
-            style,
-            strokes: (extension.strokes ?? []).map((stroke) => ({
-              ...stroke,
-              ...(size !== undefined ? { size } : {}),
-              ...(color !== undefined ? { color } : {}),
-              ...(strokePatch.thinning !== undefined
-                ? { thinning: strokePatch.thinning }
-                : {}),
-              ...(strokePatch.smoothing !== undefined
-                ? { smoothing: strokePatch.smoothing }
-                : {}),
-              ...(strokePatch.streamline !== undefined
-                ? { streamline: strokePatch.streamline }
-                : {}),
-              ...(strokePatch.simulatePressure !== undefined
-                ? { simulatePressure: strokePatch.simulatePressure }
-                : {}),
-              ...(strokePatch.start !== undefined
-                ? { start: strokePatch.start || undefined }
-                : {}),
-              ...(strokePatch.end !== undefined
-                ? { end: strokePatch.end || undefined }
-                : {}),
-            })),
-          },
-        }
-      },
+      (node) => patchDrawingNode(node, patch),
       patchHistoryKey('drawing', patch),
     )
   }
@@ -444,91 +399,20 @@ export function CanvasStylePanel({
       <div className="sb-style-panel-content">
       {firstNode ? (
         firstIsDrawing ? (
-          <section>
-            <h3>笔触</h3>
-            <StyleNumberControl
-              label="粗细"
-              value={drawingSize}
-              min={1}
-              max={80}
-              step={1}
-              unit="px"
-              onChange={(size) => updateDrawing({ size })}
-            />
-            <ColorPicker
-              label="颜色"
-              value={drawingColor}
-              recentColors={uiState.recentColors}
-              onChange={(color) => updateDrawing({ color })}
-              onColorUsed={onRememberColor}
-            />
-            <StyleNumberControl
-              label="透明度"
-              value={drawingOpacity}
-              min={0}
-              max={100}
-              step={1}
-              unit="%"
-              slider
-              onChange={(value) => updateDrawing({ opacity: value / 100 })}
-            />
-            <StyleNumberControl
-              label="压感强度"
-              value={drawingThinning}
-              min={-1}
-              max={1}
-              step={0.05}
-              onChange={(thinning) => updateDrawing({ thinning })}
-            />
-            <StyleNumberControl
-              label="平滑"
-              value={drawingSmoothing}
-              min={0}
-              max={1}
-              step={0.05}
-              onChange={(smoothing) => updateDrawing({ smoothing })}
-            />
-            <StyleNumberControl
-              label="流线"
-              value={drawingStreamline}
-              min={0}
-              max={1}
-              step={0.05}
-              onChange={(streamline) => updateDrawing({ streamline })}
-            />
-            <div className="sb-style-row">
-              <span>模拟压感</span>
-              <button
-                type="button"
-                className={`sb-style-toggle${
-                  drawingSimulatePressure ? ' is-active' : ''
-                }`}
-                onClick={() =>
-                  updateDrawing({
-                    simulatePressure: !drawingSimulatePressure,
-                  })
-                }
-              >
-                {drawingSimulatePressure ? '开启' : '关闭'}
-              </button>
-            </div>
-            <StyleNumberControl
-              label="起笔"
-              value={drawingStart}
-              min={0}
-              max={100}
-              step={1}
-              onChange={(start) => updateDrawing({ start })}
-            />
-            <StyleNumberControl
-              label="收笔"
-              value={drawingEnd}
-              min={0}
-              max={100}
-              step={1}
-              onChange={(end) => updateDrawing({ end })}
-            />
-          </section>
+          <DrawingStyleSection
+            size={drawingSize}
+            color={drawingColor}
+            opacity={drawingOpacity}
+            thinning={drawingThinning}
+            smoothing={drawingSmoothing}
+            streamline={drawingStreamline}
+            simulatePressure={drawingSimulatePressure}
+            start={drawingStart}
+            end={drawingEnd}
+            recentColors={uiState.recentColors}
+            onChange={updateDrawing}
+            onColorUsed={onRememberColor}
+          />
         ) : (
         <>
           <TransformFields
