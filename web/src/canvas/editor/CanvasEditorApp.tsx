@@ -767,6 +767,30 @@ export function CanvasEditorApp() {
     <div
       className={`sb-app sb-app-editor${directorMode ? ' is-director-mode' : ''}${presentation ? ' is-presenting' : ''}`}
     >
+      {conflict ? (
+        <div className="sb-save-conflict" role="alert">
+          <div className="sb-save-conflict-text">
+            <strong>保存冲突</strong>
+            <span>其他标签页已修改这块白板</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => void resolveConflict(false)}
+          >
+            用当前内容覆盖
+          </button>
+        </div>
+      ) : saveState === 'error' ? (
+        <div className="sb-save-conflict is-error" role="alert">
+          <div className="sb-save-conflict-text">
+            <strong>保存失败</strong>
+            <span>内容仍在本地，可重试保存</span>
+          </div>
+          <button type="button" onClick={() => void save()}>
+            重试保存
+          </button>
+        </div>
+      ) : null}
       <EditorRail
         mode="edit"
         treeMode={treeMode}

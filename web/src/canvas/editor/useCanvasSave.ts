@@ -115,14 +115,16 @@ export function useCanvasSave({
     }
   }
 
-  async function resolveConflict(): Promise<boolean> {
+  async function resolveConflict(confirmFirst = true): Promise<boolean> {
     if (!canvas || savingRef.current) return false
     const item = currentItem()
     if (!item) return false
-    const overwrite = window.confirm(
-      '其他标签页已经修改过这块白板。要用当前内容覆盖对方吗？',
-    )
-    if (!overwrite) return false
+    if (
+      confirmFirst &&
+      !window.confirm('其他标签页已经修改过这块白板。要用当前内容覆盖对方吗？')
+    ) {
+      return false
+    }
     const revision = revisionRef.current
     savingRef.current = true
     setSaveState('saving')

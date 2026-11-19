@@ -65,3 +65,68 @@
   display: flex;
   gap: 8px;
 }
+
+.sb-save-conflict {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px 10px 16px;
+  transform: translateX(-50%);
+  border: 1px solid #d8b48a;
+  border-radius: 10px;
+  background: #fff8ec;
+  box-shadow: 0 8px 24px rgb(60 45 20 / 16%);
+  color: #4a3a20;
+}
+
+.sb-save-conflict-text {
+  display: grid;
+  gap: 2px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sb-save-conflict-text strong {
+  font-size: 13px;
+}
+
+.sb-save-conflict-text span {
+  color: #7a6547;
+}
+
+.sb-save-conflict button {
+  padding: 6px 12px;
+  border: 1px solid #b98d54;
+  border-radius: 7px;
+  background: #fff;
+  color: #5c431f;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sb-save-conflict button:hover {
+  background: #f6ead6;
+}
+
+.sb-save-conflict.is-error {
+  border-color: #d9a6a6;
+  background: #fff5f5;
+  color: #5c2a2a;
+}
+
+.sb-save-conflict.is-error .sb-save-conflict-text span {
+  color: #8a5a5a;
+}
+
+.sb-save-conflict.is-error button {
+  border-color: #c98c8c;
+  color: #6b3030;
+}
+
+.sb-save-conflict.is-error button:hover {
+  background: #f8e4e4;
+}
