@@ -14,7 +14,6 @@ import {
   DeleteFolderDialog,
   DeployDialog,
   RenameFolderDialog,
-  type BoardFormValues,
 } from '../../editor/dialogs'
 import { DirectorFrameController } from '../../editor/DirectorFrameController'
 import { EditorRail } from '../../editor/EditorRail'
@@ -53,6 +52,7 @@ import { useDirectorSession } from './useDirectorSession'
 import { useMarkdownEditingSession } from './useMarkdownEditingSession'
 import { useSelectionActions } from './useSelectionActions'
 import { useBoardWorkspace } from './useBoardWorkspace'
+import { useBoardFiles } from './useBoardFiles'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
@@ -61,16 +61,7 @@ import { PeleCreateDialog } from './PeleCreateDialog'
 import { PreferencesDialog } from './PreferencesDialog'
 import { blockStyleFromPreferences } from './preferences'
 import { isBrowserFolderMode } from './browserFolderBackend'
-import {
-  createBoard,
-  createFolder,
-  deleteBoard,
-  deleteFolder,
-  loadWorkspace,
-  readBoard,
-  updateBoard,
-  updateFolder,
-} from './workspaceApi'
+import { loadWorkspace, readBoard } from './workspaceApi'
 import {
   rememberRecentColor,
   updateUiState,
@@ -296,6 +287,35 @@ export function CanvasEditorApp() {
     setTreeMode,
     setLoading,
     setError,
+  })
+  const {
+    handleCreate,
+    handleRename,
+    handleDelete,
+    handleCreateFolder,
+    handleRenameFolder,
+    handleDeleteFolder,
+  } = useBoardFiles({
+    items,
+    selectedSlug,
+    scope,
+    saveState,
+    savingRef,
+    save,
+    boardDialog,
+    folderDialog,
+    newFolderParent,
+    setNewFolderParent,
+    treeMode,
+    refreshItems,
+    activateCanvas,
+    fetchCanvasDocument,
+    expandPath,
+    renameExpandedPath,
+    setCanvas,
+    setSelectedSlug,
+    setSaveState,
+    setLoading,
   })
   canvasRef.current = canvas
 
@@ -1105,135 +1125,6 @@ export function CanvasEditorApp() {
     })
   }
 
-  async function handleCreate(values: BoardFormValues) {
-    if (saveState !== 'saved') {
-      const ok = await save()
-      if (!ok) throw new Error('当前白板保存失败，无法新建')
-    }
-    const data = await createBoard({
-      title: values.title,
-      slug: values.slug,
-      folder: values.folder || undefined,
-      scope,
-    })
-    const list = await refreshItems()
-    const item = list.find(
-      (entry) => entry.slug === data.canvas['x-superboard']!.meta.slug && entry.scope === scope,
-    )
-    if (item) {
-      expandPath(item.path)
-      activateCanvas(item, data.canvas)
-    }
-  }
-
-  async function handleRename(values: BoardFormValues) {
-    if (!boardDialog || boardDialog.mode !== 'rename') return
-    const target = boardDialog.board
-    const isCurrent = target.slug === selectedSlug && target.scope === scope
-    if (isCurrent && saveState !== 'saved') {
-      const ok = await save()
-      if (!ok) throw new Error('当前白板保存失败，无法重命名')
-    }
-    const data = await updateBoard(
-      { ...target, scope: target.scope ?? scope },
-      {
-        title: values.title,
-        slug: values.slug,
-        folder: values.folder,
-      },
-    )
-    await refreshItems()
-    expandPath(data.path)
-    if (isCurrent) {
-      setCanvas(data.canvas)
-      setSelectedSlug(data.canvas['x-superboard']!.meta.slug)
-      updateEditorUrl(data.canvas['x-superboard']!.meta.slug, scope, treeMode)
-    }
-  }
-
-  async function handleDelete(slug: string) {
-    if (savingRef.current) throw new Error('正在保存，请稍后再删除')
-    const item = items.find(
-      (entry) => entry.slug === slug && entry.scope === scope,
-    )
-    if (!item) return
-    const isCurrent = slug === selectedSlug
-    if (isCurrent) setSaveState('saved')
-    await deleteBoard(item)
-    const list = await refreshItems()
-    if (!isCurrent) return
-    const next = list.find((entry) => entry.scope === scope)
-    if (next) {
-      setLoading(true)
-      try {
-        const doc = await fetchCanvasDocument(next)
-        activateCanvas(next, doc)
-      } finally {
-        setLoading(false)
-      }
-    } else {
-      setCanvas(null)
-      setSelectedSlug('')
-      setSaveState('saved')
-      updateEditorUrl(null, scope, treeMode)
-    }
-  }
-
-  async function handleCreateFolder(name: string) {
-    if (newFolderParent === null) return
-    const parent = newFolderParent
-    await createFolder({ parent, name, scope })
-    await refreshItems()
-    if (parent) expandPath(parent)
-    setNewFolderParent(null)
-  }
-
-  async function handleRenameFolder(name: string, parent: string) {
-    if (!folderDialog) return
-    if (saveState !== 'saved') {
-      const ok = await save()
-      if (!ok) throw new Error('当前白板保存失败，无法重命名文件夹')
-    }
-    const data = await updateFolder({
-      path: folderDialog.path,
-      scope,
-      name,
-      parent,
-    })
-    await refreshItems()
-    renameExpandedPath(folderDialog.path, data.path)
-  }
-
-  async function handleDeleteFolder(path: string) {
-    if (saveState !== 'saved') {
-      const ok = await save()
-      if (!ok) throw new Error('当前白板保存失败，无法删除文件夹')
-    }
-    const currentPath = activeItem?.path
-    const currentInside = Boolean(
-      currentPath &&
-        (currentPath === path || currentPath.startsWith(`${path}/`)),
-    )
-    await deleteFolder(path, scope)
-    const list = await refreshItems()
-    if (!currentInside) return
-    const next = list.find((entry) => entry.scope === scope)
-    if (next) {
-      setLoading(true)
-      try {
-        const doc = await fetchCanvasDocument(next)
-        activateCanvas(next, doc)
-      } finally {
-        setLoading(false)
-      }
-    } else {
-      setCanvas(null)
-      setSelectedSlug('')
-      setSaveState('saved')
-      updateEditorUrl(null, scope, treeMode)
-    }
-  }
-
   if (loading) return <div className="sb-screen-message">正在加载画布…</div>
   if (error) {
     return (
@@ -1278,9 +1169,6 @@ export function CanvasEditorApp() {
       const node = nodeMap.get(id)
       return Boolean(node?.['x-superboard']?.locked)
     })
-  const activeItem = items.find(
-    (entry) => entry.slug === selectedSlug && entry.scope === scope,
-  )
   const railSaveLabel =
     saveState === 'error'
       ? '保存失败'
