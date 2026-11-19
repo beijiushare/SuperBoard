@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`6aa5d35 refactor: extract canvas context menu hook`
+- 最近提交：`56db6e1 test: cover freehand, tool and overlay helpers`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -79,6 +79,10 @@
 - `toolGeometry.ts`：笔触命中、箭头方向、屏幕矩形
 - `overlayGeometry.ts`：选择框、旋转、命中判断的几何工具
 - `useCanvasMenu.ts`：右键菜单与世界坐标命中
+- `useMarqueeSelection.ts`：框选
+- `useOverlayViewport.ts` + `overlayTypes.ts`：覆盖层视口同步
+- 浏览器后端单次扫描定位白板文件，减少全目录遍历
+- `test:editor` 覆盖手绘节点、笔触命中、箭头方向、屏幕矩形、框选相交
 - `drawingStyle.ts`：绘图节点样式修改
 - `DrawingStyleSection.tsx`：绘图笔触面板
 - `styleMutations.ts`：通用样式/几何/文本样式 mutation
@@ -89,7 +93,7 @@
 ### 高优先级
 
 - `CanvasEditorApp.tsx` 约 1340 行，继续拆内联 JSX 与目录面板
-- `CanvasEditorOverlay.tsx` 约 1310 行，拆拖拽、框选、选择层
+- `CanvasEditorOverlay.tsx` 约 1120 行，拆拖拽、缩放、选择渲染
 - `CanvasEditorTools.tsx` 约 1060 行，按文本/形状/橡皮/箭头拆
 
 ### 中优先级

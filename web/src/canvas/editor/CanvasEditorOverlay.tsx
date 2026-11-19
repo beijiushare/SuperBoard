@@ -5,7 +5,7 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import type { CanvasDocument, CanvasEdge, CanvasNode } from '../model'
+import type { CanvasDocument, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
   blockKind,
@@ -40,6 +40,7 @@ import {
 } from './overlayGeometry'
 import { useMarqueeSelection } from './useMarqueeSelection'
 import { useOverlayViewport } from './useOverlayViewport'
+import { useEdgeDrag } from './useEdgeDrag'
 import type {
   OverlayController,
   OverlayDataManager,
@@ -131,12 +132,6 @@ export function CanvasEditorOverlay({
   const [marquee, setMarquee] = useState<Marquee | null>(null)
   const [guides, setGuides] = useState<{ x?: number; y?: number } | null>(null)
   const [actionsVisible, setActionsVisible] = useState(true)
-  const [edgePreview, setEdgePreview] = useState<{
-    fromX: number
-    fromY: number
-    x: number
-    y: number
-  } | null>(null)
   const canShowGuides =
     guidesEnabled && !activeEditingId && !selectionSuppressedId
 
@@ -149,12 +144,6 @@ export function CanvasEditorOverlay({
     window.addEventListener('pointerdown', clearGuides, true)
     return () => window.removeEventListener('pointerdown', clearGuides, true)
   }, [])
-  const edgeDragRef = useRef<{
-    edge: CanvasEdge
-    point: 'from' | 'to'
-    fixedX: number
-    fixedY: number
-  } | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const worldRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef(view)
@@ -198,6 +187,20 @@ export function CanvasEditorOverlay({
     viewRef,
     pendingViewRef,
     setView,
+    setTick,
+  })
+  const {
+    edgePreview,
+    beginEdgeEndpoint,
+    finishEdgeEndpoint,
+    moveEdge,
+  } = useEdgeDrag({
+    dmRef,
+    overlayRef,
+    controllerRef,
+    focusedGroupId,
+    onBeforeChange,
+    onChange,
     setTick,
   })
 
@@ -479,74 +482,7 @@ export function CanvasEditorOverlay({
     event.currentTarget.setPointerCapture(event.pointerId)
   }
 
-  function edgeWorldPoint(event: { clientX: number; clientY: number }) {
-    const overlay = overlayRef.current
-    const dm = dmRef.current
-    if (!overlay || !dm) return null
-    const bounds = overlay.getBoundingClientRect()
-    return {
-      x: (event.clientX - bounds.left - dm.data.offsetX) / dm.data.scale,
-      y: (event.clientY - bounds.top - dm.data.offsetY) / dm.data.scale,
-    }
-  }
-
-  function beginEdgeEndpoint(
-    event: ReactPointerEvent,
-    edge: CanvasEdge,
-    point: 'from' | 'to',
-  ) {
-    if (event.button !== 0) return
-    event.preventDefault()
-    event.stopPropagation()
-    const dm = dmRef.current
-    if (!dm) return
-    const map = nodeMapOf(Object.values(dm.data.nodeMap).map((item) => item.ref))
-    const geometry = edgeGeometry(edge, map)
-    if (!geometry) return
-    const fixed = point === 'from' ? geometry.end : geometry.start
-    edgeDragRef.current = { edge, point, fixedX: fixed.x, fixedY: fixed.y }
-    event.currentTarget.setPointerCapture(event.pointerId)
-  }
-
-  function finishEdgeEndpoint(event: ReactPointerEvent) {
-    const dragEdge = edgeDragRef.current
-    if (!dragEdge) return
-    edgeDragRef.current = null
-    setEdgePreview(null)
-    const dm = dmRef.current
-    const point = edgeWorldPoint(event)
-    if (!dm || !point) return
-    const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
-    const map = nodeMapOf(nodes)
-    let target: CanvasNode | null = null
-    for (let index = nodes.length - 1; index >= 0; index -= 1) {
-      const candidate = selectableAncestor(nodes[index], map, focusedGroupId)
-      if (isLocked(candidate, map)) continue
-      if (
-        point.x >= candidate.x &&
-        point.x <= candidate.x + candidate.width &&
-        point.y >= candidate.y &&
-        point.y <= candidate.y + candidate.height
-      ) {
-        target = candidate
-        break
-      }
-    }
-    if (!target) return
-    onBeforeChange?.()
-    if (dragEdge.point === 'from') {
-      dragEdge.edge.fromNode = target.id
-      delete dragEdge.edge.fromSide
-    } else {
-      dragEdge.edge.toNode = target.id
-      delete dragEdge.edge.toSide
-    }
-    controllerRef.current?.refresh()
-    onChange?.()
-    setTick((value) => value + 1)
-  }
-
-function cornerRatioScale(
+  function cornerRatioScale(
   width: number,
   height: number,
   startWidth: number,
@@ -567,18 +503,7 @@ function cornerRatioScale(
   }
 
   function movePointer(event: ReactPointerEvent) {
-    if (edgeDragRef.current) {
-      const point = edgeWorldPoint(event)
-      if (point) {
-        setEdgePreview({
-          fromX: edgeDragRef.current.fixedX,
-          fromY: edgeDragRef.current.fixedY,
-          x: point.x,
-          y: point.y,
-        })
-      }
-      return
-    }
+    if (moveEdge(event)) return
     const drag = dragRef.current
     if (!drag) return
     const dx = (event.clientX - drag.startClientX) / drag.scale
