@@ -11,7 +11,7 @@ function siteBase(value: string) {
 }
 
 export default defineConfig(({ command, isPreview, mode }) => ({
-  base: command === 'build' || isPreview ? siteBase(process.env.BASE_PATH || '') : '/',
+  base: command === 'build' || isPreview ? siteBase(process.env.BASE_PATH ?? process.env.SB_BASE ?? '') : '/',
   plugins: [react(), vditorAssetsPlugin()],
   resolve: {
     alias: [
@@ -46,6 +46,7 @@ export default defineConfig(({ command, isPreview, mode }) => ({
   build: {
     manifest: true,
     emptyOutDir: true,
+    outDir: process.env.SB_OUT_DIR || 'dist',
     rollupOptions:
       command === 'build'
         ? {

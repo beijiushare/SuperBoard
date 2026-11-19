@@ -3,11 +3,26 @@ import path from 'node:path'
 import { parseCanvas, serializeCanvas } from '../web/src/canvas/model'
 
 const sourceDir = path.resolve(
-  process.argv[2] ?? process.env.WHITEBOARDS_DIR ?? 'whiteboards/public',
+  argValue(
+    '--data',
+    process.env.SUPERBOARD_DATA ||
+      process.env.WHITEBOARDS_DIR ||
+      'info/public',
+  ),
 )
 const outputDir = path.resolve(
-  process.argv[3] ?? 'node_modules/.cache/superboard/canvas',
+  argValue(
+    '--out',
+    process.env.SUPERBOARD_CANVAS_CACHE ||
+      'node_modules/.cache/superboard/canvas',
+  ),
 )
+
+function argValue(name: string, fallback: string) {
+  const index = process.argv.indexOf(name)
+  if (index >= 0 && process.argv[index + 1]) return process.argv[index + 1]
+  return fallback
+}
 
 async function walk(dir: string): Promise<string[]> {
   const files: string[] = []

@@ -2,18 +2,28 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
 const root = process.cwd()
-const distDir = path.join(root, 'dist')
-const canvasesDir = path.join(
-  root,
-  'node_modules',
-  '.cache',
-  'superboard',
-  'canvas',
+
+function argValue(name, fallback) {
+  const index = process.argv.indexOf(name)
+  if (index >= 0 && process.argv[index + 1]) return process.argv[index + 1]
+  return fallback
+}
+
+const distDir = path.resolve(
+  argValue('--out', process.env.SB_OUT_DIR || 'dist'),
+)
+const canvasesDir = path.resolve(
+  argValue(
+    '--canvas',
+    path.join(root, 'node_modules', '.cache', 'superboard', 'canvas'),
+  ),
 )
 const manifestPath = path.join(distDir, '.vite', 'manifest.json')
 const templatePath = path.join(root, 'web', 'template.html')
 
-const base = normalizeBase(process.env.BASE_PATH || '/SuperBoard/')
+const base = normalizeBase(
+  argValue('--base', process.env.BASE_PATH || process.env.SB_BASE || '/SuperBoard/'),
+)
 const siteName = 'SuperBoard'
 
 function normalizeBase(value) {
@@ -252,7 +262,7 @@ async function main() {
     `<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>页面不存在</title></head><body style="font-family:system-ui,sans-serif;padding:48px"><h1>404</h1><p>这个页面不存在。</p><p><a href="${base}">返回首页</a></p></body></html>`,
   )
 
-  console.log(`SuperBoard: 已生成 ${canvases.length} 个白板到 dist/`)
+  console.log(`SuperBoard: 已生成 ${canvases.length} 个白板到 ${path.relative(root, distDir) || '.'}/`)
 }
 
 main().catch((error) => {
