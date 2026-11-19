@@ -49,6 +49,7 @@ import {
   type ViewerInternals,
 } from './appUtils'
 import { useCanvasHistory } from './useCanvasHistory'
+import { useEditorKeyboard } from './useEditorKeyboard'
 import { useCanvasSave } from './useCanvasSave'
 import { useCanvasViewport } from './useCanvasViewport'
 import { useDirectorSession } from './useDirectorSession'
@@ -91,7 +92,7 @@ import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
 import { CanvasToolPalette } from './CanvasToolPalette'
 import { CanvasStylePanel } from './CanvasStylePanel'
-import { TOOL_SHORTCUTS, detectMediaKind, type EditorTool } from './tools'
+import { detectMediaKind, type EditorTool } from './tools'
 import {
   collectBlocks,
   collectDescendants,
@@ -164,7 +165,6 @@ export function CanvasEditorApp() {
   const stageRef = useRef<HTMLDivElement>(null)
   const shiftRef = useRef(false)
   const rightDragRef = useRef<{ x: number; y: number } | null>(null)
-  const keydownHandlerRef = useRef<(event: KeyboardEvent) => void>(() => {})
   const clipboardRef = useRef<Clipboard | null>(null)
   const pasteCountRef = useRef(0)
   const canvasRef = useRef<CanvasDocument | null>(null)
@@ -1256,118 +1256,29 @@ export function CanvasEditorApp() {
     setSelectedIds(ids)
   }
 
-  function handleKeyDown(event: KeyboardEvent) {
-    const target = event.target as HTMLElement | null
-    if (target?.closest('input, textarea, select, [contenteditable="true"]')) return
-    if (event.key === 'Escape' && presentation) {
-      event.preventDefault()
-      exitPresentation()
-      return
-    }
-    const mod = event.ctrlKey || event.metaKey
-    const key = event.key.toLowerCase()
-    if (mod && key === 's') {
-      event.preventDefault()
-      void save()
-      return
-    }
-    if (mod && key === 'z') {
-      event.preventDefault()
-      if (event.shiftKey) redo()
-      else undo()
-      return
-    }
-    if (mod && key === 'y') {
-      event.preventDefault()
-      redo()
-      return
-    }
-    if (mod && key === 'c') {
-      copySelection()
-      return
-    }
-    if (mod && key === 'v') {
-      event.preventDefault()
-      pasteClipboard()
-      return
-    }
-    if (mod && key === 'd') {
-      event.preventDefault()
-      duplicateSelection()
-      return
-    }
-    if (mod && key === 'x') {
-      event.preventDefault()
-      copySelection()
-      deleteSelection()
-      return
-    }
-    if (mod && key === 'a') {
-      event.preventDefault()
-      selectAllUnlocked()
-      return
-    }
-    if (mod && key === 'g') {
-      event.preventDefault()
-      if (event.shiftKey) ungroupSelection()
-      else toggleGroup()
-      return
-    }
-    if (!mod && event.shiftKey && key === 'l') {
-      event.preventDefault()
-      toggleLockSelection()
-      return
-    }
-    if (!mod && !event.altKey && !event.shiftKey) {
-      const nextTool = TOOL_SHORTCUTS[key]
-      if (nextTool) {
-        event.preventDefault()
-        setTool(nextTool)
-        return
-      }
-    }
-    if (!mod && event.key === ']') {
-      event.preventDefault()
-      reorderSelection(event.altKey ? 'forward' : 'front')
-      return
-    }
-    if (!mod && event.key === '[') {
-      event.preventDefault()
-      reorderSelection(event.altKey ? 'backward' : 'back')
-      return
-    }
-    if (event.key === 'Delete' || event.key === 'Backspace') {
-      event.preventDefault()
-      deleteSelection()
-      return
-    }
-    if (event.key === 'Enter' && !mod && !event.shiftKey) {
-      if (target?.closest('button, a')) return
-      event.preventDefault()
-      enterGroup()
-      return
-    }
-    if (event.key === 'Escape' && focusedGroupId) {
-      event.preventDefault()
-      const group = canvas?.nodes.find((node) => node.id === focusedGroupId)
-      setSelectedIds([focusedGroupId])
-      setSelectedEdgeId(null)
-      setFocusedGroupId(group?.['x-superboard']?.groupId ?? null)
-      return
-    }
-    if (event.key === 'Escape') {
-      setSelectedIds([])
-      setSelectedEdgeId(null)
-      setTool('select')
-    }
-  }
-  keydownHandlerRef.current = handleKeyDown
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => keydownHandlerRef.current(event)
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  useEditorKeyboard({
+    canvas,
+    presentation,
+    focusedGroupId,
+    exitPresentation,
+    save,
+    undo,
+    redo,
+    copySelection,
+    pasteClipboard,
+    duplicateSelection,
+    deleteSelection,
+    selectAllUnlocked,
+    ungroupSelection,
+    toggleGroup,
+    toggleLockSelection,
+    setTool,
+    reorderSelection,
+    enterGroup,
+    setSelectedIds,
+    setSelectedEdgeId,
+    setFocusedGroupId,
+  })
 
   useEffect(() => {
     const stage = stageRef.current
