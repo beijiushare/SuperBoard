@@ -7,11 +7,7 @@ import {
 } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { BoardContextTarget } from '../../editor/BoardContextMenu'
-import type {
-  BoardListItem,
-  BoardScope,
-  BoardTreeFolder,
-} from '../../shared/board/types'
+import type { BoardScope } from '../../shared/board/types'
 import { useTreeExpansion } from '../../shared/board/useTreeExpansion'
 import { DirectorHud } from '../../shared/director/DirectorHud'
 import { PresentationOverlay } from '../../shared/director/PresentationOverlay'
@@ -24,7 +20,6 @@ import { CanvasEditorStage } from './CanvasEditorStage'
 import {
   normalizeMarkdownLocks,
   updateEditorUrl,
-  type BoardDialogState,
   type CanvasListItem,
   type CanvasMenuState,
   type ControllerLike,
@@ -42,6 +37,7 @@ import { useSelectionActions } from './useSelectionActions'
 import { useBoardWorkspace } from './useBoardWorkspace'
 import { useBoardFiles } from './useBoardFiles'
 import { useBoardTreeData } from './useBoardTreeData'
+import { useEditorDialogState } from './useEditorDialogState'
 import { useBlockActions } from './useBlockActions'
 import { useCanvasInsertions } from './useCanvasInsertions'
 import { useCanvasMenu } from './useCanvasMenu'
@@ -108,20 +104,24 @@ export function CanvasEditorApp() {
   const uiState = useUiState()
   const stylePanelOpen = uiState.stylePanelOpen
   const menuPanelOpen = uiState.toolPaletteOpen
-  const [preferencesOpen, setPreferencesOpen] = useState(false)
-  const [boardDialog, setBoardDialog] = useState<BoardDialogState | null>(null)
-  const [folderDialog, setFolderDialog] = useState<BoardTreeFolder | null>(null)
-  const [newFolderParent, setNewFolderParent] = useState<string | null>(null)
-  const [pendingDelete, setPendingDelete] = useState<BoardListItem | null>(null)
-  const [pendingDeleteFolder, setPendingDeleteFolder] = useState<BoardTreeFolder | null>(
-    null,
-  )
-  const [deployDialogOpen, setDeployDialogOpen] = useState(false)
-  const [contextMenu, setContextMenu] = useState<{
-    x: number
-    y: number
-    target: BoardContextTarget
-  } | null>(null)
+  const {
+    boardDialog,
+    setBoardDialog,
+    folderDialog,
+    setFolderDialog,
+    newFolderParent,
+    setNewFolderParent,
+    pendingDelete,
+    setPendingDelete,
+    pendingDeleteFolder,
+    setPendingDeleteFolder,
+    deployDialogOpen,
+    setDeployDialogOpen,
+    preferencesOpen,
+    setPreferencesOpen,
+    contextMenu,
+    setContextMenu,
+  } = useEditorDialogState()
   const viewerRef = useRef<CanvasViewerHandle>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const shiftRef = useRef(false)
@@ -739,6 +739,25 @@ export function CanvasEditorApp() {
         : saveState === 'saving'
           ? '保存中…'
           : '已保存'
+  const treeConfig = treeMode
+    ? {
+        nodes: treeNodes,
+        title: `SuperBoard-${scope}`,
+        collapsed: !treeOpen,
+        selectedSlug,
+        expanded,
+        emptyLabel: '还没有白板，在空白处右键新建',
+        onToggle: toggleFolder,
+        onSelect: (slug: string) => {
+          void openBoard(slug, scope)
+          if (window.matchMedia('(max-width: 860px)').matches) {
+            setTreeOpen(false)
+          }
+        },
+        onContextMenu: openContextMenu,
+        onRootContextMenu: openRootContextMenu,
+      }
+    : undefined
 
   return (
     <div
@@ -817,27 +836,7 @@ export function CanvasEditorApp() {
             : () => setDeployDialogOpen(true)
         }
         onOpenPreferences={() => setPreferencesOpen(true)}
-        tree={
-          treeMode
-            ? {
-                nodes: treeNodes,
-                title: `SuperBoard-${scope}`,
-                collapsed: !treeOpen,
-                selectedSlug,
-                expanded,
-                emptyLabel: '还没有白板，在空白处右键新建',
-                onToggle: toggleFolder,
-                onSelect: (slug) => {
-                  void openBoard(slug, scope)
-                  if (window.matchMedia('(max-width: 860px)').matches) {
-                    setTreeOpen(false)
-                  }
-                },
-                onContextMenu: openContextMenu,
-                onRootContextMenu: openRootContextMenu,
-              }
-            : undefined
-        }
+        tree={treeConfig}
       >
         <CanvasEditorStage
           canvas={canvas}
