@@ -36,6 +36,12 @@ import {
   createArrowEdge,
   createShapeNode,
 } from '../web/src/canvas/editor/toolCreate'
+import {
+  applyGeometry,
+  applyTextStyle,
+  withCommonStyle,
+  withStyle,
+} from '../web/src/canvas/editor/styleMutations'
 
 const nodes: CanvasNode[] = [
   {
@@ -373,5 +379,41 @@ assert.equal(arrowNode.fromSide, 'right')
 assert.equal(arrowNode.toSide, 'right')
 assert.equal(arrowNode.fromEnd, 'none')
 assert.equal(arrowNode.toEnd, 'arrow')
+
+const styledBase: CanvasNode = {
+  id: 'styled',
+  type: 'text',
+  x: 0,
+  y: 0,
+  width: 200,
+  height: 40,
+  text: 'hello',
+  'x-superboard': {
+    kind: 'text',
+    style: { strokeDash: [2, 4], fill: '#eee' },
+  },
+}
+const styledText = withStyle(styledBase, { borderColor: '#123456' })
+assert.equal(styledText['x-superboard']?.style?.borderColor, '#123456')
+assert.equal(styledText['x-superboard']?.style?.fill, '#eee')
+assert.equal(styledBase['x-superboard']?.style?.borderColor, undefined)
+const commonStyled = withCommonStyle(styledBase, { borderStyle: 'dashed' })
+assert.equal(commonStyled['x-superboard']?.style?.strokeDash, undefined)
+assert.equal(commonStyled['x-superboard']?.style?.borderStyle, 'dashed')
+const geometryStyled = applyGeometry(styledBase, { width: 120, rotation: 30 })
+assert.equal(geometryStyled.width, 120)
+assert.equal(geometryStyled.height, 40)
+assert.equal(geometryStyled['x-superboard']?.rotation, 30)
+const resizeNone = applyGeometry(styledBase, {})
+assert.equal(resizeNone.width, 200)
+const textSized = applyTextStyle(styledBase, { fontSize: 28 })
+assert.equal(textSized['x-superboard']?.style?.fontSize, 28)
+assert.notEqual(textSized.height, styledBase.height)
+assert.ok(textSized.height > 0)
+const kindFallback = withStyle(
+  { id: 'raw', type: 'link', url: '#', x: 0, y: 0, width: 10, height: 10 },
+  { borderColor: '#000' },
+)
+assert.equal(kindFallback['x-superboard']?.kind, 'media')
 
 console.log('canvas editor tests passed')
