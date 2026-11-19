@@ -54,6 +54,7 @@ import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
 import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { EditorInsertDialogs } from './EditorInsertDialogs'
 import { EditorBoardDialogs } from './EditorBoardDialogs'
+import { CanvasBlockMenu } from './CanvasBlockMenu'
 import { isBrowserFolderMode } from './browserFolderBackend'
 import { loadWorkspace, readBoard } from './workspaceApi'
 import {
@@ -61,10 +62,7 @@ import {
   updateUiState,
   useUiState,
 } from './uiState'
-import {
-  blockDefinition,
-  blockEditor,
-} from './blocks'
+import { blockEditor } from './blocks'
 import { CanvasEditorTools } from './CanvasEditorTools'
 import { CanvasToolPalette } from './CanvasToolPalette'
 import { CanvasStylePanel } from './CanvasStylePanel'
@@ -749,13 +747,6 @@ export function CanvasEditorApp() {
         : saveState === 'saving'
           ? '保存中…'
           : '已保存'
-  const menuNode = canvasMenu?.nodeId ? nodeMap.get(canvasMenu.nodeId) ?? null : null
-  const menuDefinition = menuNode ? blockDefinition(menuNode) : null
-  const menuEditable = Boolean(
-    menuDefinition &&
-      menuDefinition.editor !== 'schedule' &&
-      !isLocked(menuNode!, nodeMap),
-  )
 
   return (
     <div
@@ -1038,208 +1029,53 @@ export function CanvasEditorApp() {
         />
       ) : null}
 
-      {canvasMenu ? (
-        <div
-          className="sb-canvas-context-menu"
-          style={{
-            left: Math.max(8, Math.min(canvasMenu.x, window.innerWidth - 200)),
-            top: Math.max(8, Math.min(canvasMenu.y, window.innerHeight - 340)),
-          }}
-          onPointerDown={(event) => event.stopPropagation()}
-          onContextMenu={(event) => event.preventDefault()}
-        >
-          {canvasMenu.edgeId ? (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  deleteSelection()
-                  setCanvasMenu(null)
-                }}
-              >
-                删除箭头
-              </button>
-              <div className="sb-canvas-menu-sep" />
-            </>
-          ) : null}
-          {menuNode ? (
-            <>
-              {menuEditable && selectedIds.length === 1 ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    openBlockEditor(menuNode.id)
-                    setCanvasMenu(null)
-                  }}
-                >
-                  编辑内容
-                </button>
-              ) : null}
-              <button
-                type="button"
-                onClick={() => {
-                  duplicateSelection()
-                  setCanvasMenu(null)
-                }}
-              >
-                生成副本
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  deleteSelection()
-                  setCanvasMenu(null)
-                }}
-              >
-                删除
-              </button>
-              <button
-                type="button"
-                disabled={!canGroup && !canUngroup}
-                onClick={() => {
-                  toggleGroup()
-                  setCanvasMenu(null)
-                }}
-              >
-                {canUngroup ? '解组' : '编组'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  toggleLockSelection()
-                  setCanvasMenu(null)
-                }}
-              >
-                {allSelectedLocked ? '解锁' : '锁定'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  reorderSelection('front')
-                  setCanvasMenu(null)
-                }}
-              >
-                移至最前
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  reorderSelection('back')
-                  setCanvasMenu(null)
-                }}
-              >
-                移至最后
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  reorderSelection('forward')
-                  setCanvasMenu(null)
-                }}
-              >
-                向前一层
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  reorderSelection('backward')
-                  setCanvasMenu(null)
-                }}
-              >
-                向后一层
-              </button>
-              <div className="sb-canvas-menu-sep" />
-            </>
-          ) : null}
-          {!menuNode ? (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  insertTextBlock('text', {
-                    x: canvasMenu.worldX,
-                    y: canvasMenu.worldY,
-                  })
-                  setCanvasMenu(null)
-                }}
-              >
-                输入文本
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  insertTextBlock('markdown', {
-                    x: canvasMenu.worldX,
-                    y: canvasMenu.worldY,
-                  })
-                  setCanvasMenu(null)
-                }}
-              >
-                创建 Markdown 块
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  openPeleDialog({
-                    x: canvasMenu.worldX,
-                    y: canvasMenu.worldY,
-                  })
-                  setCanvasMenu(null)
-                }}
-              >
-                创建图表
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  insertScheduleBlock({
-                    x: canvasMenu.worldX,
-                    y: canvasMenu.worldY,
-                  })
-                  setCanvasMenu(null)
-                }}
-              >
-                创建日程表
-              </button>
-              {!canvasMenu.quick ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    openMediaDialog({ x: canvasMenu.worldX, y: canvasMenu.worldY })
-                    setCanvasMenu(null)
-                  }}
-                >
-                  插入媒体
-                </button>
-              ) : null}
-            </>
-          ) : null}
-          {!canvasMenu.quick ? (
-            <>
-              <button
-                type="button"
-                style={{ display: selectedIds.length > 0 ? 'none' : undefined }}
-                onClick={() => {
-                  selectAllUnlocked()
-                  setCanvasMenu(null)
-                }}
-              >
-                全选
-              </button>
-              {hasLocked ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    unlockAllLocked()
-                    setCanvasMenu(null)
-                  }}
-                >
-                  解锁全部
-                </button>
-              ) : null}
-            </>
-          ) : null}
-        </div>
+      {canvasMenu && canvas ? (
+        <CanvasBlockMenu
+          canvas={canvas}
+          menu={canvasMenu}
+          selectedIds={selectedIds}
+          canGroup={canGroup}
+          canUngroup={canUngroup}
+          allSelectedLocked={allSelectedLocked}
+          hasLocked={hasLocked}
+          onClose={() => setCanvasMenu(null)}
+          onDuplicate={duplicateSelection}
+          onDelete={() => deleteSelection()}
+          onDeleteEdge={() => deleteSelection()}
+          onToggleGroup={toggleGroup}
+          onToggleLock={toggleLockSelection}
+          onReorder={reorderSelection}
+          onUnlockAll={unlockAllLocked}
+          onSelectAll={selectAllUnlocked}
+          onEditBlock={openBlockEditor}
+          onInsertText={() =>
+            insertTextBlock('text', {
+              x: canvasMenu.worldX,
+              y: canvasMenu.worldY,
+            })
+          }
+          onInsertMarkdown={() =>
+            insertTextBlock('markdown', {
+              x: canvasMenu.worldX,
+              y: canvasMenu.worldY,
+            })
+          }
+          onInsertPele={() =>
+            openPeleDialog({
+              x: canvasMenu.worldX,
+              y: canvasMenu.worldY,
+            })
+          }
+          onInsertSchedule={() =>
+            insertScheduleBlock({
+              x: canvasMenu.worldX,
+              y: canvasMenu.worldY,
+            })
+          }
+          onInsertMedia={() =>
+            openMediaDialog({ x: canvasMenu.worldX, y: canvasMenu.worldY })
+          }
+        />
       ) : null}
 
       <EditorInsertDialogs
