@@ -1,6 +1,11 @@
 import { parseCanvas, serializeCanvas, type CanvasDocument } from '../model'
 import type { BoardScope } from '../../shared/board/types'
 import { configureWorkspaceFetcher } from './workspaceApi'
+import {
+  beginFolderMove,
+  isFolderMoveCancelled,
+  reportFolderMoveProgress,
+} from './folderMove'
 
 type DirHandle = FileSystemDirectoryHandle
 
@@ -370,17 +375,34 @@ async function handleCanvases(url: URL, init?: RequestInit) {
   return response({ error: 'method not allowed' }, 405)
 }
 
-async function copyDirectory(source: DirHandle, target: DirHandle) {
+async function countFiles(dir: DirHandle): Promise<number> {
+  let total = 0
+  for await (const entry of directoryValues(dir)) {
+    if (isDirectoryHandle(entry)) total += await countFiles(entry)
+    else if (isFileHandle(entry)) total += 1
+  }
+  return total
+}
+
+async function copyDirectory(
+  source: DirHandle,
+  target: DirHandle,
+  onFile?: () => void,
+) {
   for await (const entry of directoryValues(source)) {
+    if (isFolderMoveCancelled()) {
+      throw new DOMException('已取消移动', 'AbortError')
+    }
     if (isDirectoryHandle(entry)) {
       const child = await target.getDirectoryHandle(entry.name, { create: true })
-      await copyDirectory(entry, child)
+      await copyDirectory(entry, child, onFile)
     } else if (isFileHandle(entry)) {
       const file = await entry.getFile()
       const next = await target.getFileHandle(entry.name, { create: true })
       const writable = await next.createWritable()
       await writable.write(file)
       await writable.close()
+      onFile?.()
     }
   }
 }
@@ -446,12 +468,25 @@ async function handleFolders(url: URL, init?: RequestInit) {
       }
     }
     try {
-      await copyDirectory(source, target)
+      const total = await countFiles(source)
+      beginFolderMove()
+      let copied = 0
+      reportFolderMoveProgress({ copied, total })
+      await copyDirectory(source, target, () => {
+        copied += 1
+        reportFolderMoveProgress({ copied, total })
+      })
+      if (isFolderMoveCancelled()) {
+        throw new DOMException('已取消移动', 'AbortError')
+      }
       await sourceParent.removeEntry(sourcePath.split('/').pop()!, {
         recursive: true,
       })
     } catch (error) {
       await targetParent.removeEntry(name, { recursive: true }).catch(() => {})
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return response({ error: '移动已取消' }, 409)
+      }
       throw error
     }
     return response({ ok: true, path: parent ? `${parent}/${name}` : name })

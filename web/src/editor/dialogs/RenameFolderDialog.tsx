@@ -1,5 +1,10 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import type { BoardTreeFolder } from '../../shared/board/types'
+import {
+  requestCancelFolderMove,
+  subscribeFolderMoveProgress,
+  type FolderMoveProgress,
+} from '../../canvas/editor/folderMove'
 import { useDialogEscape } from './useDialogEscape'
 
 interface RenameFolderDialogProps {
@@ -21,14 +26,26 @@ export function RenameFolderDialog({
   )
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [progress, setProgress] = useState<FolderMoveProgress | null>(null)
 
   useDialogEscape(busy, onClose)
+
+  useEffect(
+    () =>
+      subscribeFolderMoveProgress((next) => {
+        setProgress(next)
+      }),
+    [],
+  )
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (busy) return
     setBusy(true)
     setError('')
+    setCancelling(false)
+    setProgress(null)
     try {
       await onSubmit(name.trim(), parent)
       onClose()
@@ -36,6 +53,8 @@ export function RenameFolderDialog({
       setError(submitError instanceof Error ? submitError.message : String(submitError))
     } finally {
       setBusy(false)
+      setProgress(null)
+      setCancelling(false)
     }
   }
 
@@ -88,12 +107,30 @@ export function RenameFolderDialog({
             <small>修改父文件夹会把整个目录移动到新位置。</small>
           </label>
           {error ? <p className="sb-dialog-error">{error}</p> : null}
+          {busy && progress ? (
+            <p className="sb-dialog-copy">
+              正在移动：已复制 {progress.copied} / {progress.total} 个文件
+            </p>
+          ) : null}
         </div>
 
         <div className="sb-dialog-actions">
           <button className="sb-button" type="button" onClick={onClose} disabled={busy}>
             取消
           </button>
+          {busy && progress ? (
+            <button
+              className="sb-button"
+              type="button"
+              disabled={cancelling}
+              onClick={() => {
+                setCancelling(true)
+                requestCancelFolderMove()
+              }}
+            >
+              {cancelling ? '正在取消…' : '取消移动'}
+            </button>
+          ) : null}
           <button className="sb-button sb-button-primary" type="submit" disabled={busy}>
             {busy ? '处理中…' : '保存'}
           </button>

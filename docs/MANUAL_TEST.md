@@ -159,6 +159,8 @@
 
 - [ ] `npm run build:editor` 后打开 `editor.html`，可选择本地文件夹
 - [ ] 自动创建 `whiteboards/public` 与 `whiteboards/private`
+- [ ] 文件夹移动时显示已复制文件数与总数
+- [ ] 文件夹移动过程中可点击「取消移动」，源目录保持不变
 - [ ] 刷新页面后仍能恢复上次文件夹权限
 - [ ] 保存后磁盘 `.canvas` 为有效 JSON，并生成 `.bak`
 - [ ] 两个标签页打开同一工作区，A 新建/重命名/删除白板后 B 的目录自动刷新
