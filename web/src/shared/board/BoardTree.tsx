@@ -1,4 +1,4 @@
-import type { MouseEvent } from 'react'
+import { useRef, type KeyboardEvent, type MouseEvent } from 'react'
 import type { BoardTreeFile, BoardTreeFolder, BoardTreeNode } from './types'
 
 export type BoardTreeContextTarget =
@@ -72,9 +72,15 @@ function TreeRow({
   if (node.type === 'folder') {
     const open = expanded.has(node.path)
     return (
-      <div role="treeitem" aria-expanded={open}>
+      <div role="none">
         <button
           type="button"
+          role="treeitem"
+          aria-expanded={open}
+          aria-level={depth + 1}
+          data-tree-row=""
+          data-tree-depth={depth}
+          data-tree-folder={node.path}
           className="sb-tree-row sb-tree-folder"
           style={{ paddingLeft: 8 + depth * 14 }}
           onClick={() => onToggle(node.path)}
@@ -116,8 +122,7 @@ function TreeRow({
   return (
     <div
       className={`sb-tree-file-row${selected ? ' is-selected' : ''}`}
-      role="treeitem"
-      aria-selected={selected}
+      role="none"
       onContextMenu={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -126,6 +131,11 @@ function TreeRow({
     >
       <button
         type="button"
+        role="treeitem"
+        aria-selected={selected}
+        aria-level={depth + 1}
+        data-tree-row=""
+        data-tree-depth={depth}
         className="sb-tree-row sb-tree-file"
         style={{ paddingLeft: 8 + depth * 14 }}
         onClick={() => onSelect(node.slug)}
@@ -150,12 +160,83 @@ export function BoardTree({
   onContextMenu,
   emptyLabel = '还没有白板',
 }: BoardTreeProps) {
+  const treeRef = useRef<HTMLDivElement>(null)
+
+  function focusRow(row: HTMLButtonElement | undefined) {
+    row?.focus()
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const tree = treeRef.current
+    if (!tree) return
+    const rows = Array.from(
+      tree.querySelectorAll<HTMLButtonElement>('[data-tree-row]'),
+    )
+    const index = rows.indexOf(document.activeElement as HTMLButtonElement)
+    if (index < 0) return
+    const row = rows[index]
+    const depth = Number(row.dataset.treeDepth ?? '0')
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      focusRow(rows[Math.min(rows.length - 1, index + 1)])
+      return
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      focusRow(rows[Math.max(0, index - 1)])
+      return
+    }
+    if (event.key === 'Home') {
+      event.preventDefault()
+      focusRow(rows[0])
+      return
+    }
+    if (event.key === 'End') {
+      event.preventDefault()
+      focusRow(rows[rows.length - 1])
+      return
+    }
+    const folder = row.dataset.treeFolder
+    if (!folder) return
+    if (event.key === 'ArrowRight') {
+      event.preventDefault()
+      if (!expanded.has(folder)) {
+        onToggle(folder)
+        return
+      }
+      const next = rows[index + 1]
+      if (next && Number(next.dataset.treeDepth ?? '0') > depth) {
+        focusRow(next)
+      }
+      return
+    }
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault()
+      if (expanded.has(folder)) {
+        onToggle(folder)
+        return
+      }
+      for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
+        if (Number(rows[cursor].dataset.treeDepth ?? '0') < depth) {
+          focusRow(rows[cursor])
+          return
+        }
+      }
+    }
+  }
+
   if (nodes.length === 0) {
     return <p className="sb-tree-empty">{emptyLabel}</p>
   }
 
   return (
-    <div className="sb-tree" role="tree" aria-label="白板目录">
+    <div
+      ref={treeRef}
+      className="sb-tree"
+      role="tree"
+      aria-label="白板目录"
+      onKeyDown={handleKeyDown}
+    >
       {nodes.map((node) => (
         <TreeRow
           key={node.type === 'file' ? `file:${node.slug}` : `folder:${node.path}`}
