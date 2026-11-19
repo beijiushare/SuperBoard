@@ -8,7 +8,6 @@ import {
 } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { BoardContextTarget } from '../../editor/BoardContextMenu'
-import { DirectorFrameController } from '../../editor/DirectorFrameController'
 import type {
   BoardListItem,
   BoardScope,
@@ -47,9 +46,8 @@ import { useBlockActions } from './useBlockActions'
 import { useCanvasInsertions } from './useCanvasInsertions'
 import { useCanvasMenu } from './useCanvasMenu'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
-import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
-import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
-import { MarkdownFocusDialog } from './MarkdownFocusDialog'
+import { CanvasDirectorLayer } from './CanvasDirectorLayer'
+import { CanvasMarkdownLayer } from './CanvasMarkdownLayer'
 import { EditorInsertDialogs } from './EditorInsertDialogs'
 import { EditorBoardDialogs } from './EditorBoardDialogs'
 import { CanvasBlockMenu } from './CanvasBlockMenu'
@@ -923,29 +921,17 @@ export function CanvasEditorApp() {
                     onEditMarkdown={openMarkdownEditor}
                     onEditingChange={setTextEditingId}
                   />
-                  {markdownEditingId ? (
-                    <MarkdownEditorOverlay
-                      canvas={canvas}
-                      viewerRef={viewerRef}
-                      nodeId={markdownEditingId}
-                      onInput={handleMarkdownInput}
-                      onCommit={handleMarkdownCommit}
-                      onRequestClose={closeMarkdownEditor}
-                    />
-                  ) : null}
-                  {markdownFocusId && markdownFocusNode ? (
-                    <MarkdownFocusDialog
-                      nodeId={markdownFocusNode.id}
-                      value={markdownFocusNode.text}
-                      onInput={(value) =>
-                        handleMarkdownInput(markdownFocusNode.id, value)
-                      }
-                      onCommit={(value) =>
-                        handleMarkdownCommit(markdownFocusNode.id, value)
-                      }
-                      onClose={closeMarkdownFocus}
-                    />
-                  ) : null}
+                  <CanvasMarkdownLayer
+                    canvas={canvas}
+                    viewerRef={viewerRef}
+                    editingId={markdownEditingId}
+                    focusId={markdownFocusId}
+                    focusNode={markdownFocusNode}
+                    onInput={handleMarkdownInput}
+                    onCommit={handleMarkdownCommit}
+                    onRequestClose={closeMarkdownEditor}
+                    onCloseFocus={closeMarkdownFocus}
+                  />
                   {stylePanelOpen ? (
                     <CanvasStylePanel
                       canvas={canvas}
@@ -956,52 +942,26 @@ export function CanvasEditorApp() {
                       onRememberColor={rememberBoardColor}
                     />
                   ) : null}
-                  {directorMode && !presentation ? (
-                    <CanvasDirectorOverlay
-                      canvas={canvas}
-                      viewerRef={viewerRef}
-                      selectedId={selectedFrameId}
-                      onSelect={setSelectedFrameId}
-                      onBeforeChange={recordHistory}
-                      onChangeFrames={updateDirectorFrames}
-                      onPlayFrame={(frame) => {
-                        const index = directorFrames.findIndex(
-                          (item) => item.id === frame.id,
-                        )
-                        startPresentation(index < 0 ? 0 : index)
-                      }}
-                      onOpenController={() => setFrameControllerOpen(true)}
-                    />
-                  ) : null}
-                  {directorMode && !presentation && frameControllerOpen ? (
-                    <DirectorFrameController
-                      frames={directorFrames.map((frame) => ({
-                        id: frame.id,
-                        order: frame.order,
-                        name: frame.name,
-                        x: frame.x,
-                        y: frame.y,
-                        w: frame.width,
-                        h: frame.height,
-                      }))}
-                      selectedId={selectedFrameId}
-                      onSelect={setSelectedFrameId}
-                      onChangeFrames={(next) =>
-                        updateDirectorFrames(
-                          next.map((frame) => ({
-                            id: frame.id,
-                            order: frame.order,
-                            name: frame.name,
-                            x: frame.x,
-                            y: frame.y,
-                            width: frame.w,
-                            height: frame.h,
-                          })),
-                        )
-                      }
-                      onClose={() => setFrameControllerOpen(false)}
-                    />
-                  ) : null}
+                  <CanvasDirectorLayer
+                    canvas={canvas}
+                    viewerRef={viewerRef}
+                    directorMode={directorMode}
+                    presentation={presentation}
+                    selectedFrameId={selectedFrameId}
+                    onSelectFrame={setSelectedFrameId}
+                    onBeforeChange={recordHistory}
+                    frames={directorFrames}
+                    onChangeFrames={updateDirectorFrames}
+                    onPlayFrame={(frame) => {
+                      const index = directorFrames.findIndex(
+                        (item) => item.id === frame.id,
+                      )
+                      startPresentation(index < 0 ? 0 : index)
+                    }}
+                    frameControllerOpen={frameControllerOpen}
+                    onOpenController={() => setFrameControllerOpen(true)}
+                    onCloseController={() => setFrameControllerOpen(false)}
+                  />
                   {menuPanelOpen ? (
                     <CanvasToolPalette
                       tool={tool}
