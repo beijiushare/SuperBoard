@@ -5,6 +5,7 @@ import type { SaveState } from '../../editor/saveState'
 import { BoardTreePanel } from '../../shared/board/BoardTreePanel'
 import type { BoardTreeContextTarget } from '../../shared/board/BoardTree'
 import type { BoardTreeNode } from '../../shared/board/types'
+import { useShellKeyboard } from './useShellKeyboard'
 
 interface EditorTreeConfig {
   nodes: BoardTreeNode[]
@@ -67,6 +68,14 @@ export function EditorWorkspace({
   tree,
   children,
 }: EditorWorkspaceProps) {
+  useShellKeyboard({
+    treeMode,
+    treeOpen,
+    onOpenTree: () => {
+      if (!treeOpen) onToggleTree()
+    },
+  })
+
   return (
     <>
       <EditorRail

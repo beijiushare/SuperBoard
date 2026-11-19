@@ -162,10 +162,6 @@ export function BoardTree({
 }: BoardTreeProps) {
   const treeRef = useRef<HTMLDivElement>(null)
 
-  function focusRow(row: HTMLButtonElement | undefined) {
-    row?.focus()
-  }
-
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const tree = treeRef.current
     if (!tree) return
@@ -174,54 +170,14 @@ export function BoardTree({
     )
     const index = rows.indexOf(document.activeElement as HTMLButtonElement)
     if (index < 0) return
-    const row = rows[index]
-    const depth = Number(row.dataset.treeDepth ?? '0')
     if (event.key === 'ArrowDown') {
       event.preventDefault()
-      focusRow(rows[Math.min(rows.length - 1, index + 1)])
+      rows[Math.min(rows.length - 1, index + 1)]?.focus()
       return
     }
     if (event.key === 'ArrowUp') {
       event.preventDefault()
-      focusRow(rows[Math.max(0, index - 1)])
-      return
-    }
-    if (event.key === 'Home') {
-      event.preventDefault()
-      focusRow(rows[0])
-      return
-    }
-    if (event.key === 'End') {
-      event.preventDefault()
-      focusRow(rows[rows.length - 1])
-      return
-    }
-    const folder = row.dataset.treeFolder
-    if (!folder) return
-    if (event.key === 'ArrowRight') {
-      event.preventDefault()
-      if (!expanded.has(folder)) {
-        onToggle(folder)
-        return
-      }
-      const next = rows[index + 1]
-      if (next && Number(next.dataset.treeDepth ?? '0') > depth) {
-        focusRow(next)
-      }
-      return
-    }
-    if (event.key === 'ArrowLeft') {
-      event.preventDefault()
-      if (expanded.has(folder)) {
-        onToggle(folder)
-        return
-      }
-      for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
-        if (Number(rows[cursor].dataset.treeDepth ?? '0') < depth) {
-          focusRow(rows[cursor])
-          return
-        }
-      }
+      rows[Math.max(0, index - 1)]?.focus()
     }
   }
 
