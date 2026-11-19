@@ -131,8 +131,14 @@ async function ensureDirectory(
 
 async function scopeDirectory(scope: BoardScope, create = false) {
   if (!root) throw new Error('尚未打开工作区')
-  const boards = await ensureDirectory(root, 'whiteboards', create)
-  return ensureDirectory(boards, scope, create)
+  // New layout: <workspace>/public and <workspace>/private.
+  // Legacy layout: <workspace>/whiteboards/<scope>.
+  try {
+    const legacy = await root.getDirectoryHandle('whiteboards')
+    return await legacy.getDirectoryHandle(scope, { create })
+  } catch {
+    return root.getDirectoryHandle(scope, { create })
+  }
 }
 
 async function folderDirectory(
@@ -536,8 +542,7 @@ export async function openBrowserWorkspace() {
   await scopeDirectory('public', true)
   await scopeDirectory('private', true)
   await storeHandle(handle)
-  return handle
-}
+  return handle}
 
 export async function restoreBrowserWorkspace() {
   const handle = await readStoredHandle()

@@ -1,9 +1,6 @@
 import react from '@vitejs/plugin-react'
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
-import { boardFsPlugin } from './web/src/dev/boardFs'
-import { canvasFsPlugin } from './web/src/dev/canvasFs/plugin'
-import { gitDeployPlugin } from './web/src/dev/gitDeploy'
 import { vditorAssetsPlugin } from './web/src/dev/vditorAssets/plugin'
 
 function siteBase(value: string) {
@@ -15,7 +12,7 @@ function siteBase(value: string) {
 
 export default defineConfig(({ command, isPreview, mode }) => ({
   base: command === 'build' || isPreview ? siteBase(process.env.BASE_PATH || '') : '/',
-  plugins: [react(), boardFsPlugin(), canvasFsPlugin(), gitDeployPlugin(), vditorAssetsPlugin()],
+  plugins: [react(), vditorAssetsPlugin()],
   resolve: {
     alias: [
       { find: '@repo/shared', replacement: resolve(process.cwd(), 'web/src/vendor/json-canvas-viewer/shared/index.ts') },
@@ -53,7 +50,7 @@ export default defineConfig(({ command, isPreview, mode }) => ({
       command === 'build'
         ? {
             input: (mode === 'editor'
-              ? { editor: resolve(process.cwd(), 'editor.html') }
+              ? { editor: resolve(process.cwd(), 'index.html') }
               : {
                   viewer: resolve(process.cwd(), 'web/src/viewer/main.tsx'),
                 }) as Record<string, string>,
