@@ -9,8 +9,6 @@ import {
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { BoardContextTarget } from '../../editor/BoardContextMenu'
 import { DirectorFrameController } from '../../editor/DirectorFrameController'
-import { EditorRail } from '../../editor/EditorRail'
-import { BoardTreePanel } from '../../shared/board/BoardTreePanel'
 import type {
   BoardListItem,
   BoardScope,
@@ -55,6 +53,7 @@ import { MarkdownFocusDialog } from './MarkdownFocusDialog'
 import { EditorInsertDialogs } from './EditorInsertDialogs'
 import { EditorBoardDialogs } from './EditorBoardDialogs'
 import { CanvasBlockMenu } from './CanvasBlockMenu'
+import { EditorWorkspace } from './EditorWorkspace'
 import { isBrowserFolderMode } from './browserFolderBackend'
 import { loadWorkspace, readBoard } from './workspaceApi'
 import {
@@ -796,14 +795,14 @@ export function CanvasEditorApp() {
           </button>
         </div>
       ) : null}
-      <EditorRail
-        mode="edit"
+      <EditorWorkspace
         treeMode={treeMode}
         treeOpen={treeOpen}
-        sidebarLabel={treeMode && treeOpen ? '收起目录' : '展开目录'}
         onToggleTree={toggleTree}
         scopeLabel={scope === 'public' ? '切换到私有白板' : '切换到公开白板'}
-        onSwitchScope={() => void switchScope(scope === 'public' ? 'private' : 'public')}
+        onSwitchScope={() =>
+          void switchScope(scope === 'public' ? 'private' : 'public')
+        }
         saveLabel={railSaveLabel}
         saveState={saveState}
         canSave={Boolean(canvas) && saveState !== 'saving'}
@@ -825,27 +824,28 @@ export function CanvasEditorApp() {
             : () => setDeployDialogOpen(true)
         }
         onOpenPreferences={() => setPreferencesOpen(true)}
-      />
-
-      <div className="sb-workspace">
-        {treeMode ? (
-          <BoardTreePanel
-            nodes={treeNodes}
-            title={`SuperBoard-${scope}`}
-            collapsed={!treeOpen}
-            selectedSlug={selectedSlug}
-            expanded={expanded}
-            onToggle={toggleFolder}
-            onSelect={(slug) => {
-              void openBoard(slug, scope)
-              if (window.matchMedia('(max-width: 860px)').matches) setTreeOpen(false)
-            }}
-            onContextMenu={(event, target) => openContextMenu(event, target)}
-            onRootContextMenu={openRootContextMenu}
-            emptyLabel="还没有白板，在空白处右键新建"
-          />
-        ) : null}
-
+        tree={
+          treeMode
+            ? {
+                nodes: treeNodes,
+                title: `SuperBoard-${scope}`,
+                collapsed: !treeOpen,
+                selectedSlug,
+                expanded,
+                emptyLabel: '还没有白板，在空白处右键新建',
+                onToggle: toggleFolder,
+                onSelect: (slug) => {
+                  void openBoard(slug, scope)
+                  if (window.matchMedia('(max-width: 860px)').matches) {
+                    setTreeOpen(false)
+                  }
+                },
+                onContextMenu: openContextMenu,
+                onRootContextMenu: openRootContextMenu,
+              }
+            : undefined
+        }
+      >
         <main className="sb-canvas">
           <div className="canvas-editor">
             <div
@@ -1014,7 +1014,7 @@ export function CanvasEditorApp() {
             </div>
           </div>
         </main>
-      </div>
+      </EditorWorkspace>
 
       {directorMode && !presentation ? (
         <DirectorHud onPlay={() => startPresentation(0)} onExit={toggleDirector} />
