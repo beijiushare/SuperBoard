@@ -23,6 +23,7 @@ import {
   textStyleFromPreferences,
 } from './preferences'
 import { detectMediaKind, type EditorTool } from './tools'
+import { getUiState } from './uiState'
 
 type DataManager = {
   data: {
@@ -94,7 +95,6 @@ interface CanvasEditorToolsProps {
   onEditingChange?: (id: string | null) => void
 }
 
-const STROKE_SIZE = 4
 const MIN_DRAG = 6
 
 function distanceToSegment(
@@ -417,7 +417,16 @@ export function CanvasEditorTools({
     ctx.clearRect(0, 0, width, height)
     if (!points || points.length < 2) return
     const scale = internals()?.dm.data.scale ?? 1
-    const outline = getStroke(points, { size: STROKE_SIZE * scale, simulatePressure: true })
+    const brush = getUiState().brush
+    const outline = getStroke(points, {
+      size: brush.size * scale,
+      thinning: brush.thinning,
+      smoothing: brush.smoothing,
+      streamline: brush.streamline,
+      simulatePressure: brush.simulatePressure,
+      start: { taper: brush.start },
+      end: { taper: brush.end },
+    })
     if (outline.length < 3) return
     ctx.beginPath()
     ctx.moveTo(outline[0][0], outline[0][1])
@@ -425,8 +434,10 @@ export function CanvasEditorTools({
       ctx.lineTo(outline[index][0], outline[index][1])
     }
     ctx.closePath()
-    ctx.fillStyle = '#1d1d1d'
+    ctx.globalAlpha = brush.opacity
+    ctx.fillStyle = brush.color
     ctx.fill()
+    ctx.globalAlpha = 1
   }
 
   function clearStrokePreview() {
@@ -740,7 +751,8 @@ export function CanvasEditorTools({
       maxX = Math.max(maxX, x)
       maxY = Math.max(maxY, y)
     }
-    const pad = STROKE_SIZE / 2 + 1
+    const brush = getUiState().brush
+    const pad = brush.size / 2 + 1
     minX -= pad
     minY -= pad
     maxX += pad
@@ -758,11 +770,22 @@ export function CanvasEditorTools({
       height: Math.max(1, maxY - minY),
       'x-superboard': {
         kind: 'drawing',
+        style: {
+          borderWidth: brush.size,
+          borderColor: brush.color,
+          opacity: brush.opacity,
+        },
         strokes: [
           {
             id: `${id}-1`,
-            color: '#1d1d1d',
-            size: STROKE_SIZE,
+            color: brush.color,
+            size: brush.size,
+            thinning: brush.thinning,
+            smoothing: brush.smoothing,
+            streamline: brush.streamline,
+            simulatePressure: brush.simulatePressure,
+            start: brush.start || undefined,
+            end: brush.end || undefined,
             points: local,
           },
         ],

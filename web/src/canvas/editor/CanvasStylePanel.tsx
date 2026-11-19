@@ -26,7 +26,7 @@ import {
   TransformFields,
 } from './StyleFieldGroups'
 import { StyleNumberControl } from './StyleNumberControl'
-import { updateUiState, useUiState } from './uiState'
+import { getUiState, updateUiState, useUiState } from './uiState'
 import { useFloatingPanel } from './useFloatingPanel'
 import { WindowDragHandle } from './WindowDragHandle'
 
@@ -147,6 +147,9 @@ export function CanvasStylePanel({
       (node) => patchDrawingNode(node, patch),
       patchHistoryKey('drawing', patch),
     )
+    updateUiState({
+      brush: { ...getUiState().brush, ...patch },
+    })
   }
 
   const texts = nodes.filter((node) => node.type === 'text' && (!kindOf(node) || kindOf(node) === 'text'))

@@ -1,10 +1,23 @@
 import { useSyncExternalStore } from 'react'
 
+export interface BrushDefaults {
+  size: number
+  color: string
+  opacity: number
+  thinning: number
+  smoothing: number
+  streamline: number
+  simulatePressure: boolean
+  start: number
+  end: number
+}
+
 export interface CanvasUiState {
   stylePanelOpen: boolean
   toolPaletteOpen: boolean
   guides: boolean
   recentColors: string[]
+  brush: BrushDefaults
 }
 
 const STORAGE_KEY = 'superboard.ui.v1'
@@ -14,10 +27,43 @@ export const DEFAULT_UI_STATE: CanvasUiState = {
   toolPaletteOpen: true,
   guides: true,
   recentColors: [],
+  brush: {
+    size: 4,
+    color: '#1d1d1d',
+    opacity: 1,
+    thinning: 0.5,
+    smoothing: 0.5,
+    streamline: 0.5,
+    simulatePressure: true,
+    start: 0,
+    end: 0,
+  },
 }
 
 let cached = loadUiState()
 const listeners = new Set<() => void>()
+
+function mergeBrush(value: unknown): BrushDefaults {
+  const base = DEFAULT_UI_STATE.brush
+  if (!value || typeof value !== 'object') return base
+  const record = value as Partial<BrushDefaults>
+  const number = (input: unknown, fallback: number) =>
+    typeof input === 'number' && Number.isFinite(input) ? input : fallback
+  return {
+    size: number(record.size, base.size),
+    color: typeof record.color === 'string' && record.color ? record.color : base.color,
+    opacity: number(record.opacity, base.opacity),
+    thinning: number(record.thinning, base.thinning),
+    smoothing: number(record.smoothing, base.smoothing),
+    streamline: number(record.streamline, base.streamline),
+    simulatePressure:
+      typeof record.simulatePressure === 'boolean'
+        ? record.simulatePressure
+        : base.simulatePressure,
+    start: number(record.start, base.start),
+    end: number(record.end, base.end),
+  }
+}
 
 function mergeUiState(value: unknown): CanvasUiState {
   if (!value || typeof value !== 'object') return DEFAULT_UI_STATE
@@ -29,6 +75,7 @@ function mergeUiState(value: unknown): CanvasUiState {
     recentColors: Array.isArray(record.recentColors)
       ? record.recentColors.filter((item): item is string => typeof item === 'string').slice(0, 5)
       : [],
+    brush: mergeBrush(record.brush),
   }
 }
 
