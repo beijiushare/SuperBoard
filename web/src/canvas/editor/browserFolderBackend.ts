@@ -26,6 +26,20 @@ let installed = false
 // an external editor) changed the file after we read it.
 const versions = new Map<string, string>()
 
+let boardsCache: { at: number; rows: Array<Record<string, unknown>> } | null = null
+const BOARDS_CACHE_MS = 1500
+
+function invalidateBoardCache() {
+  boardsCache = null
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('focus', invalidateBoardCache)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) invalidateBoardCache()
+  })
+}
+
 function versionKey(scope: BoardScope, slug: string) {
   return `${scope}/${slug}`
 }
@@ -181,7 +195,15 @@ async function scanBoards(
 }
 
 async function listBoards() {
-  return [...(await scanBoards(await scopeDirectory('public'), 'public')), ...(await scanBoards(await scopeDirectory('private'), 'private'))]
+  if (boardsCache && Date.now() - boardsCache.at < BOARDS_CACHE_MS) {
+    return boardsCache.rows
+  }
+  const rows = [
+    ...(await scanBoards(await scopeDirectory('public'), 'public')),
+    ...(await scanBoards(await scopeDirectory('private'), 'private')),
+  ]
+  boardsCache = { at: Date.now(), rows }
+  return rows
 }
 
 async function findBoard(scope: BoardScope, slug: string) {
@@ -249,6 +271,7 @@ async function writeFile(
     throw error
   }
   versions.set(versionKey(scope, slug), text)
+  invalidateBoardCache()
   return text
 }
 
@@ -370,6 +393,7 @@ async function handleCanvases(url: URL, init?: RequestInit) {
     const dir = await folderDirectory(scope, location.path)
     await dir.removeEntry(`${slug}.canvas`)
     versions.delete(key)
+    invalidateBoardCache()
     return response({ ok: true })
   }
   return response({ error: 'method not allowed' }, 405)
@@ -489,6 +513,7 @@ async function handleFolders(url: URL, init?: RequestInit) {
       }
       throw error
     }
+    invalidateBoardCache()
     return response({ ok: true, path: parent ? `${parent}/${name}` : name })
   }
   if (url.pathname === '/__folders' && method === 'DELETE') {
@@ -497,6 +522,7 @@ async function handleFolders(url: URL, init?: RequestInit) {
     if (!path) return response({ error: '不能删除根目录' }, 400)
     const parent = await folderDirectory(scope, path.split('/').slice(0, -1).join('/'))
     await parent.removeEntry(path.split('/').pop()!, { recursive: true })
+    invalidateBoardCache()
     return response({ ok: true })
   }
   return response({ error: 'method not allowed' }, 405)
