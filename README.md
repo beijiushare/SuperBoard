@@ -1,28 +1,26 @@
 # SuperBoard
 
-需要注意：这是一个纯粹的个人使用的项目，基本上就是几个项目拼凑起来加一些个性化，可能不维护，可能破坏式更新，请勿将其用于生产环境！
+文件驱动的个人白板系统。白板保存为 Git 友好的 `.canvas`（JSON Canvas），编辑器在浏览器或桌面端直接打开你选择的本地文件夹。
 
-文件驱动的个人白板系统：本地用浏览器编辑，画布保存为 Git 友好的 `.canvas`（JSON Canvas），推送到 GitHub 后自动构建成只读静态站点。
-
-> 编辑器、查看器和数据格式统一使用 JSON Canvas（`.canvas`）+ 自建轻量编辑器 + fork 查看器。
-> 目标、格式和阶段见 [`docs/PLAN.md`](docs/PLAN.md)，目标架构见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)。
+> 个人项目，可能破坏式更新，请勿用于生产环境。
 
 - 一个白板一个文件，无数据库、无后端存储
-- 本地编辑器直接读写 `whiteboards/public/` 和 `whiteboards/private/`
-- 线上按白板生成独立 HTML，强制只读
-- 线上与编辑器共用外壳：左 rail、目录抽屉、导演幕布和播放逻辑保持一致，只隐藏编辑相关操作
+- 默认入口是编辑器，启动后选择工作区文件夹
+- 工作区使用 `public/` 与 `private/` 两个子目录；旧 `whiteboards/public|private` 仍兼容
+- `info/public` 只作为公开演示数据，不参与编辑器启动
 - 支持 Markdown、AsciiMath 公式、Pele 图表和手绘
+- 可导出单 HTML，也提供站点导出脚本
 
 ## 快速开始
 
-要求 Node.js 24。
+要求 Node.js 24+。
 
 ```bash
 npm install
 npm run dev
 ```
 
-打开终端输出的本地地址（默认 `http://127.0.0.1:5173/`）。
+打开终端输出的地址，选择本地工作区文件夹。刷新后会自动恢复上次目录权限。
 
 ```bash
 npm run test:model
@@ -33,148 +31,74 @@ npm run test:editor
 
 | 命令 | 说明 |
 | --- | --- |
-| `npm run dev` | 启动本地编辑器，读写 `whiteboards/public/`、`whiteboards/private/` |
+| `npm run dev` | 启动编辑器，选择本地工作区 |
 | `npm run typecheck` | TypeScript 类型检查 |
-| `npm run test:editor` | 编辑器层级、连线、导出核心测试 |
-| `npm run build:viewer` | 只打包只读端前端资源到 `dist/` |
-| `npm run build:site` | 打包并生成完整静态站（每个白板一个 HTML） |
-| `npm run preview:site` | 本地预览构建产物 |
+| `npm run test:model` | 画布模型测试 |
+| `npm run test:editor` | 编辑器核心逻辑测试 |
+| `npm run build:editor` | 构建编辑器到 `dist/`，入口为 `index.html` |
+| `npm run build:info` | 用 `info/public` 构建演示站到 `dist-info/` |
+| `npm run export:site -- --data <目录> --out <目录>` | 从任意数据目录导出多文件站点 |
+| `npm run preview:site` | 本地预览 `dist/` |
 | `npm run mathjax` | 复制 MathJax 静态资源到 `public/mathjax/` |
 
-### build:viewer 和 build:site 的区别
+### 站点导出
 
-- `build:viewer`：执行 `npm run mathjax && vite build`，只产出 `dist/assets/*` 和 Vite manifest，不生成白板页面。
-- `build:site`：先执行 `build:viewer`，再运行 `web/build.js`，生成：
-  - `dist/index.html`（自动跳转目录视图）
-  - `dist/tree.html`
-  - `dist/boards/<slug>.html`
-  - `dist/boards/<slug>.json`
-  - `404.html`、`.nojekyll`、可选的 `CNAME`
+```bash
+npm run export:site -- --data ./my-boards/public --out ./dist-site --base /
+```
 
-每个 `<slug>.html` 已经内嵌该白板的 JSON，页面运行不依赖旁边的 `<slug>.json`。`.json` 是额外输出的原始数据副本，方便直接取用、调试或给外部脚本读取。
+产物包括：
+
+- `index.html`
+- `tree.html`
+- `boards/<slug>.html`
+- `boards/<slug>.json`
+- `404.html`、`.nojekyll`
 
 ### 预览必须通过 HTTP
 
-不要直接双击 `dist/` 里的 HTML 用 `file://` 打开。产物使用 ES Module，且资源路径是 `/SuperBoard/assets/...`，`file://` 下会触发 CORS 和 404。
-
-本地预览：
+不要直接双击构建产物用 `file://` 打开。它使用 ES Module 和绝对资源路径。
 
 ```bash
-npm run build:site
-npm run preview:site
+npm run build:info
+uv run python -m http.server 4173 --directory dist-info
 ```
 
-然后访问 `http://localhost:4173/SuperBoard/`，单页地址为 `http://localhost:4173/SuperBoard/boards/<slug>.html`。
+然后打开 `http://localhost:4173/`。
 
-## 目录结构
+编辑器构建：
+
+```bash
+npm run build:editor
+uv run python -m http.server 4174 --directory dist
+```
+
+打开 `http://localhost:4174/`，使用 Edge 或 Chrome 桌面版选择文件夹。
+
+## 数据布局
+
+新布局：
 
 ```text
-whiteboards/public/   公开白板，提交 Git，参与构建
-whiteboards/private/  私有白板，本地专用，已被 .gitignore
-web/src/shared/       编辑器与只读端共用代码，含 rail、目录、导演幕布与播放逻辑
-web/src/canvas/model/ JSON Canvas 类型、校验与序列化
-web/src/canvas/viewer/ 查看器适配层与自定义渲染层
-web/src/canvas/editor/ 自建编辑器（选择、工具、历史、样式、导出）
-web/src/editor/       编辑 shell 组件（rail、目录、对话框）
-web/src/viewer/       只读页面入口
-web/src/dev/          Vite 读写插件（.canvas 与文件夹）
-web/src/styles/       全局样式模块
-web/build.js          生成静态多页面站点
-scripts/              MathJax 资源复制、prepare:canvas、deploy.cmd
-参考/                 设计文档与参考资料（默认不入库）
+<工作区>/
+  public/
+    board.canvas
+    folder/board.canvas
+  private/
+    ...
 ```
 
-白板文件示例：
+旧布局仍可读取：
 
 ```text
-whiteboards/
-├─ public/
-│  ├─ 项目规划.canvas
-│  └─ 项目/路线图.canvas
-└─ private/
-   └─ 私密草稿.canvas
+<工作区>/
+  whiteboards/
+    public/
+    private/
 ```
 
-`private/` 不会进入 Git，也不会进入 `dist/`；构建脚本只读取 `whiteboards/public/`。
+## 导出
 
-## 编辑器
-
-- 最左侧竖向操作栏：目录开关、公开/私有切换、保存、样式面板开关、顶部操作栏开关、提交推送
-- 目录标题同步显示 `SuperBoard-public` / `SuperBoard-private`
-- 顶部操作栏默认隐藏，通过左侧 `command` 按钮显示
-- 操作栏最后是 `uploadCloud` 提交按钮：确认后在 Windows 打开新终端窗口，运行 `scripts/deploy.cmd`（`git add` / `commit` / `push`），随后由 GitHub Actions 自动部署
-- 目录树支持文件夹、右键新建/重命名/删除文件夹、删除白板
-- 画布右键可添加 Markdown 块和图表块；空白处、iframe/视频媒体不显示“复制为 / 导出为”
-- 媒体块选中后可操作 iframe/视频控件；未选中时用于选择、双击编辑
-- 底部“媒体”工具改为 URL/iframe 输入：图片、视频直链、网页链接或直接粘贴 `<iframe>` 标签
-- 媒体块默认 640×360、锁定比例、圆角、无边框无背景；双击可修改链接
-- 媒体块右键支持裁剪：矩形、圆角矩形、圆形；样式面板可调起点/圆心、尺寸、半径和圆角
-- 左键双击块进入编辑，右键不会触发
-- 自动保存 debounce 1200ms，支持 `Ctrl/⌘ + S`
-- Markdown 默认按内容高度展开；锁定长宽比时只约束块尺寸，Markdown / 图表内容按新宽度重新排版，不再整体缩放
-- 样式面板默认隐藏，通过 `aperture` 按钮打开
-- 图表画廊为三列流式布局，预览区不拦截滚轮
-
-`/__deploy` 只在 Vite dev server 中注册，且只接受本机请求；线上静态站没有这个接口。
-
-## 技术栈
-
-| 用途 | 项目 |
-| --- | --- |
-| 画布底座 | 自建编辑器 + JSON Canvas（`.canvas`） |
-| 图表渲染 | [Pele](https://pele.run/) |
-| Markdown 编辑器 | [Vditor](https://github.com/Vanessa219/vditor)（IR 模式） |
-| Markdown 查看器 | Vditor 静态渲染 + [react-markdown](https://github.com/remarkjs/react-markdown) 回退 |
-| Markdown 主题 | Typora Purple / Orange Heart / Mint 配色参考 |
-| 公式语法 | [AsciiMath](https://asciimath.org/) |
-| 公式渲染 | [MathJax](https://www.mathjax.org/) |
-| SVG 清洗 | [DOMPurify](https://github.com/cure53/DOMPurify) |
-| 前端框架 | React + Vite |
-| 图标动画 | react-useanimations |
-| 拖拽排序 | [dnd-kit](https://github.com/clauderic/dnd-kit) |
-
-Markdown 使用标准 Markdown/GFM 语法；公式使用行内 `$...$`、块级 `$$...$$`，内容按 AsciiMath 解释，由 MathJax 输出 SVG。
-
-## 构建与部署
-
-推送到 `main` 或 `master` 后，GitHub Actions 会执行类型检查、构建并部署到 GitHub Pages。工作流见 `.github/workflows/deploy.yml`。
-
-相关环境变量：
-
-| 变量 | 说明 |
-| --- | --- |
-| `BASE_PATH` | 站点路径，默认 `/SuperBoard/` |
-| `SUPERBOARD_CNAME` | 生成 `CNAME`，可选 |
-
-
-## 文档
-
-迁移计划与目标架构：
-
-- [`docs/PLAN.md`](docs/PLAN.md)
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-
-旧实现规范与细节见：
-
-- `参考/规范.md`
-- `参考/doc/`
-- `参考/plan/`
-
-`参考/` 目录包含本地参考资料，默认被 `.gitignore` 忽略。
-
-## 致谢
-
-SuperBoard 建立在以下优秀开源项目之上：
-
-- [Pele](https://pele.run/)：Mermaid 兼容的图表渲染
-- [Vditor](https://github.com/Vanessa219/vditor)：Markdown IR 模式编辑器
-- [react-markdown](https://github.com/remarkjs/react-markdown) 及 remark/rehype 生态：只读 Markdown 解析、GFM、清洗与代码高亮
-- [AsciiMath](https://asciimath.org/)：公式语法
-- [MathJax](https://www.mathjax.org/)：AsciiMath 到 SVG 的渲染
-- [DOMPurify](https://github.com/cure53/DOMPurify)：SVG 安全清洗
-- [dnd-kit](https://github.com/clauderic/dnd-kit)：控制帧拖拽排序
-- [Typora Purple Theme](https://github.com/hliu202/typora-purple-theme)：紫色 Markdown 主题，使用 `purple.css`
-- [Typora Orange Heart](https://gitee.com/golikang/typora-theme-orange-heart)：橙色 Markdown 主题
-- [Typora Mint Theme](https://github.com/Y1chenYao/typora-mint-theme)：薄荷 Markdown 主题
-
-感谢这些项目的作者与维护者。
+- 编辑器 rail 的导出按钮可导出当前白板为单 HTML 或 SVG
+- 多文件站点使用 `npm run export:site`
+- 桌面端一键导出与部署命令仍在计划中
