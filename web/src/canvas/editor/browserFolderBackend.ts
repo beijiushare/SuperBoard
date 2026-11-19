@@ -1,5 +1,6 @@
 import { parseCanvas, serializeCanvas, type CanvasDocument } from '../model'
 import type { BoardScope } from '../../shared/board/types'
+import { configureWorkspaceFetcher } from './workspaceApi'
 
 type DirHandle = FileSystemDirectoryHandle
 
@@ -489,15 +490,27 @@ export function isBrowserFolderMode() {
   return installed
 }
 
+export async function browserRequest(
+  input: RequestInfo | URL,
+  init?: RequestInit,
+) {
+  const rawUrl =
+    typeof input === 'string'
+      ? input
+      : input instanceof Request
+        ? input.url
+        : input.toString()
+  const url = new URL(rawUrl, window.location.href)
+  if (url.pathname.startsWith('/__canvases')) return handleCanvases(url, init)
+  if (url.pathname.startsWith('/__folders')) return handleFolders(url, init)
+  return new Response(JSON.stringify({ error: 'not found' }), {
+    status: 404,
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+  })
+}
+
 export function installBrowserFolderBackend() {
   if (installed) return
   installed = true
-  const originalFetch = window.fetch.bind(window)
-  window.fetch = async (input, init) => {
-    const rawUrl = typeof input === 'string' ? input : input instanceof Request ? input.url : input.toString()
-    const url = new URL(rawUrl, window.location.href)
-    if (url.pathname.startsWith('/__canvases')) return handleCanvases(url, init)
-    if (url.pathname.startsWith('/__folders')) return handleFolders(url, init)
-    return originalFetch(input, init)
-  }
+  configureWorkspaceFetcher(browserRequest)
 }

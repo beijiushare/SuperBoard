@@ -7,8 +7,22 @@ export interface WorkspaceFolders {
   scope: BoardScope
 }
 
+let workspaceFetcher: ((input: RequestInfo | URL, init?: RequestInit) => Promise<Response>) | null =
+  null
+
+export function configureWorkspaceFetcher(
+  fetcher: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
+) {
+  workspaceFetcher = fetcher
+}
+
+function request(input: RequestInfo | URL, init?: RequestInit) {
+  if (workspaceFetcher) return workspaceFetcher(input, init)
+  return window.fetch(input, init)
+}
+
 async function json<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init)
+  const response = await request(url, init)
   if (!response.ok) {
     const data = (await response.json().catch(() => null)) as
       | { error?: string }
@@ -33,8 +47,8 @@ export class WorkspaceError extends Error {
 
 export async function loadWorkspace() {
   const [boardsResponse, foldersResponse] = await Promise.all([
-    fetch('/__canvases'),
-    fetch('/__folders'),
+    request('/__canvases'),
+    request('/__folders'),
   ])
   if (!boardsResponse.ok) {
     throw new Error(`加载失败（${boardsResponse.status}）`)
