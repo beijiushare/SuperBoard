@@ -184,21 +184,27 @@ async function findBoard(scope: BoardScope, slug: string) {
   return boards.find((board) => board.slug === slug) ?? null
 }
 
-async function boardFile(scope: BoardScope, slug: string) {
+async function boardLocation(scope: BoardScope, slug: string) {
   const current = await scopeDirectory(scope)
-  const find = async (dir: DirHandle): Promise<FileSystemFileHandle | null> => {
+  const find = async (
+    dir: DirHandle,
+    prefix: string,
+  ): Promise<{ file: FileSystemFileHandle; path: string } | null> => {
     for await (const entry of directoryValues(dir)) {
       if (entry.name.startsWith('.')) continue
       if (isDirectoryHandle(entry)) {
-        const found = await find(entry)
+        const found = await find(
+          entry,
+          prefix ? `${prefix}/${entry.name}` : entry.name,
+        )
         if (found) return found
       } else if (isFileHandle(entry) && entry.name === `${slug}.canvas`) {
-        return entry
+        return { file: entry, path: prefix }
       }
     }
     return null
   }
-  return find(current)
+  return find(current, '')
 }
 
 async function writeTextFile(
@@ -287,8 +293,9 @@ async function handleCanvases(url: URL, init?: RequestInit) {
   if (!match) return response({ error: 'not found' }, 404)
   const slug = match[1]
   const scope = normalizeScope(url.searchParams.get('scope'))
-  const file = await boardFile(scope, slug)
-  if (!file) return response({ error: '白板不存在' }, 404)
+  const location = await boardLocation(scope, slug)
+  if (!location) return response({ error: '白板不存在' }, 404)
+  const file = location.file
   const text = await (await file.getFile()).text()
   const canvas = parseCanvas(text)
   const key = versionKey(scope, slug)
@@ -310,9 +317,8 @@ async function handleCanvases(url: URL, init?: RequestInit) {
       )
     }
     meta.updatedAt = new Date().toISOString()
-    const board = await findBoard(scope, slug)
-    await writeFile(scope, String(board?.path ?? ''), slug, next)
-    return response({ ok: true, meta, path: board?.path ?? '', scope })
+    await writeFile(scope, location.path, slug, next)
+    return response({ ok: true, meta, path: location.path, scope })
   }
   if (method === 'PATCH') {
     const body = JSON.parse(String(init?.body ?? '{}')) as {
@@ -325,10 +331,10 @@ async function handleCanvases(url: URL, init?: RequestInit) {
     if (!meta) return response({ error: '缺少 meta' }, 400)
     const nextSlug = body.slug === undefined ? slug : String(body.slug)
     if (!/^[a-z0-9][a-z0-9-]*$/.test(nextSlug)) return response({ error: 'slug 非法' }, 400)
-    const board = await findBoard(scope, slug)
-    const nextFolder = body.folder === undefined ? String(board?.path ?? '') : normalizeFolder(body.folder)
+    const nextFolder =
+      body.folder === undefined ? location.path : normalizeFolder(body.folder)
     if (
-      (nextSlug !== slug || nextFolder !== String(board?.path ?? '')) &&
+      (nextSlug !== slug || nextFolder !== location.path) &&
       (await findBoard(scope, nextSlug))
     ) {
       return response({ error: `slug 已存在: ${nextSlug}` }, 409)
@@ -349,15 +355,14 @@ async function handleCanvases(url: URL, init?: RequestInit) {
     }
     await writeFile(scope, nextFolder, nextSlug, nextCanvas)
     if (nextSlug !== slug) versions.delete(key)
-    if (nextFolder !== String(board?.path ?? '') || nextSlug !== slug) {
-      const oldDir = await folderDirectory(scope, String(board?.path ?? ''))
+    if (nextFolder !== location.path || nextSlug !== slug) {
+      const oldDir = await folderDirectory(scope, location.path)
       await oldDir.removeEntry(`${slug}.canvas`).catch(() => {})
     }
     return response({ ok: true, canvas: nextCanvas, meta: nextCanvas['x-superboard']?.meta, path: nextFolder, scope })
   }
   if (method === 'DELETE') {
-    const board = await findBoard(scope, slug)
-    const dir = await folderDirectory(scope, String(board?.path ?? ''))
+    const dir = await folderDirectory(scope, location.path)
     await dir.removeEntry(`${slug}.canvas`)
     versions.delete(key)
     return response({ ok: true })
