@@ -21,6 +21,17 @@ import {
   nodeWorldRect,
   viewportWorldRect,
 } from '../web/src/canvas/viewer/culling'
+import { createDrawingNode } from '../web/src/canvas/editor/freehand'
+import {
+  arrowSides,
+  closestSide,
+  screenRect as toolScreenRect,
+  strokeHit,
+} from '../web/src/canvas/editor/toolGeometry'
+import {
+  intersects,
+  screenStyle,
+} from '../web/src/canvas/editor/overlayGeometry'
 
 const nodes: CanvasNode[] = [
   {
@@ -220,5 +231,101 @@ assert.ok(styledSvg.includes('fill="#112233"'))
 assert.ok(styledSvg.includes('stroke="#445566"'))
 assert.ok(styledSvg.includes('stroke-width="4"'))
 assert.ok(styledSvg.includes('stroke-dasharray="7 4"'))
+
+const brush = {
+  size: 4,
+  color: '#123456',
+  opacity: 0.5,
+  thinning: 0.4,
+  smoothing: 0.6,
+  streamline: 0.7,
+  simulatePressure: false,
+  start: 2,
+  end: 3,
+}
+const drawing = createDrawingNode({
+  id: 'draw-1',
+  points: [
+    [0, 0, 0.5],
+    [10, 10, 0.8],
+  ],
+  offsetX: 0,
+  offsetY: 0,
+  scale: 1,
+  brush,
+})
+assert.equal(drawing.x, -3)
+assert.equal(drawing.y, -3)
+assert.equal(drawing.width, 16)
+assert.equal(drawing.height, 16)
+assert.equal(drawing['x-superboard']?.kind, 'drawing')
+assert.equal(drawing['x-superboard']?.style?.borderWidth, 4)
+assert.equal(drawing['x-superboard']?.style?.borderColor, '#123456')
+assert.equal(drawing['x-superboard']?.style?.opacity, 0.5)
+assert.deepEqual(drawing['x-superboard']?.strokes?.[0]?.points?.[0], [3, 3, 0.5])
+const stroke = {
+  id: 's1',
+  color: '#000',
+  size: 4,
+  points: [
+    [0, 0],
+    [10, 0],
+  ] as unknown as Array<[number, number]>,
+}
+const hitNode: CanvasNode = {
+  id: 'hit',
+  type: 'group',
+  x: 0,
+  y: 0,
+  width: 10,
+  height: 10,
+  'x-superboard': { kind: 'drawing', strokes: [stroke] },
+}
+assert.equal(strokeHit(stroke, hitNode, 5, 3, 2), true)
+assert.equal(strokeHit(stroke, hitNode, 5, 10, 2), false)
+assert.equal(closestSide(hitNode, 9, 5), 'right')
+assert.deepEqual(
+  arrowSides(
+    { id: 'l', type: 'group', x: 0, y: 0, width: 10, height: 10 },
+    { id: 'r', type: 'group', x: 100, y: 20, width: 10, height: 10 },
+  ),
+  { fromSide: 'right', toSide: 'left' },
+)
+assert.deepEqual(toolScreenRect({ offsetX: 10, offsetY: 20, scale: 2 }, 5, 5, 15, 15), {
+  left: 20,
+  top: 30,
+  width: 20,
+  height: 20,
+})
+assert.equal(
+  intersects(
+    { left: 0, top: 0, width: 10, height: 10 },
+    { left: 5, top: 5, width: 10, height: 10 },
+  ),
+  true,
+)
+assert.equal(
+  intersects(
+    { left: 0, top: 0, width: 10, height: 10 },
+    { left: 20, top: 20, width: 10, height: 10 },
+  ),
+  false,
+)
+const rotatedStyle = screenStyle(
+  {
+    id: 'r',
+    type: 'group',
+    x: 10,
+    y: 10,
+    width: 20,
+    height: 20,
+    'x-superboard': { kind: 'shape', rotation: 45 },
+  },
+  0,
+  0,
+  1,
+)
+assert.equal(rotatedStyle.transform, 'rotate(45deg)')
+assert.equal(rotatedStyle.transformOrigin, 'center center')
 
 console.log('canvas editor tests passed')
