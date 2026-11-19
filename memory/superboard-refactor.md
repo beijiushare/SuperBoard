@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`b35d16a refactor: extract freehand stroke helpers`
+- 最近提交：`cc0e725 refactor: extract overlay geometry helpers`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -73,7 +73,11 @@
 - `useSelectionActions.ts`：复制/粘贴/删除/分组/层级/锁定
 - `useBoardWorkspace.ts`：白板打开/切换/加载
 - `useBoardFiles.ts`：白板与文件夹增删改
+- `useBlockActions.ts`：块编辑、锁定比例、重置尺寸
+- `useCanvasInsertions.ts`：文本/Markdown/Pele/日程/媒体插入
 - `freehand.ts`：手绘笔触预览与节点生成
+- `toolGeometry.ts`：笔触命中、箭头方向、屏幕矩形
+- `overlayGeometry.ts`：选择框、旋转、命中判断的几何工具
 - `drawingStyle.ts`：绘图节点样式修改
 - `DrawingStyleSection.tsx`：绘图笔触面板
 - `styleMutations.ts`：通用样式/几何/文本样式 mutation
@@ -83,9 +87,9 @@
 
 ### 高优先级
 
-- `CanvasEditorApp.tsx` 约 1710 行，继续拆插入/菜单与内联 JSX
-- `CanvasEditorOverlay.tsx` 约 1340 行，拆视口、拖拽、缩放、选择层
-- `CanvasEditorTools.tsx` 约 1070 行，按文本/形状/橡皮/箭头拆
+- `CanvasEditorApp.tsx` 约 1460 行，继续拆右键菜单与内联 JSX
+- `CanvasEditorOverlay.tsx` 约 1310 行，拆拖拽、框选、选择层
+- `CanvasEditorTools.tsx` 约 1060 行，按文本/形状/橡皮/箭头拆
 
 ### 中优先级
 
