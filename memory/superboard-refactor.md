@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`4b33fd6 refactor: extract edge drag hook and update tests`
+- 最近提交：`3ee23f8 test: cover style mutations`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -37,7 +37,8 @@
 - 保存冲突检测：文件基线版本变化时返回 409
 - 多标签修改通过 BroadcastChannel 通知，冲突时停止自动保存
 - 保存失败自动重试两次，409 不重试
-- 冲突时点击保存按钮或 Ctrl+S，可确认覆盖
+- 冲突时保存按钮显示「保存冲突，点击覆盖」，顶部横幅可覆盖或重新加载磁盘版本
+- 保存失败时顶部横幅提供「重试保存」
 - 工作区请求通过 `configureWorkspaceFetcher` 注入，不再覆盖 `window.fetch`
 - 入口：`web/src/canvas/editor/browserMain.tsx`
 - 后端：`web/src/canvas/editor/browserFolderBackend.ts`
@@ -82,8 +83,9 @@
 - `useMarqueeSelection.ts`：框选
 - `useOverlayViewport.ts` + `overlayTypes.ts`：覆盖层视口同步
 - `useEdgeDrag.ts`：连线端点拖拽
+- `toolCreate.ts`：形状节点与箭头连线创建
 - 浏览器后端单次扫描定位白板文件，减少全目录遍历
-- `test:editor` 覆盖手绘节点、笔触命中、箭头方向、屏幕矩形、框选相交
+- `test:editor` 覆盖手绘节点、笔触命中、箭头方向、屏幕矩形、框选相交、形状/连线创建、样式 mutation
 - `docs/MANUAL_TEST.md` 增加浏览器编辑器、多标签冲突、画笔默认值测试项
 - `drawingStyle.ts`：绘图节点样式修改
 - `DrawingStyleSection.tsx`：绘图笔触面板
@@ -96,7 +98,7 @@
 
 - `CanvasEditorApp.tsx` 约 1340 行，继续拆内联 JSX 与目录面板
 - `CanvasEditorOverlay.tsx` 约 1070 行，拆拖拽、缩放、选择渲染
-- `CanvasEditorTools.tsx` 约 1060 行，按文本/形状/橡皮/箭头拆
+- `CanvasEditorTools.tsx` 约 1020 行，按文本/橡皮拆
 
 ### 中优先级
 
