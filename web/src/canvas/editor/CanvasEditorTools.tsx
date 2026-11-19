@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { getStroke } from 'perfect-freehand'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import {
   TEXT_LINE_HEIGHT,
@@ -24,6 +23,11 @@ import {
 } from './preferences'
 import { detectMediaKind, type EditorTool } from './tools'
 import { getUiState } from './uiState'
+import {
+  createDrawingNode,
+  drawStrokePreview,
+  type StrokePoint,
+} from './freehand'
 
 type DataManager = {
   data: {
@@ -189,7 +193,7 @@ export function CanvasEditorTools({
   const surfaceRef = useRef<HTMLDivElement>(null)
   const previewCanvasRef = useRef<HTMLCanvasElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const strokeRef = useRef<number[][] | null>(null)
+  const strokeRef = useRef<StrokePoint[] | null>(null)
   const arrowRef = useRef<ArrowDraft | null>(null)
   const editingRef = useRef<Editing | null>(null)
   const suppressTextCreateRef = useRef(false)
@@ -407,37 +411,16 @@ export function CanvasEditorTools({
   function redrawStrokePreview() {
     const canvasElement = previewCanvasRef.current
     const points = strokeRef.current
-    if (!canvasElement) return
+    if (!canvasElement || !points) return
     const ctx = canvasElement.getContext('2d')
     if (!ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const width = canvasElement.width / dpr
-    const height = canvasElement.height / dpr
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    ctx.clearRect(0, 0, width, height)
-    if (!points || points.length < 2) return
-    const scale = internals()?.dm.data.scale ?? 1
-    const brush = getUiState().brush
-    const outline = getStroke(points, {
-      size: brush.size * scale,
-      thinning: brush.thinning,
-      smoothing: brush.smoothing,
-      streamline: brush.streamline,
-      simulatePressure: brush.simulatePressure,
-      start: { taper: brush.start },
-      end: { taper: brush.end },
-    })
-    if (outline.length < 3) return
-    ctx.beginPath()
-    ctx.moveTo(outline[0][0], outline[0][1])
-    for (let index = 1; index < outline.length; index += 1) {
-      ctx.lineTo(outline[index][0], outline[index][1])
-    }
-    ctx.closePath()
-    ctx.globalAlpha = brush.opacity
-    ctx.fillStyle = brush.color
-    ctx.fill()
-    ctx.globalAlpha = 1
+    drawStrokePreview(
+      ctx,
+      window.devicePixelRatio || 1,
+      points,
+      getUiState().brush,
+      internals()?.dm.data.scale ?? 1,
+    )
   }
 
   function clearStrokePreview() {
@@ -736,61 +719,14 @@ export function CanvasEditorTools({
     const data = internals()
     if (!data) return
     const { offsetX, offsetY, scale } = data.dm.data
-    const world = points.map(([x, y, pressure]) => [
-      (x - offsetX) / scale,
-      (y - offsetY) / scale,
-      pressure ?? 0.5,
-    ])
-    let minX = Infinity
-    let minY = Infinity
-    let maxX = -Infinity
-    let maxY = -Infinity
-    for (const [x, y] of world) {
-      minX = Math.min(minX, x)
-      minY = Math.min(minY, y)
-      maxX = Math.max(maxX, x)
-      maxY = Math.max(maxY, y)
-    }
-    const brush = getUiState().brush
-    const pad = brush.size / 2 + 1
-    minX -= pad
-    minY -= pad
-    maxX += pad
-    maxY += pad
-    const id = nextFreeId(existingIds(), 'draw')
-    const local = world.map(
-      ([x, y, pressure]) => [x - minX, y - minY, pressure] as [number, number, number],
-    )
-    const node: CanvasNode = {
-      id,
-      type: 'group',
-      x: minX,
-      y: minY,
-      width: Math.max(1, maxX - minX),
-      height: Math.max(1, maxY - minY),
-      'x-superboard': {
-        kind: 'drawing',
-        style: {
-          borderWidth: brush.size,
-          borderColor: brush.color,
-          opacity: brush.opacity,
-        },
-        strokes: [
-          {
-            id: `${id}-1`,
-            color: brush.color,
-            size: brush.size,
-            thinning: brush.thinning,
-            smoothing: brush.smoothing,
-            streamline: brush.streamline,
-            simulatePressure: brush.simulatePressure,
-            start: brush.start || undefined,
-            end: brush.end || undefined,
-            points: local,
-          },
-        ],
-      },
-    }
+    const node = createDrawingNode({
+      id: nextFreeId(existingIds(), 'draw'),
+      points,
+      offsetX,
+      offsetY,
+      scale,
+      brush: getUiState().brush,
+    })
     onBeforeChange()
     onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [])
   }
@@ -922,7 +858,7 @@ export function CanvasEditorTools({
       const surface = surfaceRef.current
       if (!surface) return
       const bounds = surface.getBoundingClientRect()
-      const point = [
+      const point: StrokePoint = [
         event.clientX - bounds.left,
         event.clientY - bounds.top,
         event.pressure || 0.5,
