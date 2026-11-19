@@ -42,6 +42,10 @@ import {
   withCommonStyle,
   withStyle,
 } from '../web/src/canvas/editor/styleMutations'
+import {
+  applyErasure,
+  planErasure,
+} from '../web/src/canvas/editor/eraser'
 
 const nodes: CanvasNode[] = [
   {
@@ -415,5 +419,93 @@ const kindFallback = withStyle(
   { borderColor: '#000' },
 )
 assert.equal(kindFallback['x-superboard']?.kind, 'media')
+
+const eraseStroke = (id: string, y: number) => ({
+  id,
+  color: '#000',
+  size: 4,
+  points: [
+    [0, y],
+    [10, y],
+  ] as unknown as Array<[number, number]>,
+})
+const eraseNode: CanvasNode = {
+  id: 'erase',
+  type: 'group',
+  x: 0,
+  y: 0,
+  width: 10,
+  height: 10,
+  'x-superboard': {
+    kind: 'drawing',
+    strokes: [eraseStroke('s1', 0), eraseStroke('s2', 10)],
+  },
+}
+const eraseTarget: CanvasNode = {
+  id: 'target',
+  type: 'group',
+  x: 100,
+  y: 0,
+  width: 10,
+  height: 10,
+  'x-superboard': { kind: 'shape', shape: 'rect' },
+}
+const eraseEdge: CanvasEdge = {
+  id: 'erase-edge',
+  fromNode: 'erase',
+  toNode: 'target',
+  fromSide: 'right',
+  toSide: 'left',
+}
+const eraseCanvas: CanvasDocument = {
+  nodes: [eraseNode, eraseTarget],
+  edges: [eraseEdge],
+  'x-superboard': { version: 1, meta: { title: '擦除', slug: 'erase' } },
+}
+const eraseNodeMap = nodeMapOf(eraseCanvas.nodes)
+const firstPlan = planErasure([eraseNode], [], 5, 1, 1)
+assert.equal(firstPlan.removals.length, 1)
+assert.deepEqual([...firstPlan.removals[0].hit], ['s1'])
+applyErasure({
+  canvas: eraseCanvas,
+  nodeMap: Object.fromEntries(
+    [...eraseNodeMap].map(([id, node]) => [id, { ref: node }]),
+  ),
+  edgeMap: { [eraseEdge.id]: { ref: eraseEdge } },
+  plan: firstPlan,
+})
+assert.equal(eraseNode['x-superboard']?.strokes?.length, 1)
+assert.equal(eraseNode['x-superboard']?.strokes?.[0].id, 's2')
+const secondPlan = planErasure(eraseCanvas.nodes, eraseCanvas.edges, 5, 10, 1)
+assert.equal(secondPlan.removals.length, 1)
+assert.equal(secondPlan.edgeIds.has('erase-edge'), true)
+const nodeMapAfter = Object.fromEntries(
+  [...nodeMapOf(eraseCanvas.nodes)].map(([id, node]) => [id, { ref: node }]),
+)
+applyErasure({
+  canvas: eraseCanvas,
+  nodeMap: nodeMapAfter,
+  edgeMap: { [eraseEdge.id]: { ref: eraseEdge } },
+  plan: secondPlan,
+})
+assert.equal(eraseCanvas.nodes.some((node) => node.id === 'erase'), false)
+assert.equal(eraseCanvas.edges.length, 0)
+assert.equal('erase' in nodeMapAfter, false)
+const lockedErase = planErasure(
+  [
+    {
+      ...eraseNode,
+      'x-superboard': {
+        ...eraseNode['x-superboard'],
+        locked: true,
+      },
+    },
+  ],
+  [],
+  5,
+  1,
+  1,
+)
+assert.equal(lockedErase.removals.length, 0)
 
 console.log('canvas editor tests passed')

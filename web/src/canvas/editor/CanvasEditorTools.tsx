@@ -19,11 +19,10 @@ import {
 } from './freehand'
 import {
   closestSide,
-  distanceToSegment,
   screenRect as screenRectOf,
-  strokeHit,
 } from './toolGeometry'
 import { createArrowEdge, createShapeNode } from './toolCreate'
+import { applyErasure, planErasure } from './eraser'
 import { useTextEditing } from './useTextEditing'
 import { TextEditingOverlay } from './TextEditingOverlay'
 
@@ -312,76 +311,24 @@ export function CanvasEditorTools({
     return null
   }
 
-  function hitStroke(
-    node: CanvasNode,
-    x: number,
-    y: number,
-    tolerance: number,
-  ) {
-    const strokes = node['x-superboard']?.strokes
-    if (!strokes?.length) return false
-    return strokes.some((stroke) => strokeHit(stroke, node, x, y, tolerance))
-  }
-
   function eraseAt(x: number, y: number) {
     const data = internals()
     const gesture = eraserRef.current
     if (!data || !gesture) return
     const { dm, controller } = data
     const nodes = Object.values(dm.data.nodeMap).map((item) => item.ref)
-    const map = nodeMapOf(nodes)
-    const tolerance = 4 / dm.data.scale
-    const removals: Array<{ node: CanvasNode; hit: Set<string> }> = []
-    for (const node of nodes) {
-      if (node['x-superboard']?.kind !== 'drawing' || isLocked(node, map)) continue
-      if (!hitStroke(node, x, y, tolerance)) continue
-      const hit = new Set<string>()
-      for (const stroke of node['x-superboard']?.strokes ?? []) {
-        if (strokeHit(stroke, node, x, y, tolerance)) hit.add(stroke.id)
-      }
-      if (hit.size > 0) removals.push({ node, hit })
-    }
-    const edgeIds = new Set<string>()
-    const edgeTolerance = 8 / dm.data.scale
-    for (const item of Object.values(dm.data.edgeMap ?? {})) {
-      const edge = item.ref
-      const from = dm.data.nodeMap[edge.fromNode]?.ref
-      const to = dm.data.nodeMap[edge.toNode]?.ref
-      if (!from || !to) continue
-      const distance = distanceToSegment(
-        x,
-        y,
-        from.x + from.width / 2,
-        from.y + from.height / 2,
-        to.x + to.width / 2,
-        to.y + to.height / 2,
-      )
-      if (distance <= edgeTolerance) edgeIds.add(edge.id)
-    }
-    if (removals.length === 0 && edgeIds.size === 0) return
+    const plan = planErasure(nodes, canvas.edges, x, y, dm.data.scale)
+    if (plan.removals.length === 0 && plan.edgeIds.size === 0) return
     if (!gesture.changed) {
       gesture.changed = true
       onBeforeChange()
     }
-    const removedNodes = new Set<string>()
-    for (const removal of removals) {
-      const extension = removal.node['x-superboard']
-      if (!extension?.strokes) continue
-      extension.strokes = extension.strokes.filter((stroke) => !removal.hit.has(stroke.id))
-      if (extension.strokes.length > 0) continue
-      removedNodes.add(removal.node.id)
-      const index = canvas.nodes.findIndex((node) => node.id === removal.node.id)
-      if (index >= 0) canvas.nodes.splice(index, 1)
-      delete dm.data.nodeMap[removal.node.id]
-    }
-    const shouldRemoveEdge = (edge: CanvasEdge) =>
-      edgeIds.has(edge.id) ||
-      removedNodes.has(edge.fromNode) ||
-      removedNodes.has(edge.toNode)
-    canvas.edges = canvas.edges.filter((edge) => !shouldRemoveEdge(edge))
-    for (const edge of Object.values(dm.data.edgeMap ?? {})) {
-      if (shouldRemoveEdge(edge.ref)) delete dm.data.edgeMap[edge.ref.id]
-    }
+    applyErasure({
+      canvas,
+      nodeMap: dm.data.nodeMap,
+      edgeMap: dm.data.edgeMap ?? {},
+      plan,
+    })
     controller.refresh()
     onChange()
   }
