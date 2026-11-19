@@ -9,18 +9,16 @@ import {
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { isLocked, nextFreeId, nodeMapOf, topAncestor } from './hierarchy'
 import type { EditorTool } from './tools'
-import { getUiState } from './uiState'
 import {
-  createDrawingNode,
-  drawStrokePreview,
-  type StrokePoint,
-} from './freehand'
-import { createArrowEdge, createShapeNode } from './toolCreate'
+  createArrowEdge,
+  createShapeNode,
+} from './toolCreate'
 import { applyErasure, planErasure } from './eraser'
 import { useTextEditing } from './useTextEditing'
 import { useToolViewport } from './toolViewport'
 import type { ToolController, ToolDataManager } from './toolViewport'
 import { useToolPointers } from './useToolPointers'
+import { useFreehandTool } from './useFreehandTool'
 import type { ArrowDraft, ShapeDraft } from './toolTypes'
 import { TextEditingOverlay } from './TextEditingOverlay'
 import { ToolPreviewLayer } from './ToolPreviewLayer'
@@ -62,8 +60,6 @@ export function CanvasEditorTools({
   onEditingChange,
 }: CanvasEditorToolsProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null)
-  const strokeRef = useRef<StrokePoint[] | null>(null)
   const arrowRef = useRef<ArrowDraft | null>(null)
   const eraserRef = useRef<{ changed: boolean } | null>(null)
   const panModeRef = useRef(false)
@@ -80,6 +76,27 @@ export function CanvasEditorTools({
   const { internals, getView, surfacePoint } = useToolViewport({
     viewerRef,
     surfaceRef,
+  })
+  const {
+    previewCanvasRef,
+    strokeRef,
+    redrawStrokePreview,
+    commitStroke,
+    resetStroke,
+  } = useFreehandTool({
+    canvas,
+    getScale: () => internals()?.dm.data.scale ?? 1,
+    getOffset: () => {
+      const data = internals()
+      if (!data) return null
+      return {
+        offsetX: data.dm.data.offsetX,
+        offsetY: data.dm.data.offsetY,
+        scale: data.dm.data.scale,
+      }
+    },
+    onBeforeChange,
+    onApply,
   })
   const {
     editing,
@@ -131,7 +148,7 @@ export function CanvasEditorTools({
   useEffect(() => {
     setDraft(null)
     setArrowDraft(null)
-    strokeRef.current = null
+    resetStroke()
     arrowRef.current = null
     eraserRef.current = null
     panGestureRef.current = null
@@ -214,30 +231,6 @@ export function CanvasEditorTools({
     onCreateRequestHandled?.()
   }, [createRequest, onCreateRequestHandled])
 
-  function redrawStrokePreview() {
-    const canvasElement = previewCanvasRef.current
-    const points = strokeRef.current
-    if (!canvasElement || !points) return
-    const ctx = canvasElement.getContext('2d')
-    if (!ctx) return
-    drawStrokePreview(
-      ctx,
-      window.devicePixelRatio || 1,
-      points,
-      getUiState().brush,
-      internals()?.dm.data.scale ?? 1,
-    )
-  }
-
-  function clearStrokePreview() {
-    const canvasElement = previewCanvasRef.current
-    const ctx = canvasElement?.getContext('2d')
-    if (!canvasElement || !ctx) return
-    const dpr = window.devicePixelRatio || 1
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    ctx.clearRect(0, 0, canvasElement.width / dpr, canvasElement.height / dpr)
-  }
-
   function existingIds() {
     return new Set<string>([
       ...canvas.nodes.map((node) => node.id),
@@ -313,26 +306,6 @@ export function CanvasEditorTools({
     setDraft(null)
     onBeforeChange()
     onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
-  }
-
-  function commitStroke() {
-    const points = strokeRef.current
-    strokeRef.current = null
-    clearStrokePreview()
-    if (!points || points.length < 2) return
-    const data = internals()
-    if (!data) return
-    const { offsetX, offsetY, scale } = data.dm.data
-    const node = createDrawingNode({
-      id: nextFreeId(existingIds(), 'draw'),
-      points,
-      offsetX,
-      offsetY,
-      scale,
-      brush: getUiState().brush,
-    })
-    onBeforeChange()
-    onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [])
   }
 
   function commitArrow() {
