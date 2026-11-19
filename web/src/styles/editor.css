@@ -145,3 +145,50 @@
 .sb-save-conflict.is-error button:hover {
   background: #f8e4e4;
 }
+
+.sb-folder-moving {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(248 247 243 / 55%);
+  backdrop-filter: blur(6px);
+  cursor: wait;
+}
+
+.sb-folder-moving-card {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 22px 28px;
+  border: 1px solid #d8d4c9;
+  border-radius: 12px;
+  background: #fffdf8;
+  box-shadow: 0 18px 48px rgb(50 45 30 / 18%);
+  color: #2b2924;
+  text-align: center;
+}
+
+.sb-folder-moving-card strong {
+  font-size: 16px;
+}
+
+.sb-folder-moving-card span {
+  color: #6f6b60;
+  font-size: 13px;
+}
+
+.sb-folder-moving-card button {
+  margin-top: 6px;
+  padding: 7px 14px;
+  border: 1px solid #c9bda8;
+  border-radius: 8px;
+  background: #fff;
+  color: #5d513d;
+  cursor: pointer;
+}
+
+body.is-folder-moving {
+  overflow: hidden;
+}

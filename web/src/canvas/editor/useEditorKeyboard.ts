@@ -30,6 +30,7 @@ export function useEditorKeyboard(options: UseEditorKeyboardOptions) {
   const handlerRef = useRef<(event: KeyboardEvent) => void>(() => {})
 
   handlerRef.current = (event: KeyboardEvent) => {
+    if (document.body.classList.contains('is-folder-moving')) return
     const target = event.target as HTMLElement | null
     if (target?.closest('input, textarea, select, [contenteditable="true"]')) {
       return

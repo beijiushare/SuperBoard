@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../../styles/index.css'
 import { CanvasEditorApp } from './CanvasEditorApp'
+import { FolderMoveOverlay } from './FolderMoveOverlay'
 import {
   installBrowserFolderBackend,
   openBrowserWorkspace,
@@ -89,7 +90,14 @@ function BrowserEditorGate() {
     )
   }
 
-  if (ready) return <CanvasEditorApp />
+  if (ready) {
+    return (
+      <>
+        <CanvasEditorApp />
+        <FolderMoveOverlay />
+      </>
+    )
+  }
 
   return (
     <div className="sb-screen-message">

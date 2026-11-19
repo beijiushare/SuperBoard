@@ -3,6 +3,7 @@ import type { BoardScope } from '../../shared/board/types'
 import { configureWorkspaceFetcher } from './workspaceApi'
 import {
   beginFolderMove,
+  finishFolderMove,
   isFolderMoveCancelled,
   reportFolderMoveProgress,
 } from './folderMove'
@@ -486,38 +487,49 @@ async function handleFolders(url: URL, init?: RequestInit) {
     const sourceParent = await folderDirectory(scope, currentParent)
     const source = await sourceParent.getDirectoryHandle(sourcePath.split('/').pop()!)
     const targetParent = await folderDirectory(scope, parent, true)
-    let target: DirHandle
     try {
-      target = await targetParent.getDirectoryHandle(name)
+      await targetParent.getDirectoryHandle(name)
       return response({ error: `文件夹已存在: ${name}` }, 409)
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'NotFoundError') {
-        target = await targetParent.getDirectoryHandle(name, { create: true })
-      } else {
+      if (!(error instanceof DOMException) || error.name !== 'NotFoundError') {
         throw error
       }
     }
+    beginFolderMove()
+    reportFolderMoveProgress({ phase: 'start', copied: 0, total: 0 })
     try {
-      const total = await countFiles(source)
-      beginFolderMove()
-      let copied = 0
-      reportFolderMoveProgress({ copied, total })
-      await copyDirectory(source, target, () => {
-        copied += 1
-        reportFolderMoveProgress({ copied, total })
-      })
-      if (isFolderMoveCancelled()) {
-        throw new DOMException('已取消移动', 'AbortError')
+      const move = (source as DirHandle & {
+        move?: (parent: DirHandle, name?: string) => Promise<void>
+      }).move
+      if (typeof move === 'function') {
+        await move.call(source, targetParent, name)
+      } else {
+        const target = await targetParent.getDirectoryHandle(name, {
+          create: true,
+        })
+        const total = await countFiles(source)
+        let copied = 0
+        reportFolderMoveProgress({ phase: 'progress', copied, total })
+        await copyDirectory(source, target, () => {
+          copied += 1
+          reportFolderMoveProgress({ phase: 'progress', copied, total })
+        })
+        if (isFolderMoveCancelled()) {
+          throw new DOMException('已取消移动', 'AbortError')
+        }
+        await sourceParent.removeEntry(sourcePath.split('/').pop()!, {
+          recursive: true,
+        })
       }
-      await sourceParent.removeEntry(sourcePath.split('/').pop()!, {
-        recursive: true,
-      })
     } catch (error) {
       await targetParent.removeEntry(name, { recursive: true }).catch(() => {})
       if (error instanceof DOMException && error.name === 'AbortError') {
         return response({ error: '移动已取消' }, 409)
       }
       throw error
+    } finally {
+      finishFolderMove()
+      reportFolderMoveProgress({ phase: 'end', copied: 0, total: 0 })
     }
     invalidateBoardCache()
     return response({ ok: true, path: parent ? `${parent}/${name}` : name })

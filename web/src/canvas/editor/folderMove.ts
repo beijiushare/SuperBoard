@@ -1,14 +1,25 @@
 export interface FolderMoveProgress {
   copied: number
   total: number
+  phase?: 'start' | 'progress' | 'end'
 }
 
 const PROGRESS_EVENT = 'superboard:folder-move-progress'
 
 let cancelled = false
+let moving = false
 
 export function beginFolderMove() {
   cancelled = false
+  moving = true
+}
+
+export function finishFolderMove() {
+  moving = false
+}
+
+export function isFolderMoveActive() {
+  return moving
 }
 
 export function requestCancelFolderMove() {
@@ -21,6 +32,8 @@ export function isFolderMoveCancelled() {
 
 export function reportFolderMoveProgress(progress: FolderMoveProgress) {
   if (typeof window === 'undefined') return
+  if (progress.phase === 'start') moving = true
+  if (progress.phase === 'end') moving = false
   window.dispatchEvent(
     new CustomEvent<FolderMoveProgress>(PROGRESS_EVENT, { detail: progress }),
   )

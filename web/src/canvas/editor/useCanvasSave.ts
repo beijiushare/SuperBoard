@@ -7,6 +7,7 @@ import {
   type SaveState,
 } from './appUtils'
 import { WorkspaceError, writeBoard } from './workspaceApi'
+import { isFolderMoveActive } from './folderMove'
 
 const RETRY_DELAYS = [250, 800]
 const CHANNEL_NAME = 'superboard-board'
@@ -89,6 +90,7 @@ export function useCanvasSave({
   }
 
   async function save(): Promise<boolean> {
+    if (isFolderMoveActive()) return false
     if (!canvas || savingRef.current) return false
     if (saveState === 'saved') return true
     if (conflictRef.current) return false
