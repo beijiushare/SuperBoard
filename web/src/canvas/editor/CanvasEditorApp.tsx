@@ -22,7 +22,7 @@ import type {
   CanvasNode,
   SuperBoardScheduleEvent,
 } from '../model'
-import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
+import { CanvasEditorStage } from './CanvasEditorStage'
 import {
   normalizeMarkdownLocks,
   updateEditorUrl,
@@ -33,6 +33,7 @@ import {
   type DataManagerLike,
   type ViewerInternals,
 } from './appUtils'
+import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { useCanvasHistory } from './useCanvasHistory'
 import { useEditorKeyboard } from './useEditorKeyboard'
 import { useCanvasSave } from './useCanvasSave'
@@ -45,9 +46,6 @@ import { useBoardFiles } from './useBoardFiles'
 import { useBlockActions } from './useBlockActions'
 import { useCanvasInsertions } from './useCanvasInsertions'
 import { useCanvasMenu } from './useCanvasMenu'
-import { CanvasEditorOverlay } from './CanvasEditorOverlay'
-import { CanvasDirectorLayer } from './CanvasDirectorLayer'
-import { CanvasMarkdownLayer } from './CanvasMarkdownLayer'
 import { EditorInsertDialogs } from './EditorInsertDialogs'
 import { EditorBoardDialogs } from './EditorBoardDialogs'
 import { CanvasBlockMenu } from './CanvasBlockMenu'
@@ -60,9 +58,6 @@ import {
   useUiState,
 } from './uiState'
 import { blockEditor } from './blocks'
-import { CanvasEditorTools } from './CanvasEditorTools'
-import { CanvasToolPalette } from './CanvasToolPalette'
-import { CanvasStylePanel } from './CanvasStylePanel'
 import type { EditorTool } from './tools'
 import {
   isInsideGroup,
@@ -856,136 +851,92 @@ export function CanvasEditorApp() {
             : undefined
         }
       >
-        <main className="sb-canvas">
-          <div className="canvas-editor">
-            <div
-              ref={stageRef}
-              className="canvas-editor-stage"
-              onContextMenu={openCanvasMenu}
-              onDoubleClick={openQuickMenu}
-            >
-              {canvas ? (
-                <>
-                  <div className="canvas-viewer-wrap">
-                    <CanvasViewer
-                    ref={viewerRef}
-                    canvas={canvas}
-                    onNodeSelect={handleNodeSelect}
-                    onScheduleEventsChange={updateScheduleEvents}
-                    style={{ width: '100%', height: '100%' }}
-                    />
-                  </div>
-                  <CanvasEditorOverlay
-                    canvas={canvas}
-                    viewerRef={viewerRef}
-                    selectedIds={selectedIds}
-                    onSelect={setSelectedIds}
-                    onChange={() => {
-                      markDirty()
-                      if (textEditingId) {
-                        setCanvas((current) =>
-                          current
-                            ? { ...current, nodes: [...current.nodes] }
-                            : current,
-                        )
-                      }
-                    }}
-                    onBeforeChange={recordHistory}
-                    interactive={tool === 'select'}
-                    selectedEdgeId={selectedEdgeId}
-                    onSelectEdge={(id) => {
-                      setSelectedEdgeId(id)
-                      if (id) setSelectedIds([])
-                    }}
-                    focusedGroupId={focusedGroupId}
-                    activeEditingId={markdownEditingId ?? textEditingId}
-                    guidesEnabled={uiState.guides}
-                    onToggleBlockEdit={toggleBlockEdit}
-                    onFocusBlockEdit={openMarkdownFocus}
-                    onDeleteBlock={deleteBlock}
-                    onResetBlockSize={resetBlockSize}
-                    onToggleRatioLock={toggleRatioLock}
-                  />
-                  <CanvasEditorTools
-                    canvas={canvas}
-                    tool={tool}
-                    viewerRef={viewerRef}
-                    onBeforeChange={recordHistory}
-                    onChange={markDirty}
-                    onApply={applyDocument}
-                    onExitTool={() => setTool('select')}
-                    editRequest={editRequest}
-                    onEditRequestHandled={() => setEditRequest(null)}
-                    createRequest={textCreateRequest}
-                    onCreateRequestHandled={() => setTextCreateRequest(null)}
-                    onEditMarkdown={openMarkdownEditor}
-                    onEditingChange={setTextEditingId}
-                  />
-                  <CanvasMarkdownLayer
-                    canvas={canvas}
-                    viewerRef={viewerRef}
-                    editingId={markdownEditingId}
-                    focusId={markdownFocusId}
-                    focusNode={markdownFocusNode}
-                    onInput={handleMarkdownInput}
-                    onCommit={handleMarkdownCommit}
-                    onRequestClose={closeMarkdownEditor}
-                    onCloseFocus={closeMarkdownFocus}
-                  />
-                  {stylePanelOpen ? (
-                    <CanvasStylePanel
-                      canvas={canvas}
-                      selectedIds={selectedIds}
-                      selectedEdgeId={selectedEdgeId}
-                      onBeforeChange={recordHistory}
-                      onApply={applyDocument}
-                      onRememberColor={rememberBoardColor}
-                    />
-                  ) : null}
-                  <CanvasDirectorLayer
-                    canvas={canvas}
-                    viewerRef={viewerRef}
-                    directorMode={directorMode}
-                    presentation={presentation}
-                    selectedFrameId={selectedFrameId}
-                    onSelectFrame={setSelectedFrameId}
-                    onBeforeChange={recordHistory}
-                    frames={directorFrames}
-                    onChangeFrames={updateDirectorFrames}
-                    onPlayFrame={(frame) => {
-                      const index = directorFrames.findIndex(
-                        (item) => item.id === frame.id,
-                      )
-                      startPresentation(index < 0 ? 0 : index)
-                    }}
-                    frameControllerOpen={frameControllerOpen}
-                    onOpenController={() => setFrameControllerOpen(true)}
-                    onCloseController={() => setFrameControllerOpen(false)}
-                  />
-                  {menuPanelOpen ? (
-                    <CanvasToolPalette
-                      tool={tool}
-                      onToolChange={setTool}
-                      onInsertMarkdown={() => insertTextBlock('markdown')}
-                      onInsertPele={() => openPeleDialog()}
-                      onInsertSchedule={() => insertScheduleBlock()}
-                      onInsertMedia={() => openMediaDialog()}
-                    />
-                  ) : null}
-                </>
-              ) : (
-                <div className="sb-canvas-empty">
-                  <div>
-                    <h2>还没有白板</h2>
-                    <p>
-                      在左侧目录空白处右键新建白板，或先把 .canvas 放进 whiteboards/{scope}/。
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </main>
+        <CanvasEditorStage
+          canvas={canvas}
+          scope={scope}
+          stageRef={stageRef}
+          viewerRef={viewerRef}
+          onContextMenu={openCanvasMenu}
+          onDoubleClick={openQuickMenu}
+          onNodeSelect={handleNodeSelect}
+          onScheduleEventsChange={updateScheduleEvents}
+          selection={{
+            selectedIds,
+            onSelect: setSelectedIds,
+            selectedEdgeId,
+            onSelectEdge: (id) => {
+              setSelectedEdgeId(id)
+              if (id) setSelectedIds([])
+            },
+            focusedGroupId,
+            interactive: tool === 'select',
+            activeEditingId: markdownEditingId ?? textEditingId,
+            guidesEnabled: uiState.guides,
+            onBeforeChange: recordHistory,
+            onChange: () => {
+              markDirty()
+              if (textEditingId) {
+                setCanvas((current) =>
+                  current
+                    ? { ...current, nodes: [...current.nodes] }
+                    : current,
+                )
+              }
+            },
+            onToggleBlockEdit: toggleBlockEdit,
+            onFocusBlockEdit: openMarkdownFocus,
+            onDeleteBlock: deleteBlock,
+            onResetBlockSize: resetBlockSize,
+            onToggleRatioLock: toggleRatioLock,
+          }}
+          tools={{
+            tool,
+            onChangeTool: setTool,
+            onApply: applyDocument,
+            onExitTool: () => setTool('select'),
+            editRequest,
+            onEditRequestHandled: () => setEditRequest(null),
+            createRequest: textCreateRequest,
+            onCreateRequestHandled: () => setTextCreateRequest(null),
+            onEditMarkdown: openMarkdownEditor,
+            onEditingChange: setTextEditingId,
+          }}
+          markdown={{
+            editingId: markdownEditingId,
+            focusId: markdownFocusId,
+            focusNode: markdownFocusNode,
+            onInput: handleMarkdownInput,
+            onCommit: handleMarkdownCommit,
+            onRequestClose: closeMarkdownEditor,
+            onCloseFocus: closeMarkdownFocus,
+          }}
+          stylePanelOpen={stylePanelOpen}
+          onRememberColor={rememberBoardColor}
+          director={{
+            mode: directorMode,
+            presentation,
+            selectedFrameId,
+            onSelectFrame: setSelectedFrameId,
+            frames: directorFrames,
+            onChangeFrames: updateDirectorFrames,
+            onPlayFrame: (frame) => {
+              const index = directorFrames.findIndex(
+                (item) => item.id === frame.id,
+              )
+              startPresentation(index < 0 ? 0 : index)
+            },
+            controllerOpen: frameControllerOpen,
+            onOpenController: () => setFrameControllerOpen(true),
+            onCloseController: () => setFrameControllerOpen(false),
+          }}
+          palette={{
+            open: menuPanelOpen,
+            onInsertMarkdown: () => insertTextBlock('markdown'),
+            onInsertPele: () => openPeleDialog(),
+            onInsertSchedule: () => insertScheduleBlock(),
+            onInsertMedia: () => openMediaDialog(),
+          }}
+        />
       </EditorWorkspace>
 
       {directorMode && !presentation ? (
