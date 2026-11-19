@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`1423b47 refactor: extract board dialogs component`
+- 最近提交：`82ddf8e feat: sync board tree across tabs`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -36,6 +36,7 @@
 - 浏览器模式隐藏 Git 部署按钮
 - 保存冲突检测：文件基线版本变化时返回 409
 - 多标签修改通过 BroadcastChannel 通知，冲突时停止自动保存
+- 工作区增删改通过 localStorage 版本号通知其他标签页刷新目录
 - 保存失败自动重试两次，409 不重试
 - 冲突时保存按钮显示「保存冲突，点击覆盖」，顶部横幅可覆盖或重新加载磁盘版本
 - 保存失败时顶部横幅提供「重试保存」
@@ -86,6 +87,8 @@
 - `toolCreate.ts`：形状节点与箭头连线创建
 - `useTextEditing.ts`：文本/媒体/Pele 编辑会话
 - `EditorInsertDialogs.tsx`、`EditorBoardDialogs.tsx`：编辑弹窗拆分
+- `CanvasBlockMenu.tsx`：画布右键菜单
+- `EditorWorkspace.tsx`：rail 与目录外壳
 - 浏览器后端单次扫描定位白板文件，减少全目录遍历
 - `test:editor` 覆盖手绘节点、笔触命中、箭头方向、屏幕矩形、框选相交、形状/连线创建、样式 mutation
 - `docs/MANUAL_TEST.md` 增加浏览器编辑器、多标签冲突、画笔默认值测试项
@@ -98,7 +101,7 @@
 
 ### 高优先级
 
-- `CanvasEditorApp.tsx` 约 1300 行，继续拆内联 JSX 与目录面板
+- `CanvasEditorApp.tsx` 约 1140 行，继续拆画布舞台与目录面板
 - `CanvasEditorOverlay.tsx` 约 1070 行，拆拖拽、缩放、选择渲染
 - `CanvasEditorTools.tsx` 约 814 行，按橡皮与手势拆
 
