@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`8fa0def refactor: extract canvas drag hook`
+- 最近提交：`51770ff refactor: extract eraser planning and apply`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -92,8 +92,10 @@
 - `CanvasDirectorLayer.tsx`、`CanvasMarkdownLayer.tsx`：导演与 Markdown 覆盖层
 - `CanvasEditorStage.tsx`：画布舞台（Viewer/Overlay/Tools/样式/导演/工具栏）
 - `useCanvasDrag.ts`：移动、缩放、单选/多选旋转、对齐参考线
+- `TextEditingOverlay.tsx`：文本输入浮层
+- `eraser.ts`：橡皮擦命中计划与批量删除
 - 浏览器后端单次扫描定位白板文件，减少全目录遍历
-- `test:editor` 覆盖手绘节点、笔触命中、箭头方向、屏幕矩形、框选相交、形状/连线创建、样式 mutation
+- `test:editor` 覆盖手绘节点、笔触命中、箭头方向、屏幕矩形、框选相交、形状/连线创建、样式 mutation、橡皮擦除
 - `docs/MANUAL_TEST.md` 增加浏览器编辑器、多标签冲突、画笔默认值测试项
 - `drawingStyle.ts`：绘图节点样式修改
 - `DrawingStyleSection.tsx`：绘图笔触面板
@@ -107,7 +109,7 @@
 - `CanvasEditorApp.tsx` 约 1060 行，剩余状态与目录配置
 - `CanvasEditorStage.tsx` 约 280 行，可继续按 Viewer/Overlay/Tools 拆
 - `CanvasEditorOverlay.tsx` 约 554 行，只剩渲染与选择框
-- `CanvasEditorTools.tsx` 约 814 行，按橡皮与手势拆
+- `CanvasEditorTools.tsx` 约 741 行，剩余工具手势与预览
 
 ### 中优先级
 
