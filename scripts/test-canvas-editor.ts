@@ -32,6 +32,10 @@ import {
   intersects,
   screenStyle,
 } from '../web/src/canvas/editor/overlayGeometry'
+import {
+  createArrowEdge,
+  createShapeNode,
+} from '../web/src/canvas/editor/toolCreate'
 
 const nodes: CanvasNode[] = [
   {
@@ -327,5 +331,47 @@ const rotatedStyle = screenStyle(
 )
 assert.equal(rotatedStyle.transform, 'rotate(45deg)')
 assert.equal(rotatedStyle.transformOrigin, 'center center')
+
+const rounded = createShapeNode({
+  id: 'shape-1',
+  shape: 'rounded-rect',
+  startX: 10,
+  startY: 20,
+  currentX: 50,
+  currentY: 60,
+})
+assert.equal(rounded.x, 10)
+assert.equal(rounded.y, 20)
+assert.equal(rounded.width, 40)
+assert.equal(rounded.height, 40)
+assert.equal(rounded['x-superboard']?.kind, 'shape')
+assert.equal(rounded['x-superboard']?.shape, 'rect')
+assert.equal(rounded['x-superboard']?.roundedRect, true)
+assert.equal(rounded['x-superboard']?.style?.cornerRadius, 8)
+const line = createShapeNode({
+  id: 'shape-2',
+  shape: 'line',
+  startX: 100,
+  startY: 50,
+  currentX: 0,
+  currentY: 10,
+})
+assert.equal(line.width, 100)
+assert.equal(line.height, 40)
+assert.equal(line['x-superboard']?.style?.backgroundColor, 'transparent')
+assert.deepEqual(line['x-superboard']?.lineFlip, { x: true, y: true })
+const arrowNode = createArrowEdge({
+  id: 'edge-1',
+  from: { id: 'l', type: 'group', x: 0, y: 0, width: 10, height: 10 },
+  to: { id: 'r', type: 'group', x: 100, y: 20, width: 10, height: 10 },
+  currentX: 109,
+  currentY: 25,
+})
+assert.equal(arrowNode.fromNode, 'l')
+assert.equal(arrowNode.toNode, 'r')
+assert.equal(arrowNode.fromSide, 'right')
+assert.equal(arrowNode.toSide, 'right')
+assert.equal(arrowNode.fromEnd, 'none')
+assert.equal(arrowNode.toEnd, 'arrow')
 
 console.log('canvas editor tests passed')

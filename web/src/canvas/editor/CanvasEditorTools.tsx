@@ -8,14 +8,12 @@ import {
   type CanvasDocument,
   type CanvasEdge,
   type CanvasNode,
-  type SuperBoardNodeExtension,
 } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { DEFAULT_BLOCK_SIZES, blockEditor } from './blocks'
 import { isLocked, nextFreeId, nodeMapOf, topAncestor } from './hierarchy'
 import {
   DEFAULT_PREFERENCES,
-  blockStyleFromPreferences,
   getPreferences,
   textStyleFromPreferences,
 } from './preferences'
@@ -27,12 +25,12 @@ import {
   type StrokePoint,
 } from './freehand'
 import {
-  arrowSides,
   closestSide,
   distanceToSegment,
   screenRect as screenRectOf,
   strokeHit,
 } from './toolGeometry'
+import { createArrowEdge, createShapeNode } from './toolCreate'
 
 type DataManager = {
   data: {
@@ -604,39 +602,16 @@ export function CanvasEditorTools({
       setDraft(null)
       return
     }
-    const x = Math.min(current.startX, current.currentX)
-    const y = Math.min(current.startY, current.currentY)
     const shapeKind = shape === 'rounded-rect' ? 'rect' : shape
     const id = nextFreeId(existingIds(), shapeKind)
-    const extension: SuperBoardNodeExtension = {
-      kind: 'shape',
-      shape: shapeKind,
-      ...(shape === 'rounded-rect' ? { roundedRect: true } : {}),
-      style: {
-        ...blockStyleFromPreferences(),
-        ...(shape === 'line' ? { backgroundColor: 'transparent' } : {}),
-        ...(shape === 'rounded-rect'
-          ? { cornerRadius: 8 }
-          : shape === 'rect'
-            ? { cornerRadius: getPreferences().shapeCornerRadius }
-            : {}),
-      },
-    }
-    if (shape === 'line') {
-      extension.lineFlip = {
-        x: current.currentX < current.startX,
-        y: current.currentY < current.startY,
-      }
-    }
-    const node: CanvasNode = {
+    const node = createShapeNode({
       id,
-      type: 'group',
-      x,
-      y,
-      width: Math.max(1, width),
-      height: Math.max(1, height),
-      'x-superboard': extension,
-    }
+      shape,
+      startX: current.startX,
+      startY: current.startY,
+      currentX: current.currentX,
+      currentY: current.currentY,
+    })
     setDraft(null)
     onBeforeChange()
     onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
@@ -673,16 +648,13 @@ export function CanvasEditorTools({
     if (!data) return
     const from = data.dm.data.nodeMap[current.fromId]?.ref
     if (!from) return
-    const sides = arrowSides(from, target)
-    const edge: CanvasEdge = {
+    const edge = createArrowEdge({
       id: nextFreeId(existingIds(), 'edge'),
-      fromNode: from.id,
-      toNode: target.id,
-      fromSide: sides.fromSide,
-      toSide: closestSide(target, current.currentX, current.currentY),
-      fromEnd: 'none',
-      toEnd: 'arrow',
-    }
+      from,
+      to: target,
+      currentX: current.currentX,
+      currentY: current.currentY,
+    })
     onBeforeChange()
     onApply({ ...canvas, edges: [...canvas.edges, edge] }, [])
   }
