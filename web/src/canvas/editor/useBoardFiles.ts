@@ -12,6 +12,7 @@ import {
   createFolder,
   deleteBoard,
   deleteFolder,
+  notifyWorkspaceChanged,
   updateBoard,
   updateFolder,
 } from './workspaceApi'
@@ -76,6 +77,7 @@ export function useBoardFiles({
       folder: values.folder || undefined,
       scope,
     })
+    notifyWorkspaceChanged()
     const list = await refreshItems()
     const item = list.find(
       (entry) =>
@@ -104,6 +106,7 @@ export function useBoardFiles({
         folder: values.folder,
       },
     )
+    notifyWorkspaceChanged()
     await refreshItems()
     expandPath(data.path)
     if (isCurrent) {
@@ -122,6 +125,7 @@ export function useBoardFiles({
     const isCurrent = slug === selectedSlug
     if (isCurrent) setSaveState('saved')
     await deleteBoard(item)
+    notifyWorkspaceChanged()
     const list = await refreshItems()
     if (!isCurrent) return
     const next = list.find((entry) => entry.scope === scope)
@@ -145,6 +149,7 @@ export function useBoardFiles({
     if (newFolderParent === null) return
     const parent = newFolderParent
     await createFolder({ parent, name, scope })
+    notifyWorkspaceChanged()
     await refreshItems()
     if (parent) expandPath(parent)
     setNewFolderParent(null)
@@ -162,6 +167,7 @@ export function useBoardFiles({
       name,
       parent,
     })
+    notifyWorkspaceChanged()
     await refreshItems()
     renameExpandedPath(folderDialog.path, data.path)
   }
@@ -177,6 +183,7 @@ export function useBoardFiles({
         (currentPath === path || currentPath.startsWith(`${path}/`)),
     )
     await deleteFolder(path, scope)
+    notifyWorkspaceChanged()
     const list = await refreshItems()
     if (!currentInside) return
     const next = list.find((entry) => entry.scope === scope)

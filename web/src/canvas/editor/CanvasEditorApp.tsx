@@ -55,7 +55,7 @@ import { EditorBoardDialogs } from './EditorBoardDialogs'
 import { CanvasBlockMenu } from './CanvasBlockMenu'
 import { EditorWorkspace } from './EditorWorkspace'
 import { isBrowserFolderMode } from './browserFolderBackend'
-import { loadWorkspace, readBoard } from './workspaceApi'
+import { loadWorkspace, readBoard, WORKSPACE_VERSION_KEY } from './workspaceApi'
 import {
   rememberRecentColor,
   updateUiState,
@@ -376,6 +376,18 @@ export function CanvasEditorApp() {
     ensureExtension,
   })
   canvasRef.current = canvas
+
+  const refreshItemsRef = useRef(refreshItems)
+  refreshItemsRef.current = refreshItems
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === WORKSPACE_VERSION_KEY) {
+        void refreshItemsRef.current()
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {

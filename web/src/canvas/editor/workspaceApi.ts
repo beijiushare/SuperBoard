@@ -7,6 +7,16 @@ export interface WorkspaceFolders {
   scope: BoardScope
 }
 
+export const WORKSPACE_VERSION_KEY = 'superboard.workspaceVersion'
+
+export function notifyWorkspaceChanged() {
+  try {
+    window.localStorage.setItem(WORKSPACE_VERSION_KEY, String(Date.now()))
+  } catch {
+    // localStorage may be unavailable; refresh is best effort.
+  }
+}
+
 let workspaceFetcher: ((input: RequestInfo | URL, init?: RequestInit) => Promise<Response>) | null =
   null
 
