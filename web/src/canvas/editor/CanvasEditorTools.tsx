@@ -725,7 +725,11 @@ export function CanvasEditorTools({
     const data = internals()
     if (!data) return
     const { offsetX, offsetY, scale } = data.dm.data
-    const world = points.map(([x, y]) => [(x - offsetX) / scale, (y - offsetY) / scale])
+    const world = points.map(([x, y, pressure]) => [
+      (x - offsetX) / scale,
+      (y - offsetY) / scale,
+      pressure ?? 0.5,
+    ])
     let minX = Infinity
     let minY = Infinity
     let maxX = -Infinity
@@ -742,7 +746,9 @@ export function CanvasEditorTools({
     maxX += pad
     maxY += pad
     const id = nextFreeId(existingIds(), 'draw')
-    const local = world.map(([x, y]) => [x - minX, y - minY] as [number, number])
+    const local = world.map(
+      ([x, y, pressure]) => [x - minX, y - minY, pressure] as [number, number, number],
+    )
     const node: CanvasNode = {
       id,
       type: 'group',
@@ -852,7 +858,9 @@ export function CanvasEditorTools({
       return
     }
     if (tool === 'draw') {
-      strokeRef.current = [[point.screenX, point.screenY]]
+      strokeRef.current = [
+        [point.screenX, point.screenY, event.pressure || 0.5],
+      ]
       redrawStrokePreview()
       event.currentTarget.setPointerCapture(event.pointerId)
       return
@@ -891,7 +899,11 @@ export function CanvasEditorTools({
       const surface = surfaceRef.current
       if (!surface) return
       const bounds = surface.getBoundingClientRect()
-      const point = [event.clientX - bounds.left, event.clientY - bounds.top]
+      const point = [
+        event.clientX - bounds.left,
+        event.clientY - bounds.top,
+        event.pressure || 0.5,
+      ]
       const points = strokeRef.current
       const last = points[points.length - 1]
       if (Math.hypot(point[0] - last[0], point[1] - last[1]) < 1) return
