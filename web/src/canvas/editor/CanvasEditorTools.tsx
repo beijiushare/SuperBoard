@@ -10,14 +10,8 @@ import {
   type CanvasNode,
 } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
-import { DEFAULT_BLOCK_SIZES, blockEditor } from './blocks'
 import { isLocked, nextFreeId, nodeMapOf, topAncestor } from './hierarchy'
-import {
-  DEFAULT_PREFERENCES,
-  getPreferences,
-  textStyleFromPreferences,
-} from './preferences'
-import { detectMediaKind, type EditorTool } from './tools'
+import type { EditorTool } from './tools'
 import { getUiState } from './uiState'
 import {
   createDrawingNode,
@@ -31,6 +25,7 @@ import {
   strokeHit,
 } from './toolGeometry'
 import { createArrowEdge, createShapeNode } from './toolCreate'
+import { useTextEditing } from './useTextEditing'
 
 type DataManager = {
   data: {
@@ -71,21 +66,6 @@ interface ArrowDraft {
   currentY: number
 }
 
-interface Editing {
-  id: string | null
-  kind: 'text' | 'markdown' | 'pele' | 'media'
-  x: number
-  y: number
-  width: number
-  height: number
-  value: string
-  fontSize: number
-  fontFamily?: string
-  color?: string
-  opacity?: number
-  textAlign?: 'left' | 'center' | 'right'
-}
-
 interface CanvasEditorToolsProps {
   canvas: CanvasDocument
   tool: EditorTool
@@ -121,11 +101,8 @@ export function CanvasEditorTools({
 }: CanvasEditorToolsProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const previewCanvasRef = useRef<HTMLCanvasElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const strokeRef = useRef<StrokePoint[] | null>(null)
   const arrowRef = useRef<ArrowDraft | null>(null)
-  const editingRef = useRef<Editing | null>(null)
-  const suppressTextCreateRef = useRef(false)
   const eraserRef = useRef<{ changed: boolean } | null>(null)
   const panModeRef = useRef(false)
   const panGestureRef = useRef<{
@@ -138,7 +115,24 @@ export function CanvasEditorTools({
   } | null>(null)
   const [draft, setDraft] = useState<ShapeDraft | null>(null)
   const [arrowDraft, setArrowDraft] = useState<ArrowDraft | null>(null)
-  const [editing, setEditing] = useState<Editing | null>(null)
+  const {
+    editing,
+    editingRef,
+    textareaRef,
+    suppressTextCreateRef,
+    startEditing,
+    commitEditing,
+    updateEditing,
+    resetEditing,
+    editKindOf,
+  } = useTextEditing({
+    canvas,
+    getScale: () => internals()?.dm.data.scale ?? 1,
+    onBeforeChange,
+    onApply,
+    onExitTool,
+    onEditingChange,
+  })
 
   function internals() {
     try {
@@ -178,33 +172,6 @@ export function CanvasEditorTools({
     }
   }
 
-  function setTextOverlayHidden(id: string | null, hidden: boolean) {
-    if (!id) return
-    document.getElementById(id)?.classList.toggle('sb-text-editing-hidden', hidden)
-  }
-
-  function updateEditing(next: Editing | null) {
-    const previous = editingRef.current
-    if (previous?.id && (!next || next.id !== previous.id)) {
-      setTextOverlayHidden(previous.id, false)
-    }
-    if (next?.id) setTextOverlayHidden(next.id, true)
-    editingRef.current = next
-    setEditing(next)
-  }
-
-  useEffect(() => {
-    onEditingChange?.(editing?.id ?? null)
-  }, [editing?.id, onEditingChange])
-
-  useEffect(() => {
-    return () => {
-      if (editingRef.current?.id) {
-        setTextOverlayHidden(editingRef.current.id, false)
-      }
-    }
-  }, [])
-
   useEffect(() => {
     setDraft(null)
     setArrowDraft(null)
@@ -213,7 +180,7 @@ export function CanvasEditorTools({
     eraserRef.current = null
     panGestureRef.current = null
     suppressTextCreateRef.current = false
-    updateEditing(null)
+    resetEditing()
   }, [tool])
 
   useEffect(() => {
@@ -234,14 +201,6 @@ export function CanvasEditorTools({
       window.removeEventListener('keyup', onKeyUp)
     }
   }, [])
-
-  useEffect(() => {
-    if (!editing) return
-    const textarea = textareaRef.current
-    if (!textarea) return
-    textarea.focus()
-    textarea.setSelectionRange(textarea.value.length, textarea.value.length)
-  }, [editing?.id, editing?.x, editing?.y, editing ? 'open' : 'closed'])
 
   useEffect(() => {
     if (tool === 'select') return
@@ -299,44 +258,6 @@ export function CanvasEditorTools({
     onCreateRequestHandled?.()
   }, [createRequest, onCreateRequestHandled])
 
-  useEffect(() => {
-    const current = editingRef.current
-    if (!current?.id) return
-    const node = canvas.nodes.find((item) => item.id === current.id)
-    if (!node) return
-    const style = node['x-superboard']?.style
-    updateEditing({
-      ...current,
-      x: node.x,
-      y: node.y,
-      width: node.width,
-      height: node.height,
-      fontSize: style?.fontSize ?? current.fontSize,
-      fontFamily: style?.fontFamily ?? current.fontFamily,
-      color: style?.color ?? current.color,
-      opacity: style?.opacity ?? current.opacity,
-      textAlign: style?.textAlign ?? current.textAlign,
-    })
-  }, [canvas])
-
-  function editKindOf(node: CanvasNode): Editing['kind'] | null {
-    const editor = blockEditor(node)
-    if (!editor || editor === 'schedule') return null
-    return editor
-  }
-
-  function editingValue(node: CanvasNode, kind: Editing['kind']) {
-    const extension = node['x-superboard']
-    if (kind === 'media') {
-      return node.type === 'link' ? (extension?.media?.url ?? node.url) : ''
-    }
-    if (kind === 'pele') {
-      const code = extension?.code
-      return typeof code === 'string' ? code : node.type === 'text' ? node.text : ''
-    }
-    return node.type === 'text' ? node.text : ''
-  }
-
   function redrawStrokePreview() {
     const canvasElement = previewCanvasRef.current
     const points = strokeRef.current
@@ -389,133 +310,6 @@ export function CanvasEditorTools({
       return root
     }
     return null
-  }
-
-  function startEditing(node: CanvasNode | null, x: number, y: number) {
-    suppressTextCreateRef.current = false
-    const textDefaults = DEFAULT_PREFERENCES.text
-    const newTextDefaults = getPreferences().text
-    const kind = node ? editKindOf(node) : null
-    if (node && kind) {
-      const style = node['x-superboard']?.style
-      updateEditing({
-        id: node.id,
-        kind,
-        x: node.x,
-        y: node.y,
-        width: node.width,
-        height: node.height,
-        value: editingValue(node, kind),
-        fontSize: style?.fontSize ?? textDefaults.fontSize,
-        fontFamily: style?.fontFamily ?? textDefaults.fontFamily,
-        color: style?.color ?? textDefaults.color,
-        opacity: style?.opacity ?? textDefaults.opacity,
-        textAlign: style?.textAlign ?? textDefaults.textAlign,
-      })
-      return
-    }
-    updateEditing({
-      id: null,
-      kind: 'text',
-      x,
-      y,
-      width:
-        canvas['x-superboard']?.settings?.defaultBlockWidth ??
-        DEFAULT_BLOCK_SIZES.text.width,
-      height:
-        canvas['x-superboard']?.settings?.defaultBlockHeight ??
-        DEFAULT_BLOCK_SIZES.text.height,
-      value: '',
-      fontSize: newTextDefaults.fontSize,
-      fontFamily: newTextDefaults.fontFamily,
-      color: newTextDefaults.color,
-      opacity: newTextDefaults.opacity,
-      textAlign: newTextDefaults.textAlign,
-    })
-  }
-
-  function commitEditing() {
-    const current = editingRef.current
-    if (!current) return
-    suppressTextCreateRef.current = true
-    const textarea = textareaRef.current
-    const scale = internals()?.dm.data.scale ?? 1
-    const measured = Math.max(
-      TEXT_MIN_HEIGHT,
-      (textarea?.scrollHeight ?? current.height * scale) / scale,
-    )
-    updateEditing(null)
-    if (current.id) {
-      const index = canvas.nodes.findIndex((item) => item.id === current.id)
-      const node = canvas.nodes[index]
-      if (!node) return
-      if (current.value === '') {
-        onBeforeChange()
-        onApply(
-          { ...canvas, nodes: canvas.nodes.filter((item) => item.id !== current.id) },
-          [],
-        )
-        return
-      }
-      let nextNode: CanvasNode
-      if (current.kind === 'media') {
-        if (node.type !== 'link') return
-        const extension = node['x-superboard']
-        nextNode = {
-          ...node,
-          url: current.value,
-          'x-superboard': {
-            ...extension,
-            kind: 'media',
-            media: {
-              ...extension?.media,
-              kind: detectMediaKind(current.value),
-              url: current.value,
-            },
-          },
-        }
-      } else if (current.kind === 'pele') {
-        if (node.type !== 'text') return
-        nextNode = {
-          ...node,
-          text: `\`\`\`mermaid\n${current.value}\n\`\`\``,
-          height: measured,
-          'x-superboard': { ...node['x-superboard'], kind: 'pele', code: current.value },
-        }
-      } else {
-        if (node.type !== 'text') return
-        nextNode = { ...node, text: current.value, height: measured }
-      }
-      onBeforeChange()
-      onApply(
-        {
-          ...canvas,
-          nodes: canvas.nodes.map((item, itemIndex) =>
-            itemIndex === index ? nextNode : item,
-          ),
-        },
-        [current.id],
-      )
-      return
-    }
-    if (current.value.trim() === '') return
-    const id = nextFreeId(existingIds(), 'text')
-    const node: CanvasNode = {
-      id,
-      type: 'text',
-      x: current.x,
-      y: current.y,
-      width: current.width,
-      height: measured,
-      text: current.value,
-      'x-superboard': {
-        kind: 'text',
-        style: textStyleFromPreferences(),
-      },
-    }
-    onBeforeChange()
-    onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
-    onExitTool()
   }
 
   function hitStroke(
