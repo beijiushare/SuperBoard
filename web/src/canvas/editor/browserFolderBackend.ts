@@ -16,6 +16,14 @@ const HANDLE_KEY = 'root'
 let root: DirHandle | null = null
 let installed = false
 
+// Baseline file text observed by this tab. A mismatch means another tab (or
+// an external editor) changed the file after we read it.
+const versions = new Map<string, string>()
+
+function versionKey(scope: BoardScope, slug: string) {
+  return `${scope}/${slug}`
+}
+
 function response(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -228,6 +236,8 @@ async function writeFile(
     }
     throw error
   }
+  versions.set(versionKey(scope, slug), text)
+  return text
 }
 
 function blankCanvas(title: string, slug: string): CanvasDocument {
@@ -278,12 +288,26 @@ async function handleCanvases(url: URL, init?: RequestInit) {
   const scope = normalizeScope(url.searchParams.get('scope'))
   const file = await boardFile(scope, slug)
   if (!file) return response({ error: '白板不存在' }, 404)
-  const canvas = parseCanvas(await (await file.getFile()).text())
-  if (method === 'GET') return response(canvas)
+  const text = await (await file.getFile()).text()
+  const canvas = parseCanvas(text)
+  const key = versionKey(scope, slug)
+  if (method === 'GET') {
+    versions.set(key, text)
+    return response(canvas)
+  }
   if (method === 'PUT') {
-    const next = parseCanvas(String(init?.body ?? ''))
+    const bodyText = String(init?.body ?? '')
+    const next = parseCanvas(bodyText)
     const meta = next['x-superboard']?.meta
     if (!meta || meta.slug !== slug) return response({ error: 'slug 不一致' }, 409)
+    const force = new Headers(init?.headers).get('x-superboard-force') === '1'
+    const baseline = versions.get(key)
+    if (!force && baseline !== undefined && baseline !== text && bodyText !== text) {
+      return response(
+        { error: '检测到其他标签页已修改该白板，请先确认是否覆盖' },
+        409,
+      )
+    }
     meta.updatedAt = new Date().toISOString()
     const board = await findBoard(scope, slug)
     await writeFile(scope, String(board?.path ?? ''), slug, next)
@@ -323,6 +347,7 @@ async function handleCanvases(url: URL, init?: RequestInit) {
       },
     }
     await writeFile(scope, nextFolder, nextSlug, nextCanvas)
+    if (nextSlug !== slug) versions.delete(key)
     if (nextFolder !== String(board?.path ?? '') || nextSlug !== slug) {
       const oldDir = await folderDirectory(scope, String(board?.path ?? ''))
       await oldDir.removeEntry(`${slug}.canvas`).catch(() => {})
@@ -333,6 +358,7 @@ async function handleCanvases(url: URL, init?: RequestInit) {
     const board = await findBoard(scope, slug)
     const dir = await folderDirectory(scope, String(board?.path ?? ''))
     await dir.removeEntry(`${slug}.canvas`)
+    versions.delete(key)
     return response({ ok: true })
   }
   return response({ error: 'method not allowed' }, 405)

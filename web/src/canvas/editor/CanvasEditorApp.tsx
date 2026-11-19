@@ -163,7 +163,15 @@ export function CanvasEditorApp() {
     canvasRef,
     onRestore: applyDocument,
   })
-  const { saveState, setSaveState, save, markDirty, savingRef } = useCanvasSave({
+  const {
+    saveState,
+    setSaveState,
+    save,
+    resolveConflict,
+    conflict,
+    markDirty,
+    savingRef,
+  } = useCanvasSave({
     canvas,
     items,
     selectedSlug,
@@ -1001,7 +1009,7 @@ export function CanvasEditorApp() {
     presentation,
     focusedGroupId,
     exitPresentation,
-    save,
+    save: conflict ? resolveConflict : save,
     undo,
     redo,
     copySelection,
@@ -1169,8 +1177,9 @@ export function CanvasEditorApp() {
       const node = nodeMap.get(id)
       return Boolean(node?.['x-superboard']?.locked)
     })
-  const railSaveLabel =
-    saveState === 'error'
+  const railSaveLabel = conflict
+    ? '保存冲突，点击覆盖'
+    : saveState === 'error'
       ? '保存失败'
       : saveState === 'dirty'
         ? '点击保存'
@@ -1200,7 +1209,7 @@ export function CanvasEditorApp() {
         saveLabel={railSaveLabel}
         saveState={saveState}
         canSave={Boolean(canvas) && saveState !== 'saving'}
-        onSave={() => void save()}
+        onSave={() => void (conflict ? resolveConflict() : save())}
         stylePanelOpen={stylePanelOpen}
         onToggleStylePanel={() =>
           updateUiState({ stylePanelOpen: !stylePanelOpen })

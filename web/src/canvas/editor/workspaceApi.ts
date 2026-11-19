@@ -10,9 +10,25 @@ export interface WorkspaceFolders {
 async function json<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init)
   if (!response.ok) {
-    throw new Error(`请求失败（${response.status}）`)
+    const data = (await response.json().catch(() => null)) as
+      | { error?: string }
+      | null
+    throw new WorkspaceError(
+      data?.error || `请求失败（${response.status}）`,
+      response.status,
+    )
   }
   return (await response.json()) as T
+}
+
+export class WorkspaceError extends Error {
+  readonly status: number
+
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'WorkspaceError'
+    this.status = status
+  }
 }
 
 export async function loadWorkspace() {
@@ -42,12 +58,19 @@ export async function readBoard(item: CanvasListItem) {
   )
 }
 
-export async function writeBoard(item: CanvasListItem, canvas: CanvasDocument) {
+export async function writeBoard(
+  item: CanvasListItem,
+  canvas: CanvasDocument,
+  force = false,
+) {
   return json<{ ok: true }>(
     `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}`,
     {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(force ? { 'x-superboard-force': '1' } : {}),
+      },
       body: JSON.stringify(canvas),
     },
   )
