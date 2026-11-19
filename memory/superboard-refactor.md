@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`3ee23f8 test: cover style mutations`
+- 最近提交：`1423b47 refactor: extract board dialogs component`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -84,6 +84,8 @@
 - `useOverlayViewport.ts` + `overlayTypes.ts`：覆盖层视口同步
 - `useEdgeDrag.ts`：连线端点拖拽
 - `toolCreate.ts`：形状节点与箭头连线创建
+- `useTextEditing.ts`：文本/媒体/Pele 编辑会话
+- `EditorInsertDialogs.tsx`、`EditorBoardDialogs.tsx`：编辑弹窗拆分
 - 浏览器后端单次扫描定位白板文件，减少全目录遍历
 - `test:editor` 覆盖手绘节点、笔触命中、箭头方向、屏幕矩形、框选相交、形状/连线创建、样式 mutation
 - `docs/MANUAL_TEST.md` 增加浏览器编辑器、多标签冲突、画笔默认值测试项
@@ -96,9 +98,9 @@
 
 ### 高优先级
 
-- `CanvasEditorApp.tsx` 约 1340 行，继续拆内联 JSX 与目录面板
+- `CanvasEditorApp.tsx` 约 1300 行，继续拆内联 JSX 与目录面板
 - `CanvasEditorOverlay.tsx` 约 1070 行，拆拖拽、缩放、选择渲染
-- `CanvasEditorTools.tsx` 约 1020 行，按文本/橡皮拆
+- `CanvasEditorTools.tsx` 约 814 行，按橡皮与手势拆
 
 ### 中优先级
 
