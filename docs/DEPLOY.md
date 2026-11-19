@@ -12,7 +12,7 @@
 npm run build:info
 ```
 
-输出到 `dist-info/`，base 为 `/SuperBoard/`。
+输出到 `dist-info/`；本地默认 base 为 `/`，GitHub Actions 会通过 `BASE_PATH` 设置为仓库名。
 
 GitHub Actions 工作流：`.github/workflows/pages.yml`。
 
