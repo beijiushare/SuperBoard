@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type MouseEvent as ReactMouseEvent,
@@ -13,7 +12,6 @@ import type {
   BoardScope,
   BoardTreeFolder,
 } from '../../shared/board/types'
-import { buildBoardTree } from '../../shared/board/tree'
 import { useTreeExpansion } from '../../shared/board/useTreeExpansion'
 import { DirectorHud } from '../../shared/director/DirectorHud'
 import { PresentationOverlay } from '../../shared/director/PresentationOverlay'
@@ -43,6 +41,7 @@ import { useMarkdownEditingSession } from './useMarkdownEditingSession'
 import { useSelectionActions } from './useSelectionActions'
 import { useBoardWorkspace } from './useBoardWorkspace'
 import { useBoardFiles } from './useBoardFiles'
+import { useBoardTreeData } from './useBoardTreeData'
 import { useBlockActions } from './useBlockActions'
 import { useCanvasInsertions } from './useCanvasInsertions'
 import { useCanvasMenu } from './useCanvasMenu'
@@ -217,22 +216,11 @@ export function CanvasEditorApp() {
     ensureExtension,
   })
 
-  const scopedItems = useMemo(
-    () => items.filter((item) => item.scope === scope),
-    [items, scope],
-  )
-  const scopedFolders = useMemo(
-    () => folders.filter((folder) => folder.scope === scope),
-    [folders, scope],
-  )
-  const folderPaths = useMemo(
-    () => scopedFolders.map((folder) => folder.path).sort((a, b) => a.localeCompare(b, 'zh-CN')),
-    [scopedFolders],
-  )
-  const treeNodes = useMemo(
-    () => buildBoardTree(scopedItems, scopedFolders),
-    [scopedItems, scopedFolders],
-  )
+  const { scopedItems, folderPaths, treeNodes } = useBoardTreeData({
+    items,
+    folders,
+    scope,
+  })
   const { expanded, toggleFolder, expandPath, renameExpandedPath } =
     useTreeExpansion(scopedItems)
   const {
