@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`bae7847 refactor: extract tool pointer gestures`
+- 最近提交：`b9782cc refactor: extract freehand tool hook`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -97,6 +97,7 @@
 - `ToolPreviewLayer.tsx`：形状/箭头拖拽预览
 - `toolViewport.ts`：工具使用的视口/DataManager 访问
 - `useToolPointers.ts`：工具指针按下/移动/抬起手势
+- `useFreehandTool.ts`：手绘预览与落笔提交
 - `toolTypes.ts`：形状与箭头草稿类型
 - 浏览器后端单次扫描定位白板文件，减少全目录遍历
 - `test:editor` 覆盖手绘节点、笔触命中、箭头方向、屏幕矩形、框选相交、形状/连线创建、样式 mutation、橡皮擦除
@@ -113,7 +114,7 @@
 - `CanvasEditorApp.tsx` 约 1060 行，剩余状态与目录配置
 - `CanvasEditorStage.tsx` 约 280 行，可继续按 Viewer/Overlay/Tools 拆
 - `CanvasEditorOverlay.tsx` 约 554 行，只剩渲染与选择框
-- `CanvasEditorTools.tsx` 约 424 行，剩余提交与草稿状态
+- `CanvasEditorTools.tsx` 约 397 行，剩余形状/箭头提交与状态
 
 ### 中优先级
 
