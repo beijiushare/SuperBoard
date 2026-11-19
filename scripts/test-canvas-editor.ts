@@ -12,6 +12,7 @@ import {
 } from '../web/src/canvas/editor/hierarchy'
 import {
   resolveNodeStyle,
+  textBlockHeight,
   type CanvasDocument,
   type CanvasEdge,
   type CanvasNode,
@@ -507,5 +508,12 @@ const lockedErase = planErasure(
   1,
 )
 assert.equal(lockedErase.removals.length, 0)
+
+const shortTextHeight = textBlockHeight('一行文字', 200, 16)
+const multiLineHeight = textBlockHeight('第一行\n第二行\n第三行', 200, 16)
+assert.ok(multiLineHeight > shortTextHeight)
+const narrowHeight = textBlockHeight('hello world hello', 40, 16)
+const wideHeight = textBlockHeight('hello world hello', 200, 16)
+assert.ok(narrowHeight > wideHeight)
 
 console.log('canvas editor tests passed')

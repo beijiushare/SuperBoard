@@ -57,8 +57,10 @@ export function applyTextStyle(
 ): CanvasNode {
   const next = withStyle(node, patch)
   if (node.type !== 'text' || !patch.fontSize) return next
+  const fontFamily =
+    patch.fontFamily ?? next['x-superboard']?.style?.fontFamily
   return {
     ...next,
-    height: textBlockHeight(node.text, node.width, patch.fontSize),
+    height: textBlockHeight(node.text, node.width, patch.fontSize, fontFamily),
   }
 }
