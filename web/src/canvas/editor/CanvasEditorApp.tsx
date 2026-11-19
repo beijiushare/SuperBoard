@@ -53,6 +53,7 @@ import { useMarkdownEditingSession } from './useMarkdownEditingSession'
 import { useSelectionActions } from './useSelectionActions'
 import { useBoardWorkspace } from './useBoardWorkspace'
 import { useBoardFiles } from './useBoardFiles'
+import { useBlockActions } from './useBlockActions'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
 import { CanvasDirectorOverlay } from './CanvasDirectorOverlay'
 import { MarkdownEditorOverlay } from './MarkdownEditorOverlay'
@@ -70,13 +71,8 @@ import {
 import { InputDialog } from '../../shared/ui/InputDialog'
 import {
   DEFAULT_BLOCK_SIZES,
-  SHAPE_DEFAULT_SIZE,
   blockDefinition,
   blockEditor,
-  blockKind,
-  isActionableNode,
-  isRatioLocked,
-  isShapeNode,
 } from './blocks'
 import { distanceToEdge } from './edges'
 import { CanvasEditorTools } from './CanvasEditorTools'
@@ -324,6 +320,30 @@ export function CanvasEditorApp() {
     setSelectedSlug,
     setSaveState,
     setLoading,
+  })
+  const {
+    openBlockEditor,
+    toggleBlockEdit,
+    toggleRatioLock,
+    resetBlockSize,
+    handleMarkdownCommit,
+  } = useBlockActions({
+    canvasRef,
+    viewerRef,
+    textEditingId,
+    captureViewport,
+    recordHistory,
+    markDirty,
+    setCanvas,
+    setSelectedIds,
+    setTool,
+    setEditRequest,
+    closeTextEditing,
+    openMarkdownEditor,
+    toggleMarkdownEdit,
+    closeMarkdownEditor,
+    openPeleEditor,
+    ensureExtension,
   })
   canvasRef.current = canvas
 
@@ -657,127 +677,9 @@ export function CanvasEditorApp() {
     }
   }
 
-  function openBlockEditor(id: string) {
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === id)
-    const editor = node ? blockEditor(node) : null
-    if (!editor) return
-    if (editor === 'markdown') {
-      closeTextEditing()
-      openMarkdownEditor(id)
-      return
-    }
-    if (editor === 'pele') {
-      openPeleEditor(id)
-      return
-    }
-    if (editor === 'schedule') {
-      closeMarkdownEditor()
-      setSelectedIds([id])
-      setTool('select')
-      return
-    }
-    closeMarkdownEditor()
-    setSelectedIds([id])
-    setTool('text')
-    setEditRequest({ id, nonce: Date.now() })
-  }
-
-  function toggleBlockEdit(id: string) {
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === id)
-    const editor = node ? blockEditor(node) : null
-    if (!editor) return
-    if (editor === 'markdown') {
-      closeTextEditing()
-      toggleMarkdownEdit(id)
-      return
-    }
-    if (editor === 'schedule') {
-      setSelectedIds([id])
-      setTool('select')
-      return
-    }
-    if (textEditingId === id) {
-      closeTextEditing()
-      return
-    }
-    openBlockEditor(id)
-  }
-
   function closeTextEditing() {
     const active = document.activeElement as HTMLElement | null
     active?.blur()
-  }
-
-  function toggleRatioLock(id: string) {
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === id)
-    if (!document || !node || !isActionableNode(node)) return
-    recordHistory()
-    const extension = ensureExtension(node)
-    const wasLocked = isRatioLocked(node)
-    extension.ratioLocked = !wasLocked
-    if (wasLocked) extension.contentScale = 1
-    markDirty()
-    viewerRef.current?.viewer?.refresh?.()
-  }
-
-  function resetBlockSize(id: string) {
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === id)
-    if (!document || !node) return
-    const kind = blockKind(node)
-    const target = kind
-      ? DEFAULT_BLOCK_SIZES[kind]
-      : isShapeNode(node)
-        ? SHAPE_DEFAULT_SIZE
-        : null
-    if (!target) return
-    if (
-      node.width === target.width &&
-      node.height === target.height &&
-      (node['x-superboard']?.contentScale ?? 1) === 1
-    ) {
-      return
-    }
-    recordHistory()
-    captureViewport()
-    const next: CanvasDocument = {
-      ...document,
-      nodes: document.nodes.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              x: item.x + (item.width - target.width) / 2,
-              y: item.y + (item.height - target.height) / 2,
-              width: target.width,
-              height: target.height,
-              'x-superboard': {
-                ...ensureExtension(item),
-                contentScale: 1,
-              },
-            }
-          : item,
-      ),
-    }
-    setSelectedIds([id])
-    setCanvas(next)
-    markDirty()
-  }
-
-  function handleMarkdownCommit(id: string, value: string) {
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === id)
-    if (!document || !node || node.type !== 'text') return
-    captureViewport()
-    setCanvas({
-      ...document,
-      nodes: document.nodes.map((item) =>
-        item.id === id && item.type === 'text' ? { ...item, text: value } : item,
-      ),
-    })
-    markDirty()
   }
 
   function defaultBlockSize(kind: keyof typeof DEFAULT_BLOCK_SIZES) {
