@@ -3,7 +3,6 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
@@ -35,6 +34,14 @@ import {
   nodeMapOf,
   selectableAncestor,
 } from './hierarchy'
+import {
+  hasIframeContent,
+  intersects,
+  isAdditiveSelection,
+  screenRect,
+  screenStyle,
+  type Marquee,
+} from './overlayGeometry'
 
 type DataManager = {
   data: {
@@ -82,12 +89,6 @@ interface DragNode {
 
 const GUIDE_DISTANCE_THRESHOLD_PX = 3
 
-function hasIframeContent(node: CanvasNode) {
-  if (node['x-superboard']?.kind === 'schedule') return true
-  if (node['x-superboard']?.media?.kind === 'iframe') return true
-  return node.type === 'text' && /<iframe\b/i.test(node.text)
-}
-
 interface DragState {
   kind: 'move' | 'resize' | 'rotate'
   nodes: DragNode[]
@@ -113,52 +114,6 @@ interface DragState {
     offsetX: number
     offsetY: number
   }>
-}
-
-interface Marquee {
-  left: number
-  top: number
-  width: number
-  height: number
-}
-
-function isAdditiveSelection(event: {
-  shiftKey: boolean
-  metaKey: boolean
-  ctrlKey: boolean
-}) {
-  return event.shiftKey || event.metaKey || event.ctrlKey
-}
-
-function screenRect(node: CanvasNode, offsetX: number, offsetY: number, scale: number) {
-  return {
-    left: offsetX + node.x * scale,
-    top: offsetY + node.y * scale,
-    width: node.width * scale,
-    height: node.height * scale,
-  }
-}
-
-function screenStyle(
-  node: CanvasNode,
-  offsetX: number,
-  offsetY: number,
-  scale: number,
-): CSSProperties {
-  const rect = screenRect(node, offsetX, offsetY, scale)
-  const rotation = node['x-superboard']?.rotation
-  return rotation
-    ? { ...rect, transform: `rotate(${rotation}deg)`, transformOrigin: 'center center' }
-    : rect
-}
-
-function intersects(a: Marquee, b: Marquee) {
-  return (
-    a.left < b.left + b.width &&
-    a.left + a.width > b.left &&
-    a.top < b.top + b.height &&
-    a.top + a.height > b.top
-  )
 }
 
 export function CanvasEditorOverlay({
