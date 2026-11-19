@@ -1,25 +1,20 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   TEXT_LINE_HEIGHT,
   TEXT_PADDING_X,
   TEXT_PADDING_Y,
   type CanvasDocument,
-  type CanvasNode,
 } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
-import { isLocked, nextFreeId, nodeMapOf, topAncestor } from './hierarchy'
 import type { EditorTool } from './tools'
-import {
-  createArrowEdge,
-  createShapeNode,
-} from './toolCreate'
 import { applyErasure, planErasure } from './eraser'
 import { useTextEditing } from './useTextEditing'
 import { useToolViewport } from './toolViewport'
 import type { ToolController, ToolDataManager } from './toolViewport'
 import { useToolPointers } from './useToolPointers'
 import { useFreehandTool } from './useFreehandTool'
-import type { ArrowDraft, ShapeDraft } from './toolTypes'
+import { useShapeArrowTools } from './useShapeArrowTools'
+import type { ArrowDraft } from './toolTypes'
 import { TextEditingOverlay } from './TextEditingOverlay'
 import { ToolPreviewLayer } from './ToolPreviewLayer'
 
@@ -41,8 +36,6 @@ interface CanvasEditorToolsProps {
   onEditMarkdown?: (id: string) => void
   onEditingChange?: (id: string | null) => void
 }
-
-const MIN_DRAG = 6
 
 export function CanvasEditorTools({
   canvas,
@@ -71,8 +64,6 @@ export function CanvasEditorTools({
     controller: Controller
     dm: DataManager
   } | null>(null)
-  const [draft, setDraft] = useState<ShapeDraft | null>(null)
-  const [arrowDraft, setArrowDraft] = useState<ArrowDraft | null>(null)
   const { internals, getView, surfacePoint } = useToolViewport({
     viewerRef,
     surfaceRef,
@@ -95,6 +86,22 @@ export function CanvasEditorTools({
         scale: data.dm.data.scale,
       }
     },
+    onBeforeChange,
+    onApply,
+  })
+  const {
+    draft,
+    setDraft,
+    arrowDraft,
+    setArrowDraft,
+    arrowTarget,
+    findNodeAt,
+    commitShape,
+    commitArrow,
+    resetDrafts,
+  } = useShapeArrowTools({
+    canvas,
+    getData: () => internals()?.dm ?? null,
     onBeforeChange,
     onApply,
   })
@@ -146,8 +153,7 @@ export function CanvasEditorTools({
     })
 
   useEffect(() => {
-    setDraft(null)
-    setArrowDraft(null)
+    resetDrafts()
     resetStroke()
     arrowRef.current = null
     eraserRef.current = null
@@ -231,36 +237,6 @@ export function CanvasEditorTools({
     onCreateRequestHandled?.()
   }, [createRequest, onCreateRequestHandled])
 
-  function existingIds() {
-    return new Set<string>([
-      ...canvas.nodes.map((node) => node.id),
-      ...canvas.edges.map((edge) => edge.id),
-    ])
-  }
-
-  function findNodeAt(x: number, y: number, predicate?: (node: CanvasNode) => boolean) {
-    const data = internals()
-    if (!data) return null
-    const nodes = Object.values(data.dm.data.nodeMap).map((item) => item.ref)
-    const map = nodeMapOf(nodes)
-    for (let index = nodes.length - 1; index >= 0; index -= 1) {
-      const node = nodes[index]
-      if (predicate && !predicate(node)) continue
-      const root = predicate ? node : topAncestor(node, map)
-      if (isLocked(root, map)) continue
-      if (
-        x < root.x ||
-        x > root.x + root.width ||
-        y < root.y ||
-        y > root.y + root.height
-      ) {
-        continue
-      }
-      return root
-    }
-    return null
-  }
-
   function eraseAt(x: number, y: number) {
     const data = internals()
     const gesture = eraserRef.current
@@ -283,60 +259,10 @@ export function CanvasEditorTools({
     onChange()
   }
 
-  function commitShape(shape: 'rect' | 'rounded-rect' | 'ellipse' | 'diamond' | 'line') {
-    const current = draft
-    if (!current) return
-    const scale = internals()?.dm.data.scale ?? 1
-    const width = Math.abs(current.currentX - current.startX)
-    const height = Math.abs(current.currentY - current.startY)
-    if (Math.max(width, height) * scale < MIN_DRAG) {
-      setDraft(null)
-      return
-    }
-    const shapeKind = shape === 'rounded-rect' ? 'rect' : shape
-    const id = nextFreeId(existingIds(), shapeKind)
-    const node = createShapeNode({
-      id,
-      shape,
-      startX: current.startX,
-      startY: current.startY,
-      currentX: current.currentX,
-      currentY: current.currentY,
-    })
-    setDraft(null)
-    onBeforeChange()
-    onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
-  }
-
-  function commitArrow() {
-    const current = arrowRef.current
-    arrowRef.current = null
-    setArrowDraft(null)
-    if (!current) return
-    const target = findNodeAt(current.currentX, current.currentY)
-    if (!target || target.id === current.fromId) return
-    const data = internals()
-    if (!data) return
-    const from = data.dm.data.nodeMap[current.fromId]?.ref
-    if (!from) return
-    const edge = createArrowEdge({
-      id: nextFreeId(existingIds(), 'edge'),
-      from,
-      to: target,
-      currentX: current.currentX,
-      currentY: current.currentY,
-    })
-    onBeforeChange()
-    onApply({ ...canvas, edges: [...canvas.edges, edge] }, [])
-  }
-
   if (tool === 'select') return null
 
   const view = getView()
 
-  const arrowTarget = arrowDraft
-    ? findNodeAt(arrowDraft.currentX, arrowDraft.currentY, (node) => node.id !== arrowDraft.fromId)
-    : null
   const textPreview = editing
     ? (() => {
         const scale = view?.scale ?? 1
