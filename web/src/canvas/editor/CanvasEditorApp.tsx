@@ -35,8 +35,6 @@ import type {
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
-  HISTORY_LIMIT,
-  HISTORY_MERGE_MS,
   PASTE_OFFSET,
   nextId,
   normalizeMarkdownLocks,
@@ -50,6 +48,7 @@ import {
   type DataManagerLike,
   type ViewerInternals,
 } from './appUtils'
+import { useCanvasHistory } from './useCanvasHistory'
 import { useCanvasSave } from './useCanvasSave'
 import { useCanvasViewport } from './useCanvasViewport'
 import { useDirectorSession } from './useDirectorSession'
@@ -166,11 +165,6 @@ export function CanvasEditorApp() {
   const shiftRef = useRef(false)
   const rightDragRef = useRef<{ x: number; y: number } | null>(null)
   const keydownHandlerRef = useRef<(event: KeyboardEvent) => void>(() => {})
-  const historyRef = useRef<{ past: CanvasDocument[]; future: CanvasDocument[] }>({
-    past: [],
-    future: [],
-  })
-  const historyMergeRef = useRef<{ key: string; at: number } | null>(null)
   const clipboardRef = useRef<Clipboard | null>(null)
   const pasteCountRef = useRef(0)
   const canvasRef = useRef<CanvasDocument | null>(null)
@@ -179,6 +173,10 @@ export function CanvasEditorApp() {
     selectedSlug,
     scope,
     viewerRef,
+  })
+  const { recordHistory, undo, redo, resetHistory } = useCanvasHistory({
+    canvasRef,
+    onRestore: applyDocument,
   })
   const { saveState, setSaveState, save, markDirty, savingRef } = useCanvasSave({
     canvas,
@@ -332,8 +330,7 @@ export function CanvasEditorApp() {
         }
         const next = await readBoard(first)
         if (cancelled) return
-        historyRef.current = { past: [], future: [] }
-        historyMergeRef.current = null
+        resetHistory()
         setSelectedIds([])
         setTool('select')
         normalizeMarkdownLocks(next)
@@ -403,25 +400,6 @@ export function CanvasEditorApp() {
       setSelectedEdgeId(null)
     }
   }, [canvas, selectedEdgeId])
-
-  function recordHistory(mergeKey?: string) {
-    if (!canvas) return
-    const now = Date.now()
-    if (mergeKey) {
-      const merged = historyMergeRef.current
-      if (merged?.key === mergeKey && now - merged.at < HISTORY_MERGE_MS) {
-        merged.at = now
-        return
-      }
-      historyMergeRef.current = { key: mergeKey, at: now }
-    } else {
-      historyMergeRef.current = null
-    }
-    const history = historyRef.current
-    history.past.push(structuredClone(canvas))
-    if (history.past.length > HISTORY_LIMIT) history.past.shift()
-    history.future.length = 0
-  }
 
   function rememberBoardColor(color: string) {
     rememberRecentColor(color)
@@ -927,26 +905,6 @@ export function CanvasEditorApp() {
     setMediaDialogOpen(false)
     setMediaUrl('')
     setMediaInsertPoint(null)
-  }
-
-  function undo() {
-    if (!canvas) return
-    historyMergeRef.current = null
-    const history = historyRef.current
-    const previous = history.past.pop()
-    if (!previous) return
-    history.future.push(structuredClone(canvas))
-    applyDocument(previous)
-  }
-
-  function redo() {
-    if (!canvas) return
-    historyMergeRef.current = null
-    const history = historyRef.current
-    const next = history.future.pop()
-    if (!next) return
-    history.past.push(structuredClone(canvas))
-    applyDocument(next)
   }
 
   function copySelection() {
@@ -1502,8 +1460,7 @@ export function CanvasEditorApp() {
   }
 
   function activateCanvas(item: CanvasListItem, next: CanvasDocument) {
-    historyRef.current = { past: [], future: [] }
-    historyMergeRef.current = null
+    resetHistory()
     normalizeMarkdownLocks(next)
     setSelectedIds([])
     setSelectedEdgeId(null)
