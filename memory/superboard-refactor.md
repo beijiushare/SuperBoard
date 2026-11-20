@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`72811c4 feat: inline local images in single html export`
+- 最近提交：`1a24254 chore: expose desktop platform marker and debug port`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -144,6 +144,35 @@
 - `styleMutations.ts`：通用样式/几何/文本样式 mutation
 - `StyleFieldGroups.tsx`：公共样式字段组
 
+### 桌面端（Wails v3）
+
+- 工程位于 `desktop/`，Go module `superboard/desktop`
+- 前端复用根项目 `npm run build:editor`，复制到 `desktop/frontend/dist` 后嵌入
+- bindings 生成到 `web/src/desktop/bindings`
+- 共享前端通过 `web/src/desktop/platform.ts` 检测 `window._wails` 调用
+- `WorkspaceService` 实现工作区打开/恢复、白板与文件夹 CRUD、附件导入
+- `%APPDATA%/SuperBoard/config.json` 保存工作区路径
+- 单实例锁：第二次启动恢复并聚焦已有窗口
+- `/__files/<scope>/<path>` 只读暴露工作区附件，路径越界返回 404
+- `ExportService` 使用系统保存/目录对话框导出 HTML 与附件
+- 桌面端附件插入走原生文件选择器，不再通过 JS 桥传大文件
+- 文件右键菜单支持打开、在文件管理器中显示、删除
+- 原生 JSON Canvas `type: "file"` 节点已启用，旧 link 文件节点自动迁移
+- 文件节点由 DOM 渲染（图片/视频预览、其他显示文件卡片）
+- 可用 `SUPERBOARD_DEBUG=1` 开启 WebView2 远程调试（9222）
+- 已通过 CDP 验证：桌面模式识别、工作区恢复、欢迎白板加载、附件读取、越界拦截
+
+### 代码结构（桌面端）
+
+- `desktop/main.go`：Wails 入口、窗口、单实例、调试参数
+- `desktop/services/workspace.go`：工作区、白板、文件夹、附件
+- `desktop/services/export.go`：原生导出对话框
+- `desktop/services/assets.go`：静态资源 + `/__files/`
+- `desktop/services/config.go`：本地配置
+- `desktop/scripts/frontend.mjs`：前端构建/开发桥接
+- `web/src/desktop/platform.ts`：桌面 bindings 封装与 fetch 适配
+- `web/src/canvas/editor/workspacePlatform.ts`：浏览器/桌面统一入口
+
 ## 仍待完成
 
 ### 手动验证
@@ -155,14 +184,16 @@
 - 长文本三态 UI 一致性
 - 拖拽、缩放、旋转、框选回归
 - 站点导出与 `dist-info` 演示站
+- 桌面端原生对话框、导出、文件管理器操作
 
 ### 桌面端 TODO
 
-- Wails/Go 桌面工程
-- 桌面本地 `config.json` 与单实例
+- `.canvas` 文件关联与启动参数打开白板
+- 桌面原生菜单
 - 多文件站点导出到设置中的固定目录
 - 导出目录变更与旧产物迁移
 - 部署命令配置与执行器（暂缓）
+- `wails3 dev` 下附件预览（当前需构建后验证）
 
 ### 可选优化
 
