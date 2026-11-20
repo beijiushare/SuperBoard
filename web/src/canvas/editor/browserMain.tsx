@@ -75,6 +75,25 @@ function EditorGate({ desktop }: { desktop: boolean }) {
   const supported =
     desktop ||
     (typeof window !== 'undefined' && 'showDirectoryPicker' in window)
+  const startRequested =
+    new URLSearchParams(window.location.search).get('start') === '1'
+
+  const clearStartRequest = () => {
+    const params = new URLSearchParams(window.location.search)
+    if (!params.has('start')) return
+    params.delete('start')
+    const query = params.toString()
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${query ? `?${query}` : ''}`,
+    )
+  }
+
+  const finishOpen = () => {
+    clearStartRequest()
+    setReady(true)
+  }
 
   const refreshRecent = () => {
     void listRecentWorkspaces()
@@ -86,6 +105,13 @@ function EditorGate({ desktop }: { desktop: boolean }) {
     if (lockState !== 'ready') return
     if (!supported) {
       setInitializing(false)
+      return
+    }
+    if (startRequested) {
+      void listRecentWorkspaces()
+        .then(setRecent)
+        .catch(() => setRecent([]))
+        .finally(() => setInitializing(false))
       return
     }
     const restore = desktop
@@ -103,14 +129,14 @@ function EditorGate({ desktop }: { desktop: boolean }) {
         refreshRecent()
       })
       .finally(() => setInitializing(false))
-  }, [desktop, supported, lockState])
+  }, [desktop, startRequested, supported, lockState])
 
   const handleOpenFolder = () => {
     setBusy(true)
     setError('')
     void openWorkspace()
       .then((name) => {
-        if (name) setReady(true)
+        if (name) finishOpen()
         else refreshRecent()
       })
       .catch((reason: unknown) => {
@@ -125,7 +151,7 @@ function EditorGate({ desktop }: { desktop: boolean }) {
     setError('')
     void openRecentWorkspace(item)
       .then((name) => {
-        if (name) setReady(true)
+        if (name) finishOpen()
         else refreshRecent()
       })
       .catch((reason: unknown) => {

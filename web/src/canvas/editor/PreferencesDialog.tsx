@@ -38,6 +38,8 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
   const [switching, setSwitching] = useState(false)
   const [workspacePath, setWorkspacePath] = useState('')
   const [recent, setRecent] = useState<WorkspaceRecentItem[]>([])
+  const [protectedWorkspace, setProtectedWorkspace] =
+    useState<WorkspaceRecentItem | null>(null)
 
   const refreshRecent = () => {
     void listRecentWorkspaces()
@@ -64,11 +66,12 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
       if (confirmReset) setConfirmReset(false)
+      else if (protectedWorkspace) setProtectedWorkspace(null)
       else onClose()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [confirmReset, onClose])
+  }, [confirmReset, onClose, protectedWorkspace])
 
   useEffect(() => {
     savePreferences(draft)
@@ -90,6 +93,12 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
 
   const currentWorkspace = workspacePath || workspaceName()
 
+  function isCurrentWorkspace(item: WorkspaceRecentItem) {
+    return item.path
+      ? item.path === currentWorkspace
+      : item.name === currentWorkspace
+  }
+
   function switchToRecent(item: WorkspaceRecentItem) {
     if (!item.available || switching) return
     setSwitching(true)
@@ -99,7 +108,19 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
   }
 
   function removeRecent(item: WorkspaceRecentItem) {
+    if (isCurrentWorkspace(item)) {
+      setProtectedWorkspace(item)
+      return
+    }
     void forgetRecentWorkspace(item).then(refreshRecent)
+  }
+
+  function goStart() {
+    const params = new URLSearchParams(window.location.search)
+    params.set('start', '1')
+    params.delete('board')
+    params.delete('scope')
+    window.location.href = `${window.location.pathname}?${params.toString()}`
   }
 
   return createPortal(
@@ -224,9 +245,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
             {recent.length > 0 ? (
               <div className="sb-workspace-recent">
                 {recent.map((item) => {
-                  const current = item.path
-                    ? item.path === currentWorkspace
-                    : item.name === currentWorkspace
+                  const current = isCurrentWorkspace(item)
                   const detail = !item.available
                     ? '目录不存在'
                     : item.permission === 'prompt'
@@ -265,6 +284,16 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
                     </div>
                   )
                 })}
+                <button
+                  type="button"
+                  className="sb-workspace-start"
+                  onClick={goStart}
+                >
+                  <span className="sb-workspace-recent-name">开始</span>
+                  <span className="sb-workspace-recent-path">
+                    返回开始页，选择其他工作区
+                  </span>
+                </button>
               </div>
             ) : (
               <p className="sb-preferences-note">还没有最近工作区。</p>
@@ -414,6 +443,45 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
               }}
             >
               恢复默认
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : null}
+    {protectedWorkspace ? (
+      <div
+        className="canvas-editor-dialog-backdrop is-nested"
+        role="presentation"
+        onClick={() => setProtectedWorkspace(null)}
+      >
+        <div
+          className="canvas-editor-dialog sb-confirm-dialog"
+          role="alertdialog"
+          aria-modal="true"
+          aria-label="无法删除工作区"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <h2>无法删除正在使用的工作区</h2>
+          <p>
+            当前编辑器正在使用「{protectedWorkspace.name}」。请先转到
+            <button
+              type="button"
+              className="sb-inline-link"
+              onClick={() => {
+                setProtectedWorkspace(null)
+                goStart()
+              }}
+            >
+              开始
+            </button>
+            ，再删除该工作区。
+          </p>
+          <div className="canvas-editor-dialog-actions">
+            <button
+              type="button"
+              onClick={() => setProtectedWorkspace(null)}
+            >
+              知道了
             </button>
           </div>
         </div>

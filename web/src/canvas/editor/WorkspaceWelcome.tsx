@@ -1,4 +1,5 @@
 import type { WorkspaceRecentItem } from './workspacePlatform'
+import wordmarkUrl from '../../assets/superboard-wordmark.svg?url'
 
 function HashIcon({ size = 40 }: { size?: number }) {
   return (
@@ -71,13 +72,14 @@ export function WorkspaceWelcome({
     <div className="sb-welcome">
       <div className="sb-welcome-inner">
         <header className="sb-welcome-brand">
-          <div className="sb-welcome-logo">
-            <HashIcon size={40} />
-          </div>
-          <div>
-            <h1>SuperBoard</h1>
-            <p>本地优先的白板工作区</p>
-          </div>
+          <span className="sb-start-hash" aria-hidden="true">
+            #
+          </span>
+          <img
+            className="sb-start-wordmark"
+            src={wordmarkUrl}
+            alt="SuperBoard"
+          />
         </header>
 
         <section className="sb-welcome-recent">
