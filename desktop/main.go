@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -142,11 +143,48 @@ func main() {
 		openCanvas(event.Context().Filename())
 	})
 
+	// Keep the initial window inside the primary work area. Small displays
+	// previously pushed the title bar and its buttons off-screen.
+	windowWidth, windowHeight := 1180, 700
+	windowX, windowY := 20, 20
+	workWidth, workHeight := 0, 0
+	if screen := app.Screen.GetPrimary(); screen != nil {
+		work := screen.WorkArea
+		workWidth, workHeight = work.Width, work.Height
+		if work.Width > 0 && work.Height > 0 {
+			windowWidth = min(1180, max(960, work.Width-100))
+			windowHeight = min(700, max(640, work.Height-100))
+			windowX = work.X + (work.Width-windowWidth)/2
+			windowY = work.Y + (work.Height-windowHeight)/2
+		}
+	}
+	if os.Getenv("SUPERBOARD_DEBUG") != "" {
+		if file, err := os.OpenFile(
+			filepath.Join(os.TempDir(), "superboard-window.log"),
+			os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
+			0o644,
+		); err == nil {
+			_, _ = fmt.Fprintf(
+				file,
+				"work=%dx%d window=%dx%d at %d,%d\n",
+				workWidth,
+				workHeight,
+				windowWidth,
+				windowHeight,
+				windowX,
+				windowY,
+			)
+			_ = file.Close()
+		}
+	}
+
 	mainWindow = app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Name:             "main",
 		Title:            "SuperBoard",
-		Width:            1440,
-		Height:           900,
+		Width:            windowWidth,
+		Height:           windowHeight,
+		X:                windowX,
+		Y:                windowY,
 		MinWidth:         1024,
 		MinHeight:        680,
 		BackgroundColour: application.NewRGB(247, 244, 236),
