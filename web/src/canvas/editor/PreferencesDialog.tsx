@@ -11,6 +11,7 @@ import {
 } from './preferences'
 import { BackgroundFields, BorderFields } from './StyleFieldGroups'
 import { StyleNumberControl } from './StyleNumberControl'
+import { Select } from '../../components/ui/select'
 import { desktopMode, desktopWorkspacePath } from '../../desktop/platform'
 import {
   canOpenWorkspace,
@@ -343,19 +344,13 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           <h3>文本默认样式</h3>
           <div className="sb-style-row">
             <span>字体</span>
-            <select
-              className="sb-style-select"
+            <Select
+              className="sb-select-compact"
               value={draft.text.fontFamily}
-              onChange={(event) =>
-                updateText({ fontFamily: event.target.value })
-              }
-            >
-              {FONT_OPTIONS.map((font) => (
-                <option key={font.value} value={font.value}>
-                  {font.label}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => updateText({ fontFamily: value })}
+              ariaLabel="字体"
+              options={FONT_OPTIONS}
+            />
           </div>
           <StyleNumberControl
             label="字号"

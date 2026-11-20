@@ -94,17 +94,22 @@
 }
 
 .sb-start-button {
+  display: inline-flex;
   width: 220px;
   min-width: 0;
   flex: none;
+  align-items: center;
+  justify-content: center;
   padding: 8px 16px;
   border: 0;
   border-radius: 8px;
   background: #22211f;
   color: #fffdf8;
   cursor: pointer;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 600;
+  text-align: center;
 }
 
 .sb-start-button:hover:not(:disabled) {
@@ -117,112 +122,6 @@
 }
 
 .sb-start-select {
-  width: 220px;
-  min-width: 0;
-  padding: 8px 10px;
-  border: 1px solid #d8d4c9;
-  border-radius: 8px;
-  background: #fff;
-  color: #1f1e1c;
-  font: inherit;
-  font-size: 13px;
-}
-
-.sb-start-select:focus {
-  border-color: #b9b5a9;
-  outline: none;
-  box-shadow: 0 0 0 3px rgb(34 33 31 / 6%);
-}
-
-.sb-start-select-button {
-  display: flex;
-  width: 100%;
-  min-width: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  cursor: pointer;
-  text-align: left;
-}
-
-.sb-start-select-button:disabled {
-  color: #b8b4a9;
-  cursor: default;
-}
-
-.sb-start-select-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.sb-start-select-arrow {
-  flex: none;
-  color: #8a857b;
-  font-size: 14px;
-  line-height: 1;
-}
-
-.sb-start-recent {
-  position: relative;
-  width: 220px;
-  flex: none;
-}
-
-.sb-start-menu {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 6px);
-  right: 0;
-  width: min(320px, 70vw);
-  max-height: 260px;
-  overflow: auto;
-  padding: 6px;
-  border: 1px solid #e0dcd2;
-  border-radius: 10px;
-  background: #fffdf8;
-  box-shadow: 0 12px 32px rgb(20 18 10 / 14%);
-}
-
-.sb-start-menu-item {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 10px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: #1f1e1c;
-  cursor: pointer;
-  font: inherit;
-  font-size: 13px;
-  text-align: left;
-}
-
-.sb-start-menu-item:hover:not(:disabled) {
-  background: #f1eee5;
-}
-
-.sb-start-menu-item:disabled {
-  color: #b8b4a9;
-  cursor: default;
-}
-
-.sb-start-menu-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.sb-start-menu-item small {
-  flex: none;
-  color: #a19c90;
-  font-size: 11px;
-}
-
-.sb-start-language {
   width: 220px;
 }
 

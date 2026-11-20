@@ -13,6 +13,7 @@ import {
   desktopExportHtml,
   desktopMode,
 } from '../../desktop/platform'
+import { Select } from '../../components/ui/select'
 
 interface ExportDialogProps {
   canvas: CanvasDocument
@@ -139,19 +140,22 @@ export function ExportDialog({
                 <div className="sb-export-attachment" key={item.file}>
                   <span title={item.file}>{item.name}</span>
                   <small>{formatSize(item.size)}</small>
-                  <select
+                  <Select
+                    className="sb-select-export"
                     value={actions.get(item.file) ?? 'skip'}
-                    onChange={(event) =>
+                    onChange={(value) =>
                       setAction(
                         item.file,
-                        event.target.value as AttachmentAction,
+                        value as AttachmentAction,
                       )
                     }
-                  >
-                    <option value="skip">不导出</option>
-                    <option value="embed">内嵌到 HTML</option>
-                    <option value="copy">复制到附件文件夹</option>
-                  </select>
+                    ariaLabel="附件导出方式"
+                    options={[
+                      { value: 'skip', label: '不导出' },
+                      { value: 'embed', label: '内嵌到 HTML' },
+                      { value: 'copy', label: '复制到附件文件夹' },
+                    ]}
+                  />
                 </div>
               ))}
             </div>

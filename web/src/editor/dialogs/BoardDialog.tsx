@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import type { BoardListItem } from '../../shared/board/types'
 import type { BoardFormValues } from './types'
 import { useDialogEscape } from './useDialogEscape'
+import { Select } from '../../components/ui/select'
 
 interface BoardDialogProps {
   mode: 'create' | 'rename'
@@ -88,18 +89,16 @@ export function BoardDialog({
 
           <label className="sb-field">
             <span>文件夹</span>
-            <select
+            <Select
               value={folder}
-              onChange={(event) => setFolder(event.target.value)}
+              onChange={setFolder}
               disabled={busy}
-            >
-              <option value="">根目录</option>
-              {folders.map((path) => (
-                <option key={path} value={path}>
-                  {path}
-                </option>
-              ))}
-            </select>
+              ariaLabel="文件夹"
+              options={[
+                { value: '', label: '根目录' },
+                ...folders.map((path) => ({ value: path, label: path })),
+              ]}
+            />
             <small>
               {mode === 'create'
                 ? '默认放在右键位置，也可以改到其他文件夹。'

@@ -8,6 +8,7 @@ import {
 import { ColorPicker } from './ColorPicker'
 import { DEFAULT_PREFERENCES, FONT_OPTIONS } from './preferences'
 import { StyleNumberControl } from './StyleNumberControl'
+import { Select } from '../../components/ui/select'
 
 interface TransformFieldsProps {
   rotation: number
@@ -286,19 +287,13 @@ export function TextFields({
       <h3>文本</h3>
       <div className="sb-style-row">
         <span>字体</span>
-        <select
-          className="sb-style-select"
+        <Select
+          className="sb-select-compact"
           value={style.fontFamily ?? DEFAULT_TEXT_FONT}
-          onChange={(event) =>
-            onChange({ fontFamily: event.target.value || undefined })
-          }
-        >
-          {FONT_OPTIONS.map((font) => (
-            <option key={font.value} value={font.value}>
-              {font.label}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => onChange({ fontFamily: value || undefined })}
+          ariaLabel="字体"
+          options={FONT_OPTIONS}
+        />
       </div>
       <StyleNumberControl
         label="字号"

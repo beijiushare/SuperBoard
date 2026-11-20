@@ -6,6 +6,7 @@ import {
   type FolderMoveProgress,
 } from '../../canvas/editor/folderMove'
 import { useDialogEscape } from './useDialogEscape'
+import { Select } from '../../components/ui/select'
 
 interface RenameFolderDialogProps {
   folder: BoardTreeFolder
@@ -92,18 +93,16 @@ export function RenameFolderDialog({
           </label>
           <label className="sb-field">
             <span>父文件夹</span>
-            <select
+            <Select
               value={parent}
-              onChange={(event) => setParent(event.target.value)}
+              onChange={setParent}
               disabled={busy}
-            >
-              <option value="">根目录</option>
-              {folders.map((path) => (
-                <option key={path} value={path}>
-                  {path}
-                </option>
-              ))}
-            </select>
+              ariaLabel="父文件夹"
+              options={[
+                { value: '', label: '根目录' },
+                ...folders.map((path) => ({ value: path, label: path })),
+              ]}
+            />
             <small>修改父文件夹会把整个目录移动到新位置。</small>
           </label>
           {error ? <p className="sb-dialog-error">{error}</p> : null}

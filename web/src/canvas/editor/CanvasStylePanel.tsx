@@ -18,6 +18,7 @@ import {
 import { ColorPicker } from './ColorPicker'
 import { DrawingStyleSection } from './DrawingStyleSection'
 import { patchDrawingNode, type DrawingPatch } from './drawingStyle'
+import { Select } from '../../components/ui/select'
 import {
   BackgroundFields,
   BorderFields,
@@ -579,39 +580,43 @@ export function CanvasStylePanel({
           </div>
           <div className="sb-style-row">
             <span>起点侧</span>
-            <select
-              className="sb-style-select"
+            <Select
+              className="sb-select-compact"
               value={edge.fromSide ?? ''}
-              onChange={(event) =>
+              onChange={(value) =>
                 updateEdge({
-                  fromSide: (event.target.value || undefined) as CanvasEdge['fromSide'],
+                  fromSide: (value || undefined) as CanvasEdge['fromSide'],
                 })
               }
-            >
-              <option value="">自动</option>
-              <option value="top">上</option>
-              <option value="right">右</option>
-              <option value="bottom">下</option>
-              <option value="left">左</option>
-            </select>
+              ariaLabel="起点侧"
+              options={[
+                { value: '', label: '自动' },
+                { value: 'top', label: '上' },
+                { value: 'right', label: '右' },
+                { value: 'bottom', label: '下' },
+                { value: 'left', label: '左' },
+              ]}
+            />
           </div>
           <div className="sb-style-row">
             <span>终点侧</span>
-            <select
-              className="sb-style-select"
+            <Select
+              className="sb-select-compact"
               value={edge.toSide ?? ''}
-              onChange={(event) =>
+              onChange={(value) =>
                 updateEdge({
-                  toSide: (event.target.value || undefined) as CanvasEdge['toSide'],
+                  toSide: (value || undefined) as CanvasEdge['toSide'],
                 })
               }
-            >
-              <option value="">自动</option>
-              <option value="top">上</option>
-              <option value="right">右</option>
-              <option value="bottom">下</option>
-              <option value="left">左</option>
-            </select>
+              ariaLabel="终点侧"
+              options={[
+                { value: '', label: '自动' },
+                { value: 'top', label: '上' },
+                { value: 'right', label: '右' },
+                { value: 'bottom', label: '下' },
+                { value: 'left', label: '左' },
+              ]}
+            />
           </div>
           <div className="sb-style-row">
             <span>标签</span>

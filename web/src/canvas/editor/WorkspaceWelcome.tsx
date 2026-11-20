@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type MouseEvent } from 'react'
+import type { MouseEvent } from 'react'
 import { Browser } from '@wailsio/runtime'
 import type { WorkspaceRecentItem } from './workspacePlatform'
+import { Select } from '../../components/ui/select'
 import wordmarkUrl from '../../assets/superboard-wordmark.svg?url'
 import hashUrl from '../../assets/superboard-hash.svg?url'
 
@@ -28,83 +29,6 @@ export function WelcomeLoading({ desktop }: { desktop: boolean }) {
       <h1>SuperBoard</h1>
       <p>正在打开工作区…</p>
       <span>{desktop ? '桌面版' : '浏览器版'}</span>
-    </div>
-  )
-}
-
-function RecentSelect({
-  items,
-  disabled,
-  onOpen,
-}: {
-  items: WorkspaceRecentItem[]
-  disabled: boolean
-  onOpen: (item: WorkspaceRecentItem) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const [selected, setSelected] = useState('')
-  const ref = useRef<HTMLDivElement>(null)
-  const current = items.find((item) => item.id === selected)
-  const label = current?.name ?? '选择'
-
-  useEffect(() => {
-    if (!open) return
-    const onPointerDown = (event: PointerEvent) => {
-      if (!ref.current?.contains(event.target as Node)) setOpen(false)
-    }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
-    }
-    window.addEventListener('pointerdown', onPointerDown)
-    window.addEventListener('keydown', onKeyDown)
-    return () => {
-      window.removeEventListener('pointerdown', onPointerDown)
-      window.removeEventListener('keydown', onKeyDown)
-    }
-  }, [open])
-
-  return (
-    <div className="sb-start-recent" ref={ref}>
-      <button
-        type="button"
-        className="sb-start-select sb-start-select-button"
-        disabled={disabled || items.length === 0}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <span className="sb-start-select-label">{label}</span>
-        <span className="sb-start-select-arrow" aria-hidden="true">
-          ⌄
-        </span>
-      </button>
-      {open ? (
-        <div className="sb-start-menu" role="listbox">
-          {items.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="option"
-              aria-selected={item.id === selected}
-              className="sb-start-menu-item"
-              disabled={!item.available}
-              title={item.path ?? item.name}
-              onClick={() => {
-                setSelected(item.id)
-                setOpen(false)
-                onOpen(item)
-              }}
-            >
-              <span className="sb-start-menu-name">{item.name}</span>
-              {!item.available ? (
-                <small>目录不存在</small>
-              ) : item.permission === 'prompt' ? (
-                <small>需要授权</small>
-              ) : null}
-            </button>
-          ))}
-        </div>
-      ) : null}
     </div>
   )
 }
@@ -159,6 +83,7 @@ export function WorkspaceWelcome({
             href="https://github.com/beijiushare/SuperBoard"
             target="_blank"
             rel="noreferrer"
+            title="SuperBoard 0.1.0"
             onClick={(event) =>
               openExternal(
                 event,
@@ -166,18 +91,19 @@ export function WorkspaceWelcome({
               )
             }
           >
-            版本 0.1.0
+            版本
           </a>
           <span aria-hidden="true">·</span>
           <a
             href="https://beijiu.top/SuperBoard"
             target="_blank"
             rel="noreferrer"
+            title="beijiu.top/SuperBoard"
             onClick={(event) =>
               openExternal(event, 'https://beijiu.top/SuperBoard')
             }
           >
-            beijiu.top/SuperBoard
+            网站
           </a>
         </div>
 
@@ -202,10 +128,27 @@ export function WorkspaceWelcome({
               <h2>最近打开</h2>
               <p>最近访问的工作区。</p>
             </div>
-            <RecentSelect
-              items={recent}
+            <Select
+              className="sb-start-select"
+              value=""
+              placeholder="选择"
               disabled={busy}
-              onOpen={onOpenRecent}
+              ariaLabel="最近工作区"
+              onChange={(id) => {
+                const item = recent.find((entry) => entry.id === id)
+                if (item) onOpenRecent(item)
+              }}
+              options={recent.map((item) => ({
+                value: item.id,
+                label: item.name,
+                disabled: !item.available,
+                title: item.path ?? item.name,
+                hint: !item.available
+                  ? '目录不存在'
+                  : item.permission === 'prompt'
+                    ? '需要授权'
+                    : undefined,
+              }))}
             />
           </div>
 
@@ -214,13 +157,13 @@ export function WorkspaceWelcome({
               <h2>语言</h2>
               <p>界面显示语言。</p>
             </div>
-            <select
-              className="sb-start-select sb-start-language"
-              defaultValue="zh-CN"
-              aria-label="语言"
-            >
-              <option value="zh-CN">简体中文</option>
-            </select>
+            <Select
+              className="sb-start-select"
+              value="zh-CN"
+              onChange={() => undefined}
+              ariaLabel="语言"
+              options={[{ value: 'zh-CN', label: '简体中文' }]}
+            />
           </div>
         </section>
 
