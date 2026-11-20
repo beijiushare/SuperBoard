@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`983547d fix: allow middle and right drag panning over blocks`
+- 最近提交：`72811c4 feat: inline local images in single html export`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -43,6 +43,9 @@
 - 新建文本时立即创建真实节点，再进入编辑
 - 设置改为左侧分类导航；关于页只显示版本
 - 连线、手绘、形状全部改为 SVG 图层
+- 插入媒体支持在线 URL 与本地文件
+- 本地文件复制到 `<scope>/assets/files`，渲染为文件卡片；图片/视频可预览
+- 单 HTML 导出会把本地图片转 data URL 内嵌
 - 网格改为 SVG pattern，仅保留线网格/无网格
 - 导出快照包含 SVG 图层，不再把连线/手绘转成位图
 - 设置改为 Obsidian 式左侧导航与搜索
