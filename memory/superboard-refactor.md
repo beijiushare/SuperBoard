@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`1a24254 chore: expose desktop platform marker and debug port`
+- 最近提交：`7260e92 test: cover desktop workspace service`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -160,7 +160,11 @@
 - 原生 JSON Canvas `type: "file"` 节点已启用，旧 link 文件节点自动迁移
 - 文件节点由 DOM 渲染（图片/视频预览、其他显示文件卡片）
 - 可用 `SUPERBOARD_DEBUG=1` 开启 WebView2 远程调试（9222）
-- 已通过 CDP 验证：桌面模式识别、工作区恢复、欢迎白板加载、附件读取、越界拦截
+- 支持命令行传入 `.canvas`，自动推导工作区并打开对应白板
+- 设置页显示桌面端工作区完整路径
+- 文件缺失时卡片显示「文件缺失」
+- `go test ./...` 覆盖工作区、白板/文件夹 CRUD、保存冲突、路径越界、附件导入
+- 已通过 CDP 验证：桌面模式识别、命令行打开白板、工作区恢复、欢迎白板加载、附件读取、越界拦截
 
 ### 代码结构（桌面端）
 
