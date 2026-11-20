@@ -236,8 +236,7 @@ export function CanvasFields({
           {(
             [
               ['none', '无'],
-              ['dots', '点'],
-              ['lines', '线'],
+              ['lines', '网格'],
             ] as const
           ).map(([value, label]) => (
             <button

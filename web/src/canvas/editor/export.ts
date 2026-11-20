@@ -443,7 +443,7 @@ function snapshotRoot(root: HTMLElement) {
   })
   clone
     .querySelectorAll(
-      '.JCV-controls, .JCV-minimap-container, .JCV-debug-panel, .JCV-prevention-banner',
+      '.JCV-controls, .JCV-minimap-container, .JCV-debug-panel, .JCV-prevention-banner, .JCV-click-layer, .JCV-overlay-border',
     )
     .forEach((element) => element.remove())
   return clone
@@ -460,9 +460,9 @@ function buildSnapshotHtml(clone: HTMLElement, title: string) {
 <style>${css}</style>
 <style>
 html,body{margin:0;height:100%;overflow:hidden;background:#faf9f5}
-#sb-export-stage{position:absolute;inset:0;transform-origin:0 0;cursor:grab;touch-action:none}
-#sb-export-stage:active{cursor:grabbing}
-#sb-export-stage *{pointer-events:none!important;user-select:none}
+#sb-export-stage{position:absolute;inset:0;transform-origin:0 0;cursor:default;touch-action:none}
+#sb-export-stage.is-panning{cursor:grabbing}
+#sb-export-stage .sb-export-selected{outline:2px solid #2f80ed;outline-offset:2px}
 </style>
 </head>
 <body>
@@ -470,24 +470,51 @@ html,body{margin:0;height:100%;overflow:hidden;background:#faf9f5}
 <script>
 (function(){
   var stage=document.getElementById('sb-export-stage');
-  var scale=1,tx=0,ty=0,drag=null;
+  var scale=1,tx=0,ty=0,drag=null,selected=null;
   function apply(){stage.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')';}
+  function isScrollable(el){
+    while(el&&el!==document.body){
+      var style=getComputedStyle(el);
+      if(/(auto|scroll)/.test(style.overflowY)&&el.scrollHeight>el.clientHeight+1)return true;
+      el=el.parentElement;
+    }
+    return false;
+  }
   window.addEventListener('wheel',function(e){
+    if(e.ctrlKey||e.metaKey){
+      e.preventDefault();
+      var factor=e.deltaY<0?1.1:1/1.1;
+      var next=Math.min(20,Math.max(0.05,scale*factor));
+      var wx=(e.clientX-tx)/scale, wy=(e.clientY-ty)/scale;
+      tx=e.clientX-wx*next; ty=e.clientY-wy*next; scale=next; apply();
+      return;
+    }
+    if(isScrollable(e.target))return;
     e.preventDefault();
-    var factor=e.deltaY<0?1.1:1/1.1;
-    var next=Math.min(20,Math.max(0.05,scale*factor));
-    var wx=(e.clientX-tx)/scale, wy=(e.clientY-ty)/scale;
-    tx=e.clientX-wx*next; ty=e.clientY-wy*next; scale=next; apply();
+    tx-=e.deltaX; ty-=e.deltaY; apply();
   },{passive:false});
   window.addEventListener('pointerdown',function(e){
+    if(e.button===1||e.button===2){
+      e.preventDefault();
+      drag={x:e.clientX,y:e.clientY,tx:tx,ty:ty};
+      stage.classList.add('is-panning');
+      return;
+    }
     if(e.button!==0)return;
-    drag={x:e.clientX,y:e.clientY,tx:tx,ty:ty};
+    var block=e.target.closest('.JCV-overlay-container,[data-node-id]');
+    if(selected)selected.classList.remove('sb-export-selected');
+    selected=block||null;
+    if(selected)selected.classList.add('sb-export-selected');
   });
   window.addEventListener('pointermove',function(e){
     if(!drag)return;
     tx=drag.tx+e.clientX-drag.x; ty=drag.ty+e.clientY-drag.y; apply();
   });
-  window.addEventListener('pointerup',function(){drag=null;});
+  window.addEventListener('pointerup',function(){
+    drag=null;
+    stage.classList.remove('is-panning');
+  });
+  window.addEventListener('contextmenu',function(e){e.preventDefault();});
 })();
 </script>
 </body>

@@ -372,7 +372,7 @@ export default class Renderer extends BaseModule {
 		offsetY: number,
 	) => {
 		const settings = this.gridSettings();
-		const mode = settings?.grid ?? 'dots';
+		const mode = settings?.grid === 'none' ? 'none' : 'lines';
 		if (mode === 'none') return;
 		const width = this.DM.data.container.clientWidth;
 		const height = this.DM.data.container.clientHeight;

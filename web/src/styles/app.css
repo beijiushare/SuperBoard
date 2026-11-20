@@ -1060,23 +1060,41 @@
 
 .sb-preferences-dialog {
   display: grid;
-  width: min(860px, calc(100vw - 40px));
-  height: 82vh;
-  max-height: 82vh;
-  grid-template-columns: 210px minmax(0, 1fr);
+  width: min(1120px, calc(100vw - 32px));
+  height: 88vh;
+  max-height: 88vh;
+  grid-template-columns: 260px minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 0 18px;
-  padding: 18px 20px;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fffdf8;
 }
 
 .sb-preferences-header {
-  grid-column: 1 / -1;
+  grid-column: 2;
+  grid-row: 1;
+  padding: 24px 32px 8px;
 }
 
 .sb-settings-content {
+  grid-column: 2;
+  grid-row: 2;
   overflow: auto;
-  padding-right: 4px;
-  padding-bottom: 12px;
+  padding: 8px 32px 32px;
+}
+
+.sb-settings-content section {
+  margin: 0 0 14px;
+  padding: 18px 20px;
+  border: 1px solid #e8e4da;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.sb-settings-content section h3 {
+  margin: 0 0 10px;
 }
 
 .sb-preferences-header {
@@ -1098,30 +1116,33 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  align-self: start;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: stretch;
   margin: 0;
-  padding: 6px;
-  border: 1px solid #e3ded1;
-  border-radius: 10px;
-  background: #f7f5ef;
+  padding: 20px 12px;
+  border: 0;
+  border-right: 1px solid #e6e2d8;
+  border-radius: 0;
+  background: #f6f4ee;
 }
 
 .sb-preferences-tabs button {
   width: 100%;
-  padding: 8px 10px;
+  padding: 10px 14px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   background: transparent;
-  color: #6f6d66;
-  font-size: 13px;
+  color: #5f5c55;
+  font-size: 14px;
   text-align: left;
   cursor: pointer;
 }
 
 .sb-preferences-tabs button.is-active {
-  background: #fffdf8;
-  color: #2b2924;
-  box-shadow: 0 1px 3px rgb(50 45 30 / 12%);
+  background: rgb(60 55 45 / 8%);
+  color: #1f1e1c;
+  box-shadow: none;
 }
 
 .sb-preferences-reset {
@@ -1271,7 +1292,6 @@
   border-radius: 6px;
   background: transparent;
   color: #1d1d1d;
-  box-shadow: 0 0 0 2px #2f80ed;
   box-sizing: border-box;
   line-height: 1.35;
   overflow: hidden;
@@ -1745,6 +1765,13 @@
 .sb-canvas .tl-grid,
 .sb-viewer .tl-grid {
   display: none;
+}
+
+.sb-canvas .JCV-overlays,
+.sb-canvas .JCV-main-canvas,
+.sb-viewer .JCV-overlays,
+.sb-viewer .JCV-main-canvas {
+  will-change: auto;
 }
 
 .JCV-overlay-container:has(.sb-plain-text) {

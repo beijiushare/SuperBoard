@@ -444,7 +444,7 @@ export function CanvasStylePanel({
             backgroundOpacity={Math.round(
               (boardSettings.backgroundOpacity ?? 1) * 100,
             )}
-            grid={boardSettings.grid ?? 'dots'}
+            grid={boardSettings.grid ?? 'lines'}
             guides={uiState.guides}
             recentColors={uiState.recentColors}
             onUpdate={updateBoardSettings}
