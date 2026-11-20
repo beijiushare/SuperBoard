@@ -883,6 +883,8 @@ export function CanvasEditorApp() {
             onCreateRequestHandled: () => setTextCreateRequest(null),
             onEditMarkdown: openMarkdownEditor,
             onEditingChange: setTextEditingId,
+            onRequestEdit: (id) =>
+              setEditRequest({ id, nonce: Date.now() }),
           }}
           markdown={{
             editingId: markdownEditingId,

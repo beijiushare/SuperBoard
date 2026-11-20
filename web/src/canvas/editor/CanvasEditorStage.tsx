@@ -47,6 +47,7 @@ interface StageTools {
   onCreateRequestHandled: () => void
   onEditMarkdown: (id: string) => void
   onEditingChange: (id: string | null) => void
+  onRequestEdit: (id: string) => void
 }
 
 interface StageMarkdown {
@@ -171,6 +172,7 @@ export function CanvasEditorStage({
                 onCreateRequestHandled={tools.onCreateRequestHandled}
                 onEditMarkdown={tools.onEditMarkdown}
                 onEditingChange={tools.onEditingChange}
+                onRequestEdit={tools.onRequestEdit}
               />
               <CanvasMarkdownLayer
                 canvas={canvas}

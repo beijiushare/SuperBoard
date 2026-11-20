@@ -4,9 +4,13 @@ import {
   TEXT_PADDING_X,
   TEXT_PADDING_Y,
   type CanvasDocument,
+  type CanvasNode,
 } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
+import { nextFreeId } from './hierarchy'
 import type { EditorTool } from './tools'
+import { textStyleFromPreferences } from './preferences'
+import { DEFAULT_BLOCK_SIZES } from './blocks'
 import { applyErasure, planErasure } from './eraser'
 import { useTextEditing } from './useTextEditing'
 import { useToolViewport } from './toolViewport'
@@ -35,6 +39,7 @@ interface CanvasEditorToolsProps {
   onCreateRequestHandled?: () => void
   onEditMarkdown?: (id: string) => void
   onEditingChange?: (id: string | null) => void
+  onRequestEdit?: (id: string) => void
 }
 
 export function CanvasEditorTools({
@@ -51,6 +56,7 @@ export function CanvasEditorTools({
   onCreateRequestHandled,
   onEditMarkdown,
   onEditingChange,
+  onRequestEdit,
 }: CanvasEditorToolsProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const arrowRef = useRef<ArrowDraft | null>(null)
@@ -150,7 +156,37 @@ export function CanvasEditorTools({
       commitArrow,
       onExitTool,
       onEditMarkdown,
+      onCreateText: createTextAt,
     })
+
+  function createTextAt(x: number, y: number) {
+    const settings = canvas['x-superboard']?.settings
+    const width =
+      settings?.defaultBlockWidth ?? DEFAULT_BLOCK_SIZES.text.width
+    const height =
+      settings?.defaultBlockHeight ?? DEFAULT_BLOCK_SIZES.text.height
+    const existing = new Set<string>([
+      ...canvas.nodes.map((node) => node.id),
+      ...canvas.edges.map((edge) => edge.id),
+    ])
+    const id = nextFreeId(existing, 'text')
+    const node: CanvasNode = {
+      id,
+      type: 'text',
+      x,
+      y,
+      width,
+      height,
+      text: '',
+      'x-superboard': {
+        kind: 'text',
+        style: textStyleFromPreferences(),
+      },
+    }
+    onBeforeChange()
+    onApply({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    onRequestEdit?.(id)
+  }
 
   useEffect(() => {
     resetDrafts()

@@ -8,7 +8,7 @@ import {
 } from './appUtils'
 import { DEFAULT_BLOCK_SIZES } from './blocks'
 import { nextFreeId } from './hierarchy'
-import { blockStyleFromPreferences } from './preferences'
+import { blockStyleFromPreferences, textStyleFromPreferences } from './preferences'
 import { detectMediaKind, type EditorTool } from './tools'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 
@@ -61,7 +61,6 @@ export function useCanvasInsertions({
   setSelectedIds,
   setTool,
   setEditRequest,
-  setTextCreateRequest,
   startMarkdownEditing,
   closeTextEditing,
   closeMarkdownEditor,
@@ -111,8 +110,27 @@ export function useCanvasInsertions({
         }
       : viewportCenter(size.width, size.height)
     if (kind === 'text') {
+      const id = nextFreeId(
+        new Set(canvas.nodes.map((node) => node.id)),
+        'text',
+      )
+      const node: CanvasNode = {
+        id,
+        type: 'text',
+        x: position.x,
+        y: position.y,
+        width: size.width,
+        height: size.height,
+        text: '',
+        'x-superboard': {
+          kind: 'text',
+          style: textStyleFromPreferences(),
+        },
+      }
+      recordHistory()
+      applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
       setTool('text')
-      setTextCreateRequest({ x: position.x, y: position.y, nonce: Date.now() })
+      setEditRequest({ id, nonce: Date.now() })
       return
     }
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), kind)

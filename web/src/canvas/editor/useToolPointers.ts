@@ -57,6 +57,7 @@ interface UseToolPointersOptions {
   commitArrow: () => void
   onExitTool: () => void
   onEditMarkdown?: (id: string) => void
+  onCreateText: (x: number, y: number) => void
 }
 
 export function useToolPointers({
@@ -85,6 +86,7 @@ export function useToolPointers({
   commitArrow,
   onExitTool,
   onEditMarkdown,
+  onCreateText,
 }: UseToolPointersOptions) {
   function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
     if (
@@ -131,7 +133,8 @@ export function useToolPointers({
         onEditMarkdown(hit.id)
         return
       }
-      startEditing(hit, point.worldX, point.worldY)
+      if (hit) startEditing(hit, point.worldX, point.worldY)
+      else onCreateText(point.worldX, point.worldY)
       return
     }
     if (
