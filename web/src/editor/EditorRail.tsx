@@ -73,6 +73,13 @@ export function EditorRail({
     })
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
+      const active = document.activeElement
+      if (
+        active instanceof HTMLElement &&
+        active.closest('.sb-rail-window-controls')
+      ) {
+        active.blur()
+      }
       if (
         document.querySelector(
           '.sb-modal-backdrop, .canvas-editor-dialog-backdrop',
@@ -199,7 +206,11 @@ export function EditorRail({
             className="sb-rail-button sb-rail-window-button"
             data-tooltip="最小化"
             aria-label="最小化"
-            onClick={() => void WailsWindow.Minimise()}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={(event) => {
+              event.currentTarget.blur()
+              void WailsWindow.Minimise()
+            }}
           >
             <MinimiseIcon size={17} />
           </button>
@@ -209,7 +220,9 @@ export function EditorRail({
             data-tooltip={focusMode ? '退出专注模式（Esc）' : '专注模式（Esc 退出）'}
             aria-label={focusMode ? '退出专注模式' : '专注模式'}
             aria-pressed={focusMode}
-            onClick={() => {
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={(event) => {
+              event.currentTarget.blur()
               void WailsWindow.IsFullscreen().then(async (value) => {
                 if (value) await WailsWindow.UnFullscreen()
                 else await WailsWindow.Fullscreen()
@@ -224,7 +237,11 @@ export function EditorRail({
             className="sb-rail-button sb-rail-window-button sb-rail-window-close"
             data-tooltip="退出"
             aria-label="退出"
-            onClick={() => void WailsWindow.Close()}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={(event) => {
+              event.currentTarget.blur()
+              void WailsWindow.Close()
+            }}
           >
             <CloseWindowIcon size={18} />
           </button>
