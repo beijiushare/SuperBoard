@@ -15,6 +15,7 @@ export type ToolDataManager = {
 
 export type ToolController = {
   refresh: () => void
+  onRefresh?: { subscribe: (callback: () => void) => () => void }
 }
 
 export interface ToolView {

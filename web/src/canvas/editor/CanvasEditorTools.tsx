@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   TEXT_LINE_HEIGHT,
   TEXT_PADDING_X,
@@ -60,6 +60,7 @@ export function CanvasEditorTools({
 }: CanvasEditorToolsProps) {
   const surfaceRef = useRef<HTMLDivElement>(null)
   const arrowRef = useRef<ArrowDraft | null>(null)
+  const [, forceView] = useState(0)
   const eraserRef = useRef<{ changed: boolean } | null>(null)
   const panModeRef = useRef(false)
   const panGestureRef = useRef<{
@@ -74,6 +75,24 @@ export function CanvasEditorTools({
     viewerRef,
     surfaceRef,
   })
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined
+    let timer: number | undefined
+    const attach = () => {
+      const data = internals()
+      const onRefresh = data?.controller.onRefresh
+      if (!onRefresh) {
+        timer = window.setTimeout(attach, 100)
+        return
+      }
+      unsubscribe = onRefresh.subscribe(() => forceView((value) => value + 1))
+    }
+    attach()
+    return () => {
+      if (timer) window.clearTimeout(timer)
+      unsubscribe?.()
+    }
+  }, [])
   const {
     previewCanvasRef,
     strokeRef,
