@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`9073238 ci: publish demo site from dist-info`
+- 最近提交：`1a3ed22 docs: update keyboard and export expectations`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -38,7 +38,11 @@
 - 文件夹移动优先原生 move，失败回退复制；移动期间整页模糊并禁止编辑/保存
 - 文件夹移动可取消，取消后清理目标
 - 保存冲突/失败横幅、重新加载磁盘版本
-- rail 部署按钮改为导出：单 HTML / SVG
+- 白板同 slug 移动到新文件夹不再误报冲突
+- 导出只保留单 HTML，使用真实渲染 DOM 快照（含 canvas 位图与富内容）
+- 新建文本时立即创建真实节点，再进入编辑
+- 设置改为左侧分类导航；关于页只显示版本
+- 侧栏/目录使用 Tab 与 ←/→ 切换，↑/↓ 移动
 - 保存失败自动重试两次，409 不重试
 - 冲突时保存按钮显示「保存冲突，点击覆盖」，顶部横幅可覆盖或重新加载磁盘版本
 - 保存失败时顶部横幅提供「重试保存」
@@ -103,7 +107,9 @@
 - `EditorWorkspace.tsx`：rail 与目录外壳
 - `useBoardTreeData.ts`：目录数据与文件夹路径
 - `useEditorDialogState.ts`：白板/文件夹/导出弹窗状态
-- `ExportDialog.tsx`：单 HTML / SVG 导出
+- `ExportDialog.tsx`：单 HTML 导出
+- `export.ts`：真实渲染 DOM 快照导出
+- `useShellKeyboard.ts`：Tab / ← / → / ↑ / ↓ 焦点
 - `FolderMoveOverlay.tsx`：移动期间全页遮罩
 - `useShellKeyboard.ts`：侧栏与目录的 Tab/方向键焦点
 - `browserMain.tsx`：工作区选择与 Web Locks 单标签锁
