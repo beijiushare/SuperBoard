@@ -149,6 +149,7 @@ function EditorGate({ desktop }: { desktop: boolean }) {
 
 async function boot() {
   const desktop = await detectDesktop()
+  document.documentElement.dataset.platform = desktop ? 'desktop' : 'browser'
   if (desktop) {
     installDesktopFolderBackend()
     setFileUrlResolver(desktopFileUrl)

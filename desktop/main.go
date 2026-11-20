@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"log"
+	"os"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
@@ -20,6 +21,12 @@ func main() {
 	var mainWindow *application.WebviewWindow
 	workspace := services.NewWorkspaceService()
 	exporter := services.NewExportService(workspace)
+
+	// Opt-in WebView2 debugging for local UI verification.
+	browserArgs := []string{}
+	if os.Getenv("SUPERBOARD_DEBUG") != "" {
+		browserArgs = append(browserArgs, "--remote-debugging-port=9222")
+	}
 
 	app := application.New(application.Options{
 		Name:        "SuperBoard",
@@ -47,6 +54,9 @@ func main() {
 		},
 		Mac: application.MacOptions{
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
+		},
+		Windows: application.WindowsOptions{
+			AdditionalBrowserArgs: browserArgs,
 		},
 	})
 
