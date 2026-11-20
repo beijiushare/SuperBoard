@@ -494,21 +494,17 @@ async function applyAttachmentActions(
 
 function snapshotRoot(root: HTMLElement) {
   const clone = root.cloneNode(true) as HTMLElement
-  const originals = Array.from(root.querySelectorAll('canvas'))
-  const copies = Array.from(clone.querySelectorAll('canvas'))
-  copies.forEach((copy, index) => {
-    const source = originals[index]
-    if (!source) return
-    const image = document.createElement('img')
-    image.className = copy.className
-    image.style.cssText = copy.style.cssText
-    try {
-      image.src = source.toDataURL('image/png')
-    } catch {
-      return
-    }
-    copy.replaceWith(image)
-  })
+  // The main canvas is no longer used for node content. Grids are rebuilt by
+  // the exported page so they stay infinite while panning and zooming.
+  clone
+    .querySelectorAll('canvas, .sb-canvas-grid-layer')
+    .forEach((element) => element.remove())
+  clone
+    .querySelectorAll('.JSON-Canvas-Viewer')
+    .forEach((element) => {
+      ;(element as HTMLElement).style.backgroundColor = 'transparent'
+    })
+  clone.style.background = 'transparent'
   clone
     .querySelectorAll(
       '.JCV-controls, .JCV-minimap-container, .JCV-debug-panel, .JCV-prevention-banner, .JCV-click-layer, .JCV-overlay-border',
@@ -517,7 +513,19 @@ function snapshotRoot(root: HTMLElement) {
   return clone
 }
 
-function buildSnapshotHtml(clone: HTMLElement, title: string) {
+interface SnapshotOptions {
+  grid: boolean
+  background: string
+  scale: number
+  offsetX: number
+  offsetY: number
+}
+
+function buildSnapshotHtml(
+  clone: HTMLElement,
+  title: string,
+  options: SnapshotOptions,
+) {
   const css = collectDocumentCss()
   return `<!doctype html>
 <html lang="zh-CN">
@@ -527,19 +535,33 @@ function buildSnapshotHtml(clone: HTMLElement, title: string) {
 <title>${escapeXml(title)}</title>
 <style>${css}</style>
 <style>
-html,body{margin:0;height:100%;overflow:hidden;background:#faf9f5}
-#sb-export-stage{position:absolute;inset:0;transform-origin:0 0;cursor:default;touch-action:none}
+html,body{margin:0;height:100%;overflow:hidden;background:${options.background}}
+#sb-export-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(to right,rgba(0,0,0,0.10) 1px,transparent 1px),linear-gradient(to bottom,rgba(0,0,0,0.10) 1px,transparent 1px),linear-gradient(to right,rgba(0,0,0,0.16) 1px,transparent 1px),linear-gradient(to bottom,rgba(0,0,0,0.16) 1px,transparent 1px)}
+#sb-export-stage{position:absolute;inset:0;z-index:1;transform-origin:0 0;cursor:default;touch-action:none}
 #sb-export-stage.is-panning{cursor:grabbing}
 #sb-export-stage .sb-export-selected{outline:2px solid #2f80ed;outline-offset:2px}
 </style>
 </head>
 <body>
+${options.grid ? '<div id="sb-export-grid"></div>' : ''}
 <div id="sb-export-stage">${clone.outerHTML}</div>
 <script>
 (function(){
   var stage=document.getElementById('sb-export-stage');
+  var grid=document.getElementById('sb-export-grid');
+  var baseScale=${options.scale},baseOffsetX=${options.offsetX},baseOffsetY=${options.offsetY};
   var scale=1,tx=0,ty=0,drag=null,selected=null;
-  function apply(){stage.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')';}
+  function applyGrid(){
+    if(!grid)return;
+    var step=10*baseScale*scale;
+    while(step<8)step*=2;
+    var major=step*5;
+    var ox=tx+scale*baseOffsetX;
+    var oy=ty+scale*baseOffsetY;
+    grid.style.backgroundSize=step+'px '+step+'px,'+step+'px '+step+'px,'+major+'px '+major+'px,'+major+'px '+major+'px';
+    grid.style.backgroundPosition=ox+'px '+oy+'px,'+ox+'px '+oy+'px,'+ox+'px '+oy+'px,'+ox+'px '+oy+'px';
+  }
+  function apply(){stage.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')';applyGrid();}
   function isScrollable(el){
     while(el&&el!==document.body){
       var style=getComputedStyle(el);
@@ -584,6 +606,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#faf9f5}
     stage.classList.remove('is-panning');
   });
   window.addEventListener('contextmenu',function(e){e.preventDefault();});
+  apply();
 })();
 </script>
 </body>
@@ -652,6 +675,14 @@ export async function buildExportPayload(
     const html = buildSnapshotHtml(
       clone,
       canvas['x-superboard']?.meta.title || 'SuperBoard',
+      {
+        grid: canvas['x-superboard']?.settings?.grid !== 'none',
+        background:
+          getComputedStyle(dm.data.container).backgroundColor || '#faf9f5',
+        scale: dm.data.scale,
+        offsetX: dm.data.offsetX,
+        offsetY: dm.data.offsetY,
+      },
     )
     return { html, attachments }
   } finally {

@@ -1,7 +1,6 @@
 import type { BaseArgs } from '$/BaseModule';
 import type { EdgeItem } from '$/DataManager';
 import type { Box } from '$/types';
-import type { JSONCanvasGroupNode, JSONCanvasNode } from '@repo/shared';
 import { BaseModule } from '$/BaseModule';
 import Controller from '$/Controller';
 import DataManager from '$/DataManager';
@@ -10,13 +9,6 @@ import { destroyError, drawRoundRect, getAnchorCoord, resizeCanvasForDPR } from 
 
 const ARROW_LENGTH = 12;
 const ARROW_WIDTH = 4;
-const NODE_RADIUS = 12;
-const NODE_BORDER_WIDTH = 2;
-const DOT_RADIUS = 1.3; // Dot radius in CSS pixels
-const DOT_BASE_GAP = 10; // Base gap between dots in CSS pixels
-const MIN_GRID_GAP = 4; // Minimum on-screen grid spacing in CSS pixels
-
-const NODE_BORDER_HALF_WIDTH = NODE_BORDER_WIDTH / 2;
 
 export default class Renderer extends BaseModule {
 	private _canvas?: HTMLCanvasElement;
@@ -56,19 +48,9 @@ export default class Renderer extends BaseModule {
 		this.canvas.style.transform = '';
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		this.applyGridBackground();
-		this.drawGrid(scale, offsetX, offsetY);
 		this.ctx.save();
 		this.ctx.translate(offsetX, offsetY);
 		this.ctx.scale(scale, scale);
-		if (false) this.drawGrid(scale, offsetX, offsetY);
-		Object.values(this.DM.data.nodeMap).forEach((item) => {
-			if (this.isOutside(item.box, currentViewport)) return;
-			const node = item.ref;
-			const kind = (node as { 'x-superboard'?: { kind?: string } })['x-superboard']?.kind;
-			if (node.type === 'group' && kind !== 'shape' && kind !== 'drawing') {
-				this.drawGroup(node, scale);
-			}
-		});
 		if (false) {
 			Object.values(this.DM.data.edgeMap).forEach((item) => {
 				if (this.isOutside(item.box, currentViewport)) return;
@@ -91,71 +73,6 @@ export default class Renderer extends BaseModule {
 		const right = left + container.clientWidth / scale;
 		const bottom = top + container.clientHeight / scale;
 		return { bottom, left, right, top };
-	};
-
-	private readonly drawLabelBar = (
-		x: number,
-		y: number,
-		label: string,
-		color: string,
-		textColor: string,
-		scale: number,
-	) => {
-		const barHeight = 30 * scale;
-		const radius = 6 * scale;
-		const yOffset = 8 * scale;
-		const fontSize = 16 * scale;
-		const xPadding = 6 * scale;
-		this.ctx.save();
-		this.ctx.translate(x, y);
-		this.ctx.scale(1 / scale, 1 / scale);
-		this.ctx.font = `${fontSize}px 'Inter', sans-serif`;
-		const barWidth = this.ctx.measureText(label).width + 2 * xPadding;
-		this.ctx.translate(0, -barHeight - yOffset);
-		this.ctx.fillStyle = color;
-		this.ctx.beginPath();
-		this.ctx.moveTo(radius, 0);
-		this.ctx.lineTo(barWidth - radius, 0);
-		this.ctx.quadraticCurveTo(barWidth, 0, barWidth, radius);
-		this.ctx.lineTo(barWidth, barHeight - radius);
-		this.ctx.quadraticCurveTo(barWidth, barHeight, barWidth - radius, barHeight);
-		this.ctx.lineTo(radius, barHeight);
-		this.ctx.quadraticCurveTo(0, barHeight, 0, barHeight - radius);
-		this.ctx.lineTo(0, radius);
-		this.ctx.quadraticCurveTo(0, 0, radius, 0);
-		this.ctx.closePath();
-		this.ctx.fill();
-		this.ctx.fillStyle = textColor;
-		this.ctx.fillText(label, xPadding, barHeight * 0.65);
-		this.ctx.restore();
-	};
-
-	private readonly drawNodeBackground = (node: JSONCanvasNode) => {
-		const colors = this.SM.getColor(node.color);
-		const radius = NODE_RADIUS;
-		this.ctx.globalAlpha = 1;
-		this.ctx.fillStyle = colors.background;
-		drawRoundRect(
-			this.ctx,
-			node.x + NODE_BORDER_HALF_WIDTH,
-			node.y + NODE_BORDER_HALF_WIDTH,
-			node.width - NODE_BORDER_WIDTH,
-			node.height - NODE_BORDER_WIDTH,
-			radius,
-		);
-		this.ctx.fill();
-		this.ctx.strokeStyle = colors.border;
-		this.ctx.lineWidth = NODE_BORDER_WIDTH;
-		drawRoundRect(this.ctx, node.x, node.y, node.width, node.height, radius);
-		this.ctx.stroke();
-	};
-
-	private readonly drawGroup = (node: JSONCanvasGroupNode, scale: number) => {
-		this.drawNodeBackground(node);
-		if (node.label) {
-			const color = this.SM.getColor(node.color);
-			this.drawLabelBar(node.x, node.y, node.label, color.active, color.text, scale);
-		}
 	};
 
 	private readonly drawEdge = (item: EdgeItem) => {
@@ -341,70 +258,6 @@ export default class Renderer extends BaseModule {
 		container.style.backgroundImage = 'none';
 		container.style.backgroundSize = '';
 		container.style.backgroundPosition = '';
-	};
-
-	private readonly gridLevels = (scale: number) => {
-		let base = DOT_BASE_GAP * scale;
-		while (base < MIN_GRID_GAP) base *= 2;
-		const levels: Array<{ step: number; alpha: number }> = [
-			{ step: base, alpha: 0.38 },
-		];
-		for (let index = 1; index <= 5; index += 1) {
-			const step = base / 2 ** index;
-			if (step < MIN_GRID_GAP) break;
-			const start = 20 * 2 ** (index - 1);
-			const end = 40 * 2 ** (index - 1);
-			const t = Math.max(0, Math.min(1, (base - start) / (end - start)));
-			const alpha = (t * t * (3 - 2 * t)) * 0.24;
-			if (alpha > 0.002) levels.push({ step, alpha });
-		}
-		return levels;
-	};
-
-	private readonly drawGrid = (
-		scale: number,
-		offsetX: number,
-		offsetY: number,
-	) => {
-		const settings = this.gridSettings();
-		const mode = settings?.grid === 'none' ? 'none' : 'lines';
-		if (mode === 'none') return;
-		const width = this.DM.data.container.clientWidth;
-		const height = this.DM.data.container.clientHeight;
-		const color = this.SM.getNamedColor('dots');
-		const levels = this.gridLevels(scale);
-		this.ctx.save();
-		this.ctx.strokeStyle = color;
-		this.ctx.fillStyle = color;
-		this.ctx.lineWidth = 1.2;
-		for (const level of levels) {
-			const step = level.step;
-			const startX = ((offsetX % step) + step) % step;
-			const startY = ((offsetY % step) + step) % step;
-			this.ctx.globalAlpha = level.alpha;
-			if (mode === 'lines') {
-				this.ctx.beginPath();
-				for (let x = startX; x <= width; x += step) {
-					this.ctx.moveTo(x, 0);
-					this.ctx.lineTo(x, height);
-				}
-				for (let y = startY; y <= height; y += step) {
-					this.ctx.moveTo(0, y);
-					this.ctx.lineTo(width, y);
-				}
-				this.ctx.stroke();
-			} else {
-				for (let x = startX; x <= width; x += step) {
-					for (let y = startY; y <= height; y += step) {
-						this.ctx.beginPath();
-						this.ctx.arc(x, y, DOT_RADIUS, 0, 2 * Math.PI);
-						this.ctx.fill();
-					}
-				}
-			}
-		}
-		this.ctx.globalAlpha = 1;
-		this.ctx.restore();
 	};
 
 	private readonly drawCurvedPath = (
