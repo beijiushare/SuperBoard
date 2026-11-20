@@ -1,14 +1,19 @@
 import {
   ApertureIcon,
   CheckCircleIcon,
+  CloseWindowIcon,
   CommandIcon,
   FilmIcon,
   GitBranchIcon,
+  MaximiseIcon,
+  MinimiseIcon,
   SettingsIcon,
   SidebarIcon,
   UploadCloudIcon,
 } from './EditorRailIcons'
 import type { SaveState } from './saveState'
+import { Window as WailsWindow } from '@wailsio/runtime'
+import { desktopMode } from '../desktop/platform'
 
 interface EditorRailProps {
   mode?: 'edit' | 'view'
@@ -56,9 +61,18 @@ export function EditorRail({
   onOpenPreferences,
 }: EditorRailProps) {
   const editing = mode === 'edit'
+  const desktop = desktopMode()
 
   return (
-    <aside className="sb-rail" aria-label={editing ? '编辑器操作' : '白板操作'}>
+    <aside
+      className="sb-rail"
+      aria-label={editing ? '编辑器操作' : '白板操作'}
+      onDoubleClick={(event) => {
+        if (!desktop) return
+        if ((event.target as HTMLElement).closest('button')) return
+        void WailsWindow.ToggleMaximise()
+      }}
+    >
       <button
         type="button"
         className="sb-rail-button"
@@ -154,6 +168,38 @@ export function EditorRail({
         >
           <SettingsIcon size={21} />
         </button>
+      ) : null}
+
+      {desktop ? (
+        <div className="sb-rail-window-controls">
+          <button
+            type="button"
+            className="sb-rail-button sb-rail-window-button"
+            data-tooltip="最小化"
+            aria-label="最小化"
+            onClick={() => void WailsWindow.Minimise()}
+          >
+            <MinimiseIcon size={18} />
+          </button>
+          <button
+            type="button"
+            className="sb-rail-button sb-rail-window-button"
+            data-tooltip="最大化 / 还原"
+            aria-label="最大化 / 还原"
+            onClick={() => void WailsWindow.ToggleMaximise()}
+          >
+            <MaximiseIcon size={17} />
+          </button>
+          <button
+            type="button"
+            className="sb-rail-button sb-rail-window-button sb-rail-window-close"
+            data-tooltip="退出"
+            aria-label="退出"
+            onClick={() => void WailsWindow.Close()}
+          >
+            <CloseWindowIcon size={18} />
+          </button>
+        </div>
       ) : null}
     </aside>
   )

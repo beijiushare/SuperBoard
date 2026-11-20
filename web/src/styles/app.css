@@ -21,6 +21,11 @@
   padding: 10px 0;
   border-right: 1px solid #dedbd2;
   background: #fbfaf6;
+  --wails-draggable: drag;
+}
+
+.sb-rail-button {
+  --wails-draggable: no-drag;
 }
 
 .sb-rail-button {
@@ -99,6 +104,27 @@
 
 .sb-rail-save.is-error {
   color: #c24b3b;
+}
+
+.sb-rail-window-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid #dedbd2;
+  --wails-draggable: no-drag;
+}
+
+.sb-rail-window-button {
+  width: 36px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.sb-rail-window-close:hover {
+  background: #c24b3b;
+  color: #fff;
 }
 
 .sb-app-editor .sb-workspace {
