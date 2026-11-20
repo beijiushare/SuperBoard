@@ -66,6 +66,15 @@ export function OpenWorkspace(): $CancellablePromise<$models.Result> {
     return $Call.ByID(752350517);
 }
 
+/**
+ * PickFiles copies files chosen through the native dialog into the workspace
+ * attachment directory. Unlike ImportFile it never carries file bytes over the
+ * JS bridge, so large videos are safe.
+ */
+export function PickFiles(scope: string): $CancellablePromise<$models.Result> {
+    return $Call.ByID(4147210372, scope);
+}
+
 export function ReadBoard(slug: string, scope: string): $CancellablePromise<$models.Result> {
     return $Call.ByID(2743485756, slug, scope);
 }

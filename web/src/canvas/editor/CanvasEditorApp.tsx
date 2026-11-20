@@ -305,6 +305,7 @@ export function CanvasEditorApp() {
     insertScheduleBlock,
     insertMedia,
     insertLocalFile,
+    pickLocalFilesFromDialog,
     openMediaDialog,
   } = useCanvasInsertions({
     canvas,
@@ -1105,6 +1106,7 @@ export function CanvasEditorApp() {
         }}
         onConfirmMedia={(value) => insertMedia(value)}
         onInsertFile={(file) => void insertLocalFile(file)}
+        onPickFiles={() => void pickLocalFilesFromDialog()}
         preferencesOpen={preferencesOpen}
         onClosePreferences={() => {
           setPreferencesOpen(false)

@@ -6,6 +6,7 @@ import {
   desktopImportFile,
   desktopMode,
   desktopOpenFile,
+  desktopPickFiles,
   desktopRevealFile,
   desktopWorkspaceName,
   openDesktopWorkspace,
@@ -39,6 +40,13 @@ export async function importLocalFile(
   if (desktopMode()) return desktopImportFile(file, scope)
   const path = await importBrowserFile(file, scope)
   return { path, name: file.name, mime: file.type, size: file.size }
+}
+
+export async function pickLocalFiles(
+  scope: BoardScope,
+): Promise<ImportedFile[]> {
+  if (!desktopMode()) return []
+  return desktopPickFiles(scope)
 }
 
 export async function resolveWorkspaceFileUrl(path: string) {

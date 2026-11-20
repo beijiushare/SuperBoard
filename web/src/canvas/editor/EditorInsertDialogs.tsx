@@ -18,6 +18,7 @@ interface EditorInsertDialogsProps {
   onCloseMedia: () => void
   onConfirmMedia: (value: string) => void
   onInsertFile: (file: File) => void
+  onPickFiles?: () => void
   preferencesOpen: boolean
   onClosePreferences: () => void
 }
@@ -33,6 +34,7 @@ export function EditorInsertDialogs({
   onCloseMedia,
   onConfirmMedia,
   onInsertFile,
+  onPickFiles,
   preferencesOpen,
   onClosePreferences,
 }: EditorInsertDialogsProps) {
@@ -59,6 +61,7 @@ export function EditorInsertDialogs({
           onClose={onCloseMedia}
           onInsertUrl={onConfirmMedia}
           onInsertFile={onInsertFile}
+          onPickFiles={onPickFiles}
         />
       ) : null}
 

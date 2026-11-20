@@ -8,7 +8,8 @@ import {
 } from './appUtils'
 import { DEFAULT_BLOCK_SIZES } from './blocks'
 import { nextFreeId } from './hierarchy'
-import { importLocalFile } from './workspacePlatform'
+import { importLocalFile, pickLocalFiles as pickWorkspaceFiles } from './workspacePlatform'
+import type { ImportedFile } from '../../desktop/platform'
 import type { BoardScope } from '../../shared/board/types'
 import { blockStyleFromPreferences, textStyleFromPreferences } from './preferences'
 import { detectMediaKind, type EditorTool } from './tools'
@@ -320,12 +321,9 @@ export function useCanvasInsertions({
     setMediaInsertPoint(null)
   }
 
-  async function insertLocalFile(file: File) {
-    if (!canvas) return
-    const imported = await importLocalFile(file, scope)
-    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'file')
+  function fileNode(id: string, imported: ImportedFile, index: number) {
     const size = defaultBlockSize('media')
-    const position = mediaInsertPoint
+    const base = mediaInsertPoint
       ? {
           x: Math.round(mediaInsertPoint.x - size.width / 2),
           y: Math.round(mediaInsertPoint.y - size.height / 2),
@@ -335,8 +333,8 @@ export function useCanvasInsertions({
       id,
       type: 'file',
       file: imported.path,
-      x: position.x,
-      y: position.y,
+      x: base.x + index * 24,
+      y: base.y + index * 24,
       width: size.width,
       height: size.height,
       'x-superboard': {
@@ -352,8 +350,37 @@ export function useCanvasInsertions({
         style: blockStyleFromPreferences(),
       },
     }
+    return node
+  }
+
+  async function insertLocalFile(file: File) {
+    if (!canvas) return
+    const imported = await importLocalFile(file, scope)
+    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'file')
     recordHistory()
-    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    applyDocument(
+      { ...canvas, nodes: [...canvas.nodes, fileNode(id, imported, 0)] },
+      [id],
+    )
+    setMediaDialogOpen(false)
+    setMediaUrl('')
+    setMediaInsertPoint(null)
+  }
+
+  async function pickLocalFilesFromDialog() {
+    if (!canvas) return
+    const imported = await pickWorkspaceFiles(scope)
+    if (imported.length === 0) return
+    const ids = new Set(canvas.nodes.map((node) => node.id))
+    const added: string[] = []
+    const nodes = imported.map((item, index) => {
+      const id = nextFreeId(ids, 'file')
+      ids.add(id)
+      added.push(id)
+      return fileNode(id, item, index)
+    })
+    recordHistory()
+    applyDocument({ ...canvas, nodes: [...canvas.nodes, ...nodes] }, added)
     setMediaDialogOpen(false)
     setMediaUrl('')
     setMediaInsertPoint(null)
@@ -372,6 +399,7 @@ export function useCanvasInsertions({
     insertScheduleBlock,
     insertMedia,
     insertLocalFile,
+    pickLocalFilesFromDialog,
     openMediaDialog,
   }
 }

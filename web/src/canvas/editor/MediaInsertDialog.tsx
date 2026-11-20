@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { desktopMode } from '../../desktop/platform'
 
 interface MediaInsertDialogProps {
   initialUrl: string
   onClose: () => void
   onInsertUrl: (url: string) => void
   onInsertFile: (file: File) => void
+  onPickFiles?: () => void
 }
 
 export function MediaInsertDialog({
@@ -12,6 +14,7 @@ export function MediaInsertDialog({
   onClose,
   onInsertUrl,
   onInsertFile,
+  onPickFiles,
 }: MediaInsertDialogProps) {
   const [url, setUrl] = useState(initialUrl)
   return (
@@ -48,20 +51,33 @@ export function MediaInsertDialog({
           </button>
           <hr className="sb-dialog-sep" />
           <p className="sb-dialog-copy">本地文件</p>
-          <label className="sb-button">
-            选择文件…
-            <input
-              type="file"
-              hidden
-              onChange={(event) => {
-                const file = event.target.files?.[0]
-                if (file) {
-                  onInsertFile(file)
-                  onClose()
-                }
+          {desktopMode() && onPickFiles ? (
+            <button
+              className="sb-button"
+              type="button"
+              onClick={() => {
+                onPickFiles()
+                onClose()
               }}
-            />
-          </label>
+            >
+              选择文件…
+            </button>
+          ) : (
+            <label className="sb-button">
+              选择文件…
+              <input
+                type="file"
+                hidden
+                onChange={(event) => {
+                  const file = event.target.files?.[0]
+                  if (file) {
+                    onInsertFile(file)
+                    onClose()
+                  }
+                }}
+              />
+            </label>
+          )}
         </div>
         <div className="sb-dialog-actions">
           <button className="sb-button" type="button" onClick={onClose}>

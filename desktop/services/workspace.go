@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"io"
 	"mime"
 	"net/http"
 	"net/url"
@@ -14,6 +15,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -716,6 +718,79 @@ func (s *WorkspaceService) ImportFile(name string, dataBase64 string, scope stri
 		"mime": mimeType,
 		"size": len(data),
 	})
+}
+
+// PickFiles copies files chosen through the native dialog into the workspace
+// attachment directory. Unlike ImportFile it never carries file bytes over the
+// JS bridge, so large videos are safe.
+func (s *WorkspaceService) PickFiles(scope string) Result {
+	if !isScope(scope) {
+		return fail(400, "无效的 scope")
+	}
+	app := application.Get()
+	if app == nil {
+		return fail(500, "应用尚未就绪")
+	}
+	paths, err := app.Dialog.OpenFile().
+		SetTitle("选择要插入的文件").
+		CanChooseFiles(true).
+		CanChooseDirectories(false).
+		PromptForMultipleSelection()
+	if err != nil {
+		if cancelledDialog(err) {
+			return ok(map[string]any{"cancelled": true})
+		}
+		return fail(500, err.Error())
+	}
+	if len(paths) == 0 {
+		return ok(map[string]any{"cancelled": true, "files": []any{}})
+	}
+	dir, err := s.folderDir(scope, "assets/files", true)
+	if err != nil {
+		return fail(400, err.Error())
+	}
+	files := make([]map[string]any, 0, len(paths))
+	for _, source := range paths {
+		info, statErr := os.Stat(source)
+		if statErr != nil || info.IsDir() {
+			continue
+		}
+		name := filepath.Base(source)
+		safe := strings.Trim(unsafeNameChars.ReplaceAllString(name, "_"), "._")
+		if safe == "" {
+			safe = "file"
+		}
+		fileName := fileHash(source, info.Size()) + "-" + safe
+		if err := copyFile(source, filepath.Join(dir, fileName)); err != nil {
+			return fail(500, err.Error())
+		}
+		mimeType := mime.TypeByExtension(filepath.Ext(safe))
+		if mimeType == "" {
+			mimeType = "application/octet-stream"
+		}
+		files = append(files, map[string]any{
+			"path": scope + "/assets/files/" + fileName,
+			"name": name,
+			"mime": mimeType,
+			"size": info.Size(),
+		})
+	}
+	return ok(map[string]any{"files": files})
+}
+
+func fileHash(path string, size int64) string {
+	file, err := os.Open(path)
+	if err != nil {
+		return strconv.FormatInt(time.Now().UnixNano(), 16)[:8]
+	}
+	defer file.Close()
+	hash := sha1.New()
+	buffer := make([]byte, 64*1024)
+	read, _ := io.ReadFull(file, buffer)
+	hash.Write(buffer[:read])
+	hash.Write([]byte(path))
+	hash.Write([]byte(strconv.FormatInt(size, 10)))
+	return hex.EncodeToString(hash.Sum(nil)[:4])
 }
 
 // ResolveFile validates that a workspace-relative path stays inside the

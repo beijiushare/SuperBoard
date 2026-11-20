@@ -89,6 +89,17 @@ export async function desktopImportFile(
   return body
 }
 
+export async function desktopPickFiles(scope: BoardScope) {
+  const result = await Workspace.PickFiles(scope)
+  const body = parse<{
+    files?: ImportedFile[]
+    cancelled?: boolean
+    error?: string
+  }>(result)
+  if (body.error) throw new Error(body.error)
+  return body.files ?? []
+}
+
 export async function desktopFileUrl(path: string) {
   try {
     const url = await Workspace.FileURL(path)
