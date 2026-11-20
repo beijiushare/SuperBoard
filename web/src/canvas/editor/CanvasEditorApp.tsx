@@ -45,6 +45,7 @@ import { EditorInsertDialogs } from './EditorInsertDialogs'
 import { ExportDialog } from './ExportDialog'
 import { EditorBoardDialogs } from './EditorBoardDialogs'
 import { CanvasBlockMenu } from './CanvasBlockMenu'
+import { resolveFileUrl } from '../viewer/fileResolver'
 import { EditorWorkspace } from './EditorWorkspace'
 import { loadWorkspace, readBoard, WORKSPACE_VERSION_KEY } from './workspaceApi'
 import {
@@ -1025,6 +1026,14 @@ export function CanvasEditorApp() {
           onUnlockAll={unlockAllLocked}
           onSelectAll={selectAllUnlocked}
           onEditBlock={openBlockEditor}
+          onOpenFile={(id) => {
+            const node = canvas.nodes.find((item) => item.id === id)
+            const path = node?.['x-superboard']?.media?.file
+            if (!path) return
+            void resolveFileUrl(path).then((url) => {
+              if (url) window.open(url, '_blank', 'noopener,noreferrer')
+            })
+          }}
           onInsertText={() =>
             insertTextBlock('text', {
               x: canvasMenu.worldX,

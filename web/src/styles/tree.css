@@ -357,3 +357,17 @@ body.sb-tree-resizing {
   border: 0;
   border-top: 1px solid #e6e1d6;
 }
+
+.sb-export-modes {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sb-export-modes label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}

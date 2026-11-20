@@ -21,6 +21,7 @@ interface CanvasBlockMenuProps {
   onUnlockAll: () => void
   onSelectAll: () => void
   onEditBlock: (id: string) => void
+  onOpenFile?: (id: string) => void
   onInsertText: () => void
   onInsertMarkdown: () => void
   onInsertPele: () => void
@@ -46,6 +47,7 @@ export function CanvasBlockMenu({
   onUnlockAll,
   onSelectAll,
   onEditBlock,
+  onOpenFile,
   onInsertText,
   onInsertMarkdown,
   onInsertPele,
@@ -94,6 +96,17 @@ export function CanvasBlockMenu({
               }}
             >
               编辑内容
+            </button>
+          ) : null}
+          {node['x-superboard']?.media?.kind === 'file' && onOpenFile ? (
+            <button
+              type="button"
+              onClick={() => {
+                onOpenFile(node.id)
+                onClose()
+              }}
+            >
+              打开文件
             </button>
           ) : null}
           <button
