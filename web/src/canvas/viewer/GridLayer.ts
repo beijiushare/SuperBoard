@@ -87,6 +87,7 @@ export class GridLayer extends BaseModule {
       rect.setAttribute('width', '100%')
       rect.setAttribute('height', '100%')
       rect.setAttribute('fill', `url(#${id})`)
+      rect.setAttribute('stroke', 'none')
       this.svg.appendChild(rect)
     }
   }
