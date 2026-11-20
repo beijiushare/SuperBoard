@@ -29,6 +29,7 @@ const modules = [Controls, Minimap, ShapeLayer, DrawingLayer, DirectorLayer]
 
 export interface CanvasViewerHandle {
   viewer?: {
+    container?: { get: (key: unknown) => unknown }
     refresh?: () => void
     setDirectorVisible?: (visible: boolean) => void
     playDirectorFrame?: (frame: CanvasFrame, animate?: boolean) => Promise<void>

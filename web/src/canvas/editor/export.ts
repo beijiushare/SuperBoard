@@ -408,6 +408,164 @@ export function downloadCanvasHtml(canvas: CanvasDocument) {
   download(new Blob([html], { type: 'text/html;charset=utf-8' }), filename(canvas, 'html'))
 }
 
+type ViewerLike = {
+  container?: { get: (key: unknown) => unknown }
+}
+
+function collectDocumentCss() {
+  const chunks: string[] = []
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      for (const rule of Array.from(sheet.cssRules)) chunks.push(rule.cssText)
+    } catch {
+      // Cross-origin stylesheet; skip.
+    }
+  }
+  return chunks.join('\n')
+}
+
+function snapshotRoot(root: HTMLElement) {
+  const clone = root.cloneNode(true) as HTMLElement
+  const originals = Array.from(root.querySelectorAll('canvas'))
+  const copies = Array.from(clone.querySelectorAll('canvas'))
+  copies.forEach((copy, index) => {
+    const source = originals[index]
+    if (!source) return
+    const image = document.createElement('img')
+    image.className = copy.className
+    image.style.cssText = copy.style.cssText
+    try {
+      image.src = source.toDataURL('image/png')
+    } catch {
+      return
+    }
+    copy.replaceWith(image)
+  })
+  clone
+    .querySelectorAll(
+      '.JCV-controls, .JCV-minimap-container, .JCV-debug-panel, .JCV-prevention-banner',
+    )
+    .forEach((element) => element.remove())
+  return clone
+}
+
+function buildSnapshotHtml(clone: HTMLElement, title: string) {
+  const css = collectDocumentCss()
+  return `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapeXml(title)}</title>
+<style>${css}</style>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#faf9f5}
+#sb-export-stage{position:absolute;inset:0;transform-origin:0 0;cursor:grab;touch-action:none}
+#sb-export-stage:active{cursor:grabbing}
+#sb-export-stage *{pointer-events:none!important;user-select:none}
+</style>
+</head>
+<body>
+<div id="sb-export-stage">${clone.outerHTML}</div>
+<script>
+(function(){
+  var stage=document.getElementById('sb-export-stage');
+  var scale=1,tx=0,ty=0,drag=null;
+  function apply(){stage.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')';}
+  window.addEventListener('wheel',function(e){
+    e.preventDefault();
+    var factor=e.deltaY<0?1.1:1/1.1;
+    var next=Math.min(20,Math.max(0.05,scale*factor));
+    var wx=(e.clientX-tx)/scale, wy=(e.clientY-ty)/scale;
+    tx=e.clientX-wx*next; ty=e.clientY-wy*next; scale=next; apply();
+  },{passive:false});
+  window.addEventListener('pointerdown',function(e){
+    if(e.button!==0)return;
+    drag={x:e.clientX,y:e.clientY,tx:tx,ty:ty};
+  });
+  window.addEventListener('pointermove',function(e){
+    if(!drag)return;
+    tx=drag.tx+e.clientX-drag.x; ty=drag.ty+e.clientY-drag.y; apply();
+  });
+  window.addEventListener('pointerup',function(){drag=null;});
+})();
+</script>
+</body>
+</html>`
+}
+
+function frame() {
+  return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+}
+
+export async function downloadCanvasHtmlSnapshot(
+  canvas: CanvasDocument,
+  viewer: ViewerLike | undefined,
+) {
+  if (!viewer?.container) throw new Error('画布尚未就绪')
+  const { internal } = await import(
+    '../../vendor/json-canvas-viewer/src/index.ts'
+  )
+  const dm = viewer.container.get(internal.DataManager as never) as {
+    data: {
+      offsetX: number
+      offsetY: number
+      scale: number
+      container: HTMLDivElement
+    }
+  }
+  const controller = viewer.container.get(internal.Controller as never) as {
+    refresh: () => void
+  }
+  const root = dm.data.container.closest<HTMLElement>('.canvas-viewer-wrap')
+  if (!root) throw new Error('找不到画布容器')
+  const old = {
+    offsetX: dm.data.offsetX,
+    offsetY: dm.data.offsetY,
+    scale: dm.data.scale,
+  }
+  const nodes = canvas.nodes
+  const minX = nodes.length ? Math.min(...nodes.map((node) => node.x)) : 0
+  const minY = nodes.length ? Math.min(...nodes.map((node) => node.y)) : 0
+  const maxX = nodes.length
+    ? Math.max(...nodes.map((node) => node.x + node.width))
+    : 1
+  const maxY = nodes.length
+    ? Math.max(...nodes.map((node) => node.y + node.height))
+    : 1
+  const width = dm.data.container.clientWidth
+  const height = dm.data.container.clientHeight
+  const boardWidth = Math.max(1, maxX - minX)
+  const boardHeight = Math.max(1, maxY - minY)
+  const scale = Math.min(
+    1,
+    Math.max(0.05, (width - 80) / boardWidth),
+    Math.max(0.05, (height - 80) / boardHeight),
+  )
+  try {
+    dm.data.scale = scale
+    dm.data.offsetX = (width - boardWidth * scale) / 2 - minX * scale
+    dm.data.offsetY = (height - boardHeight * scale) / 2 - minY * scale
+    controller.refresh()
+    await frame()
+    await frame()
+    const clone = snapshotRoot(root)
+    const html = buildSnapshotHtml(
+      clone,
+      canvas['x-superboard']?.meta.title || 'SuperBoard',
+    )
+    download(
+      new Blob([html], { type: 'text/html;charset=utf-8' }),
+      filename(canvas, 'html'),
+    )
+  } finally {
+    dm.data.offsetX = old.offsetX
+    dm.data.offsetY = old.offsetY
+    dm.data.scale = old.scale
+    controller.refresh()
+  }
+}
+
 export function downloadCanvasSvg(canvas: CanvasDocument) {
   const svg = buildCanvasSvg(canvas)
   download(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), filename(canvas, 'svg'))

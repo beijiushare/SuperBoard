@@ -1007,6 +1007,7 @@ export function CanvasEditorApp() {
       {exportDialogOpen && canvas ? (
         <ExportDialog
           canvas={canvas}
+          viewerRef={viewerRef}
           onClose={() => setExportDialogOpen(false)}
         />
       ) : null}
