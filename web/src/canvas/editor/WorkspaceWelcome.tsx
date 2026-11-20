@@ -134,10 +134,6 @@ export function WorkspaceWelcome({
           >
             {busy ? '正在检查…' : '打开文件夹'}
           </button>
-          <p>
-            选择一个文件夹作为工作区，建议包含 <code>public</code> 和{' '}
-            <code>private</code>；不存在会自动创建。
-          </p>
           {!supported ? (
             <p className="sb-welcome-error">
               当前浏览器不支持 File System Access API，请使用 Edge / Chrome，

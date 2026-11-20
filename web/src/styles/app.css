@@ -1195,7 +1195,7 @@
   box-shadow: none;
 }
 
-.sb-preferences-reset {
+.sb-preferences-close {
   display: grid;
   width: 30px;
   height: 30px;
@@ -1206,9 +1206,11 @@
   background: transparent;
   color: #6f6d66;
   cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
 }
 
-.sb-preferences-reset:hover {
+.sb-preferences-close:hover {
   background: transparent;
   color: #1f1e1c;
 }

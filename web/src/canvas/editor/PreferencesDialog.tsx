@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { RefreshIcon } from './BlockActionIcons'
 import { ColorPicker } from './ColorPicker'
 import {
   DEFAULT_PREFERENCES,
@@ -146,12 +145,12 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           </div>
           <button
             type="button"
-            className="sb-preferences-reset"
-            title="恢复默认"
-            aria-label="恢复默认"
-            onClick={() => setConfirmReset(true)}
+            className="sb-preferences-close"
+            title="关闭"
+            aria-label="关闭"
+            onClick={onClose}
           >
-            <RefreshIcon size={16} />
+            ×
           </button>
         </div>
 
@@ -299,6 +298,17 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
               <p className="sb-preferences-note">还没有最近工作区。</p>
             )}
             <p className="sb-preferences-note">偏好保存在本机。</p>
+            <h3>恢复默认</h3>
+            <p className="sb-preferences-note">
+              恢复默认块与文本样式，不会修改已有块。
+            </p>
+            <button
+              type="button"
+              className="sb-button"
+              onClick={() => setConfirmReset(true)}
+            >
+              恢复默认设置
+            </button>
           </section>
         ) : null}
 
