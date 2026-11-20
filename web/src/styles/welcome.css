@@ -35,6 +35,37 @@
   height: 90px;
 }
 
+@keyframes sb-brand-wiggle {
+  0% {
+    transform: rotate(0deg) translateY(0);
+  }
+  25% {
+    transform: rotate(-1.4deg) translateY(-2px);
+  }
+  50% {
+    transform: rotate(1.2deg) translateY(1px);
+  }
+  75% {
+    transform: rotate(-0.8deg) translateY(-1px);
+  }
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+}
+
+.sb-start-hash:hover,
+.sb-start-wordmark:hover {
+  animation: sb-brand-wiggle 420ms ease-in-out;
+  transform-origin: 50% 75%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-start-hash:hover,
+  .sb-start-wordmark:hover {
+    animation: none;
+  }
+}
+
 @media (max-width: 640px) {
   .sb-start-hash {
     height: 64px;
