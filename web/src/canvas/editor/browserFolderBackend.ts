@@ -582,22 +582,36 @@ export function browserWorkspaceName() {
   return root?.name ?? ''
 }
 
-async function fileHash(file: File) {
-  try {
-    const buffer = await crypto.subtle.digest('SHA-1', await file.arrayBuffer())
-    return Array.from(new Uint8Array(buffer).slice(0, 4))
-      .map((byte) => byte.toString(16).padStart(2, '0'))
-      .join('')
-  } catch {
-    return Date.now().toString(16).slice(-8)
+function sanitizeFileName(name: string) {
+  const cleaned = name
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, '_')
+    .replace(/[. ]+$/g, '')
+    .trim()
+  return cleaned || 'file'
+}
+
+async function uniqueFileName(dir: DirHandle, name: string) {
+  const dot = name.lastIndexOf('.')
+  const stem = dot > 0 ? name.slice(0, dot) : name
+  const extension = dot > 0 ? name.slice(dot) : ''
+  for (let index = 1; index < 10000; index += 1) {
+    const candidate = index === 1 ? name : `${stem}-${index}${extension}`
+    try {
+      await dir.getFileHandle(candidate)
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'NotFoundError') {
+        return candidate
+      }
+      throw error
+    }
   }
+  throw new Error('无法生成唯一文件名')
 }
 
 export async function importBrowserFile(file: File, scope: BoardScope) {
   if (!root) throw new Error('尚未打开工作区')
   const dir = await folderDirectory(scope, 'assets/files', true)
-  const safeName = file.name.replace(/[^\w.\-]+/g, '_')
-  const name = `${await fileHash(file)}-${safeName}`
+  const name = await uniqueFileName(dir, sanitizeFileName(file.name))
   const handle = await dir.getFileHandle(name, { create: true })
   const writable = await handle.createWritable()
   await writable.write(file)

@@ -316,18 +316,20 @@ body.sb-tree-resizing {
   display: flex;
   width: 100%;
   height: 100%;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px;
+  padding: 8px 12px;
   border: 0;
   background: transparent;
-  color: #6f6d66;
+  color: #3b3832;
   cursor: pointer;
 }
 
 .sb-file-card svg {
+  width: 24px;
+  height: 24px;
   flex: none;
   color: #8a857b;
 }

@@ -243,7 +243,9 @@ function FileCard({ media }: { media: SuperBoardMedia }) {
     <button
       type="button"
       className={`sb-file-card${missing ? ' sb-file-card-missing' : ''}`}
-      onClick={() => {
+      onDoubleClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
         if (media.file) void openResolvedFile(media.file)
       }}
       title={media.name ?? media.file}
@@ -275,7 +277,7 @@ export function FileSlot({
     name: node.file.split('/').pop() || node.file,
   }
   return (
-    <BlockSurface node={node}>
+    <BlockSurface node={node} plain>
       <FileCard media={media} />
     </BlockSurface>
   )
@@ -294,7 +296,7 @@ export function LinkSlot({
   const media = extension(node)?.media
   if (media?.kind === 'file') {
     return (
-      <BlockSurface node={node}>
+      <BlockSurface node={node} plain>
         <FileCard media={media} />
       </BlockSurface>
     )

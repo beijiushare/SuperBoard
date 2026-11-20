@@ -145,6 +145,9 @@ func TestWorkspaceImportFile(t *testing.T) {
 	if err := json.Unmarshal([]byte(result.Body), &payload); err != nil {
 		t.Fatal(err)
 	}
+	if filepath.Base(payload.Path) != "hello.txt" {
+		t.Fatalf("expected original name, got %s", payload.Path)
+	}
 	if _, err := os.Stat(filepath.Join(root, "public", "assets", "files", filepath.Base(payload.Path))); err != nil {
 		t.Fatalf("imported file missing: %v", err)
 	}
@@ -154,5 +157,37 @@ func TestWorkspaceImportFile(t *testing.T) {
 	}
 	if url == "" {
 		t.Fatal("empty file url")
+	}
+
+	second := service.ImportFile("hello.txt", "aGVsbG8=", "public")
+	var secondPayload struct {
+		Path string `json:"path"`
+	}
+	if err := json.Unmarshal([]byte(second.Body), &secondPayload); err != nil {
+		t.Fatal(err)
+	}
+	if filepath.Base(secondPayload.Path) != "hello-2.txt" {
+		t.Fatalf("expected -2 suffix, got %s", secondPayload.Path)
+	}
+	third := service.ImportFile("hello.txt", "aGVsbG8=", "public")
+	var thirdPayload struct {
+		Path string `json:"path"`
+	}
+	if err := json.Unmarshal([]byte(third.Body), &thirdPayload); err != nil {
+		t.Fatal(err)
+	}
+	if filepath.Base(thirdPayload.Path) != "hello-3.txt" {
+		t.Fatalf("expected -3 suffix, got %s", thirdPayload.Path)
+	}
+
+	spaced := service.ImportFile("报告 2026.pdf", "aGVsbG8=", "public")
+	var spacedPayload struct {
+		Path string `json:"path"`
+	}
+	if err := json.Unmarshal([]byte(spaced.Body), &spacedPayload); err != nil {
+		t.Fatal(err)
+	}
+	if filepath.Base(spacedPayload.Path) != "报告 2026.pdf" {
+		t.Fatalf("spaces should be preserved, got %s", spacedPayload.Path)
 	}
 }

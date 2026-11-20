@@ -1,11 +1,10 @@
 package services
 
 import (
-	"crypto/sha1"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"mime"
 	"net/http"
@@ -15,7 +14,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -24,10 +22,48 @@ import (
 )
 
 var (
-	slugPattern     = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
-	unsafeNameChars = regexp.MustCompile(`[^\p{L}\p{N}._-]+`)
-	invalidParts    = regexp.MustCompile(`[\\:*?"<>|]`)
+	slugPattern  = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
+	invalidParts = regexp.MustCompile(`[\\:*?"<>|]`)
 )
+
+// sanitizeFileName keeps the user's original name and only replaces
+// characters that cannot be used on Windows.
+func sanitizeFileName(name string) string {
+	name = strings.TrimSpace(name)
+	name = strings.Map(func(r rune) rune {
+		if r < 32 || strings.ContainsRune(`<>:"/\|?*`, r) {
+			return '_'
+		}
+		return r
+	}, name)
+	name = strings.TrimRight(name, ". ")
+	if name == "" || name == "." || name == ".." {
+		return "file"
+	}
+	return name
+}
+
+// createUniqueFile creates name inside dir and appends -2, -3, ... when the
+// name is already taken.
+func createUniqueFile(dir string, name string) (string, *os.File, error) {
+	ext := filepath.Ext(name)
+	stem := strings.TrimSuffix(name, ext)
+	for index := 1; index < 10000; index++ {
+		candidate := name
+		if index > 1 {
+			candidate = fmt.Sprintf("%s-%d%s", stem, index, ext)
+		}
+		path := filepath.Join(dir, candidate)
+		file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+		if err == nil {
+			return path, file, nil
+		}
+		if !os.IsExist(err) {
+			return "", nil, err
+		}
+	}
+	return "", nil, errors.New("无法生成唯一文件名")
+}
 
 // WorkspaceService owns the selected workspace folder and mirrors the browser
 // workspace backend over Wails bindings.
@@ -722,20 +758,26 @@ func (s *WorkspaceService) ImportFile(name string, dataBase64 string, scope stri
 	if err != nil {
 		return fail(400, "文件数据不合法")
 	}
-	safe := strings.Trim(unsafeNameChars.ReplaceAllString(name, "_"), "._")
-	if safe == "" {
-		safe = "file"
-	}
-	sum := sha1.Sum(data)
-	fileName := hex.EncodeToString(sum[:4]) + "-" + safe
+	safe := sanitizeFileName(name)
 	dir, err := s.folderDir(scope, "assets/files", true)
 	if err != nil {
 		return fail(400, err.Error())
 	}
-	if err := os.WriteFile(filepath.Join(dir, fileName), data, 0o644); err != nil {
+	target, handle, err := createUniqueFile(dir, safe)
+	if err != nil {
 		return fail(500, err.Error())
 	}
-	mimeType := mime.TypeByExtension(filepath.Ext(safe))
+	if _, err := handle.Write(data); err != nil {
+		handle.Close()
+		_ = os.Remove(target)
+		return fail(500, err.Error())
+	}
+	if err := handle.Close(); err != nil {
+		_ = os.Remove(target)
+		return fail(500, err.Error())
+	}
+	fileName := filepath.Base(target)
+	mimeType := mime.TypeByExtension(filepath.Ext(fileName))
 	if mimeType == "" {
 		mimeType = "application/octet-stream"
 	}
@@ -785,15 +827,25 @@ func (s *WorkspaceService) PickFiles(scope string) Result {
 			continue
 		}
 		name := filepath.Base(source)
-		safe := strings.Trim(unsafeNameChars.ReplaceAllString(name, "_"), "._")
-		if safe == "" {
-			safe = "file"
-		}
-		fileName := fileHash(source, info.Size()) + "-" + safe
-		if err := copyFile(source, filepath.Join(dir, fileName)); err != nil {
+		target, handle, err := createUniqueFile(dir, sanitizeFileName(name))
+		if err != nil {
 			return fail(500, err.Error())
 		}
-		mimeType := mime.TypeByExtension(filepath.Ext(safe))
+		input, openErr := os.Open(source)
+		if openErr != nil {
+			handle.Close()
+			_ = os.Remove(target)
+			continue
+		}
+		_, copyErr := io.Copy(handle, input)
+		input.Close()
+		handle.Close()
+		if copyErr != nil {
+			_ = os.Remove(target)
+			return fail(500, copyErr.Error())
+		}
+		fileName := filepath.Base(target)
+		mimeType := mime.TypeByExtension(filepath.Ext(fileName))
 		if mimeType == "" {
 			mimeType = "application/octet-stream"
 		}
@@ -805,21 +857,6 @@ func (s *WorkspaceService) PickFiles(scope string) Result {
 		})
 	}
 	return ok(map[string]any{"files": files})
-}
-
-func fileHash(path string, size int64) string {
-	file, err := os.Open(path)
-	if err != nil {
-		return strconv.FormatInt(time.Now().UnixNano(), 16)[:8]
-	}
-	defer file.Close()
-	hash := sha1.New()
-	buffer := make([]byte, 64*1024)
-	read, _ := io.ReadFull(file, buffer)
-	hash.Write(buffer[:read])
-	hash.Write([]byte(path))
-	hash.Write([]byte(strconv.FormatInt(size, 10)))
-	return hex.EncodeToString(hash.Sum(nil)[:4])
 }
 
 // ResolveFile validates that a workspace-relative path stays inside the

@@ -11,6 +11,7 @@ import {
   isShapeNode,
 } from './blocks'
 import type { EditorTool } from './tools'
+import { nodeFilePath, openWorkspaceFile } from './workspacePlatform'
 
 interface UseBlockActionsOptions {
   canvasRef: RefObject<CanvasDocument | null>
@@ -54,6 +55,15 @@ export function useBlockActions({
     const node = document?.nodes.find((item) => item.id === id)
     const editor = node ? blockEditor(node) : null
     if (!editor) return
+    if (editor === 'media') {
+      closeTextEditing()
+      closeMarkdownEditor()
+      setSelectedIds([id])
+      setTool('select')
+      const path = nodeFilePath(node ?? undefined)
+      if (path) void openWorkspaceFile(path)
+      return
+    }
     if (editor === 'markdown') {
       closeTextEditing()
       openMarkdownEditor(id)
