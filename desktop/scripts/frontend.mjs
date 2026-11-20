@@ -12,12 +12,12 @@ const desktopDir = resolve(here, '..')
 const rootDir = resolve(desktopDir, '..')
 const mode = process.argv[2] ?? 'build'
 const passthrough = process.argv.slice(3)
+const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
 
 function run(args) {
-  const result = spawnSync('npm', args, {
+  const result = spawnSync(npm, args, {
     cwd: rootDir,
     stdio: 'inherit',
-    shell: process.platform === 'win32',
   })
   if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1)
 }

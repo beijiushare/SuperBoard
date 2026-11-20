@@ -8,7 +8,7 @@ import {
 } from './appUtils'
 import { DEFAULT_BLOCK_SIZES } from './blocks'
 import { nextFreeId } from './hierarchy'
-import { importBrowserFile } from './browserFolderBackend'
+import { importLocalFile } from './workspacePlatform'
 import type { BoardScope } from '../../shared/board/types'
 import { blockStyleFromPreferences, textStyleFromPreferences } from './preferences'
 import { detectMediaKind, type EditorTool } from './tools'
@@ -322,7 +322,7 @@ export function useCanvasInsertions({
 
   async function insertLocalFile(file: File) {
     if (!canvas) return
-    const path = await importBrowserFile(file, scope)
+    const imported = await importLocalFile(file, scope)
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'file')
     const size = defaultBlockSize('media')
     const position = mediaInsertPoint
@@ -334,7 +334,7 @@ export function useCanvasInsertions({
     const node: CanvasNode = {
       id,
       type: 'link',
-      url: path,
+      url: imported.path,
       x: position.x,
       y: position.y,
       width: size.width,
@@ -343,11 +343,11 @@ export function useCanvasInsertions({
         kind: 'media',
         media: {
           kind: 'file',
-          url: path,
-          file: path,
-          name: file.name,
-          mime: file.type,
-          size: file.size,
+          url: imported.path,
+          file: imported.path,
+          name: imported.name,
+          mime: imported.mime,
+          size: imported.size,
         },
         style: blockStyleFromPreferences(),
       },

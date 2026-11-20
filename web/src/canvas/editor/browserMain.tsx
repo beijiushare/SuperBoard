@@ -6,13 +6,16 @@ import { FolderMoveOverlay } from './FolderMoveOverlay'
 import {
   browserFileUrl,
   installBrowserFolderBackend,
-  openBrowserWorkspace,
   restoreBrowserWorkspace,
 } from './browserFolderBackend'
 import { setFileUrlResolver } from '../viewer/fileResolver'
-
-installBrowserFolderBackend()
-setFileUrlResolver(browserFileUrl)
+import {
+  detectDesktop,
+  desktopFileUrl,
+  installDesktopFolderBackend,
+  restoreDesktopWorkspace,
+} from '../../desktop/platform'
+import { openWorkspace } from './workspacePlatform'
 
 const LOCK_NAME = 'superboard-editor'
 
@@ -53,13 +56,14 @@ function useSingleEditorLock(): LockState {
   return state
 }
 
-function BrowserEditorGate() {
+function EditorGate({ desktop }: { desktop: boolean }) {
   const lockState = useSingleEditorLock()
   const [ready, setReady] = useState(false)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(true)
   const supported =
-    typeof window !== 'undefined' && 'showDirectoryPicker' in window
+    desktop ||
+    (typeof window !== 'undefined' && 'showDirectoryPicker' in window)
 
   useEffect(() => {
     if (lockState !== 'ready') return
@@ -67,12 +71,15 @@ function BrowserEditorGate() {
       setBusy(false)
       return
     }
-    void restoreBrowserWorkspace()
-      .then((handle) => {
-        if (handle) setReady(true)
+    const restore = desktop
+      ? restoreDesktopWorkspace
+      : () => restoreBrowserWorkspace()
+    void restore()
+      .then((value) => {
+        if (value) setReady(true)
       })
       .finally(() => setBusy(false))
-  }, [supported, lockState])
+  }, [desktop, supported, lockState])
 
   if (lockState === 'blocked') {
     return (
@@ -117,22 +124,41 @@ function BrowserEditorGate() {
           onClick={() => {
             setBusy(true)
             setError('')
-            void openBrowserWorkspace()
-              .then(() => setReady(true))
+            void openWorkspace()
+              .then((name) => {
+                if (name) setReady(true)
+              })
               .catch((reason: unknown) => {
                 setError(reason instanceof Error ? reason.message : String(reason))
               })
               .finally(() => setBusy(false))
           }}
         >
-          打开本地文件夹
+          选择工作区文件夹
         </button>
       ) : (
-        <p>当前浏览器不支持 File System Access API，请使用 Edge 或 Chrome 桌面版。</p>
+        <p>
+          当前浏览器不支持 File System Access API，请使用 Edge 或 Chrome 桌面版，
+          或改用 SuperBoard 桌面端。
+        </p>
       )}
       {error ? <p>{error}</p> : null}
     </div>
   )
 }
 
-createRoot(document.getElementById('root')!).render(<BrowserEditorGate />)
+async function boot() {
+  const desktop = await detectDesktop()
+  if (desktop) {
+    installDesktopFolderBackend()
+    setFileUrlResolver(desktopFileUrl)
+  } else {
+    installBrowserFolderBackend()
+    setFileUrlResolver(browserFileUrl)
+  }
+  createRoot(document.getElementById('root')!).render(
+    <EditorGate desktop={desktop} />,
+  )
+}
+
+void boot()

@@ -12,10 +12,12 @@ import {
 } from './preferences'
 import { BackgroundFields, BorderFields } from './StyleFieldGroups'
 import { StyleNumberControl } from './StyleNumberControl'
+import { desktopMode } from '../../desktop/platform'
 import {
-  browserWorkspaceName,
-  openBrowserWorkspace,
-} from './browserFolderBackend'
+  canOpenWorkspace,
+  openWorkspace,
+  workspaceName,
+} from './workspacePlatform'
 
 interface PreferencesDialogProps {
   onClose: () => void
@@ -122,9 +124,13 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
         {tab === 'about' ? (
           <section>
             <h3>版本</h3>
-            <p className="sb-preferences-note">SuperBoard 0.1.0 · 浏览器版</p>
             <p className="sb-preferences-note">
-              浏览器端不提供检查更新；更新桌面安装包时会单独提示。
+              SuperBoard 0.1.0 · {desktopMode() ? '桌面版' : '浏览器版'}
+            </p>
+            <p className="sb-preferences-note">
+              {desktopMode()
+                ? '桌面端更新由安装包负责，设置中不检查更新。'
+                : '浏览器端不提供检查更新；更新桌面安装包时会单独提示。'}
             </p>
           </section>
         ) : null}
@@ -133,16 +139,16 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           <section>
             <h3>工作区</h3>
             <p className="sb-preferences-note">
-              当前目录：{browserWorkspaceName() || '未选择'}
+              当前目录：{workspaceName() || '未选择'}
             </p>
-            {'showDirectoryPicker' in window ? (
+            {canOpenWorkspace() ? (
               <button
                 type="button"
                 className="sb-button"
                 disabled={switching}
                 onClick={() => {
                   setSwitching(true)
-                  void openBrowserWorkspace()
+                  void openWorkspace()
                     .then(() => window.location.reload())
                     .catch(() => setSwitching(false))
                 }}
@@ -150,9 +156,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
                 {switching ? '正在切换…' : '重新选择文件夹'}
               </button>
             ) : null}
-            <p className="sb-preferences-note">
-              偏好保存在当前浏览器；桌面端会改为本地配置文件。
-            </p>
+            <p className="sb-preferences-note">偏好保存在本机。</p>
           </section>
         ) : null}
 

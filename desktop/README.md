@@ -1,59 +1,77 @@
-# Welcome to Your New Wails3 Project!
+# SuperBoard Desktop
 
-Congratulations on generating your Wails3 application! This README will guide you through the next steps to get your project up and running.
+Wails v3 外壳，复用仓库根目录的 React 编辑器。
 
-## Getting Started
+## 结构
 
-1. Navigate to your project directory in the terminal.
+```text
+desktop/
+  main.go              Wails 入口、窗口、单实例
+  services/            Go 服务（工作区、文件、附件、配置）
+  build/               构建配置与平台资源
+  frontend/dist/       构建时从根项目 dist 复制，git 忽略
+  scripts/frontend.mjs 前端构建 / 开发桥接
+```
 
-2. To run your application in development mode, use the following command:
+Go 生成的 TypeScript bindings 输出到：
 
-   ```
-   wails3 dev
-   ```
+```text
+web/src/desktop/bindings/
+```
 
-   This will start your application and enable hot-reloading for both frontend and backend changes.
+## 开发
 
-3. To build your application for production, use:
+```bash
+# 在仓库根目录
+npm run desktop:dev
+```
 
-   ```
-   wails3 build
-   ```
+或：
 
-   This will create a production-ready executable in the `build` directory.
+```bash
+cd desktop
+wails3 dev
+```
 
-## Exploring Wails3 Features
+`wails3 dev` 会在 `frontend/` 运行 `npm run dev`，该脚本转发到根项目的 Vite
+开发服务器。
 
-Now that you have your project set up, it's time to explore the features that Wails3 offers:
+> 开发模式下页面由 Vite 直接提供，`/__files/` 附件路由由 Wails 资产服务器
+> 处理，因此在 `wails3 dev` 中本地附件预览不可用。需要验证附件时请执行
+> `wails3 build` 后运行 `bin/superboard.exe`。
 
-1. **Check out the examples**: The best way to learn is by example. Visit the `examples` directory in the `v3/examples` directory to see various sample applications.
+## 构建
 
-2. **Run an example**: To run any of the examples, navigate to the example's directory and use:
+```bash
+# 在仓库根目录
+npm run desktop:build
+```
 
-   ```
-   go run .
-   ```
+或：
 
-   Note: Some examples may be under development during the alpha phase.
+```bash
+cd desktop
+wails3 build
+```
 
-3. **Explore the documentation**: Visit the [Wails3 documentation](https://v3.wails.io/) for in-depth guides and API references.
+产物：
 
-4. **Join the community**: Have questions or want to share your progress? Join the [Wails Discord](https://discord.gg/JDdSxwjhGf) or visit the [Wails discussions on GitHub](https://github.com/wailsapp/wails/discussions).
+```text
+desktop/bin/superboard.exe
+```
 
-## Project Structure
+构建流程：
 
-Take a moment to familiarize yourself with your project structure:
+1. `wails3 generate bindings` 生成 `web/src/desktop/bindings`
+2. `frontend/` 的 `npm run build` 调用根项目 `npm run build:editor`
+3. 复制 `dist/` 到 `desktop/frontend/dist`
+4. Go 编译并嵌入前端资源
 
-- `frontend/`: Contains your frontend code (HTML, CSS, JavaScript/TypeScript)
-- `main.go`: The entry point of your Go backend
-- `app.go`: Define your application structure and methods here
-- `wails.json`: Configuration file for your Wails project
+## 工作区
 
-## Next Steps
-
-1. Modify the frontend in the `frontend/` directory to create your desired UI.
-2. Add backend functionality in `main.go`.
-3. Use `wails3 dev` to see your changes in real-time.
-4. When ready, build your application with `wails3 build`.
-
-Happy coding with Wails3! If you encounter any issues or have questions, don't hesitate to consult the documentation or reach out to the Wails community.
+- 首次启动通过系统目录选择器选择工作区。
+- 路径保存在 `%APPDATA%/SuperBoard/config.json`。
+- 布局与浏览器端一致：`<workspace>/public`、`<workspace>/private`，
+  兼容旧的 `whiteboards/public|private`。
+- 附件位于 `<scope>/assets/files`，由 `/__files/` 只读暴露。
+- 第二次启动会聚焦已有窗口，不再开新实例。

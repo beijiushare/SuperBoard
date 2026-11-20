@@ -22,6 +22,8 @@ interface CanvasBlockMenuProps {
   onSelectAll: () => void
   onEditBlock: (id: string) => void
   onOpenFile?: (id: string) => void
+  onRevealFile?: (id: string) => void
+  onDeleteFile?: (id: string) => void
   onInsertText: () => void
   onInsertMarkdown: () => void
   onInsertPele: () => void
@@ -48,6 +50,8 @@ export function CanvasBlockMenu({
   onSelectAll,
   onEditBlock,
   onOpenFile,
+  onRevealFile,
+  onDeleteFile,
   onInsertText,
   onInsertMarkdown,
   onInsertPele,
@@ -99,15 +103,39 @@ export function CanvasBlockMenu({
             </button>
           ) : null}
           {node['x-superboard']?.media?.kind === 'file' && onOpenFile ? (
-            <button
-              type="button"
-              onClick={() => {
-                onOpenFile(node.id)
-                onClose()
-              }}
-            >
-              打开文件
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenFile(node.id)
+                  onClose()
+                }}
+              >
+                打开文件
+              </button>
+              {onRevealFile ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onRevealFile(node.id)
+                    onClose()
+                  }}
+                >
+                  在文件管理器中显示
+                </button>
+              ) : null}
+              {onDeleteFile ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onDeleteFile(node.id)
+                    onClose()
+                  }}
+                >
+                  删除文件
+                </button>
+              ) : null}
+            </>
           ) : null}
           <button
             type="button"

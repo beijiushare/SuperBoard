@@ -45,7 +45,12 @@ import { EditorInsertDialogs } from './EditorInsertDialogs'
 import { ExportDialog } from './ExportDialog'
 import { EditorBoardDialogs } from './EditorBoardDialogs'
 import { CanvasBlockMenu } from './CanvasBlockMenu'
-import { resolveFileUrl } from '../viewer/fileResolver'
+import {
+  deleteWorkspaceFile,
+  openWorkspaceFile,
+  revealWorkspaceFile,
+  supportsDesktopFileActions,
+} from './workspacePlatform'
 import { EditorWorkspace } from './EditorWorkspace'
 import { loadWorkspace, readBoard, WORKSPACE_VERSION_KEY } from './workspaceApi'
 import {
@@ -1029,11 +1034,32 @@ export function CanvasEditorApp() {
           onOpenFile={(id) => {
             const node = canvas.nodes.find((item) => item.id === id)
             const path = node?.['x-superboard']?.media?.file
-            if (!path) return
-            void resolveFileUrl(path).then((url) => {
-              if (url) window.open(url, '_blank', 'noopener,noreferrer')
-            })
+            if (path) void openWorkspaceFile(path)
           }}
+          onRevealFile={
+            supportsDesktopFileActions()
+              ? (id) => {
+                  const node = canvas.nodes.find((item) => item.id === id)
+                  const path = node?.['x-superboard']?.media?.file
+                  if (path) void revealWorkspaceFile(path)
+                }
+              : undefined
+          }
+          onDeleteFile={
+            supportsDesktopFileActions()
+              ? (id) => {
+                  const node = canvas.nodes.find((item) => item.id === id)
+                  const path = node?.['x-superboard']?.media?.file
+                  if (!path) return
+                  if (
+                    !window.confirm('从工作区删除该文件？引用它的卡片将无法再预览。')
+                  ) {
+                    return
+                  }
+                  void deleteWorkspaceFile(path)
+                }
+              : undefined
+          }
           onInsertText={() =>
             insertTextBlock('text', {
               x: canvasMenu.worldX,

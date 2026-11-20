@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
+
+	"superboard/desktop/services"
 )
 
 // The editor build from the repository root is copied into frontend/dist
@@ -16,12 +18,19 @@ var assets embed.FS
 
 func main() {
 	var mainWindow *application.WebviewWindow
+	workspace := services.NewWorkspaceService()
 
 	app := application.New(application.Options{
 		Name:        "SuperBoard",
 		Description: "SuperBoard 白板编辑器",
+		Services: []application.Service{
+			application.NewService(workspace),
+		},
 		Assets: application.AssetOptions{
-			Handler: application.AssetFileServerFS(assets),
+			Handler: services.NewAssetHandler(
+				application.AssetFileServerFS(assets),
+				workspace,
+			),
 		},
 		SingleInstance: &application.SingleInstanceOptions{
 			UniqueID: "com.superboard.desktop",
