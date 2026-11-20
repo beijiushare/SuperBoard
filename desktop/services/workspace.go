@@ -197,6 +197,35 @@ func (s *WorkspaceService) RestoreWorkspace() Result {
 	})
 }
 
+// OpenWorkspaceAt switches to a workspace path chosen by the OS or CLI.
+func (s *WorkspaceService) OpenWorkspaceAt(root string) Result {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if root == "" {
+		return fail(400, "工作区路径为空")
+	}
+	if _, err := os.Stat(filepath.Join(root, "public")); err != nil {
+		if _, err := os.Stat(filepath.Join(root, "private")); err != nil {
+			if _, err := os.Stat(filepath.Join(root, "whiteboards")); err != nil {
+				return fail(400, "不是 SuperBoard 工作区")
+			}
+		}
+	}
+	if err := s.setRoot(root); err != nil {
+		return fail(400, err.Error())
+	}
+	config := loadConfig()
+	config.Workspace = root
+	if err := saveConfig(config); err != nil {
+		return fail(500, err.Error())
+	}
+	s.versions = map[string]string{}
+	return ok(map[string]any{
+		"name": filepath.Base(root),
+		"path": root,
+	})
+}
+
 func (s *WorkspaceService) WorkspaceName() string {
 	s.mu.Lock()
 	defer s.mu.Unlock()

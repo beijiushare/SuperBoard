@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import { Events } from '@wailsio/runtime'
 import '../../styles/index.css'
 import { CanvasEditorApp } from './CanvasEditorApp'
 import { FolderMoveOverlay } from './FolderMoveOverlay'
@@ -153,6 +154,15 @@ async function boot() {
   if (desktop) {
     installDesktopFolderBackend()
     setFileUrlResolver(desktopFileUrl)
+    void Events.On('superboard:open', (event) => {
+      const data = (event.data ?? {}) as { scope?: string; slug?: string }
+      if (!data.slug) return
+      const params = new URLSearchParams(window.location.search)
+      params.set('board', data.slug)
+      if (data.scope === 'private') params.set('scope', 'private')
+      else params.delete('scope')
+      window.location.search = params.toString()
+    })
   } else {
     installBrowserFolderBackend()
     setFileUrlResolver(browserFileUrl)

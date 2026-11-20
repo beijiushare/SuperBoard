@@ -67,6 +67,13 @@ export function OpenWorkspace(): $CancellablePromise<$models.Result> {
 }
 
 /**
+ * OpenWorkspaceAt switches to a workspace path chosen by the OS or CLI.
+ */
+export function OpenWorkspaceAt(root: string): $CancellablePromise<$models.Result> {
+    return $Call.ByID(3195366456, root);
+}
+
+/**
  * PickFiles copies files chosen through the native dialog into the workspace
  * attachment directory. Unlike ImportFile it never carries file bytes over the
  * JS bridge, so large videos are safe.
