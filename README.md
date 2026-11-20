@@ -99,6 +99,7 @@ uv run python -m http.server 4174 --directory dist
 
 ## 导出
 
-- 编辑器 rail 的导出按钮可导出当前白板为单 HTML 或 SVG
+- 编辑器 rail 的导出按钮可导出当前白板为单 HTML，画面来自真实渲染快照
 - 多文件站点使用 `npm run export:site`
+- 不再提供 SVG/PNG 导出入口
 - 桌面端一键导出与部署命令仍在计划中
