@@ -582,6 +582,44 @@ export function browserWorkspaceName() {
   return root?.name ?? ''
 }
 
+async function fileHash(file: File) {
+  try {
+    const buffer = await crypto.subtle.digest('SHA-1', await file.arrayBuffer())
+    return Array.from(new Uint8Array(buffer).slice(0, 4))
+      .map((byte) => byte.toString(16).padStart(2, '0'))
+      .join('')
+  } catch {
+    return Date.now().toString(16).slice(-8)
+  }
+}
+
+export async function importBrowserFile(file: File, scope: BoardScope) {
+  if (!root) throw new Error('尚未打开工作区')
+  const dir = await folderDirectory(scope, 'assets/files', true)
+  const safeName = file.name.replace(/[^\w.\-]+/g, '_')
+  const name = `${await fileHash(file)}-${safeName}`
+  const handle = await dir.getFileHandle(name, { create: true })
+  const writable = await handle.createWritable()
+  await writable.write(file)
+  await writable.close()
+  invalidateBoardCache()
+  return `${scope}/assets/files/${name}`
+}
+
+export async function browserFileUrl(path: string) {
+  if (!root) return null
+  const parts = path.split('/').filter(Boolean)
+  const scope = normalizeScope(parts.shift())
+  const fileName = parts.pop()
+  if (!fileName) return null
+  let dir = await scopeDirectory(scope)
+  for (const part of parts) {
+    dir = await dir.getDirectoryHandle(part)
+  }
+  const file = await (await dir.getFileHandle(fileName)).getFile()
+  return URL.createObjectURL(file)
+}
+
 export async function browserRequest(
   input: RequestInfo | URL,
   init?: RequestInit,

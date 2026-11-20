@@ -8,6 +8,8 @@ import {
 } from './appUtils'
 import { DEFAULT_BLOCK_SIZES } from './blocks'
 import { nextFreeId } from './hierarchy'
+import { importBrowserFile } from './browserFolderBackend'
+import type { BoardScope } from '../../shared/board/types'
 import { blockStyleFromPreferences, textStyleFromPreferences } from './preferences'
 import { detectMediaKind, type EditorTool } from './tools'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
@@ -15,6 +17,7 @@ import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 interface UseCanvasInsertionsOptions {
   canvas: CanvasDocument | null
   canvasRef: RefObject<CanvasDocument | null>
+  scope: BoardScope
   viewerRef: RefObject<CanvasViewerHandle | null>
   peleDialog:
     | { mode: 'create'; point?: { x: number; y: number } }
@@ -48,6 +51,7 @@ interface UseCanvasInsertionsOptions {
 export function useCanvasInsertions({
   canvas,
   canvasRef,
+  scope,
   viewerRef,
   peleDialog,
   setPeleDialog,
@@ -316,6 +320,44 @@ export function useCanvasInsertions({
     setMediaInsertPoint(null)
   }
 
+  async function insertLocalFile(file: File) {
+    if (!canvas) return
+    const path = await importBrowserFile(file, scope)
+    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'file')
+    const size = defaultBlockSize('media')
+    const position = mediaInsertPoint
+      ? {
+          x: Math.round(mediaInsertPoint.x - size.width / 2),
+          y: Math.round(mediaInsertPoint.y - size.height / 2),
+        }
+      : viewportCenter(size.width, size.height)
+    const node: CanvasNode = {
+      id,
+      type: 'link',
+      url: path,
+      x: position.x,
+      y: position.y,
+      width: size.width,
+      height: size.height,
+      'x-superboard': {
+        kind: 'media',
+        media: {
+          kind: 'file',
+          url: path,
+          file: path,
+          name: file.name,
+          mime: file.type,
+        },
+        style: blockStyleFromPreferences(),
+      },
+    }
+    recordHistory()
+    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    setMediaDialogOpen(false)
+    setMediaUrl('')
+    setMediaInsertPoint(null)
+  }
+
   function openMediaDialog(point?: { x: number; y: number }) {
     setMediaInsertPoint(point ?? null)
     setMediaDialogOpen(true)
@@ -328,6 +370,7 @@ export function useCanvasInsertions({
     insertPele,
     insertScheduleBlock,
     insertMedia,
+    insertLocalFile,
     openMediaDialog,
   }
 }

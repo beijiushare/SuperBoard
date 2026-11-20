@@ -1,6 +1,6 @@
 import { PeleCreateDialog } from './PeleCreateDialog'
 import { PreferencesDialog } from './PreferencesDialog'
-import { InputDialog } from '../../shared/ui/InputDialog'
+import { MediaInsertDialog } from './MediaInsertDialog'
 
 type PeleDialogState =
   | { mode: 'create'; point?: { x: number; y: number } }
@@ -17,6 +17,7 @@ interface EditorInsertDialogsProps {
   mediaUrl: string
   onCloseMedia: () => void
   onConfirmMedia: (value: string) => void
+  onInsertFile: (file: File) => void
   preferencesOpen: boolean
   onClosePreferences: () => void
 }
@@ -31,6 +32,7 @@ export function EditorInsertDialogs({
   mediaUrl,
   onCloseMedia,
   onConfirmMedia,
+  onInsertFile,
   preferencesOpen,
   onClosePreferences,
 }: EditorInsertDialogsProps) {
@@ -52,14 +54,11 @@ export function EditorInsertDialogs({
       ) : null}
 
       {mediaOpen ? (
-        <InputDialog
-          title="插入媒体"
-          description="支持图片、视频链接，以及其他可嵌入的 iframe 地址。"
-          initialValue={mediaUrl}
-          placeholder="https://..."
-          confirmText="插入"
-          onConfirm={onConfirmMedia}
+        <MediaInsertDialog
+          initialUrl={mediaUrl}
           onClose={onCloseMedia}
+          onInsertUrl={onConfirmMedia}
+          onInsertFile={onInsertFile}
         />
       ) : null}
 

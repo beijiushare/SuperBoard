@@ -297,10 +297,12 @@ export function CanvasEditorApp() {
     insertPele,
     insertScheduleBlock,
     insertMedia,
+    insertLocalFile,
     openMediaDialog,
   } = useCanvasInsertions({
     canvas,
     canvasRef,
+    scope,
     viewerRef,
     peleDialog,
     setPeleDialog,
@@ -1066,6 +1068,7 @@ export function CanvasEditorApp() {
           setMediaInsertPoint(null)
         }}
         onConfirmMedia={(value) => insertMedia(value)}
+        onInsertFile={(file) => void insertLocalFile(file)}
         preferencesOpen={preferencesOpen}
         onClosePreferences={() => {
           setPreferencesOpen(false)

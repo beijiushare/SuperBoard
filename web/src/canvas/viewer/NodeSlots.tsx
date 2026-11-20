@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { DEFAULT_PREFERENCES } from '../editor/preferences'
 import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
@@ -13,6 +13,7 @@ import {
 } from '../model'
 import '../../styles/markdown.css'
 import '../../styles/pele.css'
+import { resolveFileUrl } from './fileResolver'
 
 const PeleView = lazy(() =>
   import('../../shared/pele/PeleView').then((module) => ({
@@ -202,6 +203,44 @@ function mediaClipPath(media: SuperBoardMedia, width: number, height: number) {
   return `${inset})`
 }
 
+const FILE_ICON_PATH =
+  'M186.181818 837.818182l325.818182 0 0 46.545455-325.818182 0 0-46.545455ZM837.818182 837.818182 837.818182 884.363636 930.909091 884.363636 930.909091 0 232.727273 0 232.727273 93.090909 279.272727 93.090909 279.272727 46.545455 884.363636 46.545455 884.363636 837.818182ZM186.181818 698.181818l512 0 0 46.545455-512 0 0-46.545455ZM93.090909 149.410909l0 864.814545C93.090909 1019.624727 97.373091 1024 102.679273 1024l678.958545 0C786.990545 1024 791.272727 1019.671273 791.272727 1014.225455L791.272727 149.410909C791.272727 144.011636 786.990545 139.636364 781.684364 139.636364L102.679273 139.636364C97.373091 139.636364 93.090909 143.965091 93.090909 149.410909zM139.636364 186.181818l605.090909 0 0 791.272727L139.636364 977.454545 139.636364 186.181818zM186.181818 279.272727l512 0 0 46.545455-512 0 0-46.545455ZM186.181818 418.909091l512 0 0 46.545455-512 0 0-46.545455ZM186.181818 558.545455l512 0 0 46.545455-512 0 0-46.545455Z'
+
+function FileCard({ media }: { media: SuperBoardMedia }) {
+  const [url, setUrl] = useState<string | null>(null)
+  useEffect(() => {
+    if (!media.file) return
+    let alive = true
+    void resolveFileUrl(media.file).then((next) => {
+      if (alive) setUrl(next)
+    })
+    return () => {
+      alive = false
+    }
+  }, [media.file])
+  if (url && media.mime?.startsWith('image/')) {
+    return <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+  }
+  if (url && media.mime?.startsWith('video/')) {
+    return <video src={url} controls style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+  }
+  return (
+    <button
+      type="button"
+      className="sb-file-card"
+      onClick={() => {
+        if (url) window.open(url, '_blank', 'noopener,noreferrer')
+      }}
+      title={media.name ?? media.file}
+    >
+      <svg viewBox="0 0 1024 1024" width="72" height="72" aria-hidden="true">
+        <path d={FILE_ICON_PATH} fill="currentColor" />
+      </svg>
+      <span>{media.name ?? media.file}</span>
+    </button>
+  )
+}
+
 export function LinkSlot({
   node,
   onActive,
@@ -213,6 +252,13 @@ export function LinkSlot({
 }) {
   useNodeSelection(node.id, onActive, onSelect)
   const media = extension(node)?.media
+  if (media?.kind === 'file') {
+    return (
+      <BlockSurface node={node}>
+        <FileCard media={media} />
+      </BlockSurface>
+    )
+  }
   if (!media) {
     return (
       <BlockSurface node={node}>

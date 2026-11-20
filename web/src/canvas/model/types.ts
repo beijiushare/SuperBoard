@@ -91,7 +91,7 @@ export type SuperBoardNodeKind =
   | 'frame'
 
 export type SuperBoardShapeKind = 'rect' | 'ellipse' | 'diamond' | 'line'
-export type SuperBoardMediaKind = 'image' | 'video' | 'iframe'
+export type SuperBoardMediaKind = 'image' | 'video' | 'iframe' | 'file'
 export interface SuperBoardStyle {
   backgroundColor?: string
   backgroundOpacity?: number
@@ -118,6 +118,9 @@ export interface SuperBoardStyle {
 export interface SuperBoardMedia {
   kind: SuperBoardMediaKind
   url: string
+  file?: string
+  name?: string
+  mime?: string
   crop?: 'rect' | 'rounded' | 'circle'
   cropX?: number
   cropY?: number

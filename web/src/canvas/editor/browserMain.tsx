@@ -4,12 +4,15 @@ import '../../styles/index.css'
 import { CanvasEditorApp } from './CanvasEditorApp'
 import { FolderMoveOverlay } from './FolderMoveOverlay'
 import {
+  browserFileUrl,
   installBrowserFolderBackend,
   openBrowserWorkspace,
   restoreBrowserWorkspace,
 } from './browserFolderBackend'
+import { setFileUrlResolver } from '../viewer/fileResolver'
 
 installBrowserFolderBackend()
+setFileUrlResolver(browserFileUrl)
 
 const LOCK_NAME = 'superboard-editor'
 
