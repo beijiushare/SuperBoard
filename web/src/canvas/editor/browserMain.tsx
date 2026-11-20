@@ -17,7 +17,6 @@ import {
   restoreDesktopWorkspace,
 } from '../../desktop/platform'
 import {
-  forgetRecentWorkspace,
   listRecentWorkspaces,
   openRecentWorkspace,
   openWorkspace,
@@ -161,10 +160,6 @@ function EditorGate({ desktop }: { desktop: boolean }) {
       .finally(() => setBusy(false))
   }
 
-  const handleForgetRecent = (item: WorkspaceRecentItem) => {
-    void forgetRecentWorkspace(item).finally(refreshRecent)
-  }
-
   if (lockState === 'blocked') {
     return (
       <div className="sb-screen-message">
@@ -197,7 +192,6 @@ function EditorGate({ desktop }: { desktop: boolean }) {
       recent={recent}
       onOpenFolder={handleOpenFolder}
       onOpenRecent={handleOpenRecent}
-      onForgetRecent={handleForgetRecent}
     />
   )
 }

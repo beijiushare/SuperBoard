@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState, type MouseEvent } from 'react'
+import { Browser } from '@wailsio/runtime'
 import type { WorkspaceRecentItem } from './workspacePlatform'
 import wordmarkUrl from '../../assets/superboard-wordmark.svg?url'
 import hashUrl from '../../assets/superboard-hash.svg?url'
@@ -17,24 +19,6 @@ function HashIcon({ size = 40 }: { size?: number }) {
   )
 }
 
-function formatTime(value?: string) {
-  if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  return date.toLocaleString('zh-CN', {
-    month: 'numeric',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
-function recentDetail(item: WorkspaceRecentItem) {
-  if (!item.available) return '目录不存在'
-  if (item.permission === 'prompt') return '需要重新授权'
-  return item.path ?? ''
-}
-
 export function WelcomeLoading({ desktop }: { desktop: boolean }) {
   return (
     <div className="sb-welcome sb-welcome-loading">
@@ -48,6 +32,83 @@ export function WelcomeLoading({ desktop }: { desktop: boolean }) {
   )
 }
 
+function RecentSelect({
+  items,
+  disabled,
+  onOpen,
+}: {
+  items: WorkspaceRecentItem[]
+  disabled: boolean
+  onOpen: (item: WorkspaceRecentItem) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [selected, setSelected] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
+  const current = items.find((item) => item.id === selected)
+  const label = current?.name ?? '选择'
+
+  useEffect(() => {
+    if (!open) return
+    const onPointerDown = (event: PointerEvent) => {
+      if (!ref.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('pointerdown', onPointerDown)
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown)
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open])
+
+  return (
+    <div className="sb-start-recent" ref={ref}>
+      <button
+        type="button"
+        className="sb-start-select sb-start-select-button"
+        disabled={disabled || items.length === 0}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="sb-start-select-label">{label}</span>
+        <span className="sb-start-select-arrow" aria-hidden="true">
+          ⌄
+        </span>
+      </button>
+      {open ? (
+        <div className="sb-start-menu" role="listbox">
+          {items.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="option"
+              aria-selected={item.id === selected}
+              className="sb-start-menu-item"
+              disabled={!item.available}
+              title={item.path ?? item.name}
+              onClick={() => {
+                setSelected(item.id)
+                setOpen(false)
+                onOpen(item)
+              }}
+            >
+              <span className="sb-start-menu-name">{item.name}</span>
+              {!item.available ? (
+                <small>目录不存在</small>
+              ) : item.permission === 'prompt' ? (
+                <small>需要授权</small>
+              ) : null}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 interface WorkspaceWelcomeProps {
   desktop: boolean
   busy: boolean
@@ -56,7 +117,6 @@ interface WorkspaceWelcomeProps {
   recent: WorkspaceRecentItem[]
   onOpenFolder: () => void
   onOpenRecent: (item: WorkspaceRecentItem) => void
-  onForgetRecent: (item: WorkspaceRecentItem) => void
 }
 
 export function WorkspaceWelcome({
@@ -67,10 +127,18 @@ export function WorkspaceWelcome({
   recent,
   onOpenFolder,
   onOpenRecent,
-  onForgetRecent,
 }: WorkspaceWelcomeProps) {
+  const openExternal = (event: MouseEvent, url: string) => {
+    if (!desktop) return
+    event.preventDefault()
+    void Browser.OpenURL(url)
+  }
+
   return (
-    <div className="sb-welcome">
+    <div
+      className="sb-welcome"
+      data-platform={desktop ? 'desktop' : 'browser'}
+    >
       <div className="sb-welcome-inner">
         <header className="sb-welcome-brand">
           <img
@@ -86,66 +154,83 @@ export function WorkspaceWelcome({
           />
         </header>
 
-        <section className="sb-welcome-recent">
-          <div className="sb-welcome-section-head">
-            <h2>最近打开</h2>
-          </div>
-          {recent.length > 0 ? (
-            <ul>
-              {recent.map((item) => (
-                <li key={item.id} className={item.available ? undefined : 'is-missing'}>
-                  <button
-                    type="button"
-                    className="sb-welcome-recent-open"
-                    disabled={!item.available}
-                    onClick={() => onOpenRecent(item)}
-                  >
-                    <span className="sb-welcome-recent-name">{item.name}</span>
-                    <span className="sb-welcome-recent-detail">
-                      {recentDetail(item)}
-                    </span>
-                  </button>
-                  <span className="sb-welcome-recent-time">
-                    {formatTime(item.lastOpened)}
-                  </span>
-                  <button
-                    type="button"
-                    className="sb-welcome-recent-remove"
-                    aria-label={`移除 ${item.name}`}
-                    title="从最近列表移除"
-                    onClick={() => onForgetRecent(item)}
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="sb-welcome-empty">还没有最近的工作区记录。</p>
-          )}
-        </section>
-
-        <div className="sb-welcome-actions">
-          <button
-            type="button"
-            className="sb-welcome-primary"
-            disabled={busy || !supported}
-            onClick={onOpenFolder}
+        <div className="sb-start-meta">
+          <a
+            href="https://github.com/beijiushare/SuperBoard"
+            target="_blank"
+            rel="noreferrer"
+            onClick={(event) =>
+              openExternal(
+                event,
+                'https://github.com/beijiushare/SuperBoard',
+              )
+            }
           >
-            {busy ? '正在检查…' : '打开文件夹'}
-          </button>
-          {!supported ? (
-            <p className="sb-welcome-error">
-              当前浏览器不支持 File System Access API，请使用 Edge / Chrome，
-              或改用 SuperBoard 桌面端。
-            </p>
-          ) : null}
-          {error ? <p className="sb-welcome-error">{error}</p> : null}
+            版本 0.1.0
+          </a>
+          <span aria-hidden="true">·</span>
+          <a
+            href="https://beijiu.top/SuperBoard"
+            target="_blank"
+            rel="noreferrer"
+            onClick={(event) =>
+              openExternal(event, 'https://beijiu.top/SuperBoard')
+            }
+          >
+            beijiu.top/SuperBoard
+          </a>
         </div>
 
-        <footer className="sb-welcome-footer">
-          版本 0.1.0 · {desktop ? '桌面版' : '浏览器版'}
-        </footer>
+        <section className="sb-start-card" aria-label="开始">
+          <div className="sb-start-row">
+            <div className="sb-start-row-text">
+              <h2>打开文件夹</h2>
+              <p>打开指定文件夹作为工作区。</p>
+            </div>
+            <button
+              type="button"
+              className="sb-start-button"
+              disabled={busy || !supported}
+              onClick={onOpenFolder}
+            >
+              {busy ? '正在…' : '打开'}
+            </button>
+          </div>
+
+          <div className="sb-start-row">
+            <div className="sb-start-row-text">
+              <h2>最近打开</h2>
+              <p>最近访问的工作区。</p>
+            </div>
+            <RecentSelect
+              items={recent}
+              disabled={busy}
+              onOpen={onOpenRecent}
+            />
+          </div>
+
+          <div className="sb-start-row">
+            <div className="sb-start-row-text">
+              <h2>语言</h2>
+              <p>界面显示语言。</p>
+            </div>
+            <select
+              className="sb-start-select sb-start-language"
+              defaultValue="zh-CN"
+              aria-label="语言"
+            >
+              <option value="zh-CN">简体中文</option>
+            </select>
+          </div>
+        </section>
+
+        {!supported ? (
+          <p className="sb-welcome-error">
+            当前浏览器不支持 File System Access API，请使用 Edge / Chrome，
+            或改用 SuperBoard 桌面端。
+          </p>
+        ) : null}
+        {error ? <p className="sb-welcome-error">{error}</p> : null}
       </div>
     </div>
   )
