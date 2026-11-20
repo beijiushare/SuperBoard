@@ -3,7 +3,6 @@ import { getStroke } from 'perfect-freehand'
 import {
   resolveNodeStyle,
   type SuperBoardStroke,
-  type SuperBoardStyle,
 } from '../model'
 import { intersectsViewport, nodeWorldRect, viewportWorldRect } from './culling'
 
@@ -15,7 +14,7 @@ type DrawingNode = {
   'x-superboard'?: {
     strokes?: SuperBoardStroke[]
     rotation?: number
-    style?: SuperBoardStyle
+    style?: Record<string, unknown>
   }
 }
 
@@ -33,64 +32,60 @@ type Controller = {
   onRefresh: { subscribe: (callback: () => void) => () => void }
 }
 
-interface CachedOutline {
+interface CachedPath {
   width: number
-  outline: number[][]
+  path: string
+}
+
+const SVG_NS = 'http://www.w3.org/2000/svg'
+
+function outlinePath(outline: number[][]) {
+  if (outline.length < 3) return ''
+  const [first, ...rest] = outline
+  let path = `M ${first[0].toFixed(2)} ${first[1].toFixed(2)}`
+  for (const point of rest) {
+    path += ` L ${point[0].toFixed(2)} ${point[1].toFixed(2)}`
+  }
+  return `${path} Z`
 }
 
 export class DrawingLayer extends BaseModule {
   private readonly dm: DataManager
   private readonly controller: Controller
-  private readonly canvas: HTMLCanvasElement
-  private readonly ctx: CanvasRenderingContext2D
+  private readonly svg: SVGSVGElement
   private readonly unsubscribe: () => void
-  private readonly outlineCache = new WeakMap<SuperBoardStroke, CachedOutline>()
+  private readonly pathCache = new WeakMap<SuperBoardStroke, CachedPath>()
 
   constructor(...args: BaseArgs) {
     super(...args)
     this.dm = this.container.get(internal.DataManager as never) as DataManager
     this.controller = this.container.get(internal.Controller as never) as Controller
-    this.canvas = document.createElement('canvas')
-    this.canvas.className = 'sb-canvas-drawing-layer'
-    Object.assign(this.canvas.style, {
+    this.svg = document.createElementNS(SVG_NS, 'svg')
+    this.svg.setAttribute('class', 'sb-canvas-drawing-layer')
+    Object.assign(this.svg.style, {
       position: 'absolute',
       inset: '0',
       width: '100%',
       height: '100%',
+      overflow: 'visible',
       pointerEvents: 'none',
     })
-    const ctx = this.canvas.getContext('2d')
-    if (!ctx) throw new Error('无法创建手写画布')
-    this.ctx = ctx
     const overlays = this.dm.data.container.querySelector('.JCV-overlays')
-    if (overlays) this.dm.data.container.insertBefore(this.canvas, overlays)
-    else this.dm.data.container.appendChild(this.canvas)
+    if (overlays) this.dm.data.container.insertBefore(this.svg, overlays)
+    else this.dm.data.container.appendChild(this.svg)
     this.unsubscribe = this.controller.onRefresh.subscribe(this.draw)
     this.onStart(this.start)
     this.onRestart(this.start)
     this.onDispose(this.dispose)
   }
 
-  private resize() {
-    const container = this.dm.data.container
-    const dpr = window.devicePixelRatio || 1
-    const width = Math.max(1, Math.round(container.clientWidth * dpr))
-    const height = Math.max(1, Math.round(container.clientHeight * dpr))
-    if (this.canvas.width !== width || this.canvas.height !== height) {
-      this.canvas.width = width
-      this.canvas.height = height
-    }
-    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-  }
-
   private readonly start = () => {
-    this.resize()
     this.draw()
   }
 
-  private outlineFor(stroke: SuperBoardStroke, width: number) {
-    const cached = this.outlineCache.get(stroke)
-    if (cached?.width === width) return cached.outline
+  private pathFor(stroke: SuperBoardStroke, width: number) {
+    const cached = this.pathCache.get(stroke)
+    if (cached?.width === width) return cached.path
     const outline = getStroke(
       stroke.points.map(([x, y, pressure]) =>
         pressure === undefined ? [x, y] : [x, y, pressure],
@@ -105,58 +100,59 @@ export class DrawingLayer extends BaseModule {
         end: stroke.end === undefined ? undefined : { taper: stroke.end },
       },
     )
-    this.outlineCache.set(stroke, { width, outline })
-    return outline
+    const path = outlinePath(outline)
+    this.pathCache.set(stroke, { width, path })
+    return path
   }
 
   private readonly draw = () => {
-    this.resize()
     const { offsetX, offsetY, scale, nodeMap } = this.dm.data
     const viewport = viewportWorldRect(this.dm.data, 120)
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    this.ctx.save()
-    this.ctx.translate(offsetX, offsetY)
-    this.ctx.scale(scale, scale)
+    while (this.svg.firstChild) this.svg.removeChild(this.svg.firstChild)
+    const group = document.createElementNS(SVG_NS, 'g')
+    group.setAttribute(
+      'transform',
+      `translate(${offsetX} ${offsetY}) scale(${scale})`,
+    )
+    this.svg.appendChild(group)
     for (const item of Object.values(nodeMap)) {
       const node = item.ref
-      const rotation = node['x-superboard']?.rotation ?? 0
-      const style = node['x-superboard']?.style
-      const resolved = resolveNodeStyle(style)
       const strokes = node['x-superboard']?.strokes
       if (!strokes?.length) continue
+      const rotation = node['x-superboard']?.rotation ?? 0
       if (!intersectsViewport(nodeWorldRect(node, rotation, 16), viewport)) {
         continue
       }
-      this.ctx.save()
-      this.ctx.globalAlpha = resolved.opacity
-      if (rotation) {
-        const centerX = node.x + node.width / 2
-        const centerY = node.y + node.height / 2
-        this.ctx.translate(centerX, centerY)
-        this.ctx.rotate((rotation * Math.PI) / 180)
-        this.ctx.translate(-centerX, -centerY)
-      }
-      this.ctx.translate(node.x, node.y)
+      const resolved = resolveNodeStyle(
+        node['x-superboard']?.style as never,
+      )
+      const nodeGroup = document.createElementNS(SVG_NS, 'g')
+      const rotate = rotation
+        ? ` rotate(${rotation} ${node.width / 2} ${node.height / 2})`
+        : ''
+      nodeGroup.setAttribute(
+        'transform',
+        `translate(${node.x} ${node.y})${rotate}`,
+      )
+      nodeGroup.setAttribute('opacity', String(resolved.opacity))
       for (const stroke of strokes) {
         const width = resolved.borderWidth ?? stroke.size
-        const outline = this.outlineFor(stroke, width)
-        if (outline.length < 3) continue
-        this.ctx.beginPath()
-        this.ctx.moveTo(outline[0][0], outline[0][1])
-        for (let index = 1; index < outline.length; index += 1) {
-          this.ctx.lineTo(outline[index][0], outline[index][1])
-        }
-        this.ctx.closePath()
-        this.ctx.fillStyle = resolved.borderColor ?? style?.color ?? stroke.color
-        this.ctx.fill()
+        const pathData = this.pathFor(stroke, width)
+        if (!pathData) continue
+        const path = document.createElementNS(SVG_NS, 'path')
+        path.setAttribute('d', pathData)
+        path.setAttribute(
+          'fill',
+          resolved.borderColor ?? stroke.color ?? '#1d1d1d',
+        )
+        nodeGroup.appendChild(path)
       }
-      this.ctx.restore()
+      group.appendChild(nodeGroup)
     }
-    this.ctx.restore()
   }
 
   private readonly dispose = () => {
     this.unsubscribe()
-    this.canvas.remove()
+    this.svg.remove()
   }
 }

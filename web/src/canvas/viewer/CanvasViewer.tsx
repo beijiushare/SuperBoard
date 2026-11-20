@@ -22,10 +22,12 @@ import type {
 } from '../model'
 import { DirectorLayer } from './DirectorLayer'
 import { DrawingLayer } from './DrawingLayer'
+import { EdgeLayer } from './EdgeLayer'
+import { GridLayer } from './GridLayer'
 import { LinkSlot, TextSlot } from './NodeSlots'
 import { ShapeLayer } from './ShapeLayer'
 
-const modules = [Controls, Minimap, ShapeLayer, DrawingLayer, DirectorLayer]
+const modules = [Controls, Minimap, GridLayer, EdgeLayer, ShapeLayer, DrawingLayer, DirectorLayer]
 
 export interface CanvasViewerHandle {
   viewer?: {

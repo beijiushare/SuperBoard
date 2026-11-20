@@ -60,6 +60,7 @@ export default class Renderer extends BaseModule {
 		this.ctx.save();
 		this.ctx.translate(offsetX, offsetY);
 		this.ctx.scale(scale, scale);
+		if (false) this.drawGrid(scale, offsetX, offsetY);
 		Object.values(this.DM.data.nodeMap).forEach((item) => {
 			if (this.isOutside(item.box, currentViewport)) return;
 			const node = item.ref;
@@ -69,10 +70,12 @@ export default class Renderer extends BaseModule {
 				this.drawGroup(node, scale);
 			}
 		});
-		Object.values(this.DM.data.edgeMap).forEach((item) => {
-			if (this.isOutside(item.box, currentViewport)) return;
-			this.drawEdge(item);
-		});
+		if (false) {
+			Object.values(this.DM.data.edgeMap).forEach((item) => {
+				if (this.isOutside(item.box, currentViewport)) return;
+				this.drawEdge(item);
+			});
+		}
 		this.ctx.restore();
 	};
 
