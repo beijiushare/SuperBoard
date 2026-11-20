@@ -46,6 +46,14 @@ export function desktopWorkspaceName() {
   return workspaceName
 }
 
+export async function desktopWorkspacePath() {
+  try {
+    return await Workspace.WorkspacePath()
+  } catch {
+    return ''
+  }
+}
+
 export async function openDesktopWorkspace() {
   const result = await Workspace.OpenWorkspace()
   const data = parse<{ name?: string; cancelled?: boolean; error?: string }>(result)

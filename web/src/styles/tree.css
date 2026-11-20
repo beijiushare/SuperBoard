@@ -341,6 +341,15 @@ body.sb-tree-resizing {
   white-space: nowrap;
 }
 
+.sb-file-card-missing {
+  color: #b4534b;
+}
+
+.sb-file-card-missing small {
+  color: #b4534b;
+  font-size: 11px;
+}
+
 .sb-dialog-input {
   width: 100%;
   padding: 9px 11px;

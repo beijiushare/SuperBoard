@@ -12,7 +12,7 @@ import {
 } from './preferences'
 import { BackgroundFields, BorderFields } from './StyleFieldGroups'
 import { StyleNumberControl } from './StyleNumberControl'
-import { desktopMode } from '../../desktop/platform'
+import { desktopMode, desktopWorkspacePath } from '../../desktop/platform'
 import {
   canOpenWorkspace,
   openWorkspace,
@@ -30,6 +30,18 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
   const [confirmReset, setConfirmReset] = useState(false)
   const [tab, setTab] = useState<'about' | 'general' | 'block' | 'text'>('general')
   const [switching, setSwitching] = useState(false)
+  const [workspacePath, setWorkspacePath] = useState('')
+
+  useEffect(() => {
+    if (!desktopMode()) return
+    let alive = true
+    void desktopWorkspacePath().then((path) => {
+      if (alive) setWorkspacePath(path)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -139,7 +151,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           <section>
             <h3>工作区</h3>
             <p className="sb-preferences-note">
-              当前目录：{workspaceName() || '未选择'}
+              当前目录：{workspacePath || workspaceName() || '未选择'}
             </p>
             {canOpenWorkspace() ? (
               <button

@@ -218,12 +218,16 @@ function guessMime(name: string) {
 
 function FileCard({ media }: { media: SuperBoardMedia }) {
   const [url, setUrl] = useState<string | null>(null)
+  const [missing, setMissing] = useState(false)
   const mime = media.mime || guessMime(media.name ?? media.file ?? '')
   useEffect(() => {
     if (!media.file) return
     let alive = true
+    setMissing(false)
     void resolveFileUrl(media.file).then((next) => {
-      if (alive) setUrl(next)
+      if (!alive) return
+      setUrl(next)
+      setMissing(!next)
     })
     return () => {
       alive = false
@@ -238,7 +242,7 @@ function FileCard({ media }: { media: SuperBoardMedia }) {
   return (
     <button
       type="button"
-      className="sb-file-card"
+      className={`sb-file-card${missing ? ' sb-file-card-missing' : ''}`}
       onClick={() => {
         if (media.file) void openResolvedFile(media.file)
       }}
@@ -248,6 +252,7 @@ function FileCard({ media }: { media: SuperBoardMedia }) {
         <path d={FILE_ICON_PATH} fill="currentColor" />
       </svg>
       <span>{media.name ?? media.file}</span>
+      {missing ? <small>文件缺失</small> : null}
     </button>
   )
 }
