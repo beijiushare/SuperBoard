@@ -226,3 +226,88 @@
   color: #a19c90;
   font-size: 12px;
 }
+
+.sb-workspace-recent {
+  margin: 4px 0 12px;
+  border-top: 1px solid #e6e2d8;
+}
+
+.sb-workspace-recent-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #e6e2d8;
+}
+
+.sb-workspace-recent-row.is-missing {
+  opacity: 0.55;
+}
+
+.sb-workspace-recent-open {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sb-workspace-recent-open:disabled {
+  cursor: default;
+}
+
+.sb-workspace-recent-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-workspace-recent-name small {
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: #f1eee5;
+  color: #8a857b;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.sb-workspace-recent-path {
+  max-width: 100%;
+  overflow: hidden;
+  color: #8a857b;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-workspace-recent-remove {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #a19c90;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.sb-workspace-recent-remove:hover {
+  background: #f1eee5;
+  color: #1f1e1c;
+}

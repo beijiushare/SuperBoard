@@ -15,8 +15,12 @@ import { StyleNumberControl } from './StyleNumberControl'
 import { desktopMode, desktopWorkspacePath } from '../../desktop/platform'
 import {
   canOpenWorkspace,
+  forgetRecentWorkspace,
+  listRecentWorkspaces,
+  openRecentWorkspace,
   openWorkspace,
   workspaceName,
+  type WorkspaceRecentItem,
 } from './workspacePlatform'
 
 interface PreferencesDialogProps {
@@ -33,6 +37,17 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
   )
   const [switching, setSwitching] = useState(false)
   const [workspacePath, setWorkspacePath] = useState('')
+  const [recent, setRecent] = useState<WorkspaceRecentItem[]>([])
+
+  const refreshRecent = () => {
+    void listRecentWorkspaces()
+      .then(setRecent)
+      .catch(() => setRecent([]))
+  }
+
+  useEffect(() => {
+    refreshRecent()
+  }, [])
 
   useEffect(() => {
     if (!desktopMode()) return
@@ -71,6 +86,20 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
       ...current,
       text: { ...current.text, ...patch },
     }))
+  }
+
+  const currentWorkspace = workspacePath || workspaceName()
+
+  function switchToRecent(item: WorkspaceRecentItem) {
+    if (!item.available || switching) return
+    setSwitching(true)
+    void openRecentWorkspace(item)
+      .then(() => window.location.reload())
+      .catch(() => setSwitching(false))
+  }
+
+  function removeRecent(item: WorkspaceRecentItem) {
+    void forgetRecentWorkspace(item).then(refreshRecent)
   }
 
   return createPortal(
@@ -190,6 +219,56 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
                 {switching ? '正在切换…' : '重新选择文件夹'}
               </button>
             ) : null}
+
+            <h3>最近工作区</h3>
+            {recent.length > 0 ? (
+              <div className="sb-workspace-recent">
+                {recent.map((item) => {
+                  const current = item.path
+                    ? item.path === currentWorkspace
+                    : item.name === currentWorkspace
+                  const detail = !item.available
+                    ? '目录不存在'
+                    : item.permission === 'prompt'
+                      ? '需要重新授权'
+                      : item.path || item.name
+                  return (
+                    <div
+                      key={item.id}
+                      className={`sb-workspace-recent-row${
+                        item.available ? '' : ' is-missing'
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        className="sb-workspace-recent-open"
+                        disabled={!item.available || switching}
+                        onClick={() => switchToRecent(item)}
+                      >
+                        <span className="sb-workspace-recent-name">
+                          {item.name}
+                          {current ? <small>当前</small> : null}
+                        </span>
+                        <span className="sb-workspace-recent-path">
+                          {detail}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className="sb-workspace-recent-remove"
+                        aria-label={`移除 ${item.name}`}
+                        title="从最近列表移除"
+                        onClick={() => removeRecent(item)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <p className="sb-preferences-note">还没有最近工作区。</p>
+            )}
             <p className="sb-preferences-note">偏好保存在本机。</p>
           </section>
         ) : null}
