@@ -3,7 +3,7 @@
 ## 当前状态
 
 - 分支：`master`
-- 最近提交：`0e8470c fix: keep tool editing overlay in sync with zoom`
+- 最近提交：`cd8662a feat: restore export interactions and switch to line grid`
 - 工作区干净，`whiteboards/` 已被 `.gitignore` 忽略，不再进入 Git
 - 示例数据：`info/public/welcome.canvas`
 - 真实数据：本地 `whiteboards/public`，通过 `build:data` 构建后部署到 Vercel
@@ -42,7 +42,9 @@
 - 导出只保留单 HTML，使用真实渲染 DOM 快照（含 canvas 位图与富内容）
 - 新建文本时立即创建真实节点，再进入编辑
 - 设置改为左侧分类导航；关于页只显示版本
-- 侧栏/目录使用 Tab 与 ←/→ 切换，↑/↓ 移动
+- 导出 HTML 支持左键选中、中键/右键拖动、块内滚动与点击
+- 背景只支持网格/无网格，网格改为 draw.io 风格浅色线
+- 文本编辑框去掉额外边框，只保留选中框
 - 保存失败自动重试两次，409 不重试
 - 冲突时保存按钮显示「保存冲突，点击覆盖」，顶部横幅可覆盖或重新加载磁盘版本
 - 保存失败时顶部横幅提供「重试保存」
