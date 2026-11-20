@@ -347,6 +347,7 @@ export function useCanvasInsertions({
           file: path,
           name: file.name,
           mime: file.type,
+          size: file.size,
         },
         style: blockStyleFromPreferences(),
       },

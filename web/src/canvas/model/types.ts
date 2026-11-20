@@ -121,6 +121,7 @@ export interface SuperBoardMedia {
   file?: string
   name?: string
   mime?: string
+  size?: number
   crop?: 'rect' | 'rounded' | 'circle'
   cropX?: number
   cropY?: number

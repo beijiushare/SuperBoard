@@ -371,3 +371,51 @@ body.sb-tree-resizing {
   font-size: 13px;
   cursor: pointer;
 }
+
+.sb-export-dialog {
+  width: min(640px, calc(100vw - 40px));
+}
+
+.sb-export-attachments {
+  display: grid;
+  max-height: 260px;
+  gap: 6px;
+  overflow: auto;
+  margin: 8px 0;
+  padding-right: 4px;
+}
+
+.sb-export-attachment {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.sb-export-attachment span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-export-attachment small {
+  color: #8a857b;
+}
+
+.sb-export-attachment select {
+  padding: 4px 6px;
+  border: 1px solid #d8d4c9;
+  border-radius: 6px;
+  background: #fffdf8;
+  font-size: 12px;
+}
+
+.sb-export-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  color: #6f6b60;
+  font-size: 12px;
+}

@@ -413,6 +413,17 @@ type ViewerLike = {
   container?: { get: (key: unknown) => unknown }
 }
 
+export type AttachmentAction = 'embed' | 'copy' | 'skip'
+
+async function blobToDataUrl(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
+}
+
 function collectDocumentCss() {
   const chunks: string[] = []
   for (const sheet of Array.from(document.styleSheets)) {
@@ -425,26 +436,38 @@ function collectDocumentCss() {
   return chunks.join('\n')
 }
 
-async function inlineBlobImages(root: HTMLElement) {
-  const images = Array.from(root.querySelectorAll('img'))
-  await Promise.all(
-    images.map(async (image) => {
-      const src = image.getAttribute('src') ?? ''
-      if (!src.startsWith('blob:')) return
-      try {
-        const blob = await (await fetch(src)).blob()
-        const data = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(String(reader.result))
-          reader.onerror = () => reject(reader.error)
-          reader.readAsDataURL(blob)
-        })
-        image.setAttribute('src', data)
-      } catch {
-        // Keep the original source if it cannot be inlined.
-      }
-    }),
+async function applyAttachmentActions(
+  root: HTMLElement,
+  canvas: CanvasDocument,
+  actions: Map<string, AttachmentAction> | undefined,
+) {
+  const sources = Array.from(
+    root.querySelectorAll<HTMLElement>('img,video,source'),
   )
+  for (const node of canvas.nodes) {
+    const media = node['x-superboard']?.media
+    if (media?.kind !== 'file' || !media.file) continue
+    const url = await resolveFileUrl(media.file)
+    if (!url) continue
+    const action = actions?.get(media.file) ?? (actions ? 'skip' : 'embed')
+    const targets = sources.filter(
+      (element) => element.getAttribute('src') === url,
+    )
+    if (action === 'embed') {
+      try {
+        const blob = await (await fetch(url)).blob()
+        const data = await blobToDataUrl(blob)
+        targets.forEach((element) => element.setAttribute('src', data))
+      } catch {
+        // Keep the original source.
+      }
+    } else if (action === 'skip') {
+      targets.forEach((element) => {
+        element.removeAttribute('src')
+        element.setAttribute('data-missing-attachment', media.name ?? '')
+      })
+    }
+  }
 }
 
 function snapshotRoot(root: HTMLElement) {
@@ -552,7 +575,7 @@ function frame() {
 export async function downloadCanvasHtmlSnapshot(
   canvas: CanvasDocument,
   viewer: ViewerLike | undefined,
-  inlineImages = true,
+  actions?: Map<string, AttachmentAction>,
 ) {
   if (!viewer?.container) throw new Error('画布尚未就绪')
   const { internal } = await import(
@@ -602,7 +625,7 @@ export async function downloadCanvasHtmlSnapshot(
     await frame()
     await frame()
     const clone = snapshotRoot(root)
-    if (inlineImages) await inlineBlobImages(clone)
+    await applyAttachmentActions(clone, canvas, actions)
     const html = buildSnapshotHtml(
       clone,
       canvas['x-superboard']?.meta.title || 'SuperBoard',
@@ -622,6 +645,7 @@ export async function downloadCanvasHtmlSnapshot(
 export async function exportCanvasFolder(
   canvas: CanvasDocument,
   viewer: ViewerLike | undefined,
+  actions?: Map<string, AttachmentAction>,
 ) {
   if (!viewer?.container) throw new Error('画布尚未就绪')
   const picker = (window as unknown as {
@@ -673,14 +697,28 @@ export async function exportCanvasFolder(
       if (media?.kind !== 'file' || !media.file) continue
       const url = await resolveFileUrl(media.file)
       if (!url) continue
+      const action = actions?.get(media.file) ?? (actions ? 'skip' : 'copy')
+      const targets = sources.filter(
+        (element) => element.getAttribute('src') === url,
+      )
+      if (action === 'skip') {
+        targets.forEach((element) => element.removeAttribute('src'))
+        continue
+      }
+      if (action === 'embed') {
+        const blob = await (await fetch(url)).blob()
+        const data = await blobToDataUrl(blob)
+        targets.forEach((element) => element.setAttribute('src', data))
+        continue
+      }
       const relative = `files/${(media.name || media.file.split('/').pop() || 'file').replace(/[^\w.\-]+/g, '_')}`
       const blob = await (await fetch(url)).blob()
       const handle = await filesDir.getFileHandle(relative.slice(6), { create: true })
       const writable = await handle.createWritable()
       await writable.write(blob)
       await writable.close()
-      for (const element of sources) {
-        if (element.getAttribute('src') === url) element.setAttribute('src', relative)
+      for (const element of targets) {
+        element.setAttribute('src', relative)
       }
     }
     const html = buildSnapshotHtml(
