@@ -39,6 +39,10 @@ export function FileURL(relative: string): $CancellablePromise<string> {
     return $Call.ByID(2183730599, relative);
 }
 
+export function ForgetWorkspace(path: string): $CancellablePromise<$models.Result> {
+    return $Call.ByID(2124358010, path);
+}
+
 /**
  * ImportFile stores a version of the browser file input flow. The frontend
  * sends base64 so the desktop app reuses the same insertion UI.
@@ -84,6 +88,10 @@ export function PickFiles(scope: string): $CancellablePromise<$models.Result> {
 
 export function ReadBoard(slug: string, scope: string): $CancellablePromise<$models.Result> {
     return $Call.ByID(2743485756, slug, scope);
+}
+
+export function RecentWorkspaces(): $CancellablePromise<$models.Result> {
+    return $Call.ByID(1000628777);
 }
 
 /**

@@ -3,10 +3,13 @@ import type { CanvasNode } from '../model'
 import {
   desktopDeleteFile,
   desktopFileUrl,
+  desktopForgetWorkspace,
   desktopImportFile,
   desktopMode,
   desktopOpenFile,
+  desktopOpenWorkspacePath,
   desktopPickFiles,
+  desktopRecentWorkspaces,
   desktopRevealFile,
   desktopWorkspaceName,
   openDesktopWorkspace,
@@ -15,7 +18,10 @@ import {
 import {
   browserFileUrl,
   browserWorkspaceName,
+  forgetBrowserRecent,
   importBrowserFile,
+  listBrowserRecent,
+  openBrowserRecent,
   openBrowserWorkspace,
 } from './browserFolderBackend'
 
@@ -79,4 +85,42 @@ export function nodeFilePath(node: CanvasNode | undefined) {
   const media = node['x-superboard']?.media
   if (media?.file) return media.file
   return node.type === 'file' ? node.file : undefined
+}
+
+export interface WorkspaceRecentItem {
+  id: string
+  name: string
+  path?: string
+  lastOpened?: string
+  available: boolean
+  permission?: string
+}
+
+export async function listRecentWorkspaces(): Promise<WorkspaceRecentItem[]> {
+  if (desktopMode()) {
+    const rows = await desktopRecentWorkspaces()
+    return rows.map((row) => ({
+      id: row.path,
+      name: row.name,
+      path: row.path,
+      lastOpened: row.lastOpened,
+      available: row.available,
+    }))
+  }
+  return listBrowserRecent()
+}
+
+export async function openRecentWorkspace(item: WorkspaceRecentItem) {
+  if (desktopMode()) {
+    return desktopOpenWorkspacePath(item.path ?? item.id)
+  }
+  return openBrowserRecent(item.id)
+}
+
+export async function forgetRecentWorkspace(item: WorkspaceRecentItem) {
+  if (desktopMode()) {
+    await desktopForgetWorkspace(item.path ?? item.id)
+    return
+  }
+  await forgetBrowserRecent(item.id)
 }

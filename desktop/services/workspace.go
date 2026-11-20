@@ -180,6 +180,15 @@ func (s *WorkspaceService) setRoot(root string) error {
 	return nil
 }
 
+func looksLikeWorkspace(root string) bool {
+	for _, name := range []string{"public", "private", "whiteboards"} {
+		if info, err := os.Stat(filepath.Join(root, name)); err == nil && info.IsDir() {
+			return true
+		}
+	}
+	return false
+}
+
 // OpenWorkspace asks the OS for a directory and stores it in the local config.
 func (s *WorkspaceService) OpenWorkspace() Result {
 	app := application.Get()
@@ -204,7 +213,7 @@ func (s *WorkspaceService) OpenWorkspace() Result {
 		return fail(400, err.Error())
 	}
 	config := loadConfig()
-	config.Workspace = dir
+	rememberWorkspace(&config, dir)
 	if err := saveConfig(config); err != nil {
 		return fail(500, err.Error())
 	}
@@ -226,6 +235,10 @@ func (s *WorkspaceService) RestoreWorkspace() Result {
 	if err := s.setRoot(config.Workspace); err != nil {
 		return ok(map[string]any{})
 	}
+	rememberWorkspace(&config, config.Workspace)
+	if err := saveConfig(config); err != nil {
+		return ok(map[string]any{})
+	}
 	s.versions = map[string]string{}
 	return ok(map[string]any{
 		"name": filepath.Base(config.Workspace),
@@ -240,18 +253,14 @@ func (s *WorkspaceService) OpenWorkspaceAt(root string) Result {
 	if root == "" {
 		return fail(400, "工作区路径为空")
 	}
-	if _, err := os.Stat(filepath.Join(root, "public")); err != nil {
-		if _, err := os.Stat(filepath.Join(root, "private")); err != nil {
-			if _, err := os.Stat(filepath.Join(root, "whiteboards")); err != nil {
-				return fail(400, "不是 SuperBoard 工作区")
-			}
-		}
+	if !looksLikeWorkspace(root) {
+		return fail(400, "不是 SuperBoard 工作区")
 	}
 	if err := s.setRoot(root); err != nil {
 		return fail(400, err.Error())
 	}
 	config := loadConfig()
-	config.Workspace = root
+	rememberWorkspace(&config, root)
 	if err := saveConfig(config); err != nil {
 		return fail(500, err.Error())
 	}
@@ -260,6 +269,63 @@ func (s *WorkspaceService) OpenWorkspaceAt(root string) Result {
 		"name": filepath.Base(root),
 		"path": root,
 	})
+}
+
+func (s *WorkspaceService) RecentWorkspaces() Result {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	config := loadConfig()
+	if config.Workspace != "" {
+		found := false
+		for _, item := range config.Recent {
+			if samePath(item.Path, config.Workspace) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			config.Recent = append([]RecentWorkspace{{
+				Path:       config.Workspace,
+				Name:       filepath.Base(config.Workspace),
+				LastOpened: nowISO(),
+			}}, config.Recent...)
+		}
+	}
+	rows := make([]map[string]any, 0, len(config.Recent))
+	for _, item := range config.Recent {
+		info, err := os.Stat(item.Path)
+		available := err == nil && info.IsDir() && looksLikeWorkspace(item.Path)
+		rows = append(rows, map[string]any{
+			"path":       item.Path,
+			"name":       item.Name,
+			"lastOpened": item.LastOpened,
+			"available":  available,
+		})
+	}
+	return ok(map[string]any{"recent": rows})
+}
+
+func (s *WorkspaceService) ForgetWorkspace(path string) Result {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if path == "" {
+		return fail(400, "工作区路径为空")
+	}
+	config := loadConfig()
+	next := make([]RecentWorkspace, 0, len(config.Recent))
+	for _, item := range config.Recent {
+		if !samePath(item.Path, path) {
+			next = append(next, item)
+		}
+	}
+	config.Recent = next
+	if samePath(config.Workspace, path) {
+		config.Workspace = ""
+	}
+	if err := saveConfig(config); err != nil {
+		return fail(500, err.Error())
+	}
+	return simpleOK()
 }
 
 func (s *WorkspaceService) WorkspaceName() string {

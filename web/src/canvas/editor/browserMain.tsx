@@ -16,7 +16,15 @@ import {
   installDesktopFolderBackend,
   restoreDesktopWorkspace,
 } from '../../desktop/platform'
-import { openWorkspace, openWorkspaceFile } from './workspacePlatform'
+import {
+  forgetRecentWorkspace,
+  listRecentWorkspaces,
+  openRecentWorkspace,
+  openWorkspace,
+  openWorkspaceFile,
+  type WorkspaceRecentItem,
+} from './workspacePlatform'
+import { WelcomeLoading, WorkspaceWelcome } from './WorkspaceWelcome'
 
 const LOCK_NAME = 'superboard-editor'
 
@@ -61,26 +69,75 @@ function EditorGate({ desktop }: { desktop: boolean }) {
   const lockState = useSingleEditorLock()
   const [ready, setReady] = useState(false)
   const [error, setError] = useState('')
-  const [busy, setBusy] = useState(true)
+  const [busy, setBusy] = useState(false)
+  const [initializing, setInitializing] = useState(true)
+  const [recent, setRecent] = useState<WorkspaceRecentItem[]>([])
   const supported =
     desktop ||
     (typeof window !== 'undefined' && 'showDirectoryPicker' in window)
 
+  const refreshRecent = () => {
+    void listRecentWorkspaces()
+      .then(setRecent)
+      .catch(() => setRecent([]))
+  }
+
   useEffect(() => {
     if (lockState !== 'ready') return
     if (!supported) {
-      setBusy(false)
+      setInitializing(false)
       return
     }
     const restore = desktop
       ? restoreDesktopWorkspace
       : () => restoreBrowserWorkspace()
     void restore()
-      .then((value) => {
-        if (value) setReady(true)
+      .then(async (value) => {
+        if (value) {
+          setReady(true)
+          return
+        }
+        setRecent(await listRecentWorkspaces())
+      })
+      .catch(() => {
+        refreshRecent()
+      })
+      .finally(() => setInitializing(false))
+  }, [desktop, supported, lockState])
+
+  const handleOpenFolder = () => {
+    setBusy(true)
+    setError('')
+    void openWorkspace()
+      .then((name) => {
+        if (name) setReady(true)
+        else refreshRecent()
+      })
+      .catch((reason: unknown) => {
+        setError(reason instanceof Error ? reason.message : String(reason))
+        refreshRecent()
       })
       .finally(() => setBusy(false))
-  }, [desktop, supported, lockState])
+  }
+
+  const handleOpenRecent = (item: WorkspaceRecentItem) => {
+    setBusy(true)
+    setError('')
+    void openRecentWorkspace(item)
+      .then((name) => {
+        if (name) setReady(true)
+        else refreshRecent()
+      })
+      .catch((reason: unknown) => {
+        setError(reason instanceof Error ? reason.message : String(reason))
+        refreshRecent()
+      })
+      .finally(() => setBusy(false))
+  }
+
+  const handleForgetRecent = (item: WorkspaceRecentItem) => {
+    void forgetRecentWorkspace(item).finally(refreshRecent)
+  }
 
   if (lockState === 'blocked') {
     return (
@@ -92,13 +149,8 @@ function EditorGate({ desktop }: { desktop: boolean }) {
     )
   }
 
-  if (lockState === 'checking') {
-    return (
-      <div className="sb-screen-message">
-        <h1>SuperBoard 编辑器</h1>
-        <p>正在检查编辑锁…</p>
-      </div>
-    )
+  if (lockState === 'checking' || initializing) {
+    return <WelcomeLoading desktop={desktop} />
   }
 
   if (ready) {
@@ -111,40 +163,16 @@ function EditorGate({ desktop }: { desktop: boolean }) {
   }
 
   return (
-    <div className="sb-screen-message">
-      <h1>SuperBoard 编辑器</h1>
-      <p>
-        选择一个文件夹作为工作区。建议其中包含 <code>public</code> 和{' '}
-        <code>private</code> 子目录；不存在会自动创建。
-      </p>
-      {busy ? <p>正在检查上次的工作区…</p> : null}
-      {supported ? (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            setBusy(true)
-            setError('')
-            void openWorkspace()
-              .then((name) => {
-                if (name) setReady(true)
-              })
-              .catch((reason: unknown) => {
-                setError(reason instanceof Error ? reason.message : String(reason))
-              })
-              .finally(() => setBusy(false))
-          }}
-        >
-          选择工作区文件夹
-        </button>
-      ) : (
-        <p>
-          当前浏览器不支持 File System Access API，请使用 Edge 或 Chrome 桌面版，
-          或改用 SuperBoard 桌面端。
-        </p>
-      )}
-      {error ? <p>{error}</p> : null}
-    </div>
+    <WorkspaceWelcome
+      desktop={desktop}
+      busy={busy}
+      error={error}
+      supported={supported}
+      recent={recent}
+      onOpenFolder={handleOpenFolder}
+      onOpenRecent={handleOpenRecent}
+      onForgetRecent={handleForgetRecent}
+    />
   )
 }
 

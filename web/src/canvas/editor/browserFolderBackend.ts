@@ -90,6 +90,80 @@ async function storeHandle(handle: DirHandle) {
   }
 }
 
+type RecentWorkspaceEntry = {
+  id: string
+  handle: DirHandle
+  name: string
+  lastOpened: string
+}
+
+const RECENT_KEY = 'recent'
+const recentHandles = new Map<string, DirHandle>()
+
+async function readRecentEntries() {
+  try {
+    const db = await database()
+    return await new Promise<RecentWorkspaceEntry[]>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly')
+      const request = tx.objectStore(STORE_NAME).get(RECENT_KEY)
+      request.onsuccess = () =>
+        resolve((request.result as RecentWorkspaceEntry[] | undefined) ?? [])
+      request.onerror = () => reject(request.error)
+    })
+  } catch {
+    return []
+  }
+}
+
+async function writeRecentEntries(entries: RecentWorkspaceEntry[]) {
+  try {
+    const db = await database()
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite')
+      tx.objectStore(STORE_NAME).put(entries, RECENT_KEY)
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+  } catch {
+    // Recent list is best effort.
+  }
+}
+
+async function rememberHandle(handle: DirHandle) {
+  try {
+    const entries = await readRecentEntries()
+    const existing = entries.find((entry) => entry.name === handle.name)
+    const id = existing?.id ?? crypto.randomUUID()
+    const next = [
+      {
+        id,
+        handle,
+        name: handle.name,
+        lastOpened: new Date().toISOString(),
+      },
+      ...entries.filter((entry) => entry.id !== id),
+    ].slice(0, 8)
+    await writeRecentEntries(next)
+    recentHandles.set(id, handle)
+  } catch {
+    // Ignore persistence errors.
+  }
+}
+
+async function permissionOf(handle: DirHandle) {
+  try {
+    return await (
+      handle as unknown as {
+        queryPermission: (options: {
+          mode: 'readwrite'
+        }) => Promise<PermissionState>
+      }
+    ).queryPermission({ mode: 'readwrite' })
+  } catch {
+    return 'denied' as PermissionState
+  }
+}
+
 async function readStoredHandle() {
   try {
     const db = await database()
@@ -559,19 +633,68 @@ export async function openBrowserWorkspace() {
   await scopeDirectory('public', true)
   await scopeDirectory('private', true)
   await storeHandle(handle)
-  return handle}
+  await rememberHandle(handle)
+  return handle
+}
 
 export async function restoreBrowserWorkspace() {
   const handle = await readStoredHandle()
   if (!handle) return null
-  const permission = await (handle as unknown as {
-    queryPermission: (options: { mode: 'readwrite' }) => Promise<PermissionState>
-  }).queryPermission({ mode: 'readwrite' })
+  await rememberHandle(handle)
+  const permission = await permissionOf(handle)
   if (permission !== 'granted') return null
   root = handle
   await scopeDirectory('public', true)
   await scopeDirectory('private', true)
   return handle
+}
+
+export async function listBrowserRecent() {
+  const entries = await readRecentEntries()
+  const rows = []
+  for (const entry of entries) {
+    recentHandles.set(entry.id, entry.handle)
+    const permission = await permissionOf(entry.handle)
+    rows.push({
+      id: entry.id,
+      name: entry.name,
+      lastOpened: entry.lastOpened,
+      permission,
+      available: permission === 'granted' || permission === 'prompt',
+    })
+  }
+  return rows.sort((left, right) =>
+    right.lastOpened.localeCompare(left.lastOpened),
+  )
+}
+
+export async function openBrowserRecent(id: string) {
+  let handle = recentHandles.get(id)
+  if (!handle) {
+    const entries = await readRecentEntries()
+    handle = entries.find((entry) => entry.id === id)?.handle
+  }
+  if (!handle) throw new Error('工作区记录不存在')
+  const permission = await (
+    handle as unknown as {
+      requestPermission: (options: {
+        mode: 'readwrite'
+      }) => Promise<PermissionState>
+    }
+  ).requestPermission({ mode: 'readwrite' })
+  if (permission !== 'granted') throw new Error('未获得文件夹权限')
+  root = handle
+  await scopeDirectory('public', true)
+  await scopeDirectory('private', true)
+  await storeHandle(handle)
+  await rememberHandle(handle)
+  return handle.name
+}
+
+export async function forgetBrowserRecent(id: string) {
+  const entries = await readRecentEntries()
+  await writeRecentEntries(entries.filter((entry) => entry.id !== id))
+  recentHandles.delete(id)
 }
 
 export function isBrowserFolderMode() {

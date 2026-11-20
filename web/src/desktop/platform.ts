@@ -70,6 +70,36 @@ export async function restoreDesktopWorkspace() {
   return workspaceName || null
 }
 
+export interface DesktopRecentWorkspace {
+  path: string
+  name: string
+  lastOpened?: string
+  available: boolean
+}
+
+export async function desktopRecentWorkspaces() {
+  const result = await Workspace.RecentWorkspaces()
+  const data = parse<{ recent?: DesktopRecentWorkspace[]; error?: string }>(
+    result,
+  )
+  if (data.error) throw new Error(data.error)
+  return data.recent ?? []
+}
+
+export async function desktopOpenWorkspacePath(path: string) {
+  const result = await Workspace.OpenWorkspaceAt(path)
+  const data = parse<{ name?: string; error?: string }>(result)
+  if (data.error) throw new Error(data.error)
+  workspaceName = data.name ?? ''
+  return workspaceName || null
+}
+
+export async function desktopForgetWorkspace(path: string) {
+  const result = await Workspace.ForgetWorkspace(path)
+  const data = parse<{ error?: string }>(result)
+  if (data.error) throw new Error(data.error)
+}
+
 function readAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader()

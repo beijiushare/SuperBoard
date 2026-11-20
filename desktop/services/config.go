@@ -4,10 +4,45 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
+type RecentWorkspace struct {
+	Path       string `json:"path"`
+	Name       string `json:"name"`
+	LastOpened string `json:"lastOpened,omitempty"`
+}
+
 type Config struct {
-	Workspace string `json:"workspace"`
+	Workspace string            `json:"workspace"`
+	Recent    []RecentWorkspace `json:"recent,omitempty"`
+}
+
+func samePath(a string, b string) bool {
+	return strings.EqualFold(filepath.Clean(a), filepath.Clean(b))
+}
+
+func rememberWorkspace(config *Config, root string) {
+	if root == "" {
+		return
+	}
+	entry := RecentWorkspace{
+		Path:       root,
+		Name:       filepath.Base(root),
+		LastOpened: nowISO(),
+	}
+	next := []RecentWorkspace{entry}
+	for _, item := range config.Recent {
+		if samePath(item.Path, root) {
+			continue
+		}
+		next = append(next, item)
+		if len(next) >= 8 {
+			break
+		}
+	}
+	config.Recent = next
+	config.Workspace = root
 }
 
 func configPath() string {
