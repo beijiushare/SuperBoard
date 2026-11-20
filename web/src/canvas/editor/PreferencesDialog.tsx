@@ -90,6 +90,13 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
         </div>
 
         <div className="sb-preferences-tabs" role="tablist" aria-label="设置分类">
+          <input
+            className="sb-settings-search"
+            type="search"
+            placeholder="搜索设置…"
+            aria-label="搜索设置"
+          />
+          <p className="sb-settings-group">选项</p>
           {(
             [
               ['about', '关于'],

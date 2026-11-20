@@ -1127,6 +1127,30 @@
   background: #f6f4ee;
 }
 
+.sb-settings-search {
+  width: 100%;
+  margin-bottom: 18px;
+  padding: 9px 12px;
+  border: 1px solid #d9d5cb;
+  border-radius: 9px;
+  background: #fffdf8;
+  color: #2b2924;
+  font-size: 13px;
+  outline: none;
+}
+
+.sb-settings-search:focus {
+  border-color: #a9a294;
+}
+
+.sb-settings-group {
+  margin: 0 0 6px;
+  padding: 0 8px;
+  color: #8a867c;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
 .sb-preferences-tabs button {
   width: 100%;
   padding: 10px 14px;
