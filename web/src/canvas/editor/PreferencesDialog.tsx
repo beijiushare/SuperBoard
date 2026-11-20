@@ -26,7 +26,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
     structuredClone(getPreferences()),
   )
   const [confirmReset, setConfirmReset] = useState(false)
-  const [tab, setTab] = useState<'general' | 'block' | 'text'>('general')
+  const [tab, setTab] = useState<'about' | 'general' | 'block' | 'text'>('general')
   const [switching, setSwitching] = useState(false)
 
   useEffect(() => {
@@ -92,6 +92,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
         <div className="sb-preferences-tabs" role="tablist" aria-label="设置分类">
           {(
             [
+              ['about', '关于'],
               ['general', '常规'],
               ['block', '默认块'],
               ['text', '文本'],
@@ -109,6 +110,17 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
             </button>
           ))}
         </div>
+
+        <div className="sb-settings-content">
+        {tab === 'about' ? (
+          <section>
+            <h3>版本</h3>
+            <p className="sb-preferences-note">SuperBoard 0.1.0 · 浏览器版</p>
+            <p className="sb-preferences-note">
+              浏览器端不提供检查更新；更新桌面安装包时会单独提示。
+            </p>
+          </section>
+        ) : null}
 
         {tab === 'general' ? (
           <section>
@@ -248,7 +260,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           />
         </section>
         ) : null}
-
+        </div>
       </div>
     </div>
     {confirmReset ? (
