@@ -1,4 +1,5 @@
 import type { BoardScope } from '../../shared/board/types'
+import type { CanvasNode } from '../model'
 import {
   desktopDeleteFile,
   desktopFileUrl,
@@ -63,4 +64,11 @@ export async function deleteWorkspaceFile(path: string) {
 
 export function supportsDesktopFileActions() {
   return desktopMode()
+}
+
+export function nodeFilePath(node: CanvasNode | undefined) {
+  if (!node) return undefined
+  const media = node['x-superboard']?.media
+  if (media?.file) return media.file
+  return node.type === 'file' ? node.file : undefined
 }

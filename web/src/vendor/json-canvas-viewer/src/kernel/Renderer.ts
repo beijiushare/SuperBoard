@@ -1,5 +1,5 @@
 import type { BaseArgs } from '$/BaseModule';
-import type { EdgeItem, NodeItem } from '$/DataManager';
+import type { EdgeItem } from '$/DataManager';
 import type { Box } from '$/types';
 import type { JSONCanvasGroupNode, JSONCanvasNode } from '@repo/shared';
 import { BaseModule } from '$/BaseModule';
@@ -65,8 +65,7 @@ export default class Renderer extends BaseModule {
 			if (this.isOutside(item.box, currentViewport)) return;
 			const node = item.ref;
 			const kind = (node as { 'x-superboard'?: { kind?: string } })['x-superboard']?.kind;
-			if (node.type === 'file') this.drawFile(item);
-			else if (node.type === 'group' && kind !== 'shape' && kind !== 'drawing') {
+			if (node.type === 'group' && kind !== 'shape' && kind !== 'drawing') {
 				this.drawGroup(node, scale);
 			}
 		});
@@ -157,13 +156,6 @@ export default class Renderer extends BaseModule {
 			const color = this.SM.getColor(node.color);
 			this.drawLabelBar(node.x, node.y, node.label, color.active, color.text, scale);
 		}
-	};
-
-	private readonly drawFile = (item: NodeItem) => {
-		this.ctx.fillStyle = this.SM.getColor().text;
-		const node = item.ref;
-		this.ctx.font = '16px sans-serif';
-		this.ctx.fillText(item.fileName ?? '', node.x + 5, node.y - 10);
 	};
 
 	private readonly drawEdge = (item: EdgeItem) => {

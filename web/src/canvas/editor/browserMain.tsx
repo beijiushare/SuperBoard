@@ -8,14 +8,14 @@ import {
   installBrowserFolderBackend,
   restoreBrowserWorkspace,
 } from './browserFolderBackend'
-import { setFileUrlResolver } from '../viewer/fileResolver'
+import { setFileOpener, setFileUrlResolver } from '../viewer/fileResolver'
 import {
   detectDesktop,
   desktopFileUrl,
   installDesktopFolderBackend,
   restoreDesktopWorkspace,
 } from '../../desktop/platform'
-import { openWorkspace } from './workspacePlatform'
+import { openWorkspace, openWorkspaceFile } from './workspacePlatform'
 
 const LOCK_NAME = 'superboard-editor'
 
@@ -160,5 +160,7 @@ async function boot() {
     <EditorGate desktop={desktop} />,
   )
 }
+
+setFileOpener(openWorkspaceFile)
 
 void boot()

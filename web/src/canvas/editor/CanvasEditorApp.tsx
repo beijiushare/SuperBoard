@@ -47,6 +47,7 @@ import { EditorBoardDialogs } from './EditorBoardDialogs'
 import { CanvasBlockMenu } from './CanvasBlockMenu'
 import {
   deleteWorkspaceFile,
+  nodeFilePath,
   openWorkspaceFile,
   revealWorkspaceFile,
   supportsDesktopFileActions,
@@ -1033,14 +1034,14 @@ export function CanvasEditorApp() {
           onEditBlock={openBlockEditor}
           onOpenFile={(id) => {
             const node = canvas.nodes.find((item) => item.id === id)
-            const path = node?.['x-superboard']?.media?.file
+            const path = nodeFilePath(node)
             if (path) void openWorkspaceFile(path)
           }}
           onRevealFile={
             supportsDesktopFileActions()
               ? (id) => {
                   const node = canvas.nodes.find((item) => item.id === id)
-                  const path = node?.['x-superboard']?.media?.file
+                  const path = nodeFilePath(node)
                   if (path) void revealWorkspaceFile(path)
                 }
               : undefined
@@ -1049,7 +1050,7 @@ export function CanvasEditorApp() {
             supportsDesktopFileActions()
               ? (id) => {
                   const node = canvas.nodes.find((item) => item.id === id)
-                  const path = node?.['x-superboard']?.media?.file
+                  const path = nodeFilePath(node)
                   if (!path) return
                   if (
                     !window.confirm('从工作区删除该文件？引用它的卡片将无法再预览。')

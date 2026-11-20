@@ -27,13 +27,6 @@ type Augmentation = {
 	onNodeLosesActive: OverlayManager['onNodeLosesActive'];
 };
 
-const fileRegex = {
-	audio: /\.(?:mp3|wav|ogg|opus|aac|m4a|flac)$/i,
-	image: /\.(?:png|jpg|jpeg|gif|svg|webp|avif|bmp|ico|heic|heif)$/i,
-	markdown: /\.(?:md|mdx|markdown|txt)$/i,
-	video: /\.(?:mp4|webm|ogv|mov|m3u8|mpd)$/i,
-};
-
 type NodeComponentHook<N extends JSONCanvasNode> = (options: {
 	container: HTMLDivElement;
 	content: string;
@@ -49,6 +42,7 @@ type CreateOverlayArgs =
 	| [ComponentNodeMap['image'], string, 'image']
 	| [ComponentNodeMap['audio'], string, 'audio']
 	| [ComponentNodeMap['video'], string, 'video']
+	| [ComponentNodeMap['file'], string, 'file']
 	| [ComponentNodeMap['link'], string, 'link'];
 
 type ComponentNodeMap = {
@@ -57,14 +51,13 @@ type ComponentNodeMap = {
 	image: JSONCanvasFileNode;
 	audio: JSONCanvasFileNode;
 	video: JSONCanvasFileNode;
+	file: JSONCanvasFileNode;
 	link: JSONCanvasLinkNode;
 };
 
 type ComponentDict = {
 	[K in keyof ComponentNodeMap]: NodeComponentHook<ComponentNodeMap[K]>;
 };
-
-const supportedTypes = ['markdown', 'image', 'audio', 'video'] as const;
 
 export default class OverlayManager extends BaseModule<Options, Augmentation> {
 	private _overlaysLayer?: HTMLDivElement = document.createElement('div');
@@ -84,6 +77,9 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 			audio.src = content;
 			audio.controls = true;
 			container.appendChild(audio);
+		},
+		file: () => {
+			// Rendered by the host application through nodeComponents.
 		},
 		image: ({ container, content }) => {
 			const img = document.createElement('img');
@@ -184,14 +180,10 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 	};
 
 	private readonly overlayType = (item: NodeItem) => {
-		const { ref, fileName } = item;
+		const { ref } = item;
 		if (ref.type === 'text') return 'text' as const;
 		if (ref.type === 'link') return 'link' as const;
-		if (ref.type === 'file') {
-			for (const type of supportedTypes) {
-				if (fileName?.match(fileRegex[type])) return type;
-			}
-		}
+		if (ref.type === 'file') return 'file' as const;
 		return null;
 	};
 
@@ -214,11 +206,7 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 				return;
 			}
 			if (node.type === 'file') {
-				for (const fileType of supportedTypes) {
-					if (!item.fileName?.match(fileRegex[fileType])) continue;
-					this.createOverlay(node, node.file, fileType);
-					break;
-				}
+				this.createOverlay(node, node.file, 'file');
 			}
 		} finally {
 			this.pending.delete(node.id);

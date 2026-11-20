@@ -333,8 +333,8 @@ export function useCanvasInsertions({
       : viewportCenter(size.width, size.height)
     const node: CanvasNode = {
       id,
-      type: 'link',
-      url: imported.path,
+      type: 'file',
+      file: imported.path,
       x: position.x,
       y: position.y,
       width: size.width,

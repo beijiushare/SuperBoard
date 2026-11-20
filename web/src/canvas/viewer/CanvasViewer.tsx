@@ -12,6 +12,7 @@ import {
   parser,
   type Hook,
   type JSONCanvas,
+  type JSONCanvasFileNode,
   type JSONCanvasLinkNode,
   type JSONCanvasTextNode,
 } from '../../vendor/json-canvas-viewer/react/index.ts'
@@ -24,7 +25,7 @@ import { DirectorLayer } from './DirectorLayer'
 import { DrawingLayer } from './DrawingLayer'
 import { EdgeLayer } from './EdgeLayer'
 import { GridLayer } from './GridLayer'
-import { LinkSlot, TextSlot } from './NodeSlots'
+import { FileSlot, LinkSlot, TextSlot } from './NodeSlots'
 import { ShapeLayer } from './ShapeLayer'
 
 const modules = [Controls, Minimap, GridLayer, EdgeLayer, ShapeLayer, DrawingLayer, DirectorLayer]
@@ -99,6 +100,16 @@ export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
       ),
       [],
     )
+    const renderFile = useCallback(
+      ({ node, onActive }: { node: JSONCanvasFileNode; onActive: Hook }) => (
+        <FileSlot
+          node={node}
+          onActive={onActive}
+          onSelect={(id) => onNodeSelectRef.current?.(id)}
+        />
+      ),
+      [],
+    )
 
     return (
       <JSONCanvasViewerComponent
@@ -107,6 +118,7 @@ export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
         modules={modules}
         text={renderText}
         link={renderLink}
+        file={renderFile}
         options={options}
         theme={theme}
         className={className}

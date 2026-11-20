@@ -99,4 +99,34 @@ assert.throws(
   /fromNode|toNode/,
 )
 
+const migrated = parseCanvas(
+  JSON.stringify({
+    nodes: [
+      {
+        id: 'legacy-file',
+        type: 'link',
+        url: 'public/assets/files/a.png',
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10,
+        'x-superboard': {
+          kind: 'media',
+          media: {
+            kind: 'file',
+            url: 'public/assets/files/a.png',
+            file: 'public/assets/files/a.png',
+            name: 'a.png',
+          },
+        },
+      },
+    ],
+    edges: [],
+    'x-superboard': { version: 1, meta: { title: 'Legacy', slug: 'legacy' } },
+  }),
+)
+assert.equal(migrated.nodes[0].type, 'file')
+assert.equal((migrated.nodes[0] as { file: string }).file, 'public/assets/files/a.png')
+assert.equal('url' in migrated.nodes[0], false)
+
 console.log('canvas model tests passed')

@@ -102,7 +102,9 @@ export function CanvasBlockMenu({
               编辑内容
             </button>
           ) : null}
-          {node['x-superboard']?.media?.kind === 'file' && onOpenFile ? (
+          {(node.type === 'file' ||
+            node['x-superboard']?.media?.kind === 'file') &&
+          onOpenFile ? (
             <>
               <button
                 type="button"

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { DEFAULT_PREFERENCES } from '../editor/preferences'
-import type { Hook, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
+import type { Hook, JSONCanvasFileNode, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import {
   resolveNodeStyle,
@@ -13,7 +13,7 @@ import {
 } from '../model'
 import '../../styles/markdown.css'
 import '../../styles/pele.css'
-import { resolveFileUrl } from './fileResolver'
+import { resolveFileUrl, openResolvedFile } from './fileResolver'
 
 const PeleView = lazy(() =>
   import('../../shared/pele/PeleView').then((module) => ({
@@ -206,8 +206,19 @@ function mediaClipPath(media: SuperBoardMedia, width: number, height: number) {
 const FILE_ICON_PATH =
   'M186.181818 837.818182l325.818182 0 0 46.545455-325.818182 0 0-46.545455ZM837.818182 837.818182 837.818182 884.363636 930.909091 884.363636 930.909091 0 232.727273 0 232.727273 93.090909 279.272727 93.090909 279.272727 46.545455 884.363636 46.545455 884.363636 837.818182ZM186.181818 698.181818l512 0 0 46.545455-512 0 0-46.545455ZM93.090909 149.410909l0 864.814545C93.090909 1019.624727 97.373091 1024 102.679273 1024l678.958545 0C786.990545 1024 791.272727 1019.671273 791.272727 1014.225455L791.272727 149.410909C791.272727 144.011636 786.990545 139.636364 781.684364 139.636364L102.679273 139.636364C97.373091 139.636364 93.090909 143.965091 93.090909 149.410909zM139.636364 186.181818l605.090909 0 0 791.272727L139.636364 977.454545 139.636364 186.181818zM186.181818 279.272727l512 0 0 46.545455-512 0 0-46.545455ZM186.181818 418.909091l512 0 0 46.545455-512 0 0-46.545455ZM186.181818 558.545455l512 0 0 46.545455-512 0 0-46.545455Z'
 
+function guessMime(name: string) {
+  const ext = name.split('.').pop()?.toLowerCase() ?? ''
+  if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'avif', 'bmp', 'ico'].includes(ext)) {
+    return `image/${ext === 'jpg' ? 'jpeg' : ext}`
+  }
+  if (['mp4', 'webm', 'ogv', 'mov'].includes(ext)) return `video/${ext}`
+  if (['mp3', 'wav', 'ogg', 'flac', 'm4a'].includes(ext)) return `audio/${ext}`
+  return ''
+}
+
 function FileCard({ media }: { media: SuperBoardMedia }) {
   const [url, setUrl] = useState<string | null>(null)
+  const mime = media.mime || guessMime(media.name ?? media.file ?? '')
   useEffect(() => {
     if (!media.file) return
     let alive = true
@@ -218,10 +229,10 @@ function FileCard({ media }: { media: SuperBoardMedia }) {
       alive = false
     }
   }, [media.file])
-  if (url && media.mime?.startsWith('image/')) {
+  if (url && mime.startsWith('image/')) {
     return <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
   }
-  if (url && media.mime?.startsWith('video/')) {
+  if (url && mime.startsWith('video/')) {
     return <video src={url} controls style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
   }
   return (
@@ -229,7 +240,7 @@ function FileCard({ media }: { media: SuperBoardMedia }) {
       type="button"
       className="sb-file-card"
       onClick={() => {
-        if (url) window.open(url, '_blank', 'noopener,noreferrer')
+        if (media.file) void openResolvedFile(media.file)
       }}
       title={media.name ?? media.file}
     >
@@ -238,6 +249,30 @@ function FileCard({ media }: { media: SuperBoardMedia }) {
       </svg>
       <span>{media.name ?? media.file}</span>
     </button>
+  )
+}
+
+export function FileSlot({
+  node,
+  onActive,
+  onSelect,
+}: {
+  node: JSONCanvasFileNode
+  onActive?: Hook
+  onSelect?: (id: string) => void
+}) {
+  useNodeSelection(node.id, onActive, onSelect)
+  const stored = extension(node)?.media
+  const media: SuperBoardMedia = stored ?? {
+    kind: 'file',
+    url: node.file,
+    file: node.file,
+    name: node.file.split('/').pop() || node.file,
+  }
+  return (
+    <BlockSurface node={node}>
+      <FileCard media={media} />
+    </BlockSurface>
   )
 }
 

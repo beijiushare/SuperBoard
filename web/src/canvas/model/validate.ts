@@ -37,31 +37,60 @@ function validateNode(value: unknown, index: number): CanvasNode {
     fail(`nodes[${index}].type 不支持: ${JSON.stringify(type)}`)
   }
 
-  for (const key of ['x', 'y', 'width', 'height']) {
-    if (!isFiniteNumber(value[key])) fail(`nodes[${index}].${key} 必须是有限数字`)
+  // Migrate the legacy `link` + x-superboard.media.kind="file" representation
+  // to the JSON Canvas native file node.
+  let normalized: Record<string, unknown> = value
+  let normalizedType = type
+  const extension = value['x-superboard']
+  if (
+    type === 'link' &&
+    isRecord(extension) &&
+    isRecord(extension.media) &&
+    extension.media.kind === 'file' &&
+    typeof extension.media.file === 'string'
+  ) {
+    const media = {
+      ...extension.media,
+      url:
+        typeof extension.media.url === 'string'
+          ? extension.media.url
+          : extension.media.file,
+    }
+    normalized = {
+      ...value,
+      type: 'file',
+      file: extension.media.file,
+      'x-superboard': { ...extension, media },
+    }
+    delete normalized.url
+    normalizedType = 'file'
   }
-  if ((value.width as number) <= 0 || (value.height as number) <= 0) {
+
+  for (const key of ['x', 'y', 'width', 'height']) {
+    if (!isFiniteNumber(normalized[key])) fail(`nodes[${index}].${key} 必须是有限数字`)
+  }
+  if ((normalized.width as number) <= 0 || (normalized.height as number) <= 0) {
     fail(`nodes[${index}] 的 width/height 必须大于 0`)
   }
 
-  if (type === 'text' && typeof value.text !== 'string') {
+  if (normalizedType === 'text' && typeof normalized.text !== 'string') {
     fail(`nodes[${index}].text 必须是字符串`)
   }
-  if (type === 'file' && typeof value.file !== 'string') {
+  if (normalizedType === 'file' && typeof normalized.file !== 'string') {
     fail(`nodes[${index}].file 必须是字符串`)
   }
-  if (type === 'link' && typeof value.url !== 'string') {
+  if (normalizedType === 'link' && typeof normalized.url !== 'string') {
     fail(`nodes[${index}].url 必须是字符串`)
   }
-  if (type === 'group' && value.label !== undefined && typeof value.label !== 'string') {
+  if (normalizedType === 'group' && normalized.label !== undefined && typeof normalized.label !== 'string') {
     fail(`nodes[${index}].label 必须是字符串`)
   }
 
-  if (value['x-superboard'] !== undefined && !isRecord(value['x-superboard'])) {
+  if (normalized['x-superboard'] !== undefined && !isRecord(normalized['x-superboard'])) {
     fail(`nodes[${index}]["x-superboard"] 必须是对象`)
   }
 
-  return value as unknown as CanvasNode
+  return normalized as unknown as CanvasNode
 }
 
 function validateEdge(value: unknown, index: number, nodeIds: Set<string>): CanvasEdge {

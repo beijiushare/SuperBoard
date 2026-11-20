@@ -55,6 +55,7 @@ type ViewerProps<T extends ModuleInputCtor = ModuleInputCtor> = {
 	options?: Omit<Options<T>, 'container' | 'theme' | 'canvas' | 'nodeComponents' | 'attachments'>;
 	text?: (props: TextSlotProps) => ReactNode;
 	markdown?: (props: FileSlotProps) => ReactNode;
+	file?: (props: FileSlotProps) => ReactNode;
 	image?: (props: FileSlotProps) => ReactNode;
 	video?: (props: FileSlotProps) => ReactNode;
 	audio?: (props: FileSlotProps) => ReactNode;
@@ -96,6 +97,7 @@ export default forwardRef(
 			options = emptyOptions,
 			text,
 			markdown,
+			file,
 			image,
 			video,
 			audio,
@@ -186,12 +188,13 @@ export default forwardRef(
 			const out: Options['nodeComponents'] = {};
 			if (text) out.text = createNodeFunc<TextSlotProps>(text);
 			if (markdown) out.markdown = createNodeFunc<FileSlotProps>(markdown);
+			if (file) out.file = createNodeFunc<FileSlotProps>(file);
 			if (image) out.image = createNodeFunc<FileSlotProps>(image);
 			if (video) out.video = createNodeFunc<FileSlotProps>(video);
 			if (audio) out.audio = createNodeFunc<FileSlotProps>(audio);
 			if (link) out.link = createNodeFunc<LinkSlotProps>(link);
 			return out;
-		}, [audio, image, link, markdown, removePortalById, text, upsertPortal, video]);
+		}, [audio, file, image, link, markdown, removePortalById, text, upsertPortal, video]);
 
 		const syncPortals = useCallback((nextCanvas: JSONCanvas) => {
 			const nextNodes = new Map(
