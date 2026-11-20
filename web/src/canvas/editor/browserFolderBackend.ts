@@ -368,11 +368,16 @@ async function handleCanvases(url: URL, init?: RequestInit) {
     if (!/^[a-z0-9][a-z0-9-]*$/.test(nextSlug)) return response({ error: 'slug 非法' }, 400)
     const nextFolder =
       body.folder === undefined ? location.path : normalizeFolder(body.folder)
-    if (
-      (nextSlug !== slug || nextFolder !== location.path) &&
-      (await findBoard(scope, nextSlug))
-    ) {
-      return response({ error: `slug 已存在: ${nextSlug}` }, 409)
+    if (nextSlug !== slug || nextFolder !== location.path) {
+      try {
+        const targetDir = await folderDirectory(scope, nextFolder)
+        await targetDir.getFileHandle(`${nextSlug}.canvas`)
+        return response({ error: `slug 已存在: ${nextSlug}` }, 409)
+      } catch (error) {
+        if (!(error instanceof DOMException) || error.name !== 'NotFoundError') {
+          throw error
+        }
+      }
     }
     const nextCanvas: CanvasDocument = {
       ...canvas,

@@ -62,12 +62,12 @@ export function useShellKeyboard({
       const inRail = Boolean(active?.closest('.sb-rail'))
       const inTree = Boolean(active?.closest('.sb-tree'))
 
-      if (event.key === '>' && (inRail || inTree)) {
+      if (event.key === 'ArrowRight' && inRail) {
         event.preventDefault()
         focusTree()
         return
       }
-      if (event.key === '<' && (inRail || inTree)) {
+      if (event.key === 'ArrowLeft' && inTree) {
         event.preventDefault()
         focusRail()
         return
