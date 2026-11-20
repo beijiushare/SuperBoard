@@ -140,6 +140,11 @@ function renderIndex() {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
+<link rel="icon" href="${base}favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="${base}favicon.svg">
+<link rel="apple-touch-icon" href="${base}apple-touch-icon.png">
+<link rel="manifest" href="${base}site.webmanifest">
+<meta name="theme-color" content="#faf9f5">
 <title>${siteName}</title>
 <meta http-equiv="refresh" content="0; url=${base}tree.html">
 <script>location.replace('${base}tree.html' + location.search + location.hash)</script>
@@ -158,6 +163,7 @@ function renderBoardPage(canvas, meta, entry, cssFiles, template) {
     .map((file) => `<link rel="stylesheet" href="${base}${escapeHtml(file)}">`)
     .join('\n    ')
   return template
+    .replaceAll('__BASE__', () => base)
     .replaceAll('__TITLE__', () => escapeHtml(title))
     .replace('__CSS__', () => css)
     .replace('__DATA__', () => `<script>${data}</script>`)
@@ -180,6 +186,7 @@ function renderTreePage(canvases, entry, cssFiles, template) {
     .map((file) => `<link rel="stylesheet" href="${base}${escapeHtml(file)}">`)
     .join('\n    ')
   return template
+    .replaceAll('__BASE__', () => base)
     .replaceAll('__TITLE__', () => escapeHtml('白板目录 · SuperBoard'))
     .replace('__CSS__', () => css)
     .replace('__DATA__', () => `<script>${data}</script>`)
