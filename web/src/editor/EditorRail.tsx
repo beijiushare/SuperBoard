@@ -5,7 +5,6 @@ import {
   CommandIcon,
   FilmIcon,
   GitBranchIcon,
-  MaximiseIcon,
   MinimiseIcon,
   SettingsIcon,
   SidebarIcon,
@@ -64,15 +63,7 @@ export function EditorRail({
   const desktop = desktopMode()
 
   return (
-    <aside
-      className="sb-rail"
-      aria-label={editing ? '编辑器操作' : '白板操作'}
-      onDoubleClick={(event) => {
-        if (!desktop) return
-        if ((event.target as HTMLElement).closest('button')) return
-        void WailsWindow.ToggleMaximise()
-      }}
-    >
+    <aside className="sb-rail" aria-label={editing ? '编辑器操作' : '白板操作'}>
       <button
         type="button"
         className="sb-rail-button"
@@ -179,16 +170,7 @@ export function EditorRail({
             aria-label="最小化"
             onClick={() => void WailsWindow.Minimise()}
           >
-            <MinimiseIcon size={18} />
-          </button>
-          <button
-            type="button"
-            className="sb-rail-button sb-rail-window-button"
-            data-tooltip="最大化 / 还原"
-            aria-label="最大化 / 还原"
-            onClick={() => void WailsWindow.ToggleMaximise()}
-          >
-            <MaximiseIcon size={17} />
+            <MinimiseIcon size={17} />
           </button>
           <button
             type="button"
