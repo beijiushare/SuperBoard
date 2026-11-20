@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=My Product
+Comment=A SuperBoard application
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/superboard.exe %u
+Terminal=false
+Type=Application
+Icon=superboard.exe
+Categories=Utility;
+StartupWMClass=superboard.exe
+
+ 

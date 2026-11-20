@@ -45,6 +45,7 @@ export default defineConfig(({ command, isPreview, mode }) => ({
     include: ['vditor'],
   },
   server: {
+    port: Number(process.env.WAILS_VITE_PORT) || 5173,
     watch: {
       ignored: ['**/whiteboards/**', '**/public/mathjax/**', '**/参考/**'],
     },

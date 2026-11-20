@@ -1,0 +1,11 @@
+{
+  "name": "superboard-desktop-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node ../scripts/frontend.mjs dev",
+    "build": "node ../scripts/frontend.mjs build",
+    "build:dev": "node ../scripts/frontend.mjs build"
+  }
+}
