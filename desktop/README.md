@@ -75,3 +75,14 @@ desktop/bin/superboard.exe
   兼容旧的 `whiteboards/public|private`。
 - 附件位于 `<scope>/assets/files`，由 `/__files/` 只读暴露。
 - 第二次启动会聚焦已有窗口，不再开新实例。
+- 支持通过命令行传入 `.canvas` 文件：从 `public/private` 向上推导工作区。
+- `SUPERBOARD_DEBUG=1` 会开启 WebView2 远程调试端口 9222。
+
+## 测试
+
+```bash
+# 仓库根目录
+npm run desktop:test
+```
+
+覆盖工作区打开、白板与文件夹增删改、保存冲突、路径越界、附件导入。
