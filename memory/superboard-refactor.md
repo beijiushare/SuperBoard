@@ -42,9 +42,10 @@
 - 导出只保留单 HTML，使用真实渲染 DOM 快照（含 canvas 位图与富内容）
 - 新建文本时立即创建真实节点，再进入编辑
 - 设置改为左侧分类导航；关于页只显示版本
-- 导出 HTML 支持左键选中、中键/右键拖动、块内滚动与点击
-- 背景只支持网格/无网格，网格改为 draw.io 风格浅色线
-- 文本编辑框去掉额外边框，只保留选中框
+- 连线、手绘、形状全部改为 SVG 图层
+- 网格改为 SVG pattern，仅保留线网格/无网格
+- 导出快照包含 SVG 图层，不再把连线/手绘转成位图
+- 设置改为 Obsidian 式左侧导航与搜索
 - 保存失败自动重试两次，409 不重试
 - 冲突时保存按钮显示「保存冲突，点击覆盖」，顶部横幅可覆盖或重新加载磁盘版本
 - 保存失败时顶部横幅提供「重试保存」
@@ -121,6 +122,7 @@
 - `styles/viewer-index.css`：viewer 独立样式入口，不含编辑器样式
 - `CanvasDirectorLayer.tsx`、`CanvasMarkdownLayer.tsx`：导演与 Markdown 覆盖层
 - `CanvasEditorStage.tsx`：画布舞台（Viewer/Overlay/Tools/样式/导演/工具栏）
+- `viewer/EdgeLayer.ts`、`DrawingLayer.ts`、`ShapeLayer.ts`、`GridLayer.ts`：SVG 场景层
 - `useCanvasDrag.ts`：移动、缩放、单选/多选旋转、对齐参考线
 - `TextEditingOverlay.tsx`：文本输入浮层
 - `eraser.ts`：橡皮擦命中计划与批量删除
