@@ -191,6 +191,7 @@ func main() {
 		BackgroundColour: application.NewRGB(247, 244, 236),
 		URL:              startURL,
 	})
+	mainWindow.Maximise()
 
 	if err := app.Run(); err != nil {
 		log.Fatal(err)

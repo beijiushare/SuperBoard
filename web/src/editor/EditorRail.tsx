@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react'
 import {
   ApertureIcon,
   CheckCircleIcon,
   CloseWindowIcon,
   CommandIcon,
   FilmIcon,
+  FocusIcon,
   GitBranchIcon,
   MinimiseIcon,
   SettingsIcon,
@@ -61,6 +63,35 @@ export function EditorRail({
 }: EditorRailProps) {
   const editing = mode === 'edit'
   const desktop = desktopMode()
+  const [focusMode, setFocusMode] = useState(false)
+
+  useEffect(() => {
+    if (!desktop) return
+    let alive = true
+    void WailsWindow.IsFullscreen().then((value) => {
+      if (alive) setFocusMode(value)
+    })
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      if (
+        document.querySelector(
+          '.sb-modal-backdrop, .canvas-editor-dialog-backdrop',
+        )
+      ) {
+        return
+      }
+      void WailsWindow.IsFullscreen().then((value) => {
+        if (!value) return
+        void WailsWindow.UnFullscreen()
+        setFocusMode(false)
+      })
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      alive = false
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [desktop])
 
   return (
     <aside className="sb-rail" aria-label={editing ? '编辑器操作' : '白板操作'}>
@@ -171,6 +202,22 @@ export function EditorRail({
             onClick={() => void WailsWindow.Minimise()}
           >
             <MinimiseIcon size={17} />
+          </button>
+          <button
+            type="button"
+            className="sb-rail-button sb-rail-window-button"
+            data-tooltip={focusMode ? '退出专注模式（Esc）' : '专注模式（Esc 退出）'}
+            aria-label={focusMode ? '退出专注模式' : '专注模式'}
+            aria-pressed={focusMode}
+            onClick={() => {
+              void WailsWindow.IsFullscreen().then(async (value) => {
+                if (value) await WailsWindow.UnFullscreen()
+                else await WailsWindow.Fullscreen()
+                setFocusMode(!value)
+              })
+            }}
+          >
+            <FocusIcon size={17} />
           </button>
           <button
             type="button"

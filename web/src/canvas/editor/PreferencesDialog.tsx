@@ -28,7 +28,9 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
     structuredClone(getPreferences()),
   )
   const [confirmReset, setConfirmReset] = useState(false)
-  const [tab, setTab] = useState<'about' | 'general' | 'block' | 'text'>('general')
+  const [tab, setTab] = useState<'about' | 'general' | 'block' | 'text' | 'help'>(
+    'general',
+  )
   const [switching, setSwitching] = useState(false)
   const [workspacePath, setWorkspacePath] = useState('')
 
@@ -89,7 +91,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           <div>
             <h2>偏好设置</h2>
             <p className="sb-preferences-note">
-              保存在当前浏览器，只影响之后新建的块。
+              偏好保存在本机，只影响之后新建的块。
             </p>
           </div>
           <button
@@ -117,6 +119,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
               ['general', '常规'],
               ['block', '默认块'],
               ['text', '文本'],
+              ['help', '帮助'],
             ] as const
           ).map(([value, label]) => (
             <button
@@ -143,6 +146,25 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
               {desktopMode()
                 ? '桌面端更新由安装包负责，设置中不检查更新。'
                 : '浏览器端不提供检查更新；更新桌面安装包时会单独提示。'}
+            </p>
+          </section>
+        ) : null}
+
+        {tab === 'help' ? (
+          <section>
+            <h3>专注模式</h3>
+            <p className="sb-preferences-note">
+              点击侧栏底部的专注模式按钮进入全屏；按 <kbd>Esc</kbd> 退出。
+            </p>
+            <p className="sb-preferences-note">
+              专注模式会隐藏任务栏，退出后恢复到之前的窗口状态。
+            </p>
+            <h3>窗口操作</h3>
+            <p className="sb-preferences-note">
+              侧栏底部从上到下依次是：最小化、专注模式、退出。
+            </p>
+            <p className="sb-preferences-note">
+              窗口没有标题栏，可拖动侧栏空白区域移动窗口，拖动窗口边缘缩放。
             </p>
           </section>
         ) : null}
