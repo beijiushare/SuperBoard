@@ -29,6 +29,8 @@ function run(command, args, env = {}) {
 const tsx = path.join(root, 'node_modules', 'tsx', 'dist', 'cli.mjs')
 const vite = path.join(root, 'node_modules', 'vite', 'bin', 'vite.js')
 
+run(process.execPath, ['scripts/copy-vditor.mjs'])
+
 run(process.execPath, [
   tsx,
   'scripts/prepare-canvas.ts',

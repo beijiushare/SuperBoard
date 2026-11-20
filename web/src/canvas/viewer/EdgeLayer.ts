@@ -81,6 +81,7 @@ export class EdgeLayer extends BaseModule {
       const path = document.createElementNS(SVG_NS, 'path')
       path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z')
       path.setAttribute('fill', color)
+      path.setAttribute('stroke', 'none')
       marker.appendChild(path)
       defs.appendChild(marker)
       return id

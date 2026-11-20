@@ -19,7 +19,7 @@
   align-items: center;
   gap: 6px;
   padding: 10px 0;
-  border-right: 1px solid #dedbd2;
+  border-right: 1px solid #e6e2d8;
   background: #fbfaf6;
   --wails-draggable: drag;
 }
@@ -112,7 +112,7 @@
   gap: 4px;
   margin-top: auto;
   padding-top: 8px;
-  border-top: 1px solid #dedbd2;
+  border-top: 1px solid #e6e2d8;
   --wails-draggable: no-drag;
 }
 

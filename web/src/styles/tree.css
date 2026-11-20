@@ -5,7 +5,7 @@
   min-height: 0;
   flex: 0 0 var(--sb-tree-width, 264px);
   flex-direction: column;
-  border-right: 1px solid #dedbd2;
+  border-right: 1px solid #e6e2d8;
   background: #fbfaf6;
   transition:
     margin-left 280ms cubic-bezier(0.32, 0.72, 0, 1),

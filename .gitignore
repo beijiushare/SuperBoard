@@ -2,6 +2,7 @@ node_modules/
 dist/
 dist-*/
 public/mathjax/
+public/__vditor/
 whiteboards/
 .preview/
 .env

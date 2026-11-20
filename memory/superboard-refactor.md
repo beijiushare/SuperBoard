@@ -172,6 +172,9 @@
 - 无边框窗口边缘仍可缩放（Wails Windows 边缘命中）
 - 最小化已通过 `IsIconic` 验证，退出已验证
 - 导出 HTML 网格已由用户确认：无边界、不漂移、缩放密度一致
+- Vditor 资源构建时复制到 `public/__vditor/dist`，桌面端 `/__vditor` 可正常加载
+- 箭头 marker path 显式 `stroke="none"`，避免继承深色描边
+- 目录栏与画布分隔线统一为 `#e6e2d8`
 - 已通过 CDP 验证：窗口按钮渲染、关闭退出、文件双击不进入文本编辑
 - 群组背景/边框/标签改由 DOM `GroupLayer` 渲染
 - Canvas 不再绘制网格和群组，只保留背景色
