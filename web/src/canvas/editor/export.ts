@@ -496,6 +496,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#faf9f5}
   window.addEventListener('pointerdown',function(e){
     if(e.button===1||e.button===2){
       e.preventDefault();
+      e.stopPropagation();
       drag={x:e.clientX,y:e.clientY,tx:tx,ty:ty};
       stage.classList.add('is-panning');
       return;
@@ -505,7 +506,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#faf9f5}
     if(selected)selected.classList.remove('sb-export-selected');
     selected=block||null;
     if(selected)selected.classList.add('sb-export-selected');
-  });
+  },true);
   window.addEventListener('pointermove',function(e){
     if(!drag)return;
     tx=drag.tx+e.clientX-drag.x; ty=drag.ty+e.clientY-drag.y; apply();

@@ -118,7 +118,7 @@ export function useCanvasDrag({
   const dragRef = useRef<DragState | null>(null)
 
   function beginMove(event: PointerLike, node: CanvasNode) {
-    if (event.button !== 0 && event.button !== 2) return
+    if (event.button !== 0) return
     event.preventDefault?.()
     event.stopPropagation()
     const dm = dmRef.current
@@ -210,7 +210,7 @@ export function useCanvasDrag({
   }
 
   function beginMultiMove(event: PointerLike, selection: CanvasNode[]) {
-    if (event.button !== 0 && event.button !== 2) return
+    if (event.button !== 0) return
     if (selection.length < 2) return
     event.preventDefault?.()
     event.stopPropagation()

@@ -658,6 +658,73 @@ export function CanvasEditorApp() {
   }, [canvas])
 
   useEffect(() => {
+    const stage = stageRef.current
+    if (!stage) return
+    let pan: {
+      startX: number
+      startY: number
+      offsetX: number
+      offsetY: number
+      dm: DataManagerLike
+      controller: ControllerLike
+      moved: boolean
+    } | null = null
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.button !== 1 && event.button !== 2) return
+      const target = event.target as HTMLElement | null
+      if (
+        target?.closest(
+          '.sb-modal-backdrop, .sb-style-panel, .sb-canvas-context-menu, .canvas-tool-palette, .JCV-controls, .JCV-minimap-container',
+        )
+      ) {
+        return
+      }
+      const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
+      if (!viewer?.container) return
+      const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
+      const controller = viewer.container.get(
+        internal.Controller as never,
+      ) as ControllerLike
+      pan = {
+        startX: event.clientX,
+        startY: event.clientY,
+        offsetX: dm.data.offsetX,
+        offsetY: dm.data.offsetY,
+        dm,
+        controller,
+        moved: false,
+      }
+      if (event.button === 1) event.preventDefault()
+      event.stopPropagation()
+    }
+    const onPointerMove = (event: PointerEvent) => {
+      if (!pan) return
+      const dx = event.clientX - pan.startX
+      const dy = event.clientY - pan.startY
+      if (!pan.moved && Math.hypot(dx, dy) < 4) return
+      pan.moved = true
+      event.preventDefault()
+      event.stopPropagation()
+      pan.dm.data.offsetX = pan.offsetX + dx
+      pan.dm.data.offsetY = pan.offsetY + dy
+      pan.controller.refresh()
+    }
+    const onPointerUp = () => {
+      pan = null
+    }
+    stage.addEventListener('pointerdown', onPointerDown, true)
+    window.addEventListener('pointermove', onPointerMove, true)
+    window.addEventListener('pointerup', onPointerUp, true)
+    window.addEventListener('pointercancel', onPointerUp, true)
+    return () => {
+      stage.removeEventListener('pointerdown', onPointerDown, true)
+      window.removeEventListener('pointermove', onPointerMove, true)
+      window.removeEventListener('pointerup', onPointerUp, true)
+      window.removeEventListener('pointercancel', onPointerUp, true)
+    }
+  }, [canvas])
+
+  useEffect(() => {
     if (!canvasMenu) return
     const onPointerDown = (event: PointerEvent) => {
       if ((event.target as HTMLElement | null)?.closest('.sb-canvas-context-menu')) return
