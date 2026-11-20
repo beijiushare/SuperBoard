@@ -424,6 +424,28 @@ function collectDocumentCss() {
   return chunks.join('\n')
 }
 
+async function inlineBlobImages(root: HTMLElement) {
+  const images = Array.from(root.querySelectorAll('img'))
+  await Promise.all(
+    images.map(async (image) => {
+      const src = image.getAttribute('src') ?? ''
+      if (!src.startsWith('blob:')) return
+      try {
+        const blob = await (await fetch(src)).blob()
+        const data = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(String(reader.result))
+          reader.onerror = () => reject(reader.error)
+          reader.readAsDataURL(blob)
+        })
+        image.setAttribute('src', data)
+      } catch {
+        // Keep the original source if it cannot be inlined.
+      }
+    }),
+  )
+}
+
 function snapshotRoot(root: HTMLElement) {
   const clone = root.cloneNode(true) as HTMLElement
   const originals = Array.from(root.querySelectorAll('canvas'))
@@ -578,6 +600,7 @@ export async function downloadCanvasHtmlSnapshot(
     await frame()
     await frame()
     const clone = snapshotRoot(root)
+    await inlineBlobImages(clone)
     const html = buildSnapshotHtml(
       clone,
       canvas['x-superboard']?.meta.title || 'SuperBoard',
