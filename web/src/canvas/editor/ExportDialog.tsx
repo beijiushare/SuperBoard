@@ -2,10 +2,17 @@ import { useMemo, useState } from 'react'
 import type { CanvasDocument } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
+  buildExportPayload,
   downloadCanvasHtmlSnapshot,
   exportCanvasFolder,
+  exportFilename,
   type AttachmentAction,
 } from './export'
+import {
+  desktopExportFolder,
+  desktopExportHtml,
+  desktopMode,
+} from '../../desktop/platform'
 
 interface ExportDialogProps {
   canvas: CanvasDocument
@@ -70,7 +77,18 @@ export function ExportDialog({
     setBusy(true)
     setError('')
     try {
-      if (copyCount > 0) {
+      if (desktopMode()) {
+        const payload = await buildExportPayload(
+          canvas,
+          viewerRef.current?.viewer,
+          actions,
+        )
+        if (payload.attachments.length > 0) {
+          await desktopExportFolder(payload.html, payload.attachments)
+        } else {
+          await desktopExportHtml(payload.html, exportFilename(canvas, 'html'))
+        }
+      } else if (copyCount > 0) {
         await exportCanvasFolder(
           canvas,
           viewerRef.current?.viewer,

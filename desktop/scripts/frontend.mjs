@@ -11,21 +11,25 @@ const here = dirname(fileURLToPath(import.meta.url))
 const desktopDir = resolve(here, '..')
 const rootDir = resolve(desktopDir, '..')
 const mode = process.argv[2] ?? 'build'
-const passthrough = process.argv.slice(3)
-const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
+const passthrough = process.argv.slice(3).join(' ')
 
-function run(args) {
-  const result = spawnSync(npm, args, {
+function run(command) {
+  const result = spawnSync(command, {
     cwd: rootDir,
     stdio: 'inherit',
+    shell: true,
   })
+  if (result.error) {
+    console.error(result.error)
+    process.exit(1)
+  }
   if ((result.status ?? 1) !== 0) process.exit(result.status ?? 1)
 }
 
 if (mode === 'dev') {
-  run(['run', 'dev', '--', ...passthrough])
+  run(`npm run dev -- ${passthrough}`.trim())
 } else {
-  run(['run', 'build:editor'])
+  run('npm run build:editor')
   const from = resolve(rootDir, 'dist')
   const to = resolve(desktopDir, 'frontend', 'dist')
   rmSync(to, { recursive: true, force: true })

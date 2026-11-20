@@ -1,6 +1,7 @@
 import type { BoardScope } from '../shared/board/types'
 import { configureWorkspaceFetcher } from '../canvas/editor/workspaceApi'
 import * as Workspace from './bindings/superboard/desktop/services/workspaceservice'
+import * as Exporter from './bindings/superboard/desktop/services/exportservice'
 import type { Result } from './bindings/superboard/desktop/services/models'
 
 export type DesktopModeState = 'unknown' | 'desktop' | 'browser'
@@ -107,6 +108,23 @@ export async function desktopRevealFile(path: string) {
 
 export async function desktopDeleteFile(path: string) {
   await Workspace.DeleteFile(path)
+}
+
+export async function desktopExportHtml(html: string, suggestedName: string) {
+  const result = await Exporter.ExportHtml(html, suggestedName)
+  const data = parse<{ cancelled?: boolean; error?: string }>(result)
+  if (data.error) throw new Error(data.error)
+  return !data.cancelled
+}
+
+export async function desktopExportFolder(
+  html: string,
+  attachments: Array<{ source: string; target: string }>,
+) {
+  const result = await Exporter.ExportFolder(html, JSON.stringify(attachments))
+  const data = parse<{ cancelled?: boolean; error?: string }>(result)
+  if (data.error) throw new Error(data.error)
+  return !data.cancelled
 }
 
 function jsonResponse(result: Result) {

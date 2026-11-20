@@ -325,7 +325,7 @@ export function buildCanvasSvg(canvas: CanvasDocument) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" fill="#faf9f5"/><g transform="translate(${offsetX} ${offsetY})">${body}</g></svg>`
 }
 
-function filename(canvas: CanvasDocument, extension: string) {
+export function exportFilename(canvas: CanvasDocument, extension: string) {
   const slug = canvas['x-superboard']?.meta.slug || 'superboard'
   return `${slug}.${extension}`
 }
@@ -406,7 +406,7 @@ html,body{margin:0;height:100%;background:#faf9f5;overflow:hidden;font-family:sy
 
 export function downloadCanvasHtml(canvas: CanvasDocument) {
   const html = buildCanvasHtml(canvas)
-  download(new Blob([html], { type: 'text/html;charset=utf-8' }), filename(canvas, 'html'))
+  download(new Blob([html], { type: 'text/html;charset=utf-8' }), exportFilename(canvas, 'html'))
 }
 
 type ViewerLike = {
@@ -414,6 +414,16 @@ type ViewerLike = {
 }
 
 export type AttachmentAction = 'embed' | 'copy' | 'skip'
+
+export interface ExportAttachment {
+  source: string
+  target: string
+}
+
+export interface ExportPayload {
+  html: string
+  attachments: ExportAttachment[]
+}
 
 async function blobToDataUrl(blob: Blob) {
   return new Promise<string>((resolve, reject) => {
@@ -440,10 +450,12 @@ async function applyAttachmentActions(
   root: HTMLElement,
   canvas: CanvasDocument,
   actions: Map<string, AttachmentAction> | undefined,
+  attachments: ExportAttachment[],
 ) {
   const sources = Array.from(
     root.querySelectorAll<HTMLElement>('img,video,source'),
   )
+  const seen = new Set<string>()
   for (const node of canvas.nodes) {
     const media = node['x-superboard']?.media
     if (media?.kind !== 'file' || !media.file) continue
@@ -460,6 +472,16 @@ async function applyAttachmentActions(
         targets.forEach((element) => element.setAttribute('src', data))
       } catch {
         // Keep the original source.
+      }
+    } else if (action === 'copy') {
+      const safe = (media.name || media.file.split('/').pop() || 'file').replace(
+        /[^\w.\-]+/g,
+        '_',
+      )
+      targets.forEach((element) => element.setAttribute('src', `files/${safe}`))
+      if (!seen.has(media.file)) {
+        seen.add(media.file)
+        attachments.push({ source: media.file, target: safe })
       }
     } else if (action === 'skip') {
       targets.forEach((element) => {
@@ -572,11 +594,11 @@ function frame() {
   return new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
 }
 
-export async function downloadCanvasHtmlSnapshot(
+export async function buildExportPayload(
   canvas: CanvasDocument,
   viewer: ViewerLike | undefined,
   actions?: Map<string, AttachmentAction>,
-) {
+): Promise<ExportPayload> {
   if (!viewer?.container) throw new Error('画布尚未就绪')
   const { internal } = await import(
     '../../vendor/json-canvas-viewer/src/index.ts'
@@ -625,21 +647,31 @@ export async function downloadCanvasHtmlSnapshot(
     await frame()
     await frame()
     const clone = snapshotRoot(root)
-    await applyAttachmentActions(clone, canvas, actions)
+    const attachments: ExportAttachment[] = []
+    await applyAttachmentActions(clone, canvas, actions, attachments)
     const html = buildSnapshotHtml(
       clone,
       canvas['x-superboard']?.meta.title || 'SuperBoard',
     )
-    download(
-      new Blob([html], { type: 'text/html;charset=utf-8' }),
-      filename(canvas, 'html'),
-    )
+    return { html, attachments }
   } finally {
     dm.data.offsetX = old.offsetX
     dm.data.offsetY = old.offsetY
     dm.data.scale = old.scale
     controller.refresh()
   }
+}
+
+export async function downloadCanvasHtmlSnapshot(
+  canvas: CanvasDocument,
+  viewer: ViewerLike | undefined,
+  actions?: Map<string, AttachmentAction>,
+) {
+  const payload = await buildExportPayload(canvas, viewer, actions)
+  download(
+    new Blob([payload.html], { type: 'text/html;charset=utf-8' }),
+    exportFilename(canvas, 'html'),
+  )
 }
 
 export async function exportCanvasFolder(
@@ -647,99 +679,33 @@ export async function exportCanvasFolder(
   viewer: ViewerLike | undefined,
   actions?: Map<string, AttachmentAction>,
 ) {
-  if (!viewer?.container) throw new Error('画布尚未就绪')
   const picker = (window as unknown as {
-    showDirectoryPicker?: (options?: { mode?: string }) => Promise<FileSystemDirectoryHandle>
+    showDirectoryPicker?: (options?: {
+      mode?: string
+    }) => Promise<FileSystemDirectoryHandle>
   }).showDirectoryPicker
   if (!picker) throw new Error('当前浏览器不支持导出文件夹')
+  const payload = await buildExportPayload(canvas, viewer, actions)
   const directory = await picker({ mode: 'readwrite' })
-  const { internal } = await import('../../vendor/json-canvas-viewer/src/index.ts')
-  const dm = viewer.container.get(internal.DataManager as never) as {
-    data: {
-      offsetX: number
-      offsetY: number
-      scale: number
-      container: HTMLDivElement
-    }
-  }
-  const controller = viewer.container.get(internal.Controller as never) as {
-    refresh: () => void
-  }
-  const root = dm.data.container.closest<HTMLElement>('.canvas-viewer-wrap')
-  if (!root) throw new Error('找不到画布容器')
-  const old = { ...dm.data }
-  const nodes = canvas.nodes
-  const minX = nodes.length ? Math.min(...nodes.map((node) => node.x)) : 0
-  const minY = nodes.length ? Math.min(...nodes.map((node) => node.y)) : 0
-  const maxX = nodes.length ? Math.max(...nodes.map((node) => node.x + node.width)) : 1
-  const maxY = nodes.length ? Math.max(...nodes.map((node) => node.y + node.height)) : 1
-  const width = dm.data.container.clientWidth
-  const height = dm.data.container.clientHeight
-  const boardWidth = Math.max(1, maxX - minX)
-  const boardHeight = Math.max(1, maxY - minY)
-  const scale = Math.min(
-    1,
-    Math.max(0.05, (width - 80) / boardWidth),
-    Math.max(0.05, (height - 80) / boardHeight),
-  )
-  try {
-    dm.data.scale = scale
-    dm.data.offsetX = (width - boardWidth * scale) / 2 - minX * scale
-    dm.data.offsetY = (height - boardHeight * scale) / 2 - minY * scale
-    controller.refresh()
-    await frame()
-    await frame()
-    const clone = snapshotRoot(root)
-    const filesDir = await directory.getDirectoryHandle('files', { create: true })
-    const sources = Array.from(clone.querySelectorAll<HTMLElement>('img,video,source'))
-    for (const node of canvas.nodes) {
-      const media = node['x-superboard']?.media
-      if (media?.kind !== 'file' || !media.file) continue
-      const url = await resolveFileUrl(media.file)
-      if (!url) continue
-      const action = actions?.get(media.file) ?? (actions ? 'skip' : 'copy')
-      const targets = sources.filter(
-        (element) => element.getAttribute('src') === url,
-      )
-      if (action === 'skip') {
-        targets.forEach((element) => element.removeAttribute('src'))
-        continue
-      }
-      if (action === 'embed') {
-        const blob = await (await fetch(url)).blob()
-        const data = await blobToDataUrl(blob)
-        targets.forEach((element) => element.setAttribute('src', data))
-        continue
-      }
-      const relative = `files/${(media.name || media.file.split('/').pop() || 'file').replace(/[^\w.\-]+/g, '_')}`
-      const blob = await (await fetch(url)).blob()
-      const handle = await filesDir.getFileHandle(relative.slice(6), { create: true })
-      const writable = await handle.createWritable()
-      await writable.write(blob)
-      await writable.close()
-      for (const element of targets) {
-        element.setAttribute('src', relative)
-      }
-    }
-    const html = buildSnapshotHtml(
-      clone,
-      canvas['x-superboard']?.meta.title || 'SuperBoard',
-    )
-    const handle = await directory.getFileHandle('index.html', { create: true })
+  const filesDir = await directory.getDirectoryHandle('files', { create: true })
+  for (const item of payload.attachments) {
+    const url = await resolveFileUrl(item.source)
+    if (!url) continue
+    const blob = await (await fetch(url)).blob()
+    const handle = await filesDir.getFileHandle(item.target, { create: true })
     const writable = await handle.createWritable()
-    await writable.write(html)
+    await writable.write(blob)
     await writable.close()
-  } finally {
-    dm.data.offsetX = old.offsetX
-    dm.data.offsetY = old.offsetY
-    dm.data.scale = old.scale
-    controller.refresh()
   }
+  const handle = await directory.getFileHandle('index.html', { create: true })
+  const writable = await handle.createWritable()
+  await writable.write(payload.html)
+  await writable.close()
 }
 
 export function downloadCanvasSvg(canvas: CanvasDocument) {
   const svg = buildCanvasSvg(canvas)
-  download(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), filename(canvas, 'svg'))
+  download(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), exportFilename(canvas, 'svg'))
 }
 
 export function downloadCanvasPng(canvas: CanvasDocument) {
@@ -760,7 +726,7 @@ export function downloadCanvasPng(canvas: CanvasDocument) {
       ctx.fillRect(0, 0, canvasElement.width, canvasElement.height)
       ctx.drawImage(image, 0, 0, canvasElement.width, canvasElement.height)
       canvasElement.toBlob((png) => {
-        if (png) download(png, filename(canvas, 'png'))
+        if (png) download(png, exportFilename(canvas, 'png'))
       }, 'image/png')
     }
     URL.revokeObjectURL(url)

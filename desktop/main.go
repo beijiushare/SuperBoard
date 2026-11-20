@@ -19,12 +19,14 @@ var assets embed.FS
 func main() {
 	var mainWindow *application.WebviewWindow
 	workspace := services.NewWorkspaceService()
+	exporter := services.NewExportService(workspace)
 
 	app := application.New(application.Options{
 		Name:        "SuperBoard",
 		Description: "SuperBoard 白板编辑器",
 		Services: []application.Service{
 			application.NewService(workspace),
+			application.NewService(exporter),
 		},
 		Assets: application.AssetOptions{
 			Handler: services.NewAssetHandler(
