@@ -19,7 +19,7 @@
 .sb-welcome-brand {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
 }
 
 .sb-start-hash {
