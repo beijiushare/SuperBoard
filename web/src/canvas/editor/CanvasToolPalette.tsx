@@ -6,6 +6,7 @@ import {
 import type { EditorTool } from './tools'
 import { useFloatingPanel } from './useFloatingPanel'
 import { WindowDragHandle } from './WindowDragHandle'
+import { useTranslation } from 'react-i18next'
 
 type ShapeTool = Extract<EditorTool, 'rect' | 'rounded-rect' | 'ellipse' | 'line' | 'diamond'>
 
@@ -26,11 +27,11 @@ type Flyout = {
 }
 
 const SHAPE_TOOLS: Array<{ id: ShapeTool; label: string; icon: ShapeTool }> = [
-  { id: 'rect', label: '正方形', icon: 'rect' },
-  { id: 'rounded-rect', label: '圆角矩形', icon: 'rounded-rect' },
-  { id: 'ellipse', label: '椭圆', icon: 'ellipse' },
-  { id: 'line', label: '线条', icon: 'line' },
-  { id: 'diamond', label: '菱形', icon: 'diamond' },
+  { id: 'rect', label: 'editor:shape.rect', icon: 'rect' },
+  { id: 'rounded-rect', label: 'editor:shape.roundedRect', icon: 'rounded-rect' },
+  { id: 'ellipse', label: 'editor:shape.ellipse', icon: 'ellipse' },
+  { id: 'line', label: 'editor:shape.line', icon: 'line' },
+  { id: 'diamond', label: 'editor:shape.diamond', icon: 'diamond' },
 ]
 
 const SHAPE_IDS = new Set<EditorTool>(SHAPE_TOOLS.map((item) => item.id))
@@ -128,6 +129,7 @@ export function CanvasToolPalette({
   onInsertSchedule,
   onInsertMedia,
 }: CanvasToolPaletteProps) {
+  const { t } = useTranslation(['editor', 'common'])
   const { rootRef, position, handleProps } = useFloatingPanel()
   const [flyout, setFlyout] = useState<Flyout | null>(null)
 
@@ -178,7 +180,7 @@ export function CanvasToolPalette({
           className="canvas-tool-palette-handle"
           role="button"
           tabIndex={-1}
-          aria-label="拖动操作栏"
+          aria-label={t('editor:tools.drag')}
           {...handleProps}
         >
           <WindowDragHandle />
@@ -186,8 +188,8 @@ export function CanvasToolPalette({
         <button
           type="button"
           className={`canvas-tool-button${tool === 'select' ? ' is-active' : ''}`}
-          title="选择（V）"
-          aria-label="选择"
+          title={t('editor:tools.select')}
+          aria-label={t('editor:tools.selectAria')}
           onClick={() => onToolChange('select')}
         >
           <ToolIcon name="select" />
@@ -195,8 +197,8 @@ export function CanvasToolPalette({
         <button
           type="button"
           className={`canvas-tool-button${tool === 'text' ? ' is-active' : ''}`}
-          title="文本（T）"
-          aria-label="文本"
+          title={t('editor:tools.text')}
+          aria-label={t('editor:tools.textAria')}
           onClick={() => onToolChange('text')}
         >
           <ToolIcon name="text" />
@@ -206,8 +208,8 @@ export function CanvasToolPalette({
           className={`canvas-tool-button canvas-tool-button--shape${
             shapeActive ? ' is-active' : ''
           }`}
-          title="形状（右键选择）"
-          aria-label="形状"
+          title={t('editor:tools.shape')}
+          aria-label={t('editor:tools.shapeAria')}
           onClick={() => onToolChange('rect')}
           onContextMenu={(event) => {
             event.preventDefault()
@@ -221,8 +223,8 @@ export function CanvasToolPalette({
         <button
           type="button"
           className={`canvas-tool-button${tool === 'draw' ? ' is-active' : ''}`}
-          title="自由绘图"
-          aria-label="自由绘图"
+          title={t('editor:tools.draw')}
+          aria-label={t('editor:tools.draw')}
           onClick={() => onToolChange('draw')}
         >
           <ToolIcon name="draw" />
@@ -230,8 +232,8 @@ export function CanvasToolPalette({
         <button
           type="button"
           className={`canvas-tool-button${tool === 'arrow' ? ' is-active' : ''}`}
-          title="箭头"
-          aria-label="箭头"
+          title={t('editor:tools.arrow')}
+          aria-label={t('editor:tools.arrow')}
           onClick={() => onToolChange('arrow')}
         >
           <ToolIcon name="arrow" />
@@ -239,8 +241,8 @@ export function CanvasToolPalette({
         <button
           type="button"
           className={`canvas-tool-button${tool === 'eraser' ? ' is-active' : ''}`}
-          title="橡皮擦"
-          aria-label="橡皮擦"
+          title={t('editor:tools.eraser')}
+          aria-label={t('editor:tools.eraser')}
           onClick={() => onToolChange('eraser')}
         >
           <ToolIcon name="eraser" />
@@ -249,8 +251,8 @@ export function CanvasToolPalette({
         <button
           type="button"
           className="canvas-tool-button"
-          title="插入"
-          aria-label="插入"
+          title={t('editor:tools.insert')}
+          aria-label={t('editor:tools.insert')}
           onClick={(event) => openFlyout('insert', event)}
         >
           <ToolIcon name="insert" />
@@ -259,8 +261,8 @@ export function CanvasToolPalette({
         <button
           type="button"
           className="canvas-tool-button"
-          title="导出"
-          aria-label="导出"
+          title={t('editor:tools.export')}
+          aria-label={t('editor:tools.export')}
           onClick={(event) => openFlyout('export', event)}
         >
           <ToolIcon name="export" />
@@ -286,7 +288,7 @@ export function CanvasToolPalette({
                   onClick={() => chooseShape(item.id)}
                 >
                   <ShapeIcon shape={item.icon} />
-                  <span>{item.label}</span>
+                  <span>{t(item.label)}</span>
                 </button>
               ))
             : null}
@@ -300,7 +302,7 @@ export function CanvasToolPalette({
                   onInsertMarkdown()
                 }}
               >
-                插入 Markdown
+                {t('editor:insert.markdown')}
               </button>
               <button
                 type="button"
@@ -310,7 +312,7 @@ export function CanvasToolPalette({
                   onInsertPele()
                 }}
               >
-                插入 Pele 图表
+                {t('editor:insert.pele')}
               </button>
               <button
                 type="button"
@@ -320,7 +322,7 @@ export function CanvasToolPalette({
                   onInsertSchedule()
                 }}
               >
-                插入日程表
+                {t('editor:insert.schedule')}
               </button>
               <button
                 type="button"
@@ -330,7 +332,7 @@ export function CanvasToolPalette({
                   onInsertMedia()
                 }}
               >
-                插入媒体
+                {t('editor:insert.media')}
               </button>
             </>
           ) : null}
@@ -341,10 +343,10 @@ export function CanvasToolPalette({
                 className="canvas-tool-flyout-item"
                 onClick={() => {
                   setFlyout(null)
-                  window.alert('功能开发中')
+                  window.alert(t('editor:common.comingSoon'))
                 }}
               >
-                导出 HTML
+                {t('editor:export.html')}
               </button>
             </>
           ) : null}

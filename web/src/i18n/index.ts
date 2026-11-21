@@ -3,9 +3,11 @@ import { initReactI18next } from 'react-i18next'
 import zhCommon from './locales/zh-CN/common.json'
 import zhStart from './locales/zh-CN/start.json'
 import zhSettings from './locales/zh-CN/settings.json'
+import zhEditor from './locales/zh-CN/editor.json'
 import enCommon from './locales/en-US/common.json'
 import enStart from './locales/en-US/start.json'
 import enSettings from './locales/en-US/settings.json'
+import enEditor from './locales/en-US/editor.json'
 
 export const SUPPORTED_LANGUAGES = ['zh-CN', 'en-US'] as const
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number]
@@ -16,11 +18,13 @@ const resources = {
     common: zhCommon,
     start: zhStart,
     settings: zhSettings,
+    editor: zhEditor,
   },
   'en-US': {
     common: enCommon,
     start: enStart,
     settings: enSettings,
+    editor: enEditor,
   },
 }
 
@@ -49,7 +53,7 @@ export async function initI18n(language?: string | null) {
       resources,
       lng: next,
       fallbackLng: 'zh-CN',
-      ns: ['common', 'start', 'settings'],
+      ns: ['common', 'start', 'settings', 'editor'],
       defaultNS: 'common',
       interpolation: { escapeValue: false },
       returnNull: false,
