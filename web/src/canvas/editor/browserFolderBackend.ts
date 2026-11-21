@@ -668,19 +668,41 @@ export async function restoreBrowserWorkspace() {
   return handle
 }
 
+async function directoryAccessible(handle: DirHandle) {
+  const iterable = handle as DirHandle & {
+    values?: () => AsyncIterableIterator<FileSystemHandle>
+  }
+  if (!iterable.values) return true
+  try {
+    await iterable.values().next()
+    return true
+  } catch {
+    return false
+  }
+}
+
 export async function listBrowserRecent() {
   const entries = await readRecentEntries()
   const rows = []
+  const live: RecentWorkspaceEntry[] = []
   for (const entry of entries) {
-    recentHandles.set(entry.id, entry.handle)
     const permission = await permissionOf(entry.handle)
+    if (permission === 'denied') continue
+    if (permission === 'granted' && !(await directoryAccessible(entry.handle))) {
+      continue
+    }
+    live.push(entry)
+    recentHandles.set(entry.id, entry.handle)
     rows.push({
       id: entry.id,
       name: entry.name,
       lastOpened: entry.lastOpened,
       permission,
-      available: permission === 'granted' || permission === 'prompt',
+      available: true,
     })
+  }
+  if (live.length !== entries.length) {
+    await writeRecentEntries(live)
   }
   return rows.sort((left, right) =>
     right.lastOpened.localeCompare(left.lastOpened),

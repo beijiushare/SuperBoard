@@ -308,15 +308,28 @@ func (s *WorkspaceService) RecentWorkspaces() Result {	s.mu.Lock()
 		}
 	}
 	rows := make([]map[string]any, 0, len(config.Recent))
+	kept := make([]RecentWorkspace, 0, len(config.Recent))
 	for _, item := range config.Recent {
 		info, err := os.Stat(item.Path)
-		available := err == nil && info.IsDir() && looksLikeWorkspace(item.Path)
+		if err != nil || !info.IsDir() || !looksLikeWorkspace(item.Path) {
+			continue
+		}
+		kept = append(kept, item)
 		rows = append(rows, map[string]any{
 			"path":       item.Path,
 			"name":       item.Name,
 			"lastOpened": item.LastOpened,
-			"available":  available,
+			"available":  true,
 		})
+	}
+	if len(kept) != len(config.Recent) {
+		config.Recent = kept
+		if config.Workspace != "" {
+			if info, err := os.Stat(config.Workspace); err != nil || !info.IsDir() {
+				config.Workspace = ""
+			}
+		}
+		_ = saveConfig(config)
 	}
 	return ok(map[string]any{"recent": rows})
 }
