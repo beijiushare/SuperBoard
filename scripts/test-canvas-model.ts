@@ -88,7 +88,7 @@ assert.throws(
       ],
       edges: [],
     }),
-  /id 重复/,
+  /duplicateId/,
 )
 assert.throws(
   () =>
@@ -96,7 +96,7 @@ assert.throws(
       nodes: [{ id: 'a', type: 'text', x: 0, y: 0, width: 1, height: 1, text: '' }],
       edges: [{ id: 'e', fromNode: 'a', toNode: 'missing' }],
     }),
-  /fromNode|toNode/,
+  /missingNodeRef/,
 )
 
 const migrated = parseCanvas(

@@ -9,18 +9,26 @@ import {
 } from './types'
 
 export class CanvasValidationError extends Error {
-  constructor(message: string) {
+  readonly code: string
+
+  constructor(message: string, code = '') {
     super(message)
     this.name = 'CanvasValidationError'
+    this.code = code
   }
 }
 
-function fail(message: string): never {
-  throw new CanvasValidationError(message)
+function fail(error: { key: string; params: Record<string, unknown> }): never {
+  const fallback = `errors:canvas.${error.key}`
+  const translated = i18n.t(fallback, error.params)
+  throw new CanvasValidationError(
+    typeof translated === 'string' && translated ? translated : fallback,
+    error.key,
+  )
 }
 
 function canvasError(key: string, params: Record<string, unknown> = {}) {
-  return i18n.t(`errors:canvas.${key}`, params)
+  return { key, params }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
