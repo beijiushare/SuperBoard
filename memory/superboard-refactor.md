@@ -151,7 +151,7 @@
 - bindings 生成到 `web/src/desktop/bindings`
 - 共享前端通过 `web/src/desktop/platform.ts` 检测 `window._wails` 调用
 - `WorkspaceService` 实现工作区打开/恢复、白板与文件夹 CRUD、附件导入
-- `%APPDATA%/SuperBoard/config.json` 保存工作区路径
+- 配置文件解析顺序：exe 目录 `config.json` → `%APPDATA%/SuperBoard/config.json` → 首次运行尝试在 exe 目录创建 → 失败回退 `%APPDATA%`；保存工作区路径、语言、最近工作区
 - 单实例锁：第二次启动恢复并聚焦已有窗口
 - `/__files/<scope>/<path>` 只读暴露工作区附件，路径越界返回 404
 - `ExportService` 使用系统保存/目录对话框导出 HTML 与附件

@@ -2,9 +2,11 @@ package services
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 type RecentWorkspace struct {
@@ -55,12 +57,56 @@ func rememberWorkspace(config *Config, root string) {
 	config.Workspace = root
 }
 
+var (
+	configPathOnce  sync.Once
+	configPathValue string
+)
+
 func configPath() string {
-	dir, err := os.UserConfigDir()
-	if err != nil || dir == "" {
-		return ""
+	configPathOnce.Do(func() {
+		configPathValue = resolveConfigPath()
+		if configPathValue != "" {
+			log.Printf("[config] using %s", configPathValue)
+		}
+	})
+	return configPathValue
+}
+
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
+}
+
+// resolveConfigPath prefers a portable config next to the executable. When the
+// executable directory is read-only it falls back to the per-user config
+// directory.
+func resolveConfigPath() string {
+	var exeConfig string
+	if exe, err := os.Executable(); err == nil {
+		exeConfig = filepath.Join(filepath.Dir(exe), "config.json")
 	}
-	return filepath.Join(dir, "SuperBoard", "config.json")
+	if exeConfig != "" && fileExists(exeConfig) {
+		return exeConfig
+	}
+
+	userDir, err := os.UserConfigDir()
+	if err != nil || userDir == "" {
+		userDir = ""
+	}
+	userConfig := ""
+	if userDir != "" {
+		userConfig = filepath.Join(userDir, "SuperBoard", "config.json")
+		if fileExists(userConfig) {
+			return userConfig
+		}
+	}
+
+	if exeConfig != "" {
+		if err := os.WriteFile(exeConfig, []byte("{}\n"), 0o644); err == nil {
+			return exeConfig
+		}
+	}
+	return userConfig
 }
 
 func loadConfig() Config {

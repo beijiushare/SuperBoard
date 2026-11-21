@@ -193,7 +193,9 @@
 
 - [x] `npm run desktop:build` 生成 `desktop/bin/superboard.exe`
 - [x] 首次启动显示工作区选择页
-- [x] 启动时读取 `%APPDATA%/SuperBoard/config.json` 恢复上次工作区
+- [x] 启动时读取 `config.json` 恢复上次工作区（优先 exe 同目录，其次 `%APPDATA%/SuperBoard`）
+- [ ] 首次运行：exe 目录可写时生成 `config.json`；不可写时回退 `%APPDATA%/SuperBoard/config.json`
+- [ ] 已存在 `%APPDATA%` 配置时，不会在 exe 目录重复生成
 - [x] 选择工作区后加载白板目录与欢迎白板
 - [x] `/__files/` 可读取工作区附件，越界路径返回 404
 - [x] 第二次启动聚焦已有窗口，不再开新实例
