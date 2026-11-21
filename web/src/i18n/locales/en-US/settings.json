@@ -2,8 +2,6 @@
   "title": "Preferences",
   "note": "Saved locally. Only affects new blocks.",
   "options": "Options",
-  "search.placeholder": "Search settings…",
-  "search.aria": "Search settings",
   "tabs.about": "About",
   "tabs.general": "General",
   "tabs.defaults": "Defaults",

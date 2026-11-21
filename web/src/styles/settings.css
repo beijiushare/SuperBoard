@@ -80,31 +80,6 @@
   background: var(--sb-surface-muted);
 }
 
-.sb-preferences-dialog .sb-settings-search {
-  width: 100%;
-  height: 34px;
-  margin-bottom: 16px;
-  padding: 0 12px;
-  border: 1px solid var(--sb-border-control);
-  border-radius: var(--sb-radius-md);
-  background: var(--sb-surface);
-  color: var(--sb-text);
-  font-size: 13px;
-  outline: none;
-  transition:
-    border-color var(--sb-motion),
-    box-shadow var(--sb-motion);
-}
-
-.sb-preferences-dialog .sb-settings-search::placeholder {
-  color: var(--sb-text-faint);
-}
-
-.sb-preferences-dialog .sb-settings-search:focus {
-  border-color: #b9b5a9;
-  box-shadow: 0 0 0 3px rgb(34 33 31 / 6%);
-}
-
 .sb-preferences-dialog .sb-settings-group {
   margin: 0 0 6px;
   padding: 0 12px;

@@ -164,12 +164,6 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           role="tablist"
           aria-label={t('settings:options')}
         >
-          <input
-            className="sb-settings-search"
-            type="search"
-            placeholder={t('settings:search.placeholder')}
-            aria-label={t('settings:search.aria')}
-          />
           <p className="sb-settings-group">{t('settings:options')}</p>
           {(
             [

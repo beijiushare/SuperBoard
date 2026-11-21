@@ -2,8 +2,6 @@
   "title": "偏好设置",
   "note": "偏好保存在本机，只影响之后新建的块。",
   "options": "选项",
-  "search.placeholder": "搜索设置…",
-  "search.aria": "搜索设置",
   "tabs.about": "关于",
   "tabs.general": "常规",
   "tabs.defaults": "默认样式",
