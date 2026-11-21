@@ -15,7 +15,7 @@ class EditorErrorBoundary extends Component<
   }
 
   componentDidCatch(error: unknown, info: ErrorInfo) {
-    console.error('[SuperBoard] 编辑器崩溃', error, info.componentStack)
+    console.error('[SuperBoard] editor crashed', error, info.componentStack)
   }
 
   render() {

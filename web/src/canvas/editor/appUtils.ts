@@ -76,7 +76,7 @@ export function writeViewport(handle: CanvasViewerHandle | null, viewport: Viewp
     dm.data.scale = viewport.scale
     controller.refresh()
   } catch {
-    // 查看器尚未挂载，忽略
+    // Viewer is not mounted yet; ignore.
   }
 }
 

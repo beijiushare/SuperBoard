@@ -58,7 +58,7 @@ export function MarkdownVditor({
       try {
         await loadMathJax()
       } catch (error) {
-        console.error('[SuperBoard] 加载 MathJax 失败', error)
+        console.error('[SuperBoard] failed to load MathJax', error)
       }
       if (cancelled || !element) return
       const vditor = new VditorClass(element, {
@@ -109,14 +109,14 @@ export function MarkdownVditor({
       try {
         vditor?.destroy()
       } catch (error) {
-        console.error('[SuperBoard] 销毁 Vditor 失败', error)
+        console.error('[SuperBoard] failed to destroy Vditor', error)
       }
       if (dirty) {
         window.setTimeout(() => {
           try {
             commitRef.current(currentValue)
           } catch (error) {
-            console.error('[SuperBoard] 提交 Markdown 失败', error)
+            console.error('[SuperBoard] failed to commit Markdown', error)
           }
         }, 0)
       }

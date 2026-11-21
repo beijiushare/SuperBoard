@@ -99,7 +99,7 @@ export function MarkdownVditorPreview({
         setReady(true)
       } catch (error) {
         if (!cancelled) {
-          console.error('[SuperBoard] Vditor 预览渲染失败', error)
+          console.error('[SuperBoard] Vditor preview render failed', error)
           setFailed(true)
         }
       }
