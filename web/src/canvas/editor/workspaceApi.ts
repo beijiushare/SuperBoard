@@ -1,4 +1,5 @@
 import type { BoardScope } from '../../shared/board/types'
+import i18n from '../../i18n'
 import type { CanvasDocument } from '../model'
 import type { CanvasListItem } from './appUtils'
 
@@ -38,7 +39,7 @@ async function json<T>(url: string, init?: RequestInit): Promise<T> {
       | { error?: string }
       | null
     throw new WorkspaceError(
-      data?.error || `请求失败（${response.status}）`,
+      data?.error || i18n.t('editor:workspace.requestFailed', { status: response.status }),
       response.status,
     )
   }
@@ -61,7 +62,7 @@ export async function loadWorkspace() {
     request('/__folders'),
   ])
   if (!boardsResponse.ok) {
-    throw new Error(`加载失败（${boardsResponse.status}）`)
+    throw new Error(i18n.t('editor:workspace.loadFailed', { status: boardsResponse.status }))
   }
   const boards = (await boardsResponse.json()) as {
     canvases: CanvasListItem[]

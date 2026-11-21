@@ -1,4 +1,5 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import i18n from '../../i18n'
 import type { BoardScope } from '../../shared/board/types'
 import type { CanvasDocument } from '../model'
 import {
@@ -113,13 +114,13 @@ export function useBoardWorkspace({
     )
     if (!item) return
     if (savingRef.current) {
-      window.alert('正在保存，请稍候再切换白板。')
+      window.alert(i18n.t('editor:workspace.savingSwitch'))
       return
     }
     if (
       !force &&
       saveState !== 'saved' &&
-      !window.confirm('当前白板有未保存的修改，切换后会丢失，继续？')
+      !window.confirm(i18n.t('editor:workspace.unsavedSwitch'))
     ) {
       return
     }

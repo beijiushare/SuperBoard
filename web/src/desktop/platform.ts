@@ -1,4 +1,5 @@
 import type { BoardScope } from '../shared/board/types'
+import i18n from '../i18n'
 import { configureWorkspaceFetcher } from '../canvas/editor/workspaceApi'
 import * as Workspace from './bindings/superboard/desktop/services/workspaceservice'
 import * as Exporter from './bindings/superboard/desktop/services/exportservice'
@@ -21,7 +22,10 @@ function timeout<T>(promise: Promise<T>, ms = 400) {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) =>
-      window.setTimeout(() => reject(new Error('桌面桥接超时')), ms),
+      window.setTimeout(
+        () => reject(new Error(i18n.t('editor:desktop.bridgeTimeout'))),
+        ms,
+      ),
     ),
   ])
 }
@@ -136,7 +140,7 @@ export async function desktopImportFile(
   const data = await readAsDataUrl(file)
   const result = await Workspace.ImportFile(file.name, data, scope)
   const body = parse<ImportedFile & { error?: string }>(result)
-  if (!body.path) throw new Error(body.error ?? '导入文件失败')
+  if (!body.path) throw new Error(body.error ?? i18n.t('editor:desktop.importFailed'))
   return body
 }
 

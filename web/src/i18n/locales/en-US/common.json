@@ -8,5 +8,6 @@
   "actions.confirm": "OK",
   "actions.selectPlaceholder": "Select",
   "markdown.empty": "No content",
+  "markdown.unsupportedEmbed": "Unsupported embed",
   "status.rendering": "Rendering…"
 }

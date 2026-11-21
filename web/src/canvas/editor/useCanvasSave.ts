@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import i18n from '../../i18n'
 import type { BoardScope } from '../../shared/board/types'
 import type { CanvasDocument } from '../model'
 import {
@@ -123,7 +124,7 @@ export function useCanvasSave({
     if (!item) return false
     if (
       confirmFirst &&
-      !window.confirm('其他标签页已经修改过这块白板。要用当前内容覆盖对方吗？')
+      !window.confirm(i18n.t('editor:workspace.conflictOverwrite'))
     ) {
       return false
     }

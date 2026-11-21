@@ -9,6 +9,7 @@ import {
 import { edgeGeometry } from './edges'
 import { resolveFileUrl } from '../viewer/fileResolver'
 import { getAppLanguage } from '../../i18n'
+import i18n from '../../i18n'
 
 const PADDING = 64
 
@@ -120,7 +121,9 @@ function textBlockFor(node: CanvasNode): TextBlock | null {
   if (node.type === 'link') {
     const media = extension?.media
     const url = media?.url ?? node.url
-    const label = media ? `媒体（${media.kind}）` : '链接'
+    const label = media
+      ? i18n.t('editor:exportHtml.media', { kind: media.kind })
+      : i18n.t('editor:exportHtml.link')
     return {
       text: `${label}\n${url}`,
       fontSize: 13,
@@ -360,7 +363,7 @@ html,body{margin:0;height:100%;background:#faf9f5;overflow:hidden;font-family:sy
 </head>
 <body>
 <div id="viewport"><div id="stage">${svg}</div></div>
-<div id="hint">滚轮缩放 · 拖动平移</div>
+<div id="hint">${i18n.t('editor:exportHtml.hint')}</div>
 <script>
 (function(){
   var viewport=document.getElementById('viewport');
@@ -623,7 +626,7 @@ export async function buildExportPayload(
   viewer: ViewerLike | undefined,
   actions?: Map<string, AttachmentAction>,
 ): Promise<ExportPayload> {
-  if (!viewer?.container) throw new Error('画布尚未就绪')
+  if (!viewer?.container) throw new Error(i18n.t('editor:exportHtml.notReady'))
   const { internal } = await import(
     '../../vendor/json-canvas-viewer/src/index.ts'
   )
@@ -639,7 +642,7 @@ export async function buildExportPayload(
     refresh: () => void
   }
   const root = dm.data.container.closest<HTMLElement>('.canvas-viewer-wrap')
-  if (!root) throw new Error('找不到画布容器')
+  if (!root) throw new Error(i18n.t('editor:exportHtml.noContainer'))
   const old = {
     offsetX: dm.data.offsetX,
     offsetY: dm.data.offsetY,
@@ -716,7 +719,7 @@ export async function exportCanvasFolder(
       mode?: string
     }) => Promise<FileSystemDirectoryHandle>
   }).showDirectoryPicker
-  if (!picker) throw new Error('当前浏览器不支持导出文件夹')
+  if (!picker) throw new Error(i18n.t('editor:exportHtml.folderUnsupported'))
   const payload = await buildExportPayload(canvas, viewer, actions)
   const directory = await picker({ mode: 'readwrite' })
   const filesDir = await directory.getDirectoryHandle('files', { create: true })

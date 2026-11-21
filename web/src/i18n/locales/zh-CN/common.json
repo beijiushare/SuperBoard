@@ -8,5 +8,6 @@
   "actions.confirm": "确定",
   "actions.selectPlaceholder": "请选择",
   "markdown.empty": "暂无内容",
+  "markdown.unsupportedEmbed": "不支持的嵌入内容",
   "status.rendering": "渲染中…"
 }

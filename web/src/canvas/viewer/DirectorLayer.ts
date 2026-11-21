@@ -1,4 +1,5 @@
 import { BaseModule, internal, type BaseArgs } from '../../vendor/json-canvas-viewer/src/index.ts'
+import i18n from '../../i18n'
 import type { CanvasFrame } from '../model'
 
 type DataManager = {
@@ -47,7 +48,7 @@ export class DirectorLayer extends BaseModule {
       pointerEvents: 'none',
     })
     const ctx = this.canvas.getContext('2d')
-    if (!ctx) throw new Error('无法创建导演幕布画布')
+    if (!ctx) throw new Error(i18n.t('editor:desktop.noDirectorCanvas'))
     this.ctx = ctx
     const overlays = this.dm.data.container.querySelector('.JCV-overlays')
     if (overlays) this.dm.data.container.insertBefore(this.canvas, overlays)
@@ -102,7 +103,11 @@ export class DirectorLayer extends BaseModule {
       this.ctx.strokeRect(frame.x, frame.y, frame.width, frame.height)
       this.ctx.fillStyle = '#2f80ed'
       this.ctx.font = `${12 / scale}px sans-serif`
-      this.ctx.fillText(`${frame.order}:${frame.name || `帧${frame.order}`}`, frame.x, frame.y - 6 / scale)
+      this.ctx.fillText(
+        `${frame.order}:${frame.name || i18n.t('editor:director.frameCompact', { order: frame.order })}`,
+        frame.x,
+        frame.y - 6 / scale,
+      )
     }
     this.ctx.restore()
   }

@@ -1,4 +1,5 @@
 import { visit } from 'unist-util-visit'
+import i18n from '../../i18n'
 
 type HastNode = {
   type: string
@@ -52,7 +53,9 @@ export function rehypeSafeEmbeds() {
             target: '_blank',
             rel: 'noopener noreferrer',
           }
-          node.children = [{ type: 'text', value: '不支持的嵌入内容' }]
+          node.children = [
+            { type: 'text', value: i18n.t('common:markdown.unsupportedEmbed') },
+          ]
           return
         }
         node.properties = {

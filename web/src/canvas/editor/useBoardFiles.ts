@@ -1,4 +1,5 @@
 import type { BoardScope, BoardTreeFolder } from '../../shared/board/types'
+import i18n from '../../i18n'
 import type { BoardFormValues } from '../../editor/dialogs'
 import type { CanvasDocument } from '../model'
 import {
@@ -69,7 +70,7 @@ export function useBoardFiles({
   async function handleCreate(values: BoardFormValues) {
     if (saveState !== 'saved') {
       const ok = await save()
-      if (!ok) throw new Error('当前白板保存失败，无法新建')
+      if (!ok) throw new Error(i18n.t('editor:workspace.saveBeforeCreate'))
     }
     const data = await createBoard({
       title: values.title,
@@ -96,7 +97,7 @@ export function useBoardFiles({
     const isCurrent = target.slug === selectedSlug && target.scope === scope
     if (isCurrent && saveState !== 'saved') {
       const ok = await save()
-      if (!ok) throw new Error('当前白板保存失败，无法重命名')
+      if (!ok) throw new Error(i18n.t('editor:workspace.saveBeforeRename'))
     }
     const data = await updateBoard(
       { ...target, scope: target.scope ?? scope },
@@ -117,7 +118,7 @@ export function useBoardFiles({
   }
 
   async function handleDelete(slug: string) {
-    if (savingRef.current) throw new Error('正在保存，请稍后再删除')
+    if (savingRef.current) throw new Error(i18n.t('editor:workspace.savingDelete'))
     const item = items.find(
       (entry) => entry.slug === slug && entry.scope === scope,
     )
@@ -159,7 +160,7 @@ export function useBoardFiles({
     if (!folderDialog) return
     if (saveState !== 'saved') {
       const ok = await save()
-      if (!ok) throw new Error('当前白板保存失败，无法重命名文件夹')
+      if (!ok) throw new Error(i18n.t('editor:workspace.saveBeforeFolderRename'))
     }
     const data = await updateFolder({
       path: folderDialog.path,
@@ -175,7 +176,7 @@ export function useBoardFiles({
   async function handleDeleteFolder(path: string) {
     if (saveState !== 'saved') {
       const ok = await save()
-      if (!ok) throw new Error('当前白板保存失败，无法删除文件夹')
+      if (!ok) throw new Error(i18n.t('editor:workspace.saveBeforeFolderDelete'))
     }
     const currentPath = activeItem?.path
     const currentInside = Boolean(
