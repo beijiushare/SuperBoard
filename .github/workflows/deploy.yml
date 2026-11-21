@@ -33,6 +33,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Check i18n keys
+        run: npm run check:i18n
+
       - name: Build static site
         env:
           BASE_PATH: /SuperBoard/
