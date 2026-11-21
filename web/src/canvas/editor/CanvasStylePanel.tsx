@@ -20,6 +20,7 @@ import { ColorPicker } from './ColorPicker'
 import { DrawingStyleSection } from './DrawingStyleSection'
 import { patchDrawingNode, type DrawingPatch } from './drawingStyle'
 import { Select } from '../../components/ui/select'
+import { Switch } from '../../components/ui/switch'
 import {
   BackgroundFields,
   BorderFields,
@@ -544,41 +545,19 @@ export function CanvasStylePanel({
           />
           <div className="sb-style-row">
             <span>{t('editor:style.toEnd')}</span>
-            <div className="sb-style-buttons">
-              <button
-                type="button"
-                className={edge.toEnd !== 'none' ? 'is-active' : undefined}
-                onClick={() => updateEdge({ toEnd: 'arrow' })}
-              >
-                {t('editor:style.arrow')}
-              </button>
-              <button
-                type="button"
-                className={edge.toEnd === 'none' ? 'is-active' : undefined}
-                onClick={() => updateEdge({ toEnd: 'none' })}
-              >
-                {t('editor:style.none')}
-              </button>
-            </div>
+            <Switch
+              checked={edge.toEnd !== 'none'}
+              onChange={(checked) => updateEdge({ toEnd: checked ? 'arrow' : 'none' })}
+              ariaLabel={t('editor:style.toEnd')}
+            />
           </div>
           <div className="sb-style-row">
             <span>{t('editor:style.fromEnd')}</span>
-            <div className="sb-style-buttons">
-              <button
-                type="button"
-                className={edge.fromEnd === 'arrow' ? 'is-active' : undefined}
-                onClick={() => updateEdge({ fromEnd: 'arrow' })}
-              >
-                {t('editor:style.arrow')}
-              </button>
-              <button
-                type="button"
-                className={edge.fromEnd !== 'arrow' ? 'is-active' : undefined}
-                onClick={() => updateEdge({ fromEnd: 'none' })}
-              >
-                {t('editor:style.none')}
-              </button>
-            </div>
+            <Switch
+              checked={edge.fromEnd === 'arrow'}
+              onChange={(checked) => updateEdge({ fromEnd: checked ? 'arrow' : 'none' })}
+              ariaLabel={t('editor:style.fromEnd')}
+            />
           </div>
           <div className="sb-style-row">
             <span>{t('editor:style.fromSide')}</span>

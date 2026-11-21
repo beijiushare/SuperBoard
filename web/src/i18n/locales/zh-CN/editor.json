@@ -138,8 +138,6 @@
   "style.edge": "箭头",
   "style.toEnd": "终点箭头",
   "style.fromEnd": "起点箭头",
-  "style.arrow": "箭头",
-  "style.none": "无",
   "style.fromSide": "起点侧",
   "style.toSide": "终点侧",
   "style.auto": "自动",

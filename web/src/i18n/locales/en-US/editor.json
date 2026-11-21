@@ -138,8 +138,6 @@
   "style.edge": "Arrow",
   "style.toEnd": "Target end",
   "style.fromEnd": "Source end",
-  "style.arrow": "Arrow",
-  "style.none": "None",
   "style.fromSide": "Source side",
   "style.toSide": "Target side",
   "style.auto": "Auto",
