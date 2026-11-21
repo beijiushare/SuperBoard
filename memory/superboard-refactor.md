@@ -184,7 +184,9 @@
 - 开始页移除工作区结构提示文案
 - 开始页卡片：打开文件夹、最近打开、语言三行；控件统一 220px
 - 版本与网站链接水平居中，文字只显示「版本」「网站」
-- 全应用使用统一 Select 组件（`web/src/components/ui/select.tsx`）
+- 全应用使用统一 Select 组件（`web/src/components/ui/select.tsx`），文字左对齐
+- 下拉占位符不再灰显，统一为正文色
+- 版本号唯一来源为 `package.json`，Vite `define` 注入 `__SUPERBOARD_VERSION__`，前端通过 `APP_VERSION` 读取
 - 网页端 favicon、apple-touch-icon、PWA manifest 已接入
 - 最近下拉默认显示「选择」，选项悬停显示路径
 - 语言下拉暂时只有简体中文

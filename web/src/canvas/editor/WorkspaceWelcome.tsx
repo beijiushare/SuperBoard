@@ -1,6 +1,7 @@
 import type { MouseEvent } from 'react'
 import { Browser } from '@wailsio/runtime'
 import type { WorkspaceRecentItem } from './workspacePlatform'
+import { APP_VERSION } from '../../shared/appVersion'
 import { Select } from '../../components/ui/select'
 import wordmarkUrl from '../../assets/superboard-wordmark.svg?url'
 import hashUrl from '../../assets/superboard-hash.svg?url'
@@ -83,7 +84,7 @@ export function WorkspaceWelcome({
             href="https://github.com/beijiushare/SuperBoard"
             target="_blank"
             rel="noreferrer"
-            title="SuperBoard 0.1.0"
+            title={`SuperBoard ${APP_VERSION}`}
             onClick={(event) =>
               openExternal(
                 event,
@@ -91,7 +92,7 @@ export function WorkspaceWelcome({
               )
             }
           >
-            版本
+            版本 {APP_VERSION}
           </a>
           <span aria-hidden="true">·</span>
           <a

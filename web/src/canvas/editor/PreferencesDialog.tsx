@@ -13,6 +13,7 @@ import { BackgroundFields, BorderFields } from './StyleFieldGroups'
 import { StyleNumberControl } from './StyleNumberControl'
 import { Select } from '../../components/ui/select'
 import { desktopMode, desktopWorkspacePath } from '../../desktop/platform'
+import { APP_VERSION } from '../../shared/appVersion'
 import {
   canOpenWorkspace,
   forgetRecentWorkspace,
@@ -190,7 +191,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           <section>
             <h3>版本</h3>
             <p className="sb-preferences-note">
-              SuperBoard 0.1.0 · {desktopMode() ? '桌面版' : '浏览器版'}
+              SuperBoard {APP_VERSION} · {desktopMode() ? '桌面版' : '浏览器版'}
             </p>
             <p className="sb-preferences-note">
               {desktopMode()

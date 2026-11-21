@@ -1,7 +1,14 @@
 import react from '@vitejs/plugin-react'
+import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import { vditorAssetsPlugin } from './web/src/dev/vditorAssets/plugin'
+
+const packageVersion = (
+  JSON.parse(
+    readFileSync(resolve(process.cwd(), 'package.json'), 'utf8'),
+  ) as { version?: string }
+).version ?? '0.0.0'
 
 function siteBase(value: string) {
   let result = value.trim() || '/SuperBoard/'
@@ -19,6 +26,9 @@ export default defineConfig(({ command, isPreview, mode }) => ({
       )
     : '/',
   plugins: [react(), vditorAssetsPlugin()],
+  define: {
+    __SUPERBOARD_VERSION__: JSON.stringify(packageVersion),
+  },
   resolve: {
     alias: [
       { find: '@repo/shared', replacement: resolve(process.cwd(), 'web/src/vendor/json-canvas-viewer/shared/index.ts') },
