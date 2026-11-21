@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import {
   DEFAULT_TEXT_FONT,
   type CanvasNode,
@@ -6,7 +7,7 @@ import {
   type SuperBoardStyle,
 } from '../model'
 import { ColorPicker } from './ColorPicker'
-import { DEFAULT_PREFERENCES, FONT_OPTIONS } from './preferences'
+import { DEFAULT_PREFERENCES, fontOptions } from './preferences'
 import { StyleNumberControl } from './StyleNumberControl'
 import { Select } from '../../components/ui/select'
 
@@ -27,11 +28,12 @@ export function TransformFields({
   onWidth,
   onHeight,
 }: TransformFieldsProps) {
+  const { t } = useTranslation(['editor'])
   return (
     <section>
-      <h3>变换</h3>
+      <h3>{t('editor:style.transform')}</h3>
       <StyleNumberControl
-        label="角度"
+        label={t('editor:style.angle')}
         value={rotation}
         min={-360}
         max={360}
@@ -41,7 +43,7 @@ export function TransformFields({
         onChange={onRotation}
       />
       <StyleNumberControl
-        label="高度"
+        label={t('editor:style.height')}
         value={height}
         min={1}
         max={10000}
@@ -50,7 +52,7 @@ export function TransformFields({
         onChange={onHeight}
       />
       <StyleNumberControl
-        label="宽度"
+        label={t('editor:style.width')}
         value={width}
         min={1}
         max={10000}
@@ -81,11 +83,12 @@ export function BackgroundFields({
   onOpacity,
   onColorUsed,
 }: BackgroundFieldsProps) {
+  const { t } = useTranslation(['editor'])
   return (
     <section>
-      <h3>背景</h3>
+      <h3>{t('editor:style.background')}</h3>
       <ColorPicker
-        label="颜色"
+        label={t('editor:style.color')}
         value={color}
         allowNone={allowNone}
         recentColors={recentColors}
@@ -93,7 +96,7 @@ export function BackgroundFields({
         onColorUsed={onColorUsed}
       />
       <StyleNumberControl
-        label="透明度"
+        label={t('editor:style.opacity')}
         value={opacity}
         min={0}
         max={100}
@@ -133,11 +136,12 @@ export function BorderFields({
   onStyle,
   onColorUsed,
 }: BorderFieldsProps) {
+  const { t } = useTranslation(['editor'])
   return (
     <section>
-      <h3>边框</h3>
+      <h3>{t('editor:style.border')}</h3>
       <ColorPicker
-        label="颜色"
+        label={t('editor:style.color')}
         value={color}
         allowNone
         recentColors={recentColors}
@@ -145,7 +149,7 @@ export function BorderFields({
         onColorUsed={onColorUsed}
       />
       <StyleNumberControl
-        label="透明度"
+        label={t('editor:style.opacity')}
         value={opacity}
         min={0}
         max={100}
@@ -155,7 +159,7 @@ export function BorderFields({
         onChange={onOpacity}
       />
       <StyleNumberControl
-        label="粗细"
+        label={t('editor:style.thickness')}
         value={width}
         min={0}
         max={40}
@@ -165,13 +169,13 @@ export function BorderFields({
       />
       {showStyle ? (
         <div className="sb-style-row">
-          <span>线型</span>
+          <span>{t('editor:style.lineStyle')}</span>
           <div className="sb-style-buttons">
             {(
               [
-                ['solid', '实线'],
-                ['dashed', '虚线'],
-                ['dotted', '点线'],
+                ['solid', t('editor:style.solid')],
+                ['dashed', t('editor:style.dashed')],
+                ['dotted', t('editor:style.dotted')],
               ] as const
             ).map(([value, label]) => (
               <button
@@ -211,18 +215,19 @@ export function CanvasFields({
   onToggleGuides,
   onColorUsed,
 }: CanvasFieldsProps) {
+  const { t } = useTranslation(['editor'])
   return (
     <section>
-      <h3>画布</h3>
+      <h3>{t('editor:style.canvas')}</h3>
       <ColorPicker
-        label="颜色"
+        label={t('editor:style.color')}
         value={background}
         recentColors={recentColors}
         onChange={(value) => onUpdate({ background: value })}
         onColorUsed={onColorUsed}
       />
       <StyleNumberControl
-        label="透明度"
+        label={t('editor:style.opacity')}
         value={backgroundOpacity}
         min={0}
         max={100}
@@ -232,12 +237,12 @@ export function CanvasFields({
         onChange={(value) => onUpdate({ backgroundOpacity: value / 100 })}
       />
       <div className="sb-style-row">
-        <span>网格</span>
+        <span>{t('editor:style.grid')}</span>
         <div className="sb-style-buttons">
           {(
             [
-              ['none', '无'],
-              ['lines', '网格'],
+              ['none', t('editor:style.gridNone')],
+              ['lines', t('editor:style.gridLines')],
             ] as const
           ).map(([value, label]) => (
             <button
@@ -252,13 +257,13 @@ export function CanvasFields({
         </div>
       </div>
       <div className="sb-style-row">
-        <span>对齐</span>
+        <span>{t('editor:style.guides')}</span>
         <button
           type="button"
           className={`sb-style-toggle${guides ? ' is-active' : ''}`}
           onClick={onToggleGuides}
         >
-          {guides ? '开启' : '关闭'}
+          {guides ? t('editor:style.on') : t('editor:style.off')}
         </button>
       </div>
     </section>
@@ -278,25 +283,26 @@ export function TextFields({
   onChange,
   onColorUsed,
 }: TextFieldsProps) {
+  const { t } = useTranslation(['editor'])
   const style = {
     ...DEFAULT_PREFERENCES.text,
     ...node?.['x-superboard']?.style,
   }
   return (
     <section>
-      <h3>文本</h3>
+      <h3>{t('editor:style.text')}</h3>
       <div className="sb-style-row">
-        <span>字体</span>
+        <span>{t('editor:style.font')}</span>
         <Select
           className="sb-select-compact"
           value={style.fontFamily ?? DEFAULT_TEXT_FONT}
           onChange={(value) => onChange({ fontFamily: value || undefined })}
-          ariaLabel="字体"
-          options={FONT_OPTIONS}
+          ariaLabel={t('editor:style.font')}
+          options={fontOptions(t)}
         />
       </div>
       <StyleNumberControl
-        label="字号"
+        label={t('editor:style.fontSize')}
         value={style.fontSize ?? 16}
         min={8}
         max={200}
@@ -305,14 +311,14 @@ export function TextFields({
         onChange={(fontSize) => onChange({ fontSize })}
       />
       <ColorPicker
-        label="颜色"
+        label={t('editor:style.color')}
         value={style.color ?? '#1d1d1d'}
         recentColors={recentColors}
         onChange={(color) => onChange({ color })}
         onColorUsed={onColorUsed}
       />
       <StyleNumberControl
-        label="透明度"
+        label={t('editor:style.opacity')}
         value={Math.round((style.opacity ?? 1) * 100)}
         min={0}
         max={100}
@@ -322,7 +328,7 @@ export function TextFields({
         onChange={(value) => onChange({ opacity: value / 100 })}
       />
       <div className="sb-style-row">
-        <span>样式</span>
+        <span>{t('editor:style.fontStyle')}</span>
         <div className="sb-style-buttons">
           <button
             type="button"
@@ -361,13 +367,13 @@ export function TextFields({
         </div>
       </div>
       <div className="sb-style-row">
-        <span>对齐</span>
+        <span>{t('editor:style.textAlign')}</span>
         <div className="sb-style-buttons">
           {(
             [
-              ['left', '左'],
-              ['center', '中'],
-              ['right', '右'],
+              ['left', t('editor:style.alignLeftShort')],
+              ['center', t('editor:style.alignCenterShort')],
+              ['right', t('editor:style.alignRightShort')],
             ] as const
           ).map(([value, label]) => (
             <button

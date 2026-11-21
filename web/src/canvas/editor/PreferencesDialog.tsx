@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ColorPicker } from './ColorPicker'
 import {
   DEFAULT_PREFERENCES,
-  FONT_OPTIONS,
+  fontOptions,
   getPreferences,
   savePreferences,
   type EditorPreferences,
@@ -393,7 +393,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
               value={draft.text.fontFamily}
               onChange={(value) => updateText({ fontFamily: value })}
               ariaLabel="字体"
-              options={FONT_OPTIONS}
+              options={fontOptions(t)}
             />
           </div>
           <StyleNumberControl

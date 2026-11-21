@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { ColorPicker } from './ColorPicker'
 import type { DrawingPatch } from './drawingStyle'
 import { StyleNumberControl } from './StyleNumberControl'
@@ -31,11 +32,12 @@ export function DrawingStyleSection({
   onChange,
   onColorUsed,
 }: DrawingStyleSectionProps) {
+  const { t } = useTranslation(['editor'])
   return (
     <section>
-      <h3>笔触</h3>
+      <h3>{t('editor:style.stroke')}</h3>
       <StyleNumberControl
-        label="粗细"
+        label={t('editor:style.thickness')}
         value={size}
         min={1}
         max={80}
@@ -44,14 +46,14 @@ export function DrawingStyleSection({
         onChange={(value) => onChange({ size: value })}
       />
       <ColorPicker
-        label="颜色"
+        label={t('editor:style.color')}
         value={color}
         recentColors={recentColors}
         onChange={(value) => onChange({ color: value })}
         onColorUsed={onColorUsed}
       />
       <StyleNumberControl
-        label="透明度"
+        label={t('editor:style.opacity')}
         value={opacity}
         min={0}
         max={100}
@@ -61,7 +63,7 @@ export function DrawingStyleSection({
         onChange={(value) => onChange({ opacity: value / 100 })}
       />
       <StyleNumberControl
-        label="压感强度"
+        label={t('editor:style.pressure')}
         value={thinning}
         min={-1}
         max={1}
@@ -69,7 +71,7 @@ export function DrawingStyleSection({
         onChange={(value) => onChange({ thinning: value })}
       />
       <StyleNumberControl
-        label="平滑"
+        label={t('editor:style.smoothing')}
         value={smoothing}
         min={0}
         max={1}
@@ -77,7 +79,7 @@ export function DrawingStyleSection({
         onChange={(value) => onChange({ smoothing: value })}
       />
       <StyleNumberControl
-        label="流线"
+        label={t('editor:style.streamline')}
         value={streamline}
         min={0}
         max={1}
@@ -85,17 +87,17 @@ export function DrawingStyleSection({
         onChange={(value) => onChange({ streamline: value })}
       />
       <div className="sb-style-row">
-        <span>模拟压感</span>
+        <span>{t('editor:style.simulatePressure')}</span>
         <button
           type="button"
           className={`sb-style-toggle${simulatePressure ? ' is-active' : ''}`}
           onClick={() => onChange({ simulatePressure: !simulatePressure })}
         >
-          {simulatePressure ? '开启' : '关闭'}
+          {simulatePressure ? t('editor:style.on') : t('editor:style.off')}
         </button>
       </div>
       <StyleNumberControl
-        label="起笔"
+        label={t('editor:style.start')}
         value={start}
         min={0}
         max={100}
@@ -103,7 +105,7 @@ export function DrawingStyleSection({
         onChange={(value) => onChange({ start: value })}
       />
       <StyleNumberControl
-        label="收笔"
+        label={t('editor:style.end')}
         value={end}
         min={0}
         max={100}

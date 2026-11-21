@@ -27,13 +27,15 @@ export interface EditorPreferences {
   shapeCornerRadius: number
 }
 
-export const FONT_OPTIONS = [
-  { value: 'PingFang SC, Microsoft YaHei, sans-serif', label: '苹方 / 微软雅黑' },
-  { value: 'Noto Sans SC, Source Han Sans SC, sans-serif', label: '思源黑体' },
-  { value: 'Arial, Helvetica, sans-serif', label: 'Arial' },
-  { value: "Georgia, 'Times New Roman', serif", label: 'Georgia' },
-  { value: 'ui-monospace, Consolas, monospace', label: '等宽' },
-] as const
+export function fontOptions(t: (key: string) => string) {
+  return [
+    { value: 'PingFang SC, Microsoft YaHei, sans-serif', label: t('editor:style.fontPingFang') },
+    { value: 'Noto Sans SC, Source Han Sans SC, sans-serif', label: t('editor:style.fontNoto') },
+    { value: 'Arial, Helvetica, sans-serif', label: 'Arial' },
+    { value: "Georgia, 'Times New Roman', serif", label: 'Georgia' },
+    { value: 'ui-monospace, Consolas, monospace', label: t('editor:style.fontMono') },
+  ] as const
+}
 
 const STORAGE_KEY = 'superboard.preferences.v1'
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   resolveNodeStyle,
   type CanvasDocument,
@@ -89,6 +90,7 @@ export function CanvasStylePanel({
   onApply,
   onRememberColor,
 }: CanvasStylePanelProps) {
+  const { t } = useTranslation(['editor'])
   const { rootRef, position, handleProps } = useFloatingPanel({
     alignRight: true,
     centerVertically: true,
@@ -355,12 +357,12 @@ export function CanvasStylePanel({
           className="sb-style-panel-drag"
           role="button"
           tabIndex={-1}
-          aria-label="拖动样式面板"
+          aria-label={t('editor:style.panelAria')}
           {...handleProps}
         >
           <WindowDragHandle />
         </div>
-        <strong>样式面板</strong>
+        <strong>{t('editor:style.panelTitle')}</strong>
       </div>
       <div className="sb-style-panel-content">
       {firstNode ? (
@@ -422,9 +424,9 @@ export function CanvasStylePanel({
           ) : null}
           {firstIsRoundedRect ? (
             <section>
-              <h3>圆角</h3>
+              <h3>{t('editor:style.cornerRadius')}</h3>
               <StyleNumberControl
-                label="圆角"
+                label={t('editor:style.cornerRadius')}
                 value={firstCornerRadius}
                 min={0}
                 max={maxCornerRadius}
@@ -455,9 +457,9 @@ export function CanvasStylePanel({
             onColorUsed={onRememberColor}
           />
           <section>
-            <h3>缩放</h3>
+            <h3>{t('editor:style.zoom')}</h3>
             <div className="sb-style-row">
-              <span>最小值</span>
+              <span>{t('editor:style.min')}</span>
               <input
                 className="sb-style-number"
                 type="number"
@@ -474,7 +476,7 @@ export function CanvasStylePanel({
               <em className="sb-style-value">%</em>
             </div>
             <div className="sb-style-row">
-              <span>最大值</span>
+              <span>{t('editor:style.max')}</span>
               <input
                 className="sb-style-number"
                 type="number"
@@ -492,14 +494,14 @@ export function CanvasStylePanel({
             </div>
           </section>
           <section>
-            <h3>新增元素</h3>
+            <h3>{t('editor:style.newBlock')}</h3>
             <div className="sb-style-row">
-              <span>宽度</span>
+              <span>{t('editor:style.width')}</span>
               <input
                 className="sb-style-number"
                 type="number"
                 min={40}
-                placeholder="按类型"
+                placeholder={t('editor:style.byType')}
                 value={boardSettings.defaultBlockWidth ?? ''}
                 onChange={(event) =>
                   updateBoardSettings({
@@ -511,12 +513,12 @@ export function CanvasStylePanel({
               />
             </div>
             <div className="sb-style-row">
-              <span>高度</span>
+              <span>{t('editor:style.height')}</span>
               <input
                 className="sb-style-number"
                 type="number"
                 min={40}
-                placeholder="按类型"
+                placeholder={t('editor:style.byType')}
                 value={boardSettings.defaultBlockHeight ?? ''}
                 onChange={(event) =>
                   updateBoardSettings({
@@ -532,54 +534,54 @@ export function CanvasStylePanel({
       ) : null}
       {edge ? (
         <section>
-          <h3>箭头</h3>
+          <h3>{t('editor:style.edge')}</h3>
           <ColorPicker
-            label="颜色"
+            label={t('editor:style.color')}
             value={edge.color ?? '#1d1d1d'}
             recentColors={uiState.recentColors}
             onChange={(color) => updateEdge({ color })}
             onColorUsed={onRememberColor}
           />
           <div className="sb-style-row">
-            <span>终点箭头</span>
+            <span>{t('editor:style.toEnd')}</span>
             <div className="sb-style-buttons">
               <button
                 type="button"
                 className={edge.toEnd !== 'none' ? 'is-active' : undefined}
                 onClick={() => updateEdge({ toEnd: 'arrow' })}
               >
-                箭头
+                {t('editor:style.arrow')}
               </button>
               <button
                 type="button"
                 className={edge.toEnd === 'none' ? 'is-active' : undefined}
                 onClick={() => updateEdge({ toEnd: 'none' })}
               >
-                无
+                {t('editor:style.none')}
               </button>
             </div>
           </div>
           <div className="sb-style-row">
-            <span>起点箭头</span>
+            <span>{t('editor:style.fromEnd')}</span>
             <div className="sb-style-buttons">
               <button
                 type="button"
                 className={edge.fromEnd === 'arrow' ? 'is-active' : undefined}
                 onClick={() => updateEdge({ fromEnd: 'arrow' })}
               >
-                箭头
+                {t('editor:style.arrow')}
               </button>
               <button
                 type="button"
                 className={edge.fromEnd !== 'arrow' ? 'is-active' : undefined}
                 onClick={() => updateEdge({ fromEnd: 'none' })}
               >
-                无
+                {t('editor:style.none')}
               </button>
             </div>
           </div>
           <div className="sb-style-row">
-            <span>起点侧</span>
+            <span>{t('editor:style.fromSide')}</span>
             <Select
               className="sb-select-compact"
               value={edge.fromSide ?? ''}
@@ -588,18 +590,18 @@ export function CanvasStylePanel({
                   fromSide: (value || undefined) as CanvasEdge['fromSide'],
                 })
               }
-              ariaLabel="起点侧"
+              ariaLabel={t('editor:style.fromSide')}
               options={[
-                { value: '', label: '自动' },
-                { value: 'top', label: '上' },
-                { value: 'right', label: '右' },
-                { value: 'bottom', label: '下' },
-                { value: 'left', label: '左' },
+                { value: '', label: t('editor:style.auto') },
+                { value: 'top', label: t('editor:style.sideTop') },
+                { value: 'right', label: t('editor:style.sideRight') },
+                { value: 'bottom', label: t('editor:style.sideBottom') },
+                { value: 'left', label: t('editor:style.sideLeft') },
               ]}
             />
           </div>
           <div className="sb-style-row">
-            <span>终点侧</span>
+            <span>{t('editor:style.toSide')}</span>
             <Select
               className="sb-select-compact"
               value={edge.toSide ?? ''}
@@ -608,23 +610,23 @@ export function CanvasStylePanel({
                   toSide: (value || undefined) as CanvasEdge['toSide'],
                 })
               }
-              ariaLabel="终点侧"
+              ariaLabel={t('editor:style.toSide')}
               options={[
-                { value: '', label: '自动' },
-                { value: 'top', label: '上' },
-                { value: 'right', label: '右' },
-                { value: 'bottom', label: '下' },
-                { value: 'left', label: '左' },
+                { value: '', label: t('editor:style.auto') },
+                { value: 'top', label: t('editor:style.sideTop') },
+                { value: 'right', label: t('editor:style.sideRight') },
+                { value: 'bottom', label: t('editor:style.sideBottom') },
+                { value: 'left', label: t('editor:style.sideLeft') },
               ]}
             />
           </div>
           <div className="sb-style-row">
-            <span>标签</span>
+            <span>{t('editor:style.label')}</span>
             <input
               key={`edge-label:${edge.id}:${edge.label ?? ''}`}
               className="sb-style-input"
               defaultValue={edge.label ?? ''}
-              placeholder="连线标签"
+              placeholder={t('editor:style.edgeLabelPlaceholder')}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   event.currentTarget.blur()
@@ -642,7 +644,7 @@ export function CanvasStylePanel({
             />
           </div>
           <div className="sb-style-row">
-            <span>方向</span>
+            <span>{t('editor:style.direction')}</span>
             <div className="sb-style-buttons">
               <button
                 type="button"
@@ -657,7 +659,7 @@ export function CanvasStylePanel({
                   })
                 }
               >
-                反转方向
+                {t('editor:style.reverse')}
               </button>
             </div>
           </div>
@@ -666,35 +668,35 @@ export function CanvasStylePanel({
 
       {nodes.length >= 2 ? (
         <section>
-          <h3>排列</h3>
+          <h3>{t('editor:style.align')}</h3>
           <div className="sb-style-buttons is-row">
             <button type="button" onClick={() => align('left')}>
-              左对齐
+              {t('editor:style.alignLeft')}
             </button>
             <button type="button" onClick={() => align('right')}>
-              右对齐
+              {t('editor:style.alignRight')}
             </button>
             <button type="button" onClick={() => align('top')}>
-              顶部对齐
+              {t('editor:style.alignTop')}
             </button>
             <button type="button" onClick={() => align('bottom')}>
-              底部对齐
+              {t('editor:style.alignBottom')}
             </button>
           </div>
           <div className="sb-style-buttons is-row">
             <button type="button" onClick={() => align('vcenter')}>
-              垂直居中
+              {t('editor:style.alignVCenter')}
             </button>
             <button type="button" onClick={() => align('hcenter')}>
-              水平居中
+              {t('editor:style.alignHCenter')}
             </button>
           </div>
           <div className="sb-style-buttons is-row">
             <button type="button" onClick={() => distribute('h')}>
-              横向分布
+              {t('editor:style.distributeH')}
             </button>
             <button type="button" onClick={() => distribute('v')}>
-              纵向分布
+              {t('editor:style.distributeV')}
             </button>
           </div>
         </section>
@@ -713,13 +715,13 @@ export function CanvasStylePanel({
 
       {mediaNodes.length > 0 ? (
         <section>
-          <h3>媒体裁剪</h3>
+          <h3>{t('editor:style.mediaCrop')}</h3>
           <div className="sb-style-buttons">
             {(
               [
-                ['rect', '矩形'],
-                ['rounded', '圆角'],
-                ['circle', '圆形'],
+                ['rect', t('editor:style.cropRect')],
+                ['rounded', t('editor:style.cropRounded')],
+                ['circle', t('editor:style.cropCircle')],
               ] as const
             ).map(([mode, label]) => (
               <button
@@ -744,23 +746,23 @@ export function CanvasStylePanel({
                 })
               }
             >
-              重置
+              {t('editor:style.reset')}
             </button>
           </div>
           {firstMedia?.crop === 'circle' ? (
             <>
               <CropSlider
-                label="圆心X"
+                label={t('editor:style.cropCx')}
                 value={firstMedia.cropCx ?? 50}
                 onCommit={(value) => setMediaCrop({ cropCx: value })}
               />
               <CropSlider
-                label="圆心Y"
+                label={t('editor:style.cropCy')}
                 value={firstMedia.cropCy ?? 50}
                 onCommit={(value) => setMediaCrop({ cropCy: value })}
               />
               <CropSlider
-                label="半径"
+                label={t('editor:style.cropRadius')}
                 value={firstMedia.cropRadius ?? 50}
                 onCommit={(value) => setMediaCrop({ cropRadius: value })}
               />
@@ -768,22 +770,22 @@ export function CanvasStylePanel({
           ) : (
             <>
               <CropSlider
-                label="起点X"
+                label={t('editor:style.cropX')}
                 value={firstMedia?.cropX ?? 0}
                 onCommit={(value) => setMediaCrop({ cropX: value })}
               />
               <CropSlider
-                label="起点Y"
+                label={t('editor:style.cropY')}
                 value={firstMedia?.cropY ?? 0}
                 onCommit={(value) => setMediaCrop({ cropY: value })}
               />
               <CropSlider
-                label="宽度"
+                label={t('editor:style.width')}
                 value={firstMedia?.cropW ?? 100}
                 onCommit={(value) => setMediaCrop({ cropW: value })}
               />
               <CropSlider
-                label="高度"
+                label={t('editor:style.height')}
                 value={firstMedia?.cropH ?? 100}
                 onCommit={(value) => setMediaCrop({ cropH: value })}
               />
@@ -791,7 +793,7 @@ export function CanvasStylePanel({
           )}
           {firstMedia?.crop === 'rounded' ? (
             <CropSlider
-              label="圆角"
+              label={t('editor:style.cornerRadius')}
               value={firstMedia.cropCorner ?? 8}
               onCommit={(value) => setMediaCrop({ cropCorner: value })}
             />
