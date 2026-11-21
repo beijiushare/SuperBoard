@@ -188,12 +188,16 @@
 - 下拉占位符不再灰显，统一为正文色
 - 版本号唯一来源为 `package.json`，Vite `define` 注入 `__SUPERBOARD_VERSION__`，前端通过 `APP_VERSION` 读取
 - 网页端 favicon、apple-touch-icon、PWA manifest 已接入
-- i18n 基础：i18next + react-i18next，`web/src/i18n/`
-- 语言支持 `zh-CN` / `en-US`；开始页、设置外壳/关于/帮助/常规已迁移
-- 语言持久化：桌面端 `config.json`、浏览器 `localStorage`
-- Vditor 使用 `zh_CN` / `en_US`；导出 HTML 写入当前 `lang`；文件大小使用 `Intl.NumberFormat`
-- `npm run check:i18n` 校验中英文 key 一致性
-- 仍待迁移：编辑器内大部分硬编码文案、Go 错误码、导出 HTML 的 UI 标签
+- i18n：i18next + react-i18next，`web/src/i18n/`
+- 命名空间：`common` / `start` / `settings` / `editor` / `viewer` / `errors`
+- 语言支持 `zh-CN` / `en-US`，语言持久化：桌面端 `config.json`、浏览器 `localStorage`
+- 编辑器、Viewer、开始页、设置页的界面文案已全部迁移，无硬编码中文
+- Vditor 使用 `zh_CN` / `en_US`；FullCalendar 使用 `zh-cn` / `en`；导出 HTML 写入当前 `lang`；文件大小使用 `Intl.NumberFormat`
+- 后端错误码化：浏览器工作区后端与 Go 服务返回 `code` 或 `code|value`，前端 `translateServerError()` 统一翻译
+- Go 原生对话框标题按 `config.json` 的 `language` 切换中英
+- `npm run check:i18n` 校验中英文 key 一致性，已接入 `deploy.yml` 与 `pages.yml`
+- 开发用 Vite 中间件错误消息统一为英文（仅开发者可见）
+- `canvas-preview/fixture.ts` 的示例白板内容保持中文，视为样例数据
 - 最近下拉默认显示「选择」，选项悬停显示路径
 - 语言下拉暂时只有简体中文
 - 最近列表底部「开始」通过 `?start=1` 返回开始页
@@ -233,6 +237,13 @@
 - 站点导出与 `dist-info` 演示站
 - 桌面端原生对话框、导出、文件管理器操作
 
+### 国际化
+
+- 中英切换后检查原生对话框标题（选工作区、导出、选文件）
+- Go 错误码在真实失败场景下的提示（如 slug 冲突、文件夹已存在）
+- FullCalendar 在两种语言下的表头与按钮
+- 桌面端设置里切换语言后重启是否保持
+
 ### 桌面端与 Canvas 迁移
 
 - 导出 HTML 网格的浏览器手动验证（平移/缩放边界）
@@ -254,8 +265,10 @@
 npm run typecheck
 npm run test:model
 npm run test:editor
+npm run check:i18n
 npm run build:info
 npm run build:editor
+cd desktop && wails3 build
 ```
 
 当前仍有 `MarkdownView` 542 kB 懒加载 chunk 警告，非阻塞。
