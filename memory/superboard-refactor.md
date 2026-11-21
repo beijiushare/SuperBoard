@@ -188,6 +188,12 @@
 - 下拉占位符不再灰显，统一为正文色
 - 版本号唯一来源为 `package.json`，Vite `define` 注入 `__SUPERBOARD_VERSION__`，前端通过 `APP_VERSION` 读取
 - 网页端 favicon、apple-touch-icon、PWA manifest 已接入
+- i18n 基础：i18next + react-i18next，`web/src/i18n/`
+- 语言支持 `zh-CN` / `en-US`；开始页、设置外壳/关于/帮助/常规已迁移
+- 语言持久化：桌面端 `config.json`、浏览器 `localStorage`
+- Vditor 使用 `zh_CN` / `en_US`；导出 HTML 写入当前 `lang`；文件大小使用 `Intl.NumberFormat`
+- `npm run check:i18n` 校验中英文 key 一致性
+- 仍待迁移：编辑器内大部分硬编码文案、Go 错误码、导出 HTML 的 UI 标签
 - 最近下拉默认显示「选择」，选项悬停显示路径
 - 语言下拉暂时只有简体中文
 - 最近列表底部「开始」通过 `?start=1` 返回开始页
