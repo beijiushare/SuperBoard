@@ -7,6 +7,7 @@ import {
   type EventDisplayInfo,
 } from '@fullcalendar/react'
 import themePlugin from '@fullcalendar/react/themes/forma'
+import zhCnLocale from '@fullcalendar/react/locales/zh-cn'
 import timeGridPlugin from '@fullcalendar/react/timegrid'
 import listPlugin from '@fullcalendar/react/list'
 import interactionPlugin from '@fullcalendar/react/interaction'
@@ -16,6 +17,7 @@ import '@fullcalendar/react/themes/forma/palettes/red.css'
 import './schedule.css'
 import type { SuperBoardScheduleEvent } from '../../canvas/model'
 import { useTranslation } from 'react-i18next'
+import { getAppLanguage } from '../../i18n'
 import { InputDialog } from '../ui/InputDialog'
 
 const PLUGINS = [
@@ -140,6 +142,8 @@ export function ScheduleBlock({
           plugins={PLUGINS}
           headerToolbar={HEADER_TOOLBAR}
           buttons={buttons}
+          locale={getAppLanguage() === 'en-US' ? 'en' : 'zh-cn'}
+          locales={[zhCnLocale]}
           initialView="timeGridWeek"
           height="100%"
           scrollTime={initialScrollTime}
