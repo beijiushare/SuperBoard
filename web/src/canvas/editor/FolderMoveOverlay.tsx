@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   requestCancelFolderMove,
   subscribeFolderMoveProgress,
@@ -6,6 +7,7 @@ import {
 } from './folderMove'
 
 export function FolderMoveOverlay() {
+  const { t } = useTranslation(['editor'])
   const [progress, setProgress] = useState<FolderMoveProgress | null>(null)
 
   useEffect(() => {
@@ -32,15 +34,15 @@ export function FolderMoveOverlay() {
   return (
     <div className="sb-folder-moving" role="alertdialog" aria-busy="true">
       <div className="sb-folder-moving-card">
-        <strong>正在移动中</strong>
+        <strong>{t('editor:move.title')}</strong>
         <span>
           {copying
-            ? `已复制 ${progress.copied} / ${progress.total} 个文件`
-            : '请稍候，移动完成前不要关闭页面'}
+            ? t('editor:move.copied', { copied: progress.copied, total: progress.total })
+            : t('editor:move.wait')}
         </span>
         {copying ? (
           <button type="button" onClick={requestCancelFolderMove}>
-            取消移动
+            {t('editor:move.cancel')}
           </button>
         ) : null}
       </div>

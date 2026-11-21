@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import { ColorPaletteIcon } from './ColorPaletteIcon'
 import { EyedropperIcon } from './EyedropperIcon'
 
@@ -26,13 +27,15 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({
-  label = '颜色(C)',
+  label,
   value,
   allowNone = false,
   recentColors = [],
   onChange,
   onColorUsed,
 }: ColorPickerProps) {
+  const { t } = useTranslation(['editor'])
+  const labelText = label ?? t('editor:style.color')
   const triggerRef = useRef<HTMLButtonElement>(null)
   const [open, setOpen] = useState(false)
   const [position, setPosition] = useState({ left: 0, top: 0 })
@@ -76,7 +79,7 @@ export function ColorPicker({
   return (
     <>
       <div className="sb-color-control">
-        <span className="sb-color-control-label">{label}</span>
+        <span className="sb-color-control-label">{labelText}</span>
         <div className="sb-color-presets">
           {recentSlots.map((color, index) =>
             color ? (
@@ -99,7 +102,7 @@ export function ColorPicker({
             type="button"
             className="sb-color-trigger"
             onClick={openPicker}
-            title="更多颜色"
+            title={t('editor:color.more')}
           >
             <span
               className={`sb-color-swatch${current === 'transparent' ? ' is-none' : ''}`}
@@ -116,7 +119,7 @@ export function ColorPicker({
               style={{ left: position.left, top: position.top }}
               onPointerDown={(event) => event.stopPropagation()}
             >
-              <div className="sb-color-section-title">主题颜色</div>
+              <div className="sb-color-section-title">{t('editor:color.theme')}</div>
               <div className="sb-color-grid">
                 {THEME_COLORS.map((color) => (
                   <button
@@ -131,7 +134,7 @@ export function ColorPicker({
                   />
                 ))}
               </div>
-              <div className="sb-color-section-title">标准色</div>
+              <div className="sb-color-section-title">{t('editor:color.standard')}</div>
               <div className="sb-color-grid sb-color-grid-standard">
                 {STANDARD_COLORS.map((color) => (
                   <button
@@ -153,7 +156,7 @@ export function ColorPicker({
                   onChange={(event) => choose(event.target.value)}
                 />
                 <ColorPaletteIcon />
-                其他颜色
+                {t('editor:color.other')}
               </label>
               {allowNone ? (
                 <button
@@ -161,7 +164,7 @@ export function ColorPicker({
                   className="sb-color-more"
                   onClick={() => choose('transparent')}
                 >
-                  无颜色
+                  {t('editor:color.none')}
                 </button>
               ) : null}
               {EyeDropper ? (
@@ -178,7 +181,7 @@ export function ColorPicker({
                   }}
                 >
                   <EyedropperIcon />
-                  取色器
+                  {t('editor:color.eyedropper')}
                 </button>
               ) : null}
             </div>,

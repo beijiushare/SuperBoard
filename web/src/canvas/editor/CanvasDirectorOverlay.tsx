@@ -6,6 +6,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
+import { useTranslation } from 'react-i18next'
 import type { CanvasDocument, CanvasFrame } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 
@@ -66,6 +67,7 @@ export function CanvasDirectorOverlay({
   onPlayFrame,
   onOpenController,
 }: CanvasDirectorOverlayProps) {
+  const { t } = useTranslation(['editor'])
   const overlayRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const dmRef = useRef<DataManager | null>(null)
@@ -377,7 +379,7 @@ export function CanvasDirectorOverlay({
                 onContextMenu={(event) => openMenu(event, frame.id)}
               >
                 <div className="sb-director-frame-label">
-                  {frame.order}:{frame.name || `帧 ${frame.order}`}
+                  {frame.order}:{frame.name || t('editor:director.frame', { order: frame.order })}
                 </div>
                 {selected
                   ? ['nw', 'ne', 'sw', 'se'].map((corner) => (
@@ -411,10 +413,10 @@ export function CanvasDirectorOverlay({
                   setMenu(null)
                 }}
               >
-                播放此帧
+                {t('editor:director.playFrame')}
               </button>
               <button type="button" onClick={() => deleteFrame(menu.frameId!)}>
-                删除帧
+                {t('editor:director.deleteFrame')}
               </button>
             </>
           ) : (
@@ -432,7 +434,7 @@ export function CanvasDirectorOverlay({
                 setMenu(null)
               }}
             >
-              新建帧
+              {t('editor:director.newFrame')}
             </button>
           )}
           <button
@@ -442,7 +444,7 @@ export function CanvasDirectorOverlay({
               onOpenController()
             }}
           >
-            打开控制器
+            {t('editor:director.openController')}
           </button>
         </div>
       ) : null}

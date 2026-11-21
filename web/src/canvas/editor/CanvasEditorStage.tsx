@@ -3,6 +3,7 @@ import type {
   RefObject,
 } from 'react'
 import type { BoardScope } from '../../shared/board/types'
+import { Trans, useTranslation } from 'react-i18next'
 import type {
   CanvasDocument,
   CanvasFrame,
@@ -119,6 +120,7 @@ export function CanvasEditorStage({
   director,
   palette,
 }: CanvasEditorStageProps) {
+  const { t } = useTranslation(['editor'])
   return (
     <main className="sb-canvas">
       <div className="canvas-editor">
@@ -224,10 +226,13 @@ export function CanvasEditorStage({
           ) : (
             <div className="sb-canvas-empty">
               <div>
-                <h2>还没有白板</h2>
+                <h2>{t('editor:empty.title')}</h2>
                 <p>
-                  在左侧目录空白处右键新建白板，或先把 .canvas 放进
-                  whiteboards/{scope}/。
+                  <Trans
+                    i18nKey="editor:empty.body"
+                    values={{ scope }}
+                    components={{ code: <code /> }}
+                  />
                 </p>
               </div>
             </div>

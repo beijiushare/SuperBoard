@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { MouseEvent as ReactMouseEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { EditorRail } from '../../editor/EditorRail'
 import type { SaveState } from '../../editor/saveState'
 import { BoardTreePanel } from '../../shared/board/BoardTreePanel'
@@ -68,6 +69,7 @@ export function EditorWorkspace({
   tree,
   children,
 }: EditorWorkspaceProps) {
+  const { t } = useTranslation(['editor'])
   useShellKeyboard({
     treeMode,
     treeOpen,
@@ -82,7 +84,9 @@ export function EditorWorkspace({
         mode="edit"
         treeMode={treeMode}
         treeOpen={treeOpen}
-        sidebarLabel={treeMode && treeOpen ? '收起目录' : '展开目录'}
+        sidebarLabel={
+          treeMode && treeOpen ? t('editor:shell.collapseTree') : t('editor:shell.expandTree')
+        }
         onToggleTree={onToggleTree}
         scopeLabel={scopeLabel}
         onSwitchScope={onSwitchScope}

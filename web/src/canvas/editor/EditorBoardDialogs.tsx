@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import {
   BoardDialog,
   DeleteBoardDialog,
@@ -78,6 +79,7 @@ export function EditorBoardDialogs({
   onContextDelete,
   onContextDeleteFolder,
 }: EditorBoardDialogsProps) {
+  const { t } = useTranslation(['editor'])
   return (
     <>
       {contextMenu ? (
@@ -133,14 +135,14 @@ export function EditorBoardDialogs({
 
       {newFolderParent !== null ? (
         <InputDialog
-          title="新建文件夹"
+          title={t('editor:context.newFolder')}
           description={
             newFolderParent
-              ? `将创建在 ${newFolderParent} 下`
-              : '将创建在根目录'
+              ? t('editor:folder.createIn', { folder: newFolderParent })
+              : t('editor:folder.createRoot')
           }
-          placeholder="文件夹名称"
-          confirmText="创建"
+          placeholder={t('editor:folder.name')}
+          confirmText={t('editor:dialog.create')}
           onConfirm={(value) => void onCreateFolder(value)}
           onClose={onCloseNewFolder}
         />

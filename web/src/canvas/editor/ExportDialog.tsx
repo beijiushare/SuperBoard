@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { CanvasDocument } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
@@ -36,6 +37,7 @@ export function ExportDialog({
   viewerRef,
   onClose,
 }: ExportDialogProps) {
+  const { t } = useTranslation(['editor', 'common'])
   const attachments = useMemo(
     () =>
       canvas.nodes
@@ -121,22 +123,27 @@ export function ExportDialog({
         event.target === event.currentTarget && !busy && onClose()
       }
     >
-      <div className="sb-dialog sb-export-dialog" role="dialog" aria-modal="true" aria-label="导出">
+      <div
+        className="sb-dialog sb-export-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('editor:export.title')}
+      >
         <div className="sb-dialog-header">
-          <h2>导出</h2>
+          <h2>{t('editor:export.title')}</h2>
           <button
             className="sb-icon-button"
             type="button"
             onClick={onClose}
             disabled={busy}
-            aria-label="关闭"
+            aria-label={t('common:actions.close')}
           >
             ×
           </button>
         </div>
         <div className="sb-dialog-body">
           <p className="sb-dialog-copy">
-            当前白板有 {attachments.length} 个附件。默认全部不导出。
+            {t('editor:export.attachments', { count: attachments.length })}
           </p>
           {attachments.length > 0 ? (
             <div className="sb-export-attachments">
@@ -153,11 +160,11 @@ export function ExportDialog({
                         value as AttachmentAction,
                       )
                     }
-                    ariaLabel="附件导出方式"
+                    ariaLabel={t('editor:export.attachmentMode')}
                     options={[
-                      { value: 'skip', label: '不导出' },
-                      { value: 'embed', label: '内嵌到 HTML' },
-                      { value: 'copy', label: '复制到附件文件夹' },
+                      { value: 'skip', label: t('editor:export.skip') },
+                      { value: 'embed', label: t('editor:export.embed') },
+                      { value: 'copy', label: t('editor:export.copy') },
                     ]}
                   />
                 </div>
@@ -165,17 +172,22 @@ export function ExportDialog({
             </div>
           ) : null}
           <div className="sb-export-summary">
-            <span>内嵌预计：{formatSize(embedSize)}</span>
-            <span>附件文件夹预计：{formatSize(copySize)}</span>
+            <span>{t('editor:export.embedEstimate', { size: formatSize(embedSize) })}</span>
+            <span>{t('editor:export.copyEstimate', { size: formatSize(copySize) })}</span>
             <span>
-              导出方式：{copyCount > 0 ? '文件夹（HTML + 附件）' : '单 HTML'}
+              {t('editor:export.mode', {
+                mode:
+                  copyCount > 0
+                    ? t('editor:export.modeFolder')
+                    : t('editor:export.modeSingle'),
+              })}
             </span>
           </div>
           {error ? <p className="sb-dialog-error">{error}</p> : null}
         </div>
         <div className="sb-dialog-actions">
           <button className="sb-button" type="button" onClick={onClose} disabled={busy}>
-            取消
+            {t('common:actions.cancel')}
           </button>
           <button
             className="sb-button sb-button-primary"
@@ -183,7 +195,7 @@ export function ExportDialog({
             onClick={() => void run()}
             disabled={busy}
           >
-            {busy ? '正在导出…' : '开始导出'}
+            {busy ? t('editor:export.exporting') : t('editor:export.start')}
           </button>
         </div>
       </div>

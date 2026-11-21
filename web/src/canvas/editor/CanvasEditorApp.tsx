@@ -5,6 +5,7 @@ import {
   useState,
   type MouseEvent as ReactMouseEvent,
 } from 'react'
+import { useTranslation } from 'react-i18next'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { BoardContextTarget } from '../../editor/BoardContextMenu'
 import type { BoardScope } from '../../shared/board/types'
@@ -69,6 +70,7 @@ import {
 } from './hierarchy'
 
 export function CanvasEditorApp() {
+  const { t } = useTranslation(['editor'])
   const [items, setItems] = useState<CanvasListItem[]>([])
   const [folders, setFolders] = useState<
     Array<{ path: string; scope: 'public' | 'private' }>
@@ -763,11 +765,11 @@ export function CanvasEditorApp() {
     })
   }
 
-  if (loading) return <div className="sb-screen-message">正在加载画布…</div>
+  if (loading) return <div className="sb-screen-message">{t('editor:app.loading')}</div>
   if (error) {
     return (
       <div className="sb-screen-message">
-        <h1>无法打开画布</h1>
+        <h1>{t('editor:app.loadFailed')}</h1>
         <p>{error}</p>
       </div>
     )
@@ -808,14 +810,14 @@ export function CanvasEditorApp() {
       return Boolean(node?.['x-superboard']?.locked)
     })
   const railSaveLabel = conflict
-    ? '保存冲突，点击覆盖'
+    ? t('editor:save.conflictClick')
     : saveState === 'error'
-      ? '保存失败'
+      ? t('editor:save.failed')
       : saveState === 'dirty'
-        ? '点击保存'
+        ? t('editor:save.click')
         : saveState === 'saving'
-          ? '保存中…'
-          : '已保存'
+          ? t('editor:save.saving')
+          : t('editor:save.saved')
   const treeConfig = treeMode
     ? {
         nodes: treeNodes,
@@ -823,7 +825,7 @@ export function CanvasEditorApp() {
         collapsed: !treeOpen,
         selectedSlug,
         expanded,
-        emptyLabel: '还没有白板，在空白处右键新建',
+        emptyLabel: t('editor:tree.empty'),
         onToggle: toggleFolder,
         onSelect: (slug: string) => {
           void openBoard(slug, scope)
@@ -843,15 +845,15 @@ export function CanvasEditorApp() {
       {conflict ? (
         <div className="sb-save-conflict" role="alert">
           <div className="sb-save-conflict-text">
-            <strong>保存冲突</strong>
-            <span>其他标签页已修改这块白板</span>
+            <strong>{t('editor:save.conflictTitle')}</strong>
+            <span>{t('editor:save.conflictBody')}</span>
           </div>
           <div className="sb-save-conflict-actions">
             <button
               type="button"
               onClick={() => void resolveConflict(false)}
             >
-              用当前内容覆盖
+              {t('editor:save.overwrite')}
             </button>
             <button
               type="button"
@@ -859,7 +861,7 @@ export function CanvasEditorApp() {
               onClick={() => {
                 if (
                   !window.confirm(
-                    '放弃当前未保存的修改，重新加载磁盘上的版本？',
+                    t('editor:save.reloadConfirm'),
                   )
                 ) {
                   return
@@ -869,18 +871,18 @@ export function CanvasEditorApp() {
                 })
               }}
             >
-              重新加载
+              {t('editor:save.reload')}
             </button>
           </div>
         </div>
       ) : saveState === 'error' ? (
         <div className="sb-save-conflict is-error" role="alert">
           <div className="sb-save-conflict-text">
-            <strong>保存失败</strong>
-            <span>内容仍在本地，可重试保存</span>
+            <strong>{t('editor:save.failed')}</strong>
+            <span>{t('editor:save.failedBody')}</span>
           </div>
           <button type="button" onClick={() => void save()}>
-            重试保存
+            {t('editor:save.retry')}
           </button>
         </div>
       ) : null}
@@ -888,7 +890,9 @@ export function CanvasEditorApp() {
         treeMode={treeMode}
         treeOpen={treeOpen}
         onToggleTree={toggleTree}
-        scopeLabel={scope === 'public' ? '切换到私有白板' : '切换到公开白板'}
+        scopeLabel={
+          scope === 'public' ? t('editor:scope.toPrivate') : t('editor:scope.toPublic')
+        }
         onSwitchScope={() =>
           void switchScope(scope === 'public' ? 'private' : 'public')
         }
@@ -901,7 +905,9 @@ export function CanvasEditorApp() {
           updateUiState({ stylePanelOpen: !stylePanelOpen })
         }
         menuPanelOpen={menuPanelOpen}
-        menuPanelLabel={menuPanelOpen ? '隐藏操作栏' : '显示操作栏'}
+        menuPanelLabel={
+          menuPanelOpen ? t('editor:shell.hideMenu') : t('editor:shell.showMenu')
+        }
         onToggleMenuPanel={() =>
           updateUiState({ toolPaletteOpen: !menuPanelOpen })
         }
@@ -1054,7 +1060,7 @@ export function CanvasEditorApp() {
                   const path = nodeFilePath(node)
                   if (!path) return
                   if (
-                    !window.confirm('从工作区删除该文件？引用它的卡片将无法再预览。')
+                    !window.confirm(t('editor:file.deleteConfirm'))
                   ) {
                     return
                   }

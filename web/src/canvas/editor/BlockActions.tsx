@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { CanvasNode } from '../model'
 import { HashIcon, LockIcon, RefreshIcon, TrashIcon, TypeIcon } from './BlockActionIcons'
 import { blockDefinition, isRatioLocked } from './blocks'
@@ -32,6 +33,7 @@ export function BlockActions({
   onResetBlockSize,
   onToggleRatioLock,
 }: BlockActionsProps) {
+  const { t } = useTranslation(['editor'])
   const [actionsSize, setActionsSize] = useState({ width: 0, height: 0 })
   const actionsRef = useRef<HTMLDivElement>(null)
   const definition = blockDefinition(node)
@@ -106,7 +108,7 @@ export function BlockActions({
       <button
         type="button"
         className={`sb-block-action${ratioLocked ? ' is-active' : ''}`}
-        title={ratioLocked ? '解锁比例' : '锁定比例'}
+        title={ratioLocked ? t('editor:block.unlockRatio') : t('editor:block.lockRatio')}
         onClick={(event) => {
           event.stopPropagation()
           onToggleRatioLock?.(node.id)
@@ -119,7 +121,7 @@ export function BlockActions({
         <button
           type="button"
           className={`sb-block-action${editing ? ' is-active' : ''}`}
-          title={editing ? '退出编辑' : '编辑'}
+          title={editing ? t('editor:block.exitEdit') : t('editor:block.edit')}
           onClick={(event) => {
             event.stopPropagation()
             onToggleBlockEdit?.(node.id)
@@ -133,7 +135,7 @@ export function BlockActions({
         <button
           type="button"
           className="sb-block-action"
-          title="专注编辑"
+          title={t('editor:block.focusEdit')}
           onClick={(event) => {
             event.stopPropagation()
             onFocusBlockEdit?.(node.id)
@@ -145,7 +147,7 @@ export function BlockActions({
       <button
         type="button"
         className="sb-block-action"
-        title="恢复大小"
+        title={t('editor:block.resetSize')}
         onClick={(event) => {
           event.stopPropagation()
           onResetBlockSize?.(node.id)
@@ -156,7 +158,7 @@ export function BlockActions({
       <button
         type="button"
         className="sb-block-action"
-        title="删除"
+        title={t('editor:menu.delete')}
         onClick={(event) => {
           event.stopPropagation()
           onDeleteBlock?.(node.id)
