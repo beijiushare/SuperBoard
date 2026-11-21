@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import type { BoardListItem } from '../../shared/board/types'
 import { useDialogEscape } from './useDialogEscape'
 
@@ -9,9 +10,11 @@ interface DeleteBoardDialogProps {
 }
 
 export function DeleteBoardDialog({ board, onClose, onConfirm }: DeleteBoardDialogProps) {
+  const { t } = useTranslation(['editor', 'common'])
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const scope = board.scope ?? 'public'
+  const filePath = `whiteboards/${scope}/${board.path ? `${board.path}/` : ''}${board.slug}.canvas`
 
   useDialogEscape(busy, onClose)
 
@@ -33,31 +36,45 @@ export function DeleteBoardDialog({ board, onClose, onConfirm }: DeleteBoardDial
     <div className="sb-modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && !busy && onClose()}>
       <div className="sb-dialog" role="alertdialog" aria-modal="true" aria-labelledby="sb-delete-dialog-title">
         <div className="sb-dialog-header">
-          <h2 id="sb-delete-dialog-title">删除白板</h2>
-          <button className="sb-icon-button" type="button" onClick={onClose} disabled={busy} aria-label="关闭">
+          <h2 id="sb-delete-dialog-title">{t('editor:dialog.deleteBoard.title')}</h2>
+          <button
+            className="sb-icon-button"
+            type="button"
+            onClick={onClose}
+            disabled={busy}
+            aria-label={t('common:actions.close')}
+          >
             ×
           </button>
         </div>
 
         <div className="sb-dialog-body">
           <p className="sb-dialog-copy">
-            确定删除 <strong>{board.title}</strong> 吗？文件会从{' '}
-            <code>whiteboards/{scope}/{board.path ? `${board.path}/` : ''}{board.slug}.canvas</code> 删除。
+            <Trans
+              i18nKey="editor:dialog.deleteBoard.body"
+              values={{ title: board.title, path: filePath }}
+              components={{ strong: <strong />, code: <code /> }}
+            />
           </p>
           <p className="sb-dialog-hint">
             {scope === 'public'
-              ? '此操作不可撤销。公开白板若已提交到 Git，可从提交历史恢复。'
-              : '此操作不可撤销。私有白板未纳入 Git，删除后无法恢复。'}
+              ? t('editor:dialog.deleteBoard.hintPublic')
+              : t('editor:dialog.deleteBoard.hintPrivate')}
           </p>
           {error ? <p className="sb-dialog-error">{error}</p> : null}
         </div>
 
         <div className="sb-dialog-actions">
           <button className="sb-button" type="button" onClick={onClose} disabled={busy}>
-            取消
+            {t('common:actions.cancel')}
           </button>
-          <button className="sb-button sb-button-danger" type="button" onClick={() => void handleConfirm()} disabled={busy}>
-            {busy ? '删除中…' : '删除'}
+          <button
+            className="sb-button sb-button-danger"
+            type="button"
+            onClick={() => void handleConfirm()}
+            disabled={busy}
+          >
+            {busy ? t('editor:dialog.deleteBoard.deleting') : t('editor:dialog.deleteBoard.confirm')}
           </button>
         </div>
       </div>

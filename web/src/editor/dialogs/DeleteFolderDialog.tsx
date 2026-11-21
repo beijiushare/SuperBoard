@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import type { BoardScope, BoardTreeFolder } from '../../shared/board/types'
 import { useDialogEscape } from './useDialogEscape'
 
@@ -10,6 +11,7 @@ interface DeleteFolderDialogProps {
 }
 
 export function DeleteFolderDialog({ folder, scope, onClose, onConfirm }: DeleteFolderDialogProps) {
+  const { t } = useTranslation(['editor', 'common'])
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -33,33 +35,52 @@ export function DeleteFolderDialog({ folder, scope, onClose, onConfirm }: Delete
     <div className="sb-modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && !busy && onClose()}>
       <div className="sb-dialog" role="alertdialog" aria-modal="true" aria-labelledby="sb-delete-folder-dialog-title">
         <div className="sb-dialog-header">
-          <h2 id="sb-delete-folder-dialog-title">删除文件夹</h2>
-          <button className="sb-icon-button" type="button" onClick={onClose} disabled={busy} aria-label="关闭">
+          <h2 id="sb-delete-folder-dialog-title">{t('editor:dialog.deleteFolder.title')}</h2>
+          <button
+            className="sb-icon-button"
+            type="button"
+            onClick={onClose}
+            disabled={busy}
+            aria-label={t('common:actions.close')}
+          >
             ×
           </button>
         </div>
 
         <div className="sb-dialog-body">
           <p className="sb-dialog-copy">
-            确定删除文件夹 <strong>{folder.name}</strong> 吗？文件夹内所有白板和子文件夹都会一起删除。
+            <Trans
+              i18nKey="editor:dialog.deleteFolder.body"
+              values={{ name: folder.name }}
+              components={{ strong: <strong /> }}
+            />
           </p>
           <p className="sb-dialog-copy">
-            文件路径：<code>whiteboards/{scope}/{folder.path}</code>
+            <Trans
+              i18nKey="editor:dialog.deleteFolder.path"
+              values={{ path: `whiteboards/${scope}/${folder.path}` }}
+              components={{ code: <code /> }}
+            />
           </p>
           <p className="sb-dialog-hint">
             {scope === 'public'
-              ? '此操作不可撤销。公开白板若已提交到 Git，可从提交历史恢复。'
-              : '此操作不可撤销。私有白板未纳入 Git，删除后无法恢复。'}
+              ? t('editor:dialog.deleteBoard.hintPublic')
+              : t('editor:dialog.deleteBoard.hintPrivate')}
           </p>
           {error ? <p className="sb-dialog-error">{error}</p> : null}
         </div>
 
         <div className="sb-dialog-actions">
           <button className="sb-button" type="button" onClick={onClose} disabled={busy}>
-            取消
+            {t('common:actions.cancel')}
           </button>
-          <button className="sb-button sb-button-danger" type="button" onClick={() => void handleConfirm()} disabled={busy}>
-            {busy ? '删除中…' : '删除文件夹'}
+          <button
+            className="sb-button sb-button-danger"
+            type="button"
+            onClick={() => void handleConfirm()}
+            disabled={busy}
+          >
+            {busy ? t('editor:dialog.deleteBoard.deleting') : t('editor:dialog.deleteFolder.confirm')}
           </button>
         </div>
       </div>

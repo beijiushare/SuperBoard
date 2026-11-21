@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { BoardListItem } from '../../shared/board/types'
 import type { BoardFormValues } from './types'
 import { useDialogEscape } from './useDialogEscape'
@@ -21,6 +22,7 @@ export function BoardDialog({
   onClose,
   onSubmit,
 }: BoardDialogProps) {
+  const { t } = useTranslation(['editor', 'common'])
   const [title, setTitle] = useState(board?.title ?? '')
   const [slug, setSlug] = useState(board?.slug ?? '')
   const [folder, setFolder] = useState(board?.path ?? defaultFolder)
@@ -54,19 +56,27 @@ export function BoardDialog({
         onSubmit={(event) => void handleSubmit(event)}
       >
         <div className="sb-dialog-header">
-          <h2 id="sb-board-dialog-title">{mode === 'create' ? '新建白板' : '重命名 / 移动白板'}</h2>
-          <button className="sb-icon-button" type="button" onClick={onClose} disabled={busy} aria-label="关闭">
+          <h2 id="sb-board-dialog-title">
+            {mode === 'create' ? t('editor:dialog.board.createTitle') : t('editor:dialog.board.renameTitle')}
+          </h2>
+          <button
+            className="sb-icon-button"
+            type="button"
+            onClick={onClose}
+            disabled={busy}
+            aria-label={t('common:actions.close')}
+          >
             ×
           </button>
         </div>
 
         <div className="sb-dialog-body">
           <label className="sb-field">
-            <span>标题</span>
+            <span>{t('editor:dialog.board.title')}</span>
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="例如：项目笔记"
+              placeholder={t('editor:dialog.board.titlePlaceholder')}
               required
               autoFocus
               disabled={busy}
@@ -74,35 +84,35 @@ export function BoardDialog({
           </label>
 
           <label className="sb-field">
-            <span>文件名（slug）</span>
+            <span>{t('editor:dialog.board.slug')}</span>
             <input
               value={slug}
               onChange={(event) => setSlug(event.target.value)}
-              placeholder="例如：project-notes"
+              placeholder={t('editor:dialog.board.slugPlaceholder')}
               pattern="[a-z0-9][a-z0-9-]*"
-              title="只允许小写字母、数字和连字符，且不能以连字符开头"
+              title={t('editor:dialog.board.slugTitle')}
               required
               disabled={busy}
             />
-            <small>文件名为 {slug.trim() || '…'}.canvas，只允许小写字母、数字和连字符。</small>
+            <small>{t('editor:dialog.board.slugHint', { slug: slug.trim() || '…' })}</small>
           </label>
 
           <label className="sb-field">
-            <span>文件夹</span>
+            <span>{t('editor:dialog.board.folder')}</span>
             <Select
               value={folder}
               onChange={setFolder}
               disabled={busy}
-              ariaLabel="文件夹"
+              ariaLabel={t('editor:dialog.board.folder')}
               options={[
-                { value: '', label: '根目录' },
+                { value: '', label: t('editor:dialog.board.root') },
                 ...folders.map((path) => ({ value: path, label: path })),
               ]}
             />
             <small>
               {mode === 'create'
-                ? '默认放在右键位置，也可以改到其他文件夹。'
-                : '修改文件夹会把白板移动到新位置。'}
+                ? t('editor:dialog.board.folderHintCreate')
+                : t('editor:dialog.board.folderHintRename')}
             </small>
           </label>
 
@@ -111,10 +121,14 @@ export function BoardDialog({
 
         <div className="sb-dialog-actions">
           <button className="sb-button" type="button" onClick={onClose} disabled={busy}>
-            取消
+            {t('common:actions.cancel')}
           </button>
           <button className="sb-button sb-button-primary" type="submit" disabled={busy}>
-            {busy ? '处理中…' : mode === 'create' ? '创建' : '保存'}
+            {busy
+              ? t('editor:dialog.processing')
+              : mode === 'create'
+                ? t('editor:dialog.create')
+                : t('editor:dialog.save')}
           </button>
         </div>
       </form>

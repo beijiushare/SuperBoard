@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import type { BoardTreeFolder } from '../../shared/board/types'
 import {
   requestCancelFolderMove,
@@ -21,6 +22,7 @@ export function RenameFolderDialog({
   onClose,
   onSubmit,
 }: RenameFolderDialogProps) {
+  const { t } = useTranslation(['editor', 'common'])
   const [name, setName] = useState(folder.name)
   const [parent, setParent] = useState(
     folder.path.split('/').slice(0, -1).join('/'),
@@ -69,18 +71,28 @@ export function RenameFolderDialog({
         onSubmit={(event) => void handleSubmit(event)}
       >
         <div className="sb-dialog-header">
-          <h2 id="sb-folder-dialog-title">重命名文件夹</h2>
-          <button className="sb-icon-button" type="button" onClick={onClose} disabled={busy} aria-label="关闭">
+          <h2 id="sb-folder-dialog-title">{t('editor:dialog.renameFolder.title')}</h2>
+          <button
+            className="sb-icon-button"
+            type="button"
+            onClick={onClose}
+            disabled={busy}
+            aria-label={t('common:actions.close')}
+          >
             ×
           </button>
         </div>
 
         <div className="sb-dialog-body">
           <p className="sb-dialog-copy">
-            当前路径：<code>{folder.path}</code>
+            <Trans
+              i18nKey="editor:dialog.renameFolder.currentPath"
+              values={{ path: folder.path }}
+              components={{ code: <code /> }}
+            />
           </p>
           <label className="sb-field">
-            <span>文件夹名称</span>
+            <span>{t('editor:dialog.renameFolder.name')}</span>
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
@@ -89,33 +101,36 @@ export function RenameFolderDialog({
               autoFocus
               disabled={busy}
             />
-            <small>目录内的白板和子目录会一起移动。</small>
+            <small>{t('editor:dialog.renameFolder.nameHint')}</small>
           </label>
           <label className="sb-field">
-            <span>父文件夹</span>
+            <span>{t('editor:dialog.renameFolder.parent')}</span>
             <Select
               value={parent}
               onChange={setParent}
               disabled={busy}
-              ariaLabel="父文件夹"
+              ariaLabel={t('editor:dialog.renameFolder.parent')}
               options={[
-                { value: '', label: '根目录' },
+                { value: '', label: t('editor:dialog.board.root') },
                 ...folders.map((path) => ({ value: path, label: path })),
               ]}
             />
-            <small>修改父文件夹会把整个目录移动到新位置。</small>
+            <small>{t('editor:dialog.renameFolder.parentHint')}</small>
           </label>
           {error ? <p className="sb-dialog-error">{error}</p> : null}
           {busy && progress ? (
             <p className="sb-dialog-copy">
-              正在移动：已复制 {progress.copied} / {progress.total} 个文件
+              {t('editor:dialog.renameFolder.progress', {
+                copied: progress.copied,
+                total: progress.total,
+              })}
             </p>
           ) : null}
         </div>
 
         <div className="sb-dialog-actions">
           <button className="sb-button" type="button" onClick={onClose} disabled={busy}>
-            取消
+            {t('common:actions.cancel')}
           </button>
           {busy && progress ? (
             <button
@@ -127,11 +142,13 @@ export function RenameFolderDialog({
                 requestCancelFolderMove()
               }}
             >
-              {cancelling ? '正在取消…' : '取消移动'}
+              {cancelling
+                ? t('editor:dialog.renameFolder.cancelling')
+                : t('editor:dialog.renameFolder.cancelMove')}
             </button>
           ) : null}
           <button className="sb-button sb-button-primary" type="submit" disabled={busy}>
-            {busy ? '处理中…' : '保存'}
+            {busy ? t('editor:dialog.processing') : t('editor:dialog.save')}
           </button>
         </div>
       </form>
