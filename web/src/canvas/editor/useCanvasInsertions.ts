@@ -1,4 +1,5 @@
 import type { RefObject } from 'react'
+import i18n from '../../i18n'
 import type { CanvasDocument, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
@@ -139,7 +140,7 @@ export function useCanvasInsertions({
       return
     }
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), kind)
-    const code = 'flowchart LR\n    A[开始] --> B[结束]'
+    const code = i18n.t('editor:insert.defaultPele')
     const node: CanvasNode =
       kind === 'markdown'
         ? {
@@ -149,7 +150,7 @@ export function useCanvasInsertions({
             y: position.y,
             width: size.width,
             height: size.height,
-            text: '# 新 Markdown\n\n在这里输入内容。',
+            text: i18n.t('editor:insert.defaultMarkdown'),
             'x-superboard': {
               kind: 'markdown',
               markdownLocked: false,

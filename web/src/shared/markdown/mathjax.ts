@@ -1,3 +1,5 @@
+import i18n from '../../i18n'
+
 export interface MathMarkup {
   html: string
   width: number
@@ -61,12 +63,12 @@ export function loadMathJax(): Promise<MathJaxLike> {
     script.onload = () => {
       const mathJax = window.MathJax as MathJaxLike | undefined
       if (!mathJax?.startup?.promise) {
-        reject(new Error('MathJax 已加载，但 startup.promise 不存在'))
+        reject(new Error(i18n.t('errors:mathjax.notReady')))
         return
       }
       mathJax.startup.promise.then(() => resolve(mathJax)).catch(reject)
     }
-    script.onerror = () => reject(new Error('MathJax 加载失败'))
+    script.onerror = () => reject(new Error(i18n.t('errors:mathjax.loadFailed')))
     document.head.appendChild(script)
   })
 

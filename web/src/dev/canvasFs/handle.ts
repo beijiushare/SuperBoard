@@ -31,7 +31,7 @@ interface PatchCanvasBody {
 
 function requireMeta(canvas: CanvasDocument) {
   const meta = canvas['x-superboard']?.meta
-  if (!meta) throw new HttpError(400, '缺少 x-superboard.meta')
+  if (!meta) throw new HttpError(400, 'Missing x-superboard.meta')
   return meta
 }
 
@@ -66,22 +66,22 @@ export async function handleCanvasFsRequest(
     if (url.pathname === '/__canvases' && req.method === 'POST') {
       const body = await readJsonBody<CreateCanvasBody>(req)
       if (typeof body.title !== 'string' || !body.title.trim()) {
-        throw new HttpError(400, 'title 不能为空')
+        throw new HttpError(400, 'title must not be empty')
       }
       if (typeof body.slug !== 'string' || !isValidSlug(body.slug)) {
-        throw new HttpError(400, 'slug 非法')
+        throw new HttpError(400, 'Invalid slug')
       }
 
       const scope = normalizeScope(body.scope)
       const folder = normalizeFolder(body.folder)
       if (await findCanvasFile(root, scope, body.slug)) {
-        throw new HttpError(409, `slug 已存在: ${body.slug}`)
+        throw new HttpError(409, `Slug already exists: ${body.slug}`)
       }
 
       const file = resolveCanvasFile(root, scope, folder, body.slug)
       try {
         await fs.access(file)
-        throw new HttpError(409, `文件已存在: ${path.relative(root, file)}`)
+        throw new HttpError(409, `File already exists: ${path.relative(root, file)}`)
       } catch (error) {
         if (error instanceof HttpError) throw error
       }
@@ -111,7 +111,7 @@ export async function handleCanvasFsRequest(
     const scope = normalizeScope(url.searchParams.get('scope'))
     const found = await findCanvasFile(root, scope, slug)
     if (!found) {
-      sendJson(res, 404, { error: '白板不存在' })
+      sendJson(res, 404, { error: 'Board not found' })
       return
     }
 
@@ -123,7 +123,7 @@ export async function handleCanvasFsRequest(
     if (req.method === 'PUT') {
       const payload = validateCanvas(await readJsonBody<unknown>(req))
       const meta = requireMeta(payload)
-      if (meta.slug !== slug) throw new HttpError(409, 'meta.slug 与 URL 不一致')
+      if (meta.slug !== slug) throw new HttpError(409, 'meta.slug does not match the URL')
 
       const nextHash = canvasContentHash(payload)
       if (nextHash === found.hash) {
@@ -152,7 +152,7 @@ export async function handleCanvasFsRequest(
           : typeof body.title === 'string' && body.title.trim()
             ? body.title.trim()
             : null
-      if (!title) throw new HttpError(400, 'title 不能为空')
+      if (!title) throw new HttpError(400, 'title must not be empty')
 
       const nextSlug =
         body.slug === undefined
@@ -160,9 +160,9 @@ export async function handleCanvasFsRequest(
           : typeof body.slug === 'string' && isValidSlug(body.slug)
             ? body.slug
             : null
-      if (!nextSlug) throw new HttpError(400, 'slug 非法')
+      if (!nextSlug) throw new HttpError(400, 'Invalid slug')
       if (nextSlug !== slug && (await findCanvasFile(root, scope, nextSlug))) {
-        throw new HttpError(409, `slug 已存在: ${nextSlug}`)
+        throw new HttpError(409, `Slug already exists: ${nextSlug}`)
       }
 
       const nextFolder = body.folder === undefined ? found.folder : normalizeFolder(body.folder)
@@ -179,7 +179,7 @@ export async function handleCanvasFsRequest(
       if (nextFile !== found.file) {
         try {
           await fs.access(nextFile)
-          throw new HttpError(409, `文件已存在: ${path.relative(root, nextFile)}`)
+          throw new HttpError(409, `File already exists: ${path.relative(root, nextFile)}`)
         } catch (error) {
           if (error instanceof HttpError) throw error
         }

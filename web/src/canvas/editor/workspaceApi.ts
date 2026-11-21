@@ -1,5 +1,6 @@
 import type { BoardScope } from '../../shared/board/types'
 import i18n from '../../i18n'
+import { translateServerError } from '../../i18n/errors'
 import type { CanvasDocument } from '../model'
 import type { CanvasListItem } from './appUtils'
 
@@ -39,7 +40,9 @@ async function json<T>(url: string, init?: RequestInit): Promise<T> {
       | { error?: string }
       | null
     throw new WorkspaceError(
-      data?.error || i18n.t('editor:workspace.requestFailed', { status: response.status }),
+      data?.error
+        ? translateServerError(data.error)
+        : i18n.t('editor:workspace.requestFailed', { status: response.status }),
       response.status,
     )
   }

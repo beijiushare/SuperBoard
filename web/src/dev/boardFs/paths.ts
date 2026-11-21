@@ -6,7 +6,7 @@ import { HttpError } from './http'
 export function normalizeScope(value: unknown): BoardScope {
   if (value === undefined || value === null || value === '') return 'public'
   if (isBoardScope(value)) return value
-  throw new HttpError(400, 'scope 必须是 public 或 private')
+  throw new HttpError(400, 'scope must be public or private')
 }
 
 export function resolveScopeDir(root: string, scope: BoardScope) {
@@ -15,18 +15,18 @@ export function resolveScopeDir(root: string, scope: BoardScope) {
 
 export function validateFolderName(part: string) {
   if (!part || part === '.' || part === '..') {
-    throw new HttpError(400, `非法文件夹名: ${JSON.stringify(part)}`)
+    throw new HttpError(400, `Invalid folder name: ${JSON.stringify(part)}`)
   }
-  if (part.startsWith('.')) throw new HttpError(400, '文件夹名不能以点开头')
-  if (/[<>:"|?*\u0000-\u001f]/.test(part)) throw new HttpError(400, `文件夹名包含非法字符: ${part}`)
-  if (/[. ]$/.test(part)) throw new HttpError(400, '文件夹名不能以点或空格结尾')
-  if (RESERVED_FOLDER_NAMES.test(part)) throw new HttpError(400, `文件夹名不可用: ${part}`)
-  if (part.length > 80) throw new HttpError(400, '文件夹名过长')
+  if (part.startsWith('.')) throw new HttpError(400, 'Folder names cannot start with a dot')
+  if (/[<>:"|?*\u0000-\u001f]/.test(part)) throw new HttpError(400, `Folder name contains invalid characters: ${part}`)
+  if (/[. ]$/.test(part)) throw new HttpError(400, 'Folder names cannot end with a dot or space')
+  if (RESERVED_FOLDER_NAMES.test(part)) throw new HttpError(400, `Folder name is reserved: ${part}`)
+  if (part.length > 80) throw new HttpError(400, 'Folder name is too long')
 }
 
 export function normalizeFolder(value: unknown): string {
   if (value === undefined || value === null || value === '') return ''
-  if (typeof value !== 'string') throw new HttpError(400, 'folder 必须是字符串')
+  if (typeof value !== 'string') throw new HttpError(400, 'folder must be a string')
 
   const raw = value.trim().replaceAll('\\', '/')
   if (!raw) return ''
@@ -37,10 +37,10 @@ export function normalizeFolder(value: unknown): string {
 }
 
 export function normalizeFolderName(value: unknown): string {
-  if (typeof value !== 'string') throw new HttpError(400, '文件夹名必须是字符串')
+  if (typeof value !== 'string') throw new HttpError(400, 'Folder name must be a string')
   const name = value.trim()
-  if (!name) throw new HttpError(400, '文件夹名不能为空')
-  if (name.includes('/') || name.includes('\\')) throw new HttpError(400, '文件夹名不能包含路径分隔符')
+  if (!name) throw new HttpError(400, 'Folder name cannot be empty')
+  if (name.includes('/') || name.includes('\\')) throw new HttpError(400, 'Folder name cannot contain path separators')
   validateFolderName(name)
   return name
 }
@@ -60,7 +60,7 @@ function resolveScopedFile(
   const file = path.join(dir, fileName)
   const resolved = path.resolve(file)
   if (resolved !== boardsRoot && !resolved.startsWith(`${boardsRoot}${path.sep}`)) {
-    throw new HttpError(400, '白板路径越界')
+    throw new HttpError(400, 'Board path escapes the workspace')
   }
   return file
 }
@@ -69,7 +69,7 @@ export function resolveFolderDir(root: string, scope: BoardScope, folder: string
   const boardsRoot = resolveScopeDir(root, scope)
   const resolved = path.resolve(boardsRoot, ...folder.split('/').filter(Boolean))
   if (resolved === boardsRoot || !resolved.startsWith(`${boardsRoot}${path.sep}`)) {
-    throw new HttpError(400, '文件夹路径越界')
+    throw new HttpError(400, 'Folder path escapes the workspace')
   }
   return resolved
 }

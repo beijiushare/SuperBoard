@@ -287,6 +287,8 @@
   "pele.allTypes": "← All diagram types",
   "pele.exampleCount": "{{total}} official examples",
   "pele.useExample": "Use this example",
+  "insert.defaultPele": "flowchart LR\n    A[Start] --> B[End]",
+  "insert.defaultMarkdown": "# New Markdown\n\nType your content here.",
   "lock.title": "SuperBoard is already open in another tab",
   "lock.body": "Only one editor tab can run at a time to avoid writing the same files concurrently.",
   "lock.hint": "Close the other tab, then reload this page.",

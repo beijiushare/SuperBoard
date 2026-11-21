@@ -36,13 +36,13 @@ func cancelledDialog(err error) bool {
 func (s *ExportService) ExportHtml(html string, suggestedName string) Result {
 	app := application.Get()
 	if app == nil {
-		return fail(500, "应用尚未就绪")
+		return fail(500, "app.notReady")
 	}
 	if suggestedName == "" {
 		suggestedName = "superboard.html"
 	}
 	target, err := app.Dialog.SaveFile().
-		SetMessage("导出 HTML").
+		SetMessage(uiText("导出 HTML", "Export HTML")).
 		SetFilename(suggestedName).
 		AddFilter("HTML", "*.html").
 		CanCreateDirectories(true).
@@ -65,16 +65,16 @@ func (s *ExportService) ExportHtml(html string, suggestedName string) Result {
 func (s *ExportService) ExportFolder(html string, attachmentsJSON string) Result {
 	app := application.Get()
 	if app == nil {
-		return fail(500, "应用尚未就绪")
+		return fail(500, "app.notReady")
 	}
 	attachments := []exportAttachment{}
 	if strings.TrimSpace(attachmentsJSON) != "" {
 		if err := json.Unmarshal([]byte(attachmentsJSON), &attachments); err != nil {
-			return fail(400, "附件清单不合法")
+			return fail(400, "export.invalidAttachments")
 		}
 	}
 	dir, err := app.Dialog.OpenFile().
-		SetTitle("选择导出目录").
+		SetTitle(uiText("选择导出目录", "Choose export folder")).
 		CanChooseDirectories(true).
 		CanChooseFiles(false).
 		CanCreateDirectories(true).

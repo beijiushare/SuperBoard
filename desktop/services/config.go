@@ -23,6 +23,15 @@ func samePath(a string, b string) bool {
 	return strings.EqualFold(filepath.Clean(a), filepath.Clean(b))
 }
 
+// uiText returns the localized UI string for native dialogs based on the
+// persisted language preference.
+func uiText(zh string, en string) string {
+	if loadConfig().Language == "en-US" {
+		return en
+	}
+	return zh
+}
+
 func rememberWorkspace(config *Config, root string) {
 	if root == "" {
 		return

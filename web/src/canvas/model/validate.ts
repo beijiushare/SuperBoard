@@ -1,3 +1,4 @@
+import i18n from '../../i18n'
 import {
   CANVAS_ARROW_ENDS,
   CANVAS_NODE_TYPES,
@@ -18,6 +19,10 @@ function fail(message: string): never {
   throw new CanvasValidationError(message)
 }
 
+function canvasError(key: string, params: Record<string, unknown> = {}) {
+  return i18n.t(`errors:canvas.${key}`, params)
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 }
@@ -27,14 +32,23 @@ function isFiniteNumber(value: unknown): value is number {
 }
 
 function validateNode(value: unknown, index: number): CanvasNode {
-  if (!isRecord(value)) fail(`nodes[${index}] 必须是对象`)
+  if (!isRecord(value)) {
+    fail(canvasError('expectedObject', { path: `nodes[${index}]` }))
+  }
 
   const id = value.id
-  if (typeof id !== 'string' || !id) fail(`nodes[${index}].id 必须是非空字符串`)
+  if (typeof id !== 'string' || !id) {
+    fail(canvasError('nonEmptyString', { path: `nodes[${index}].id` }))
+  }
 
   const type = value.type
   if (!CANVAS_NODE_TYPES.includes(type as never)) {
-    fail(`nodes[${index}].type 不支持: ${JSON.stringify(type)}`)
+    fail(
+      canvasError('unsupportedType', {
+        path: `nodes[${index}]`,
+        value: JSON.stringify(type),
+      }),
+    )
   }
 
   // Migrate the legacy `link` + x-superboard.media.kind="file" representation
@@ -67,58 +81,74 @@ function validateNode(value: unknown, index: number): CanvasNode {
   }
 
   for (const key of ['x', 'y', 'width', 'height']) {
-    if (!isFiniteNumber(normalized[key])) fail(`nodes[${index}].${key} 必须是有限数字`)
+    if (!isFiniteNumber(normalized[key])) {
+      fail(canvasError('finiteNumber', { path: `nodes[${index}].${key}` }))
+    }
   }
   if ((normalized.width as number) <= 0 || (normalized.height as number) <= 0) {
-    fail(`nodes[${index}] 的 width/height 必须大于 0`)
+    fail(canvasError('positiveSize', { path: `nodes[${index}]` }))
   }
 
   if (normalizedType === 'text' && typeof normalized.text !== 'string') {
-    fail(`nodes[${index}].text 必须是字符串`)
+    fail(canvasError('expectedString', { path: `nodes[${index}].text` }))
   }
   if (normalizedType === 'file' && typeof normalized.file !== 'string') {
-    fail(`nodes[${index}].file 必须是字符串`)
+    fail(canvasError('expectedString', { path: `nodes[${index}].file` }))
   }
   if (normalizedType === 'link' && typeof normalized.url !== 'string') {
-    fail(`nodes[${index}].url 必须是字符串`)
+    fail(canvasError('expectedString', { path: `nodes[${index}].url` }))
   }
   if (normalizedType === 'group' && normalized.label !== undefined && typeof normalized.label !== 'string') {
-    fail(`nodes[${index}].label 必须是字符串`)
+    fail(canvasError('expectedString', { path: `nodes[${index}].label` }))
   }
 
   if (normalized['x-superboard'] !== undefined && !isRecord(normalized['x-superboard'])) {
-    fail(`nodes[${index}]["x-superboard"] 必须是对象`)
+    fail(canvasError('expectedObject', { path: `nodes[${index}]["x-superboard"]` }))
   }
 
   return normalized as unknown as CanvasNode
 }
 
 function validateEdge(value: unknown, index: number, nodeIds: Set<string>): CanvasEdge {
-  if (!isRecord(value)) fail(`edges[${index}] 必须是对象`)
+  if (!isRecord(value)) {
+    fail(canvasError('expectedObject', { path: `edges[${index}]` }))
+  }
 
   const id = value.id
-  if (typeof id !== 'string' || !id) fail(`edges[${index}].id 必须是非空字符串`)
+  if (typeof id !== 'string' || !id) {
+    fail(canvasError('nonEmptyString', { path: `edges[${index}].id` }))
+  }
 
   const fromNode = value.fromNode
   const toNode = value.toNode
   if (typeof fromNode !== 'string' || !nodeIds.has(fromNode)) {
-    fail(`edges[${index}].fromNode 必须引用已存在的节点`)
+    fail(canvasError('missingNodeRef', { path: `edges[${index}].fromNode` }))
   }
   if (typeof toNode !== 'string' || !nodeIds.has(toNode)) {
-    fail(`edges[${index}].toNode 必须引用已存在的节点`)
+    fail(canvasError('missingNodeRef', { path: `edges[${index}].toNode` }))
   }
 
   for (const key of ['fromSide', 'toSide'] as const) {
     const side = value[key]
     if (side !== undefined && !CANVAS_SIDES.includes(side as never)) {
-      fail(`edges[${index}].${key} 不合法: ${JSON.stringify(side)}`)
+      fail(
+        canvasError('invalidValue', {
+          path: `edges[${index}].${key}`,
+          value: JSON.stringify(side),
+        }),
+      )
     }
   }
 
   for (const key of ['fromEnd', 'toEnd'] as const) {
     const end = value[key]
     if (end !== undefined && !CANVAS_ARROW_ENDS.includes(end as never)) {
-      fail(`edges[${index}].${key} 不合法: ${JSON.stringify(end)}`)
+      fail(
+        canvasError('invalidValue', {
+          path: `edges[${index}].${key}`,
+          value: JSON.stringify(end),
+        }),
+      )
     }
   }
 
@@ -126,51 +156,75 @@ function validateEdge(value: unknown, index: number, nodeIds: Set<string>): Canv
 }
 
 export function validateCanvas(value: unknown): CanvasDocument {
-  if (!isRecord(value)) fail('画布必须是对象')
+  if (!isRecord(value)) fail(canvasError('rootNotObject'))
 
   const rawNodes = value.nodes ?? []
   const rawEdges = value.edges ?? []
-  if (!Array.isArray(rawNodes)) fail('nodes 必须是数组')
-  if (!Array.isArray(rawEdges)) fail('edges 必须是数组')
+  if (!Array.isArray(rawNodes)) fail(canvasError('expectedArray', { path: 'nodes' }))
+  if (!Array.isArray(rawEdges)) fail(canvasError('expectedArray', { path: 'edges' }))
 
   const nodes = rawNodes.map(validateNode)
   const nodeIds = new Set<string>()
   for (const [index, node] of nodes.entries()) {
-    if (nodeIds.has(node.id)) fail(`nodes[${index}].id 重复: ${node.id}`)
+    if (nodeIds.has(node.id)) {
+      fail(
+        canvasError('duplicateId', {
+          path: `nodes[${index}]`,
+          value: node.id,
+        }),
+      )
+    }
     nodeIds.add(node.id)
   }
 
   const edges = rawEdges.map((edge, index) => validateEdge(edge, index, nodeIds))
   const edgeIds = new Set<string>()
   for (const [index, edge] of edges.entries()) {
-    if (edgeIds.has(edge.id)) fail(`edges[${index}].id 重复: ${edge.id}`)
+    if (edgeIds.has(edge.id)) {
+      fail(
+        canvasError('duplicateId', {
+          path: `edges[${index}]`,
+          value: edge.id,
+        }),
+      )
+    }
     edgeIds.add(edge.id)
   }
 
   const extension = value['x-superboard']
   if (extension !== undefined) {
-    if (!isRecord(extension)) fail('x-superboard 必须是对象')
-    if (extension.version !== 1) fail('x-superboard.version 必须是 1')
-    if (!isRecord(extension.meta)) fail('x-superboard.meta 必须是对象')
+    if (!isRecord(extension)) fail(canvasError('expectedObject', { path: 'x-superboard' }))
+    if (extension.version !== 1) fail(canvasError('version'))
+    if (!isRecord(extension.meta)) {
+      fail(canvasError('expectedObject', { path: 'x-superboard.meta' }))
+    }
 
     const title = extension.meta.title
     const slug = extension.meta.slug
-    if (typeof title !== 'string' || !title.trim()) fail('x-superboard.meta.title 不能为空')
+    if (typeof title !== 'string' || !title.trim()) fail(canvasError('emptyTitle'))
     if (typeof slug !== 'string' || !/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
-      fail('x-superboard.meta.slug 不合法')
+      fail(canvasError('invalidSlug'))
     }
 
     const director = extension.director
     if (director !== undefined) {
       if (!isRecord(director) || !Array.isArray(director.frames)) {
-        fail('x-superboard.director.frames 必须是数组')
+        fail(canvasError('expectedArray', { path: 'x-superboard.director.frames' }))
       }
       for (const [index, frame] of director.frames.entries()) {
-        if (!isRecord(frame)) fail(`director.frames[${index}] 必须是对象`)
-        if (typeof frame.id !== 'string' || !frame.id) fail(`director.frames[${index}].id 不合法`)
-        if (!isFiniteNumber(frame.order)) fail(`director.frames[${index}].order 必须是数字`)
+        if (!isRecord(frame)) {
+          fail(canvasError('expectedObject', { path: `director.frames[${index}]` }))
+        }
+        if (typeof frame.id !== 'string' || !frame.id) {
+          fail(canvasError('invalidValue', { path: `director.frames[${index}].id` }))
+        }
+        if (!isFiniteNumber(frame.order)) {
+          fail(canvasError('finiteNumber', { path: `director.frames[${index}].order` }))
+        }
         for (const key of ['x', 'y', 'width', 'height']) {
-          if (!isFiniteNumber(frame[key])) fail(`director.frames[${index}].${key} 必须是数字`)
+          if (!isFiniteNumber(frame[key])) {
+            fail(canvasError('finiteNumber', { path: `director.frames[${index}].${key}` }))
+          }
         }
       }
     }
@@ -188,7 +242,11 @@ export function parseCanvas(text: string): CanvasDocument {
   try {
     value = JSON.parse(text)
   } catch (error) {
-    fail(`JSON 解析失败: ${error instanceof Error ? error.message : String(error)}`)
+    fail(
+      canvasError('jsonParse', {
+        message: error instanceof Error ? error.message : String(error),
+      }),
+    )
   }
   return validateCanvas(value)
 }

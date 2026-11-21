@@ -62,7 +62,7 @@ func createUniqueFile(dir string, name string) (string, *os.File, error) {
 			return "", nil, err
 		}
 	}
-	return "", nil, errors.New("无法生成唯一文件名")
+	return "", nil, errors.New("workspace.uniqueNameFailed")
 }
 
 // WorkspaceService owns the selected workspace folder and mirrors the browser
@@ -112,7 +112,7 @@ func folderSegments(value string) ([]string, error) {
 			continue
 		}
 		if part == "." || part == ".." || invalidParts.MatchString(part) {
-			return nil, errors.New("路径不合法")
+			return nil, errors.New("workspace.invalidPath")
 		}
 		parts = append(parts, part)
 	}
@@ -127,10 +127,10 @@ func joinedPath(parts []string) string {
 // otherwise uses <workspace>/<scope>.
 func (s *WorkspaceService) scopeDir(scope string, create bool) (string, error) {
 	if s.root == "" {
-		return "", errors.New("尚未打开工作区")
+		return "", errors.New("workspace.noWorkspace")
 	}
 	if !isScope(scope) {
-		return "", errors.New("无效的 scope")
+		return "", errors.New("workspace.invalidScope")
 	}
 	legacy := filepath.Join(s.root, "whiteboards", scope)
 	if info, err := os.Stat(legacy); err == nil && info.IsDir() {
@@ -168,7 +168,7 @@ func (s *WorkspaceService) folderDir(scope string, folder string, create bool) (
 func (s *WorkspaceService) setRoot(root string) error {
 	info, err := os.Stat(root)
 	if err != nil || !info.IsDir() {
-		return errors.New("工作区目录不存在")
+		return errors.New("workspace.missingWorkspace")
 	}
 	s.root = root
 	if _, err := s.scopeDir("public", true); err != nil {
@@ -193,10 +193,10 @@ func looksLikeWorkspace(root string) bool {
 func (s *WorkspaceService) OpenWorkspace() Result {
 	app := application.Get()
 	if app == nil {
-		return fail(500, "应用尚未就绪")
+		return fail(500, "app.notReady")
 	}
 	dir, err := app.Dialog.OpenFile().
-		SetTitle("选择 SuperBoard 工作区").
+		SetTitle(uiText("选择 SuperBoard 工作区", "Select SuperBoard workspace")).
 		CanChooseDirectories(true).
 		CanChooseFiles(false).
 		CanCreateDirectories(true).
@@ -251,10 +251,10 @@ func (s *WorkspaceService) OpenWorkspaceAt(root string) Result {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if root == "" {
-		return fail(400, "工作区路径为空")
+		return fail(400, "workspace.emptyPath")
 	}
 	if !looksLikeWorkspace(root) {
-		return fail(400, "不是 SuperBoard 工作区")
+		return fail(400, "workspace.notWorkspace")
 	}
 	if err := s.setRoot(root); err != nil {
 		return fail(400, err.Error())
@@ -278,7 +278,7 @@ func (s *WorkspaceService) GetLanguage() Result {
 
 func (s *WorkspaceService) SetLanguage(language string) Result {
 	if language != "zh-CN" && language != "en-US" {
-		return fail(400, "不支持的语言")
+		return fail(400, "workspace.unsupportedLanguage")
 	}
 	config := loadConfig()
 	config.Language = language
@@ -325,7 +325,7 @@ func (s *WorkspaceService) ForgetWorkspace(path string) Result {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if path == "" {
-		return fail(400, "工作区路径为空")
+		return fail(400, "workspace.emptyPath")
 	}
 	config := loadConfig()
 	next := make([]RecentWorkspace, 0, len(config.Recent))
@@ -362,11 +362,11 @@ func (s *WorkspaceService) WorkspacePath() string {
 func parseCanvas(text string) (map[string]any, map[string]any, error) {
 	var doc map[string]any
 	if err := json.Unmarshal([]byte(text), &doc); err != nil {
-		return nil, nil, errors.New("白板文件不是合法 JSON")
+		return nil, nil, errors.New("workspace.invalidJson")
 	}
 	meta := metaOf(doc)
 	if meta == nil {
-		return nil, nil, errors.New("白板缺少 x-superboard.meta")
+		return nil, nil, errors.New("workspace.missingMeta")
 	}
 	return doc, meta, nil
 }
@@ -503,7 +503,7 @@ func (s *WorkspaceService) boardLocation(scope string, slug string) (string, str
 		return nil
 	})
 	if dir == "" {
-		return "", "", errors.New("白板不存在")
+		return "", "", errors.New("workspace.boardMissing")
 	}
 	return dir, filepath.Join(dir, slug+".canvas"), nil
 }
@@ -512,7 +512,7 @@ func (s *WorkspaceService) ReadBoard(slug string, scope string) Result {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if !slugPattern.MatchString(slug) && slug != "" {
-		return fail(400, "slug 非法")
+		return fail(400, "workspace.badSlug")
 	}
 	_, file, err := s.boardLocation(scope, slug)
 	if err != nil {
@@ -528,7 +528,7 @@ func (s *WorkspaceService) ReadBoard(slug string, scope string) Result {
 
 func (s *WorkspaceService) writeBoard(scope string, folder string, slug string, text string) error {
 	if !slugPattern.MatchString(slug) {
-		return errors.New("slug 非法")
+		return errors.New("workspace.badSlug")
 	}
 	dir, err := s.folderDir(scope, folder, true)
 	if err != nil {
@@ -573,14 +573,14 @@ func (s *WorkspaceService) WriteBoard(slug string, scope string, data string, fo
 	key := scope + "/" + slug
 	baseline, seen := s.versions[key]
 	if !force && seen && baseline != text && data != text {
-		return fail(409, "检测到其他标签页已修改该白板，请先确认是否覆盖")
+		return fail(409, "workspace.conflictOtherTab")
 	}
 	doc, meta, err := parseCanvas(data)
 	if err != nil {
 		return fail(400, err.Error())
 	}
 	if stringValue(meta["slug"]) != slug {
-		return fail(409, "slug 不一致")
+		return fail(409, "workspace.slugMismatch")
 	}
 	meta["updatedAt"] = nowISO()
 	next, err := json.Marshal(doc)
@@ -611,10 +611,10 @@ func (s *WorkspaceService) CreateBoard(title string, slug string, folder string,
 	defer s.mu.Unlock()
 	title = strings.TrimSpace(title)
 	if title == "" || !slugPattern.MatchString(slug) {
-		return fail(400, "参数不正确")
+		return fail(400, "workspace.badParams")
 	}
 	if _, _, err := s.boardLocation(scope, slug); err == nil {
-		return fail(409, "slug 已存在: "+slug)
+		return fail(409, "workspace.slugExists|"+slug)
 	}
 	parts, err := folderSegments(folder)
 	if err != nil {
@@ -652,7 +652,7 @@ func (s *WorkspaceService) UpdateBoard(slug string, scope string, title string, 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if !slugPattern.MatchString(nextSlug) {
-		return fail(400, "slug 非法")
+		return fail(400, "workspace.badSlug")
 	}
 	locationDir, file, err := s.boardLocation(scope, slug)
 	if err != nil {
@@ -679,14 +679,14 @@ func (s *WorkspaceService) UpdateBoard(slug string, scope string, title string, 
 	if nextSlug != slug || nextFolder != currentFolder {
 		if _, _, err := s.boardLocation(scope, nextSlug); err == nil {
 			if nextSlug != slug {
-				return fail(409, "slug 已存在: "+nextSlug)
+				return fail(409, "workspace.slugExists|"+nextSlug)
 			}
 		}
 		if nextFolder != currentFolder {
 			target, targetErr := s.folderDir(scope, nextFolder, false)
 			if targetErr == nil {
 				if _, statErr := os.Stat(filepath.Join(target, nextSlug+".canvas")); statErr == nil {
-					return fail(409, "slug 已存在: "+nextSlug)
+					return fail(409, "workspace.slugExists|"+nextSlug)
 				}
 			}
 		}
@@ -738,7 +738,7 @@ func (s *WorkspaceService) CreateFolder(parent string, name string, scope string
 	defer s.mu.Unlock()
 	name = strings.TrimSpace(name)
 	if name == "" || name == "." || name == ".." || strings.ContainsAny(name, `/\`) || invalidParts.MatchString(name) {
-		return fail(400, "文件夹名不合法")
+		return fail(400, "workspace.badFolderName")
 	}
 	dir, err := s.folderDir(scope, parent, true)
 	if err != nil {
@@ -759,11 +759,11 @@ func (s *WorkspaceService) UpdateFolder(folderPath string, name string, parent s
 	defer s.mu.Unlock()
 	sourceParts, err := folderSegments(folderPath)
 	if err != nil || len(sourceParts) == 0 {
-		return fail(400, "参数不完整")
+		return fail(400, "workspace.badParams")
 	}
 	name = strings.TrimSpace(name)
 	if name == "" || strings.ContainsAny(name, `/\`) || invalidParts.MatchString(name) {
-		return fail(400, "文件夹名不合法")
+		return fail(400, "workspace.badFolderName")
 	}
 	currentParent := joinedPath(sourceParts[:len(sourceParts)-1])
 	if strings.TrimSpace(parent) == "" && currentParent != "" {
@@ -776,7 +776,7 @@ func (s *WorkspaceService) UpdateFolder(folderPath string, name string, parent s
 	sourcePath := joinedPath(sourceParts)
 	targetParentPath := joinedPath(parentParts)
 	if targetParentPath == sourcePath || strings.HasPrefix(targetParentPath, sourcePath+"/") {
-		return fail(400, "不能移动到自身或子目录")
+		return fail(400, "workspace.moveIntoSelf")
 	}
 	if targetParentPath == currentParent && name == sourceParts[len(sourceParts)-1] {
 		return simplePath(sourcePath)
@@ -792,7 +792,7 @@ func (s *WorkspaceService) UpdateFolder(folderPath string, name string, parent s
 	}
 	target := filepath.Join(targetRoot, name)
 	if _, statErr := os.Stat(target); statErr == nil {
-		return fail(409, "文件夹已存在: "+name)
+		return fail(409, "workspace.folderExists|"+name)
 	}
 	if err := os.Rename(source, target); err != nil {
 		return fail(500, err.Error())
@@ -806,7 +806,7 @@ func (s *WorkspaceService) DeleteFolder(folderPath string, scope string) Result 
 	defer s.mu.Unlock()
 	parts, err := folderSegments(folderPath)
 	if err != nil || len(parts) == 0 {
-		return fail(400, "不能删除根目录")
+		return fail(400, "workspace.deleteRoot")
 	}
 	dir, err := s.folderDir(scope, folderPath, false)
 	if err != nil {
@@ -831,14 +831,14 @@ func (s *WorkspaceService) ImportFile(name string, dataBase64 string, scope stri
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if !isScope(scope) {
-		return fail(400, "无效的 scope")
+		return fail(400, "workspace.invalidScope")
 	}
 	if comma := strings.Index(dataBase64, ","); comma >= 0 && strings.HasPrefix(dataBase64, "data:") {
 		dataBase64 = dataBase64[comma+1:]
 	}
 	data, err := base64.StdEncoding.DecodeString(dataBase64)
 	if err != nil {
-		return fail(400, "文件数据不合法")
+		return fail(400, "workspace.invalidFileData")
 	}
 	safe := sanitizeFileName(name)
 	dir, err := s.folderDir(scope, "assets/files", true)
@@ -878,14 +878,14 @@ func (s *WorkspaceService) ImportFile(name string, dataBase64 string, scope stri
 // JS bridge, so large videos are safe.
 func (s *WorkspaceService) PickFiles(scope string) Result {
 	if !isScope(scope) {
-		return fail(400, "无效的 scope")
+		return fail(400, "workspace.invalidScope")
 	}
 	app := application.Get()
 	if app == nil {
-		return fail(500, "应用尚未就绪")
+		return fail(500, "app.notReady")
 	}
 	paths, err := app.Dialog.OpenFile().
-		SetTitle("选择要插入的文件").
+		SetTitle(uiText("选择要插入的文件", "Choose files to insert")).
 		CanChooseFiles(true).
 		CanChooseDirectories(false).
 		PromptForMultipleSelection()
@@ -949,11 +949,11 @@ func (s *WorkspaceService) ResolveFile(relative string) (string, error) {
 	relative = strings.Trim(strings.ReplaceAll(relative, "\\", "/"), "/")
 	parts := strings.Split(relative, "/")
 	if len(parts) < 2 || !isScope(parts[0]) {
-		return "", errors.New("无效的文件路径")
+		return "", errors.New("workspace.invalidFilePath")
 	}
 	for _, part := range parts[1:] {
 		if part == "" || part == "." || part == ".." || invalidParts.MatchString(part) {
-			return "", errors.New("无效的文件路径")
+			return "", errors.New("workspace.invalidFilePath")
 		}
 	}
 	root, err := s.scopeDir(parts[0], false)
@@ -963,11 +963,11 @@ func (s *WorkspaceService) ResolveFile(relative string) (string, error) {
 	target := filepath.Join(append([]string{root}, parts[1:]...)...)
 	info, err := os.Stat(target)
 	if err != nil || info.IsDir() {
-		return "", errors.New("文件不存在")
+		return "", errors.New("workspace.fileMissing")
 	}
 	cleanRoot := filepath.Clean(root) + string(os.PathSeparator)
 	if !strings.HasPrefix(filepath.Clean(target)+string(os.PathSeparator), cleanRoot) {
-		return "", errors.New("无效的文件路径")
+		return "", errors.New("workspace.invalidFilePath")
 	}
 	return target, nil
 }

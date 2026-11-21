@@ -287,6 +287,8 @@
   "pele.allTypes": "← 全部图表类型",
   "pele.exampleCount": "{{total}} 个官方示例",
   "pele.useExample": "使用此示例",
+  "insert.defaultPele": "flowchart LR\n    A[开始] --> B[结束]",
+  "insert.defaultMarkdown": "# 新 Markdown\n\n在这里输入内容。",
   "lock.title": "SuperBoard 已在其他标签页打开",
   "lock.body": "为避免同时写入同一批文件，编辑器只允许一个标签页运行。",
   "lock.hint": "请关闭原来的标签页，然后刷新本页。",

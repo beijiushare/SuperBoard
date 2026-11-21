@@ -1,5 +1,6 @@
 import type { BoardScope } from '../shared/board/types'
 import i18n from '../i18n'
+import { translateServerError } from '../i18n/errors'
 import { configureWorkspaceFetcher } from '../canvas/editor/workspaceApi'
 import * as Workspace from './bindings/superboard/desktop/services/workspaceservice'
 import * as Exporter from './bindings/superboard/desktop/services/exportservice'
@@ -61,7 +62,7 @@ export async function desktopWorkspacePath() {
 export async function openDesktopWorkspace() {
   const result = await Workspace.OpenWorkspace()
   const data = parse<{ name?: string; cancelled?: boolean; error?: string }>(result)
-  if (data.error) throw new Error(data.error)
+  if (data.error) throw new Error(translateServerError(data.error))
   if (data.cancelled) return null
   workspaceName = data.name ?? ''
   return workspaceName
@@ -86,14 +87,14 @@ export async function desktopRecentWorkspaces() {
   const data = parse<{ recent?: DesktopRecentWorkspace[]; error?: string }>(
     result,
   )
-  if (data.error) throw new Error(data.error)
+  if (data.error) throw new Error(translateServerError(data.error))
   return data.recent ?? []
 }
 
 export async function desktopOpenWorkspacePath(path: string) {
   const result = await Workspace.OpenWorkspaceAt(path)
   const data = parse<{ name?: string; error?: string }>(result)
-  if (data.error) throw new Error(data.error)
+  if (data.error) throw new Error(translateServerError(data.error))
   workspaceName = data.name ?? ''
   return workspaceName || null
 }
@@ -101,20 +102,20 @@ export async function desktopOpenWorkspacePath(path: string) {
 export async function desktopForgetWorkspace(path: string) {
   const result = await Workspace.ForgetWorkspace(path)
   const data = parse<{ error?: string }>(result)
-  if (data.error) throw new Error(data.error)
+  if (data.error) throw new Error(translateServerError(data.error))
 }
 
 export async function desktopGetLanguage() {
   const result = await Workspace.GetLanguage()
   const data = parse<{ language?: string; error?: string }>(result)
-  if (data.error) throw new Error(data.error)
+  if (data.error) throw new Error(translateServerError(data.error))
   return data.language ?? ''
 }
 
 export async function desktopSetLanguage(language: string) {
   const result = await Workspace.SetLanguage(language)
   const data = parse<{ error?: string }>(result)
-  if (data.error) throw new Error(data.error)
+  if (data.error) throw new Error(translateServerError(data.error))
 }
 
 function readAsDataUrl(file: File) {
@@ -140,7 +141,11 @@ export async function desktopImportFile(
   const data = await readAsDataUrl(file)
   const result = await Workspace.ImportFile(file.name, data, scope)
   const body = parse<ImportedFile & { error?: string }>(result)
-  if (!body.path) throw new Error(body.error ?? i18n.t('editor:desktop.importFailed'))
+  if (!body.path) {
+    throw new Error(
+      body.error ? translateServerError(body.error) : i18n.t('editor:desktop.importFailed'),
+    )
+  }
   return body
 }
 
@@ -151,7 +156,7 @@ export async function desktopPickFiles(scope: BoardScope) {
     cancelled?: boolean
     error?: string
   }>(result)
-  if (body.error) throw new Error(body.error)
+  if (body.error) throw new Error(translateServerError(body.error))
   return body.files ?? []
 }
 
@@ -179,7 +184,7 @@ export async function desktopDeleteFile(path: string) {
 export async function desktopExportHtml(html: string, suggestedName: string) {
   const result = await Exporter.ExportHtml(html, suggestedName)
   const data = parse<{ cancelled?: boolean; error?: string }>(result)
-  if (data.error) throw new Error(data.error)
+  if (data.error) throw new Error(translateServerError(data.error))
   return !data.cancelled
 }
 
@@ -189,7 +194,7 @@ export async function desktopExportFolder(
 ) {
   const result = await Exporter.ExportFolder(html, JSON.stringify(attachments))
   const data = parse<{ cancelled?: boolean; error?: string }>(result)
-  if (data.error) throw new Error(data.error)
+  if (data.error) throw new Error(translateServerError(data.error))
   return !data.cancelled
 }
 

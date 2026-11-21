@@ -21,7 +21,7 @@ export async function readBody(req: IncomingMessage) {
   for await (const chunk of req) {
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
     size += buffer.length
-    if (size > 20 * 1024 * 1024) throw new HttpError(413, '请求体超过 20MB')
+    if (size > 20 * 1024 * 1024) throw new HttpError(413, 'Request body exceeds 20 MB')
     chunks.push(buffer)
   }
   return Buffer.concat(chunks).toString('utf8')
@@ -32,6 +32,6 @@ export async function readJsonBody<T>(req: IncomingMessage): Promise<T> {
   try {
     return JSON.parse(raw) as T
   } catch {
-    throw new HttpError(400, 'JSON 解析失败')
+    throw new HttpError(400, 'JSON parse failed')
   }
 }

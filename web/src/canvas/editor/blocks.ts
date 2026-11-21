@@ -18,7 +18,6 @@ export const SHAPE_DEFAULT_SIZE = { width: 160, height: 160 } as const
 
 export interface BlockDefinition {
   kind: BlockKind
-  label: string
   defaultSize: { width: number; height: number }
   ratioLocked: boolean
   scalable: boolean
@@ -29,7 +28,6 @@ export interface BlockDefinition {
 export const BLOCK_DEFINITIONS: Record<BlockKind, BlockDefinition> = {
   text: {
     kind: 'text',
-    label: '文本',
     defaultSize: DEFAULT_BLOCK_SIZES.text,
     ratioLocked: false,
     scalable: true,
@@ -38,7 +36,6 @@ export const BLOCK_DEFINITIONS: Record<BlockKind, BlockDefinition> = {
   },
   markdown: {
     kind: 'markdown',
-    label: 'Markdown',
     defaultSize: DEFAULT_BLOCK_SIZES.markdown,
     ratioLocked: true,
     scalable: true,
@@ -47,7 +44,6 @@ export const BLOCK_DEFINITIONS: Record<BlockKind, BlockDefinition> = {
   },
   pele: {
     kind: 'pele',
-    label: 'Pele 图表',
     defaultSize: DEFAULT_BLOCK_SIZES.pele,
     ratioLocked: true,
     scalable: true,
@@ -56,7 +52,6 @@ export const BLOCK_DEFINITIONS: Record<BlockKind, BlockDefinition> = {
   },
   schedule: {
     kind: 'schedule',
-    label: '日程',
     defaultSize: DEFAULT_BLOCK_SIZES.schedule,
     ratioLocked: true,
     scalable: true,
@@ -65,7 +60,6 @@ export const BLOCK_DEFINITIONS: Record<BlockKind, BlockDefinition> = {
   },
   media: {
     kind: 'media',
-    label: '媒体',
     defaultSize: DEFAULT_BLOCK_SIZES.media,
     ratioLocked: true,
     scalable: true,

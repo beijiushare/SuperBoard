@@ -1,3 +1,4 @@
+import i18n from '../../i18n'
 import { parseCanvas, serializeCanvas, type CanvasDocument } from '../model'
 import type { BoardScope } from '../../shared/board/types'
 import { configureWorkspaceFetcher } from './workspaceApi'
@@ -205,7 +206,7 @@ async function ensureDirectory(
 }
 
 async function scopeDirectory(scope: BoardScope, create = false) {
-  if (!root) throw new Error('尚未打开工作区')
+  if (!root) throw new Error(i18n.t('errors:workspace.noWorkspace'))
   // New layout: <workspace>/public and <workspace>/private.
   // Legacy layout: <workspace>/whiteboards/<scope>.
   try {
@@ -386,12 +387,12 @@ async function handleCanvases(url: URL, init?: RequestInit) {
     const title = String(body.title ?? '').trim()
     const slug = String(body.slug ?? '').trim()
     if (!title || !/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
-      return response({ error: '参数不正确' }, 400)
+      return response({ error: i18n.t('errors:workspace.badParams') }, 400)
     }
     const scope = normalizeScope(body.scope)
     const folder = normalizeFolder(body.folder)
     if (await findBoard(scope, slug)) {
-      return response({ error: `slug 已存在: ${slug}` }, 409)
+      return response({ error: i18n.t('errors:workspace.slugExists', { slug }) }, 409)
     }
     const canvas = blankCanvas(title, slug)
     await writeFile(scope, folder, slug, canvas)
@@ -403,7 +404,7 @@ async function handleCanvases(url: URL, init?: RequestInit) {
   const slug = match[1]
   const scope = normalizeScope(url.searchParams.get('scope'))
   const location = await boardLocation(scope, slug)
-  if (!location) return response({ error: '白板不存在' }, 404)
+  if (!location) return response({ error: i18n.t('errors:workspace.boardMissing') }, 404)
   const file = location.file
   const text = await (await file.getFile()).text()
   const canvas = parseCanvas(text)
@@ -416,12 +417,14 @@ async function handleCanvases(url: URL, init?: RequestInit) {
     const bodyText = String(init?.body ?? '')
     const next = parseCanvas(bodyText)
     const meta = next['x-superboard']?.meta
-    if (!meta || meta.slug !== slug) return response({ error: 'slug 不一致' }, 409)
+    if (!meta || meta.slug !== slug) {
+      return response({ error: i18n.t('errors:workspace.slugMismatch') }, 409)
+    }
     const force = new Headers(init?.headers).get('x-superboard-force') === '1'
     const baseline = versions.get(key)
     if (!force && baseline !== undefined && baseline !== text && bodyText !== text) {
       return response(
-        { error: '检测到其他标签页已修改该白板，请先确认是否覆盖' },
+        { error: i18n.t('errors:workspace.conflictOtherTab') },
         409,
       )
     }
@@ -437,16 +440,21 @@ async function handleCanvases(url: URL, init?: RequestInit) {
       summary?: string
     }
     const meta = canvas['x-superboard']?.meta
-    if (!meta) return response({ error: '缺少 meta' }, 400)
+    if (!meta) return response({ error: i18n.t('errors:workspace.missingMeta') }, 400)
     const nextSlug = body.slug === undefined ? slug : String(body.slug)
-    if (!/^[a-z0-9][a-z0-9-]*$/.test(nextSlug)) return response({ error: 'slug 非法' }, 400)
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(nextSlug)) {
+      return response({ error: i18n.t('errors:workspace.badSlug') }, 400)
+    }
     const nextFolder =
       body.folder === undefined ? location.path : normalizeFolder(body.folder)
     if (nextSlug !== slug || nextFolder !== location.path) {
       try {
         const targetDir = await folderDirectory(scope, nextFolder)
         await targetDir.getFileHandle(`${nextSlug}.canvas`)
-        return response({ error: `slug 已存在: ${nextSlug}` }, 409)
+        return response(
+          { error: i18n.t('errors:workspace.slugExists', { slug: nextSlug }) },
+          409,
+        )
       } catch (error) {
         if (!(error instanceof DOMException) || error.name !== 'NotFoundError') {
           throw error
@@ -501,7 +509,10 @@ async function copyDirectory(
 ) {
   for await (const entry of directoryValues(source)) {
     if (isFolderMoveCancelled()) {
-      throw new DOMException('已取消移动', 'AbortError')
+      throw new DOMException(
+        i18n.t('errors:workspace.moveCancelled'),
+        'AbortError',
+      )
     }
     if (isDirectoryHandle(entry)) {
       const child = await target.getDirectoryHandle(entry.name, { create: true })
@@ -537,7 +548,7 @@ async function handleFolders(url: URL, init?: RequestInit) {
     const parent = normalizeFolder(body.parent)
     const name = String(body.name ?? '').trim()
     if (!name || name.includes('/') || name.includes('\\')) {
-      return response({ error: '文件夹名不合法' }, 400)
+      return response({ error: i18n.t('errors:workspace.badFolderName') }, 400)
     }
     const dir = await folderDirectory(scope, parent, true)
     await dir.getDirectoryHandle(name, { create: true })
@@ -555,20 +566,25 @@ async function handleFolders(url: URL, init?: RequestInit) {
     const currentParent = sourcePath.split('/').slice(0, -1).join('/')
     const parent = body.parent === undefined ? currentParent : normalizeFolder(body.parent)
     const name = String(body.name ?? '').trim()
-    if (!sourcePath || !name) return response({ error: '参数不完整' }, 400)
+    if (!sourcePath || !name) {
+      return response({ error: i18n.t('errors:workspace.badParams') }, 400)
+    }
     const targetPath = parent ? `${parent}/${name}` : name
     if (targetPath === sourcePath) {
       return response({ ok: true, path: sourcePath })
     }
     if (parent === sourcePath || parent.startsWith(`${sourcePath}/`)) {
-      return response({ error: '不能移动到自身或子目录' }, 400)
+      return response({ error: i18n.t('errors:workspace.moveIntoSelf') }, 400)
     }
     const sourceParent = await folderDirectory(scope, currentParent)
     const source = await sourceParent.getDirectoryHandle(sourcePath.split('/').pop()!)
     const targetParent = await folderDirectory(scope, parent, true)
     try {
       await targetParent.getDirectoryHandle(name)
-      return response({ error: `文件夹已存在: ${name}` }, 409)
+      return response(
+        { error: i18n.t('errors:workspace.folderExists', { name }) },
+        409,
+      )
     } catch (error) {
       if (!(error instanceof DOMException) || error.name !== 'NotFoundError') {
         throw error
@@ -594,7 +610,10 @@ async function handleFolders(url: URL, init?: RequestInit) {
           reportFolderMoveProgress({ phase: 'progress', copied, total })
         })
         if (isFolderMoveCancelled()) {
-          throw new DOMException('已取消移动', 'AbortError')
+          throw new DOMException(
+            i18n.t('errors:workspace.moveCancelled'),
+            'AbortError',
+          )
         }
         await sourceParent.removeEntry(sourcePath.split('/').pop()!, {
           recursive: true,
@@ -603,7 +622,7 @@ async function handleFolders(url: URL, init?: RequestInit) {
     } catch (error) {
       await targetParent.removeEntry(name, { recursive: true }).catch(() => {})
       if (error instanceof DOMException && error.name === 'AbortError') {
-        return response({ error: '移动已取消' }, 409)
+        return response({ error: i18n.t('errors:workspace.moveCancelled') }, 409)
       }
       throw error
     } finally {
@@ -616,7 +635,7 @@ async function handleFolders(url: URL, init?: RequestInit) {
   if (url.pathname === '/__folders' && method === 'DELETE') {
     const scope = normalizeScope(url.searchParams.get('scope'))
     const path = normalizeFolder(url.searchParams.get('path'))
-    if (!path) return response({ error: '不能删除根目录' }, 400)
+    if (!path) return response({ error: i18n.t('errors:workspace.deleteRoot') }, 400)
     const parent = await folderDirectory(scope, path.split('/').slice(0, -1).join('/'))
     await parent.removeEntry(path.split('/').pop()!, { recursive: true })
     invalidateBoardCache()
@@ -627,7 +646,7 @@ async function handleFolders(url: URL, init?: RequestInit) {
 
 export async function openBrowserWorkspace() {
   const picker = (window as OpenFilePickerWindow).showDirectoryPicker
-  if (!picker) throw new Error('当前浏览器不支持本地文件夹')
+  if (!picker) throw new Error(i18n.t('errors:workspace.noFolderSupport'))
   const handle = await picker({ mode: 'readwrite' })
   root = handle
   await scopeDirectory('public', true)
@@ -674,7 +693,7 @@ export async function openBrowserRecent(id: string) {
     const entries = await readRecentEntries()
     handle = entries.find((entry) => entry.id === id)?.handle
   }
-  if (!handle) throw new Error('工作区记录不存在')
+  if (!handle) throw new Error(i18n.t('errors:workspace.recentMissing'))
   const permission = await (
     handle as unknown as {
       requestPermission: (options: {
@@ -682,7 +701,7 @@ export async function openBrowserRecent(id: string) {
       }) => Promise<PermissionState>
     }
   ).requestPermission({ mode: 'readwrite' })
-  if (permission !== 'granted') throw new Error('未获得文件夹权限')
+  if (permission !== 'granted') throw new Error(i18n.t('errors:workspace.permissionDenied'))
   root = handle
   await scopeDirectory('public', true)
   await scopeDirectory('private', true)
@@ -728,11 +747,11 @@ async function uniqueFileName(dir: DirHandle, name: string) {
       throw error
     }
   }
-  throw new Error('无法生成唯一文件名')
+  throw new Error(i18n.t('errors:workspace.uniqueNameFailed'))
 }
 
 export async function importBrowserFile(file: File, scope: BoardScope) {
-  if (!root) throw new Error('尚未打开工作区')
+  if (!root) throw new Error(i18n.t('errors:workspace.noWorkspace'))
   const dir = await folderDirectory(scope, 'assets/files', true)
   const name = await uniqueFileName(dir, sanitizeFileName(file.name))
   const handle = await dir.getFileHandle(name, { create: true })
