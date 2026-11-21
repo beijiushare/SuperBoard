@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   PELE_EXAMPLE_GROUPS,
   type PeleExample,
@@ -24,6 +25,7 @@ export function PeleCreateDialog({
   onClose,
   onSave,
 }: PeleCreateDialogProps) {
+  const { t } = useTranslation(['editor', 'common'])
   const editing = mode === 'edit'
   const [peleStep, setPeleStep] = useState<PeleStep>(editing ? 'editor' : 'types')
   const [activeGroup, setActiveGroup] = useState<PeleExampleGroup | null>(null)
@@ -73,20 +75,20 @@ export function PeleCreateDialog({
   }
 
   const title = editing
-    ? '编辑图表'
+    ? t('editor:pele.edit')
     : peleStep === 'types'
-      ? '新建图表'
+      ? t('editor:pele.create')
       : peleStep === 'examples' && activeGroup
         ? `${activeGroup.label}（${activeGroup.title}）`
-        : '编辑图表'
+        : t('editor:pele.edit')
 
   const description = editing
-    ? '编辑 Mermaid 源码，右侧实时预览'
+    ? t('editor:pele.editDescription')
     : peleStep === 'types'
-      ? `从 ${PELE_EXAMPLE_GROUPS.length} 种 Pele 官方图表中选择一种`
+      ? t('editor:pele.chooseType', { total: PELE_EXAMPLE_GROUPS.length })
       : peleStep === 'examples' && activeGroup
-        ? '选择一个官方示例进入编辑'
-        : '编辑 Mermaid 源码，右侧实时预览'
+        ? t('editor:pele.chooseExample')
+        : t('editor:pele.editDescription')
 
   const showGallery = peleStep !== 'editor'
 
@@ -107,7 +109,12 @@ export function PeleCreateDialog({
             <h2>{title}</h2>
             <p>{description}</p>
           </div>
-          <button className="sb-icon-button" type="button" onClick={onClose} aria-label="关闭">
+          <button
+            className="sb-icon-button"
+            type="button"
+            onClick={onClose}
+            aria-label={t('common:actions.close')}
+          >
             ×
           </button>
         </header>
@@ -134,7 +141,7 @@ export function PeleCreateDialog({
                 value={code}
                 onChange={(event) => setCode(event.target.value)}
                 spellCheck={false}
-                placeholder="输入 Mermaid 图表源码"
+                placeholder={t('editor:pele.sourcePlaceholder')}
               />
             </div>
 
@@ -156,20 +163,22 @@ export function PeleCreateDialog({
               type="button"
               onClick={() => setPeleStep('examples')}
             >
-              ← 返回示例
+              {t('editor:pele.backToExamples')}
             </button>
           ) : (
             <span className="sb-shortcut">
               {editing
-                ? 'Esc 关闭 · Ctrl/⌘ + Enter 保存'
+                ? t('editor:pele.editShortcut')
                 : peleStep === 'types'
-                  ? '选择类型后浏览该类型的全部官方示例'
-                  : `${activeGroup?.examples.length ?? 0} 个示例，点选后进入编辑`}
+                  ? t('editor:pele.typesHint')
+                  : t('editor:pele.examplesHint', {
+                      total: activeGroup?.examples.length ?? 0,
+                    })}
             </span>
           )}
           <div className="sb-modal-actions">
             <button className="sb-button sb-button-ghost" type="button" onClick={onClose}>
-              取消
+              {t('common:actions.cancel')}
             </button>
             {!showGallery ? (
               <button
@@ -177,7 +186,7 @@ export function PeleCreateDialog({
                 type="button"
                 onClick={() => onSave({ code, diagram })}
               >
-                保存
+                {t('editor:dialog.save')}
               </button>
             ) : null}
           </div>

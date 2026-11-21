@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { loadMathJax } from './mathjax'
 import { vditorCdn } from './vditorAssets'
 import { getAppLanguage } from '../../i18n'
@@ -61,6 +62,7 @@ export function MarkdownVditorPreview({
   source,
   className = '',
 }: MarkdownVditorPreviewProps) {
+  const { t } = useTranslation(['common'])
   const hostRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -110,7 +112,7 @@ export function MarkdownVditorPreview({
   }, [source])
 
   if (!source.trim()) {
-    return <p className="sb-empty">暂无内容</p>
+    return <p className="sb-empty">{t('common:markdown.empty')}</p>
   }
 
   if (useLegacyRenderer || failed) {

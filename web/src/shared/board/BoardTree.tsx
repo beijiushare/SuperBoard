@@ -1,4 +1,5 @@
 import { useRef, type KeyboardEvent, type MouseEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { BoardTreeFile, BoardTreeFolder, BoardTreeNode } from './types'
 
 export type BoardTreeContextTarget =
@@ -158,8 +159,9 @@ export function BoardTree({
   onToggle,
   onSelect,
   onContextMenu,
-  emptyLabel = '还没有白板',
+  emptyLabel,
 }: BoardTreeProps) {
+  const { t } = useTranslation(['editor'])
   const treeRef = useRef<HTMLDivElement>(null)
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -182,7 +184,7 @@ export function BoardTree({
   }
 
   if (nodes.length === 0) {
-    return <p className="sb-tree-empty">{emptyLabel}</p>
+    return <p className="sb-tree-empty">{emptyLabel ?? t('editor:tree.emptyBoards')}</p>
   }
 
   return (
@@ -190,7 +192,7 @@ export function BoardTree({
       ref={treeRef}
       className="sb-tree"
       role="tree"
-      aria-label="白板目录"
+      aria-label={t('editor:tree.title')}
       onKeyDown={handleKeyDown}
     >
       {nodes.map((node) => (

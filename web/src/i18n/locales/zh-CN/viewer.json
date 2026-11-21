@@ -1,0 +1,8 @@
+{
+  "missingData.title": "没有找到白板数据",
+  "missingData.body": "这个页面需要由 SuperBoard 构建脚本生成。",
+  "loadFailed": "加载白板失败（{{status}}）",
+  "loadErrorTitle": "无法加载白板",
+  "loading": "正在加载白板…",
+  "empty": "还没有白板"
+}

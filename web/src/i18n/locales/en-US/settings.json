@@ -51,5 +51,9 @@
   "help.windowOrder": "From top to bottom at the bottom of the sidebar: minimize, focus mode, exit.",
   "help.windowDrag": "The window has no title bar. Drag the sidebar background to move it, and drag the edges to resize.",
   "start.open": "Start",
-  "start.description": "Return to the start page and choose another workspace"
+  "start.description": "Return to the start page and choose another workspace",
+  "dialogAria": "Preferences",
+  "textDefaults.title": "Default text style",
+  "textDefaults.align": "Align",
+  "blockDefaults.title": "Default shape style"
 }

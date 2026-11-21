@@ -3,5 +3,10 @@
   "language.en-US": "English",
   "actions.close": "Close",
   "actions.cancel": "Cancel",
-  "actions.open": "Open"
+  "actions.open": "Open",
+  "actions.delete": "Delete",
+  "actions.confirm": "OK",
+  "actions.selectPlaceholder": "Select",
+  "markdown.empty": "No content",
+  "status.rendering": "Rendering…"
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useDialogEscape } from '../../editor/dialogs/useDialogEscape'
 import { MarkdownVditor } from './MarkdownVditor'
 
@@ -16,6 +17,7 @@ export function MarkdownFocusDialog({
   onCommit,
   onClose,
 }: MarkdownFocusDialogProps) {
+  const { t } = useTranslation(['editor', 'common'])
   useDialogEscape(false, onClose)
 
   return (
@@ -33,14 +35,14 @@ export function MarkdownFocusDialog({
       >
         <div className="sb-modal-header">
           <div>
-            <h2 id="sb-md-focus-title">专注编辑</h2>
-            <p>内容会实时更新到白板块</p>
+            <h2 id="sb-md-focus-title">{t('editor:block.focusEdit')}</h2>
+            <p>{t('editor:markdown.liveHint')}</p>
           </div>
           <button
             className="sb-icon-button"
             type="button"
             onClick={onClose}
-            aria-label="关闭"
+            aria-label={t('common:actions.close')}
           >
             ×
           </button>

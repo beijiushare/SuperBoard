@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { BoardListItem } from '../shared/board/types'
 import { buildBoardTree } from '../shared/board/tree'
 import { useTreeExpansion } from '../shared/board/useTreeExpansion'
@@ -14,12 +15,13 @@ function asBoardListItem(item: CanvasTreeItem): BoardListItem {
 }
 
 export function CanvasViewerApp() {
+  const { t } = useTranslation(['viewer'])
   const data = window.__SUPERBOARD__
   if (!data) {
     return (
       <div className="sb-screen-message">
-        <h1>没有找到白板数据</h1>
-        <p>这个页面需要由 SuperBoard 构建脚本生成。</p>
+        <h1>{t('viewer:missingData.title')}</h1>
+        <p>{t('viewer:missingData.body')}</p>
       </div>
     )
   }
@@ -44,6 +46,7 @@ function CanvasViewerShell({
   base: string
   initialCanvas?: CanvasDocument
 }) {
+  const { t } = useTranslation(['viewer', 'editor'])
   const boards = useMemo(() => items.map(asBoardListItem), [items])
   const requested = new URLSearchParams(window.location.search).get('board')
   const initialSlug = boards.find((item) => item.slug === requested)?.slug ?? boards[0]?.slug ?? ''
@@ -85,7 +88,7 @@ function CanvasViewerShell({
       headers: { Accept: 'application/json' },
     })
       .then(async (response) => {
-        if (!response.ok) throw new Error(`加载白板失败（${response.status}）`)
+        if (!response.ok) throw new Error(t('viewer:loadFailed', { status: response.status }))
         return parseCanvas(await response.text())
       })
       .then((next) => {
@@ -134,7 +137,9 @@ function CanvasViewerShell({
         mode="view"
         treeMode
         treeOpen={treeOpen}
-        sidebarLabel={treeOpen ? '收起目录' : '展开目录'}
+        sidebarLabel={
+          treeOpen ? t('editor:shell.collapseTree') : t('editor:shell.expandTree')
+        }
         onToggleTree={() => setTreeOpen((open) => !open)}
         directorMode={directorOpen}
         onToggleDirector={toggleDirector}
@@ -150,16 +155,16 @@ function CanvasViewerShell({
             onToggle={toggleFolder}
             onSelect={selectBoard}
             headerMeta={<span className="sb-tree-count">{boards.length}</span>}
-            emptyLabel="还没有白板"
+            emptyLabel={t('viewer:empty')}
           />
         ) : null}
 
         <main className="sb-canvas">
-          {loading ? <div className="sb-canvas-empty">正在加载白板…</div> : null}
+          {loading ? <div className="sb-canvas-empty">{t('viewer:loading')}</div> : null}
           {error ? (
             <div className="sb-canvas-empty">
               <div>
-                <h2>无法加载白板</h2>
+                <h2>{t('viewer:loadErrorTitle')}</h2>
                 <p>{error}</p>
               </div>
             </div>

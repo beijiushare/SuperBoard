@@ -15,6 +15,7 @@ import '@fullcalendar/react/themes/forma/theme.css'
 import '@fullcalendar/react/themes/forma/palettes/red.css'
 import './schedule.css'
 import type { SuperBoardScheduleEvent } from '../../canvas/model'
+import { useTranslation } from 'react-i18next'
 import { InputDialog } from '../ui/InputDialog'
 
 const PLUGINS = [
@@ -47,6 +48,7 @@ export function ScheduleBlock({
   events?: SuperBoardScheduleEvent[]
   onEventsChange?: (events: SuperBoardScheduleEvent[]) => void
 }) {
+  const { t } = useTranslation(['editor', 'common'])
   const [dialog, setDialog] = useState<ScheduleDialog | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [initialScrollTime] = useState(currentScrollTime)
@@ -125,7 +127,7 @@ export function ScheduleBlock({
 
   const buttons = {
     add: {
-      text: '新建日程',
+      text: t('editor:schedule.newEvent'),
       click: () => openAddDialog(),
     },
   }
@@ -162,10 +164,18 @@ export function ScheduleBlock({
               ? `edit:${dialog.id}`
               : `add:${dialog.start.getTime()}:${dialog.end?.getTime() ?? ''}`
           }
-          title={dialog.type === 'add' ? '新建日程' : '编辑日程'}
+          title={
+            dialog.type === 'add'
+              ? t('editor:schedule.newEvent')
+              : t('editor:schedule.editEvent')
+          }
           initialValue={dialog.type === 'edit' ? dialog.title : ''}
-          placeholder="日程名称"
-          confirmText={dialog.type === 'add' ? '创建' : '保存'}
+          placeholder={t('editor:schedule.eventName')}
+          confirmText={
+            dialog.type === 'add'
+              ? t('editor:dialog.create')
+              : t('editor:dialog.save')
+          }
           onDelete={
             dialog.type === 'edit'
               ? () => deleteEvent(dialog.id)

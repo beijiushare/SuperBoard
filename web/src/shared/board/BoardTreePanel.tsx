@@ -7,6 +7,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BoardTree, type BoardTreeContextTarget } from './BoardTree'
 import type { BoardTreeNode } from './types'
 
@@ -41,7 +42,7 @@ interface BoardTreePanelProps {
 
 export function BoardTreePanel({
   nodes,
-  title = '白板目录',
+  title,
   collapsed = false,
   selectedSlug,
   expanded,
@@ -52,6 +53,7 @@ export function BoardTreePanel({
   headerMeta,
   emptyLabel,
 }: BoardTreePanelProps) {
+  const { t } = useTranslation(['editor'])
   const [width, setWidth] = useState(readTreeWidth)
   const resizeRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
@@ -94,7 +96,7 @@ export function BoardTreePanel({
       style={{ '--sb-tree-width': `${width}px` } as CSSProperties}
     >
       <div className="sb-tree-header">
-        <span className="sb-tree-heading">{title}</span>
+        <span className="sb-tree-heading">{title ?? t('editor:tree.title')}</span>
         {headerMeta}
       </div>
       <div className="sb-tree-scroll" onContextMenu={onRootContextMenu}>
@@ -112,7 +114,7 @@ export function BoardTreePanel({
         className="sb-tree-resizer"
         role="separator"
         aria-orientation="vertical"
-        aria-label="调整目录宽度"
+        aria-label={t('editor:tree.resize')}
         onPointerDown={startResize}
         onPointerMove={resize}
         onPointerUp={endResize}

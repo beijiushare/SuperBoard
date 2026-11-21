@@ -1,5 +1,6 @@
 import DOMPurify from 'dompurify'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { renderAsync } from 'pele/lazy'
 import { stripDiagramTitle } from './stripTitle'
 
@@ -17,6 +18,7 @@ interface PeleViewProps {
 }
 
 export function PeleView({ code, className = '' }: PeleViewProps) {
+  const { t } = useTranslation(['common'])
   const [svg, setSvg] = useState('')
   const [error, setError] = useState('')
 
@@ -49,7 +51,7 @@ export function PeleView({ code, className = '' }: PeleViewProps) {
       ) : svg ? (
         <div className="sb-pele-svg" dangerouslySetInnerHTML={{ __html: svg }} />
       ) : (
-        <div className="sb-pele-loading">渲染中…</div>
+        <div className="sb-pele-loading">{t('common:status.rendering')}</div>
       )}
     </div>
   )

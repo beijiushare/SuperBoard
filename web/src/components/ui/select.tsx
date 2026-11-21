@@ -6,6 +6,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 
 export interface SelectOption {
   value: string
@@ -86,11 +87,12 @@ export function Select({
   value,
   onChange,
   options,
-  placeholder = '请选择',
+  placeholder,
   disabled = false,
   className = '',
   ariaLabel,
 }: SelectProps) {
+  const { t } = useTranslation(['common'])
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(0)
   const [position, setPosition] = useState<MenuPosition | null>(null)
@@ -250,7 +252,7 @@ export function Select({
         onKeyDown={onTriggerKeyDown}
       >
         <span className="sb-select-value">
-          {selected?.label ?? placeholder}
+          {selected?.label ?? placeholder ?? t('common:actions.selectPlaceholder')}
         </span>
         <ChevronIcon />
       </button>

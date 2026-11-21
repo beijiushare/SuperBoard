@@ -4,10 +4,12 @@ import zhCommon from './locales/zh-CN/common.json'
 import zhStart from './locales/zh-CN/start.json'
 import zhSettings from './locales/zh-CN/settings.json'
 import zhEditor from './locales/zh-CN/editor.json'
+import zhViewer from './locales/zh-CN/viewer.json'
 import enCommon from './locales/en-US/common.json'
 import enStart from './locales/en-US/start.json'
 import enSettings from './locales/en-US/settings.json'
 import enEditor from './locales/en-US/editor.json'
+import enViewer from './locales/en-US/viewer.json'
 
 export const SUPPORTED_LANGUAGES = ['zh-CN', 'en-US'] as const
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number]
@@ -19,12 +21,14 @@ const resources = {
     start: zhStart,
     settings: zhSettings,
     editor: zhEditor,
+    viewer: zhViewer,
   },
   'en-US': {
     common: enCommon,
     start: enStart,
     settings: enSettings,
     editor: enEditor,
+    viewer: enViewer,
   },
 }
 
@@ -53,7 +57,7 @@ export async function initI18n(language?: string | null) {
       resources,
       lng: next,
       fallbackLng: 'zh-CN',
-      ns: ['common', 'start', 'settings', 'editor'],
+      ns: ['common', 'start', 'settings', 'editor', 'viewer'],
       defaultNS: 'common',
       interpolation: { escapeValue: false },
       returnNull: false,

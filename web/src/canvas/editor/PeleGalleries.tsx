@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   PELE_EXAMPLE_GROUPS,
   type PeleExample,
@@ -66,9 +67,12 @@ export function PeleTypeGallery({
 }: {
   onSelect: (group: PeleExampleGroup) => void
 }) {
+  const { t } = useTranslation(['editor'])
   const hostRef = useRef<HTMLDivElement | null>(null)
   const onSelectRef = useRef(onSelect)
-  const [status, setStatus] = useState('加载一级画廊…')
+  const [status, setStatus] = useState<
+    { kind: 'loading' } | { kind: 'error'; message: string } | null
+  >({ kind: 'loading' })
   onSelectRef.current = onSelect
 
   useEffect(() => {
@@ -91,7 +95,7 @@ export function PeleTypeGallery({
         const doc = new DOMParser().parseFromString(text, 'image/svg+xml')
         const svg = doc.documentElement as unknown as SVGSVGElement
         if (!svg || svg.nodeName.toLowerCase() !== 'svg') {
-          throw new Error('level1.svg 不是有效的 SVG')
+          throw new Error(t('editor:pele.invalidSvg'))
         }
         resolveSvgHrefs(svg, sourceUrl.href)
         svg.classList.add('sb-level1-svg')
@@ -106,13 +110,14 @@ export function PeleTypeGallery({
         }
         svg.addEventListener('click', onClick)
         host.replaceChildren(svg)
-        setStatus('')
+        setStatus(null)
       })
       .catch((error: unknown) => {
         if (cancelled || controller.signal.aborted) return
-        setStatus(
-          `一级画廊加载失败：${error instanceof Error ? error.message : String(error)}`,
-        )
+        setStatus({
+          kind: 'error',
+          message: error instanceof Error ? error.message : String(error),
+        })
       })
 
     return () => {
@@ -125,7 +130,13 @@ export function PeleTypeGallery({
   return (
     <div className="sb-gallery-body sb-gallery-body--level1">
       <div ref={hostRef} className="sb-level1-gallery" />
-      {status ? <p className="sb-gallery-status">{status}</p> : null}
+      {status ? (
+        <p className="sb-gallery-status">
+          {status.kind === 'loading'
+            ? t('editor:pele.loadingGallery')
+            : t('editor:pele.galleryFailed', { message: status.message })}
+        </p>
+      ) : null}
     </div>
   )
 }
@@ -139,15 +150,17 @@ export function PeleExampleGallery({
   onBack: () => void
   onSelect: (example: PeleExample) => void
 }) {
+  const { t } = useTranslation(['editor'])
   const sizes = PELE_EXAMPLE_SIZES[group.type] ?? []
   return (
     <div className="sb-gallery-body">
       <div className="sb-gallery-toolbar">
         <button className="sb-button sb-button-ghost" type="button" onClick={onBack}>
-          ← 全部图表类型
+          {t('editor:pele.allTypes')}
         </button>
         <span className="sb-gallery-count">
-          {group.label}（{group.title}） · {group.examples.length} 个官方示例
+          {group.label}（{group.title}） ·{' '}
+          {t('editor:pele.exampleCount', { total: group.examples.length })}
         </span>
       </div>
       <div className="sb-example-grid">
@@ -163,7 +176,7 @@ export function PeleExampleGallery({
               <LazyPelePreview code={example.source} />
               <span className="sb-example-card-meta">
                 <span className="sb-example-card-label">{example.label}</span>
-                <span className="sb-example-card-action">使用此示例</span>
+                <span className="sb-example-card-action">{t('editor:pele.useExample')}</span>
               </span>
             </button>
           )

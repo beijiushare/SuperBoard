@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 
 interface InputDialogProps {
   title: string
@@ -18,12 +19,13 @@ export function InputDialog({
   description,
   initialValue = '',
   placeholder,
-  confirmText = '确定',
+  confirmText,
   allowEmpty = false,
   onDelete,
   onConfirm,
   onClose,
 }: InputDialogProps) {
+  const { t } = useTranslation(['common'])
   const [value, setValue] = useState(initialValue)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
   const canConfirm = allowEmpty || value.trim().length > 0
@@ -88,14 +90,14 @@ export function InputDialog({
               className="is-danger"
               onClick={onDelete}
             >
-              删除
+              {t('common:actions.delete')}
             </button>
           ) : null}
           <button type="button" onClick={onClose}>
-            取消
+            {t('common:actions.cancel')}
           </button>
           <button type="button" onClick={confirm} disabled={!canConfirm}>
-            {confirmText}
+            {confirmText ?? t('common:actions.confirm')}
           </button>
         </div>
       </div>

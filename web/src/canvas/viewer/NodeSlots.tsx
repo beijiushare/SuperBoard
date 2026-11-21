@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { DEFAULT_PREFERENCES } from '../editor/preferences'
 import type { Hook, JSONCanvasFileNode, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
@@ -137,6 +138,7 @@ export function TextSlot({
   onSelect?: (id: string) => void
   onScheduleEventsChange?: (events: SuperBoardScheduleEvent[]) => void
 }) {
+  const { t } = useTranslation(['common'])
   useNodeSelection(node.id, onActive, onSelect)
   const ext = extension(node)
   const content =
@@ -146,7 +148,7 @@ export function TextSlot({
       <MarkdownVditorPreview source={node.text} />
     ) : ext?.kind === 'pele' ? (
       <div className="sb-card sb-card-pele">
-        <Suspense fallback={<div className="sb-pele-loading">渲染中...</div>}>
+        <Suspense fallback={<div className="sb-pele-loading">{t('common:status.rendering')}</div>}>
           <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />
         </Suspense>
       </div>
@@ -217,6 +219,7 @@ function guessMime(name: string) {
 }
 
 function FileCard({ media }: { media: SuperBoardMedia }) {
+  const { t } = useTranslation(['common', 'editor'])
   const [url, setUrl] = useState<string | null>(null)
   const [missing, setMissing] = useState(false)
   const mime = media.mime || guessMime(media.name ?? media.file ?? '')
@@ -254,7 +257,7 @@ function FileCard({ media }: { media: SuperBoardMedia }) {
         <path d={FILE_ICON_PATH} fill="currentColor" />
       </svg>
       <span>{media.name ?? media.file}</span>
-      {missing ? <small>文件缺失</small> : null}
+      {missing ? <small>{t('editor:file.missing')}</small> : null}
     </button>
   )
 }

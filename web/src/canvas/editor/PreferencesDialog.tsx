@@ -32,7 +32,7 @@ interface PreferencesDialogProps {
 }
 
 export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
-  const { t } = useTranslation(['settings', 'common'])
+  const { t } = useTranslation(['settings', 'common', 'editor'])
   const language = getAppLanguage()
   const [draft, setDraft] = useState<EditorPreferences>(() =>
     structuredClone(getPreferences()),
@@ -140,7 +140,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
         className="canvas-editor-dialog sb-preferences-dialog"
         role="dialog"
         aria-modal="true"
-        aria-label="偏好设置"
+        aria-label={t('settings:dialogAria')}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="sb-preferences-header">
@@ -385,19 +385,19 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
 
         {tab === 'text' ? (
         <section>
-          <h3>文本默认样式</h3>
+          <h3>{t('settings:textDefaults.title')}</h3>
           <div className="sb-style-row">
-            <span>字体</span>
+            <span>{t('editor:style.font')}</span>
             <Select
               className="sb-select-compact"
               value={draft.text.fontFamily}
               onChange={(value) => updateText({ fontFamily: value })}
-              ariaLabel="字体"
+              ariaLabel={t('editor:style.font')}
               options={fontOptions(t)}
             />
           </div>
           <StyleNumberControl
-            label="字号"
+            label={t('editor:style.fontSize')}
             value={draft.text.fontSize}
             min={8}
             max={200}
@@ -406,12 +406,12 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
             onChange={(fontSize) => updateText({ fontSize })}
           />
           <ColorPicker
-            label="颜色"
+            label={t('editor:style.color')}
             value={draft.text.color}
             onChange={(color) => updateText({ color })}
           />
           <StyleNumberControl
-            label="透明度"
+            label={t('editor:style.opacity')}
             value={Math.round(draft.text.opacity * 100)}
             min={0}
             max={100}
@@ -421,13 +421,13 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
             onChange={(value) => updateText({ opacity: value / 100 })}
           />
           <div className="sb-style-row">
-            <span>对齐</span>
+            <span>{t('settings:textDefaults.align')}</span>
             <div className="sb-style-buttons">
               {(
                 [
-                  ['left', '左'],
-                  ['center', '中'],
-                  ['right', '右'],
+                  ['left', t('editor:style.alignLeftShort')],
+                  ['center', t('editor:style.alignCenterShort')],
+                  ['right', t('editor:style.alignRightShort')],
                 ] as const
               ).map(([value, label]) => (
                 <button
@@ -448,9 +448,9 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
 
         {tab === 'block' ? (
         <section>
-          <h3>形状默认样式</h3>
+          <h3>{t('settings:blockDefaults.title')}</h3>
           <StyleNumberControl
-            label="圆角"
+            label={t('editor:style.cornerRadius')}
             value={draft.shapeCornerRadius}
             min={0}
             max={200}

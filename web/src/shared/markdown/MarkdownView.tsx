@@ -6,6 +6,7 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
+import { useTranslation } from 'react-i18next'
 import { MathSpan } from './MathSpan'
 import { rehypeSafeEmbeds } from './safeEmbeds'
 import { remarkAsciiMath } from './remarkAsciiMath'
@@ -62,8 +63,9 @@ interface MarkdownViewProps {
 }
 
 export function MarkdownView({ source, className = '' }: MarkdownViewProps) {
+  const { t } = useTranslation(['common'])
   if (!source.trim()) {
-    return <p className="sb-empty">暂无内容</p>
+    return <p className="sb-empty">{t('common:markdown.empty')}</p>
   }
 
   return (

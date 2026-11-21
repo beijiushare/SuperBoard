@@ -51,5 +51,9 @@
   "help.windowOrder": "侧栏底部从上到下依次是：最小化、专注模式、退出。",
   "help.windowDrag": "窗口没有标题栏，可拖动侧栏空白区域移动窗口，拖动窗口边缘缩放。",
   "start.open": "开始",
-  "start.description": "返回开始页，选择其他工作区"
+  "start.description": "返回开始页，选择其他工作区",
+  "dialogAria": "偏好设置",
+  "textDefaults.title": "文本默认样式",
+  "textDefaults.align": "对齐",
+  "blockDefaults.title": "形状默认样式"
 }

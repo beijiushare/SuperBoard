@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import { useTranslation } from 'react-i18next'
 import { Events } from '@wailsio/runtime'
 import '../../styles/index.css'
 import { CanvasEditorApp } from './CanvasEditorApp'
@@ -67,6 +68,7 @@ function useSingleEditorLock(): LockState {
 }
 
 function EditorGate({ desktop }: { desktop: boolean }) {
+  const { t } = useTranslation(['editor'])
   const lockState = useSingleEditorLock()
   const [ready, setReady] = useState(false)
   const [error, setError] = useState('')
@@ -165,9 +167,9 @@ function EditorGate({ desktop }: { desktop: boolean }) {
   if (lockState === 'blocked') {
     return (
       <div className="sb-screen-message">
-        <h1>SuperBoard 已在其他标签页打开</h1>
-        <p>为避免同时写入同一批文件，编辑器只允许一个标签页运行。</p>
-        <p>请关闭原来的标签页，然后刷新本页。</p>
+        <h1>{t('editor:lock.title')}</h1>
+        <p>{t('editor:lock.body')}</p>
+        <p>{t('editor:lock.hint')}</p>
       </div>
     )
   }
