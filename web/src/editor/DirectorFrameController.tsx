@@ -16,6 +16,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useTranslation } from 'react-i18next'
 import type { DirectorFrame } from '../shared/board/types'
 
 interface DirectorFrameControllerProps {
@@ -61,6 +62,7 @@ function SortableFrameRow({
   onCommitRename,
   onCancelRename,
 }: SortableFrameRowProps) {
+  const { t } = useTranslation(['editor'])
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: frame.id,
     disabled: renaming,
@@ -108,7 +110,9 @@ function SortableFrameRow({
           }}
         />
       ) : (
-        <span className="sb-frame-controller-name">{frame.name || `帧${frame.order}`}</span>
+        <span className="sb-frame-controller-name">
+          {frame.name || t('editor:director.frameCompact', { order: frame.order })}
+        </span>
       )}
     </div>
   )
@@ -121,6 +125,7 @@ export function DirectorFrameController({
   onChangeFrames,
   onClose,
 }: DirectorFrameControllerProps) {
+  const { t } = useTranslation(['editor'])
   const [position, setPosition] = useState({ left: 20, top: 80 })
   const [height, setHeight] = useState(300)
   const dragRef = useRef<DragState | null>(null)
@@ -191,7 +196,7 @@ export function DirectorFrameController({
     onChangeFrames(
       frames.map((item) =>
         item.id === frame.id
-          ? { ...item, name: value && value !== `帧${item.order}` ? value : undefined }
+          ? { ...item, name: value && value !== t('editor:director.frameCompact', { order: item.order }) ? value : undefined }
           : item,
       ),
     )
@@ -208,12 +213,12 @@ export function DirectorFrameController({
       onContextMenu={(event) => event.stopPropagation()}
     >
       <div className="sb-frame-controller-title" onPointerDown={beginMove}>
-        <span>控制帧</span>
+        <span>{t('editor:director.controller')}</span>
         <button
           type="button"
           onPointerDown={(event) => event.stopPropagation()}
           onClick={onClose}
-          aria-label="关闭"
+          aria-label={t('editor:rail.close')}
         >
           ×
         </button>
@@ -235,7 +240,9 @@ export function DirectorFrameController({
                 onSelect={() => onSelect(frame.id)}
                 onStartRename={() => {
                   setRenamingId(frame.id)
-                  setRenameValue(frame.name || `帧${frame.order}`)
+                  setRenameValue(
+                    frame.name || t('editor:director.frameCompact', { order: frame.order }),
+                  )
                 }}
                 onRenameChange={setRenameValue}
                 onCommitRename={() => commitRename(frame)}

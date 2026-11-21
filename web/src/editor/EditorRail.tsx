@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   ApertureIcon,
   CheckCircleIcon,
@@ -61,6 +62,7 @@ export function EditorRail({
   onExport,
   onOpenPreferences,
 }: EditorRailProps) {
+  const { t } = useTranslation(['editor'])
   const editing = mode === 'edit'
   const desktop = desktopMode()
   const [focusMode, setFocusMode] = useState(false)
@@ -101,7 +103,10 @@ export function EditorRail({
   }, [desktop])
 
   return (
-    <aside className="sb-rail" aria-label={editing ? '编辑器操作' : '白板操作'}>
+    <aside
+      className="sb-rail"
+      aria-label={editing ? t('editor:rail.editorActions') : t('editor:rail.boardActions')}
+    >
       <button
         type="button"
         className="sb-rail-button"
@@ -142,8 +147,12 @@ export function EditorRail({
         <button
           type="button"
           className="sb-rail-button"
-          data-tooltip={stylePanelOpen ? '隐藏样式面板' : '显示样式面板'}
-          aria-label={stylePanelOpen ? '隐藏样式面板' : '显示样式面板'}
+          data-tooltip={
+            stylePanelOpen ? t('editor:rail.hideStylePanel') : t('editor:rail.showStylePanel')
+          }
+          aria-label={
+            stylePanelOpen ? t('editor:rail.hideStylePanel') : t('editor:rail.showStylePanel')
+          }
           aria-pressed={stylePanelOpen}
           onClick={onToggleStylePanel}
         >
@@ -167,8 +176,8 @@ export function EditorRail({
       <button
         type="button"
         className="sb-rail-button"
-        data-tooltip="导演幕布"
-        aria-label="导演幕布"
+        data-tooltip={t('editor:rail.director')}
+        aria-label={t('editor:rail.director')}
         aria-pressed={directorMode}
         onClick={onToggleDirector}
       >
@@ -179,8 +188,8 @@ export function EditorRail({
         <button
           type="button"
           className="sb-rail-button"
-          data-tooltip="导出"
-          aria-label="导出"
+          data-tooltip={t('editor:export.title')}
+          aria-label={t('editor:export.title')}
           onClick={onExport}
         >
           <UploadCloudIcon size={21} />
@@ -191,8 +200,8 @@ export function EditorRail({
         <button
           type="button"
           className="sb-rail-button"
-          data-tooltip="设置"
-          aria-label="设置"
+          data-tooltip={t('editor:rail.settings')}
+          aria-label={t('editor:rail.settings')}
           onClick={onOpenPreferences}
         >
           <SettingsIcon size={21} />
@@ -204,8 +213,8 @@ export function EditorRail({
           <button
             type="button"
             className="sb-rail-button sb-rail-window-button"
-            data-tooltip="最小化"
-            aria-label="最小化"
+            data-tooltip={t('editor:rail.minimise')}
+            aria-label={t('editor:rail.minimise')}
             onMouseDown={(event) => event.preventDefault()}
             onClick={(event) => {
               event.currentTarget.blur()
@@ -217,8 +226,12 @@ export function EditorRail({
           <button
             type="button"
             className="sb-rail-button sb-rail-window-button"
-            data-tooltip={focusMode ? '退出专注模式（Esc）' : '专注模式（Esc 退出）'}
-            aria-label={focusMode ? '退出专注模式' : '专注模式'}
+            data-tooltip={
+              focusMode ? t('editor:rail.exitFocusTooltip') : t('editor:rail.focusTooltip')
+            }
+            aria-label={
+              focusMode ? t('editor:rail.exitFocus') : t('editor:rail.focus')
+            }
             aria-pressed={focusMode}
             onMouseDown={(event) => event.preventDefault()}
             onClick={(event) => {
@@ -235,8 +248,8 @@ export function EditorRail({
           <button
             type="button"
             className="sb-rail-button sb-rail-window-button sb-rail-window-close"
-            data-tooltip="退出"
-            aria-label="退出"
+            data-tooltip={t('editor:rail.quit')}
+            aria-label={t('editor:rail.quit')}
             onMouseDown={(event) => event.preventDefault()}
             onClick={(event) => {
               event.currentTarget.blur()

@@ -1,9 +1,12 @@
 import { useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import { useTranslation } from 'react-i18next'
 import { CanvasViewer, type CanvasViewerHandle } from '../canvas/viewer/CanvasViewer'
+import { initI18n } from '../i18n'
 import { previewCanvas } from './fixture'
 
 function PreviewApp() {
+  const { t } = useTranslation(['editor'])
   const viewerRef = useRef<CanvasViewerHandle>(null)
   const [directorOpen, setDirectorOpen] = useState(false)
   const frames = previewCanvas['x-superboard']?.director?.frames ?? []
@@ -35,15 +38,15 @@ function PreviewApp() {
       />
       <div className="preview-controls">
         <button type="button" onClick={toggleDirector}>
-          {directorOpen ? '隐藏导演幕布' : '显示导演幕布'}
+          {directorOpen ? t('editor:preview.hideDirector') : t('editor:preview.showDirector')}
         </button>
         {directorOpen ? (
           <>
             <button type="button" onClick={() => void playAll()}>
-              从头播放
+              {t('editor:director.playFromStart')}
             </button>
             <button type="button" onClick={stopDirector}>
-              恢复镜头
+              {t('editor:preview.restoreCamera')}
             </button>
           </>
         ) : null}
@@ -52,4 +55,6 @@ function PreviewApp() {
   )
 }
 
-createRoot(document.getElementById('root')!).render(<PreviewApp />)
+void initI18n().then(() => {
+  createRoot(document.getElementById('root')!).render(<PreviewApp />)
+})

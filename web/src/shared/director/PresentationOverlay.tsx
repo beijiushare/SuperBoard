@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 interface PresentationOverlayProps {
   menu: { x: number; y: number } | null
   onMenu: (menu: { x: number; y: number }) => void
@@ -6,6 +8,7 @@ interface PresentationOverlayProps {
 }
 
 export function PresentationOverlay({ menu, onMenu, onAdvance, onExit }: PresentationOverlayProps) {
+  const { t } = useTranslation(['editor'])
   return (
     <div
       className="sb-presentation-overlay"
@@ -23,7 +26,7 @@ export function PresentationOverlay({ menu, onMenu, onAdvance, onExit }: Present
           onClick={(event) => event.stopPropagation()}
         >
           <button type="button" onClick={onExit}>
-            停止播放
+            {t('editor:director.stop')}
           </button>
         </div>
       ) : null}
