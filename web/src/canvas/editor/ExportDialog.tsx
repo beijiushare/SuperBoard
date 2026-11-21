@@ -13,6 +13,7 @@ import {
   desktopExportHtml,
   desktopMode,
 } from '../../desktop/platform'
+import { getAppLanguage } from '../../i18n'
 import { Select } from '../../components/ui/select'
 
 interface ExportDialogProps {
@@ -22,9 +23,12 @@ interface ExportDialogProps {
 }
 
 function formatSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  const number = new Intl.NumberFormat(getAppLanguage(), {
+    maximumFractionDigits: 1,
+  })
+  if (bytes < 1024) return `${number.format(bytes)} B`
+  if (bytes < 1024 * 1024) return `${number.format(bytes / 1024)} KB`
+  return `${number.format(bytes / 1024 / 1024)} MB`
 }
 
 export function ExportDialog({

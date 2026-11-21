@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import type Vditor from 'vditor'
 import { loadMathJax } from '../../shared/markdown/mathjax'
 import { vditorCdn } from '../../shared/markdown/vditorAssets'
+import { getAppLanguage } from '../../i18n'
 
 interface MarkdownVditorProps {
   value: string
@@ -62,6 +63,7 @@ export function MarkdownVditor({
       if (cancelled || !element) return
       const vditor = new VditorClass(element, {
         cdn: vditorCdn,
+        lang: getAppLanguage() === 'en-US' ? 'en_US' : 'zh_CN',
         mode: 'ir',
         value,
         height: '100%',

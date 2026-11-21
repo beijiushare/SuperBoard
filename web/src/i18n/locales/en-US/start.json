@@ -1,0 +1,23 @@
+{
+  "brand.alt": "SuperBoard",
+  "page.aria": "Start",
+  "meta.version": "Version {{version}}",
+  "meta.website": "Website",
+  "open.title": "Open folder",
+  "open.description": "Open a folder as your workspace.",
+  "open.action": "Open",
+  "open.busy": "Opening…",
+  "recent.title": "Recent",
+  "recent.description": "Recently opened workspaces.",
+  "recent.placeholder": "Select",
+  "recent.aria": "Recent workspaces",
+  "recent.missing": "Folder not found",
+  "recent.permission": "Permission required",
+  "language.title": "Language",
+  "language.description": "Display language.",
+  "language.aria": "Language",
+  "unsupported": "This browser does not support the File System Access API. Use Edge or Chrome, or the SuperBoard desktop app.",
+  "loading": "Opening workspace…",
+  "loading.desktop": "Desktop",
+  "loading.browser": "Browser"
+}

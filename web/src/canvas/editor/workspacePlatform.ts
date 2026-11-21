@@ -11,6 +11,7 @@ import {
   desktopPickFiles,
   desktopRecentWorkspaces,
   desktopRevealFile,
+  desktopSetLanguage,
   desktopWorkspaceName,
   openDesktopWorkspace,
   type ImportedFile,
@@ -24,6 +25,7 @@ import {
   openBrowserRecent,
   openBrowserWorkspace,
 } from './browserFolderBackend'
+import { setAppLanguage } from '../../i18n'
 
 export function workspaceName() {
   return desktopMode() ? desktopWorkspaceName() : browserWorkspaceName()
@@ -123,4 +125,10 @@ export async function forgetRecentWorkspace(item: WorkspaceRecentItem) {
     return
   }
   await forgetBrowserRecent(item.id)
+}
+
+export async function changeAppLanguage(language: string) {
+  const next = await setAppLanguage(language)
+  if (desktopMode()) await desktopSetLanguage(next)
+  return next
 }

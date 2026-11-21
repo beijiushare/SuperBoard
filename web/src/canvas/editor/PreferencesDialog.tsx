@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import { ColorPicker } from './ColorPicker'
 import {
   DEFAULT_PREFERENCES,
@@ -16,6 +17,7 @@ import { desktopMode, desktopWorkspacePath } from '../../desktop/platform'
 import { APP_VERSION } from '../../shared/appVersion'
 import {
   canOpenWorkspace,
+  changeAppLanguage,
   forgetRecentWorkspace,
   listRecentWorkspaces,
   openRecentWorkspace,
@@ -23,12 +25,15 @@ import {
   workspaceName,
   type WorkspaceRecentItem,
 } from './workspacePlatform'
+import { getAppLanguage, SUPPORTED_LANGUAGES } from '../../i18n'
 
 interface PreferencesDialogProps {
   onClose: () => void
 }
 
 export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
+  const { t } = useTranslation(['settings', 'common'])
+  const language = getAppLanguage()
   const [draft, setDraft] = useState<EditorPreferences>(() =>
     structuredClone(getPreferences()),
   )
@@ -140,39 +145,41 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
       >
         <div className="sb-preferences-header">
           <div>
-            <h2>偏好设置</h2>
-            <p className="sb-preferences-note">
-              偏好保存在本机，只影响之后新建的块。
-            </p>
+            <h2>{t('settings:title')}</h2>
+            <p className="sb-preferences-note">{t('settings:note')}</p>
           </div>
           <button
             type="button"
             className="sb-preferences-close"
-            title="关闭"
-            aria-label="关闭"
+            title={t('common:actions.close')}
+            aria-label={t('common:actions.close')}
             onClick={onClose}
           >
             ×
           </button>
         </div>
 
-        <div className="sb-preferences-tabs" role="tablist" aria-label="设置分类">
+        <div
+          className="sb-preferences-tabs"
+          role="tablist"
+          aria-label={t('settings:options')}
+        >
           <input
             className="sb-settings-search"
             type="search"
-            placeholder="搜索设置…"
-            aria-label="搜索设置"
+            placeholder={t('settings:search.placeholder')}
+            aria-label={t('settings:search.aria')}
           />
-          <p className="sb-settings-group">选项</p>
+          <p className="sb-settings-group">{t('settings:options')}</p>
           {(
             [
-              ['about', '关于'],
-              ['general', '常规'],
-              ['block', '默认块'],
-              ['text', '文本'],
-              ['help', '帮助'],
+              ['about', 'settings:tabs.about'],
+              ['general', 'settings:tabs.general'],
+              ['block', 'settings:tabs.block'],
+              ['text', 'settings:tabs.text'],
+              ['help', 'settings:tabs.help'],
             ] as const
-          ).map(([value, label]) => (
+          ).map(([value, labelKey]) => (
             <button
               key={value}
               type="button"
@@ -181,7 +188,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
               className={tab === value ? 'is-active' : undefined}
               onClick={() => setTab(value)}
             >
-              {label}
+              {t(labelKey)}
             </button>
           ))}
         </div>
@@ -189,42 +196,52 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
         <div className="sb-settings-content">
         {tab === 'about' ? (
           <section>
-            <h3>版本</h3>
+            <h3>{t('settings:about.title')}</h3>
             <p className="sb-preferences-note">
-              SuperBoard {APP_VERSION} · {desktopMode() ? '桌面版' : '浏览器版'}
+              {t('settings:about.version', {
+                version: APP_VERSION,
+                platform: desktopMode()
+                  ? t('settings:about.desktop')
+                  : t('settings:about.browser'),
+              })}
             </p>
             <p className="sb-preferences-note">
               {desktopMode()
-                ? '桌面端更新由安装包负责，设置中不检查更新。'
-                : '浏览器端不提供检查更新；更新桌面安装包时会单独提示。'}
+                ? t('settings:about.desktopNote')
+                : t('settings:about.browserNote')}
             </p>
           </section>
         ) : null}
 
         {tab === 'help' ? (
           <section>
-            <h3>专注模式</h3>
+            <h3>{t('settings:help.focusTitle')}</h3>
             <p className="sb-preferences-note">
-              点击侧栏底部的专注模式按钮进入全屏；按 <kbd>Esc</kbd> 退出。
+              {t('settings:help.focusBody')}
             </p>
             <p className="sb-preferences-note">
-              专注模式会隐藏任务栏，退出后恢复到之前的窗口状态。
+              {t('settings:help.focusNote')}
             </p>
-            <h3>窗口操作</h3>
+            <h3>{t('settings:help.windowTitle')}</h3>
             <p className="sb-preferences-note">
-              侧栏底部从上到下依次是：最小化、专注模式、退出。
+              {t('settings:help.windowOrder')}
             </p>
             <p className="sb-preferences-note">
-              窗口没有标题栏，可拖动侧栏空白区域移动窗口，拖动窗口边缘缩放。
+              {t('settings:help.windowDrag')}
             </p>
           </section>
         ) : null}
 
         {tab === 'general' ? (
           <section>
-            <h3>工作区</h3>
+            <h3>{t('settings:workspace.title')}</h3>
             <p className="sb-preferences-note">
-              当前目录：{workspacePath || workspaceName() || '未选择'}
+              {t('settings:workspace.current', {
+                path:
+                  workspacePath ||
+                  workspaceName() ||
+                  t('settings:workspace.none'),
+              })}
             </p>
             {canOpenWorkspace() ? (
               <button
@@ -238,19 +255,21 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
                     .catch(() => setSwitching(false))
                 }}
               >
-                {switching ? '正在切换…' : '重新选择文件夹'}
+                {switching
+                  ? t('settings:workspace.switching')
+                  : t('settings:workspace.reselect')}
               </button>
             ) : null}
 
-            <h3>最近工作区</h3>
+            <h3>{t('settings:workspace.recent')}</h3>
             {recent.length > 0 ? (
               <div className="sb-workspace-recent">
                 {recent.map((item) => {
                   const current = isCurrentWorkspace(item)
                   const detail = !item.available
-                    ? '目录不存在'
+                    ? t('settings:workspace.missing')
                     : item.permission === 'prompt'
-                      ? '需要重新授权'
+                      ? t('settings:workspace.permission')
                       : item.path || item.name
                   return (
                     <div
@@ -267,7 +286,9 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
                       >
                         <span className="sb-workspace-recent-name">
                           {item.name}
-                          {current ? <small>当前</small> : null}
+                          {current ? (
+                            <small>{t('settings:workspace.currentBadge')}</small>
+                          ) : null}
                         </span>
                         <span className="sb-workspace-recent-path">
                           {detail}
@@ -276,8 +297,10 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
                       <button
                         type="button"
                         className="sb-workspace-recent-remove"
-                        aria-label={`移除 ${item.name}`}
-                        title="从最近列表移除"
+                        aria-label={t('settings:workspace.removeAria', {
+                          name: item.name,
+                        })}
+                        title={t('settings:workspace.remove')}
                         onClick={() => removeRecent(item)}
                       >
                         ×
@@ -290,26 +313,46 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
                   className="sb-workspace-start"
                   onClick={goStart}
                 >
-                  <span className="sb-workspace-recent-name">开始</span>
+                  <span className="sb-workspace-recent-name">
+                    {t('settings:start.open')}
+                  </span>
                   <span className="sb-workspace-recent-path">
-                    返回开始页，选择其他工作区
+                    {t('settings:start.description')}
                   </span>
                 </button>
               </div>
             ) : (
-              <p className="sb-preferences-note">还没有最近工作区。</p>
+              <p className="sb-preferences-note">
+                {t('settings:workspace.noRecent')}
+              </p>
             )}
-            <p className="sb-preferences-note">偏好保存在本机。</p>
-            <h3>恢复默认</h3>
             <p className="sb-preferences-note">
-              恢复默认块与文本样式，不会修改已有块。
+              {t('settings:workspace.prefsSaved')}
+            </p>
+            <h3>{t('settings:language.title')}</h3>
+            <p className="sb-preferences-note">
+              {t('settings:language.description')}
+            </p>
+            <Select
+              className="sb-select-compact"
+              value={language}
+              onChange={(value) => void changeAppLanguage(value)}
+              ariaLabel={t('settings:language.aria')}
+              options={SUPPORTED_LANGUAGES.map((lang) => ({
+                value: lang,
+                label: t(`common:language.${lang}`),
+              }))}
+            />
+            <h3>{t('settings:reset.title')}</h3>
+            <p className="sb-preferences-note">
+              {t('settings:reset.description')}
             </p>
             <button
               type="button"
               className="sb-button"
               onClick={() => setConfirmReset(true)}
             >
-              恢复默认设置
+              {t('settings:reset.action')}
             </button>
           </section>
         ) : null}
@@ -432,14 +475,14 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           className="canvas-editor-dialog sb-confirm-dialog"
           role="dialog"
           aria-modal="true"
-          aria-label="恢复默认设置"
+          aria-label={t('settings:reset.confirmTitle')}
           onClick={(event) => event.stopPropagation()}
         >
-          <h2>恢复默认设置？</h2>
-          <p>所有默认样式将恢复为初始值，已有块不会改变。</p>
+          <h2>{t('settings:reset.confirmTitle')}</h2>
+          <p>{t('settings:reset.confirmBody')}</p>
           <div className="canvas-editor-dialog-actions">
             <button type="button" onClick={() => setConfirmReset(false)}>
-              取消
+              {t('settings:reset.cancel')}
             </button>
             <button
               type="button"
@@ -448,7 +491,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
                 setConfirmReset(false)
               }}
             >
-              恢复默认
+              {t('settings:reset.confirm')}
             </button>
           </div>
         </div>
@@ -464,12 +507,14 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           className="canvas-editor-dialog sb-confirm-dialog"
           role="alertdialog"
           aria-modal="true"
-          aria-label="无法删除工作区"
+          aria-label={t('settings:protected.title')}
           onClick={(event) => event.stopPropagation()}
         >
-          <h2>无法删除正在使用的工作区</h2>
+          <h2>{t('settings:protected.title')}</h2>
           <p>
-            当前编辑器正在使用「{protectedWorkspace.name}」。请先转到
+            {t('settings:protected.bodyBefore', {
+              name: protectedWorkspace.name,
+            })}
             <button
               type="button"
               className="sb-inline-link"
@@ -478,16 +523,16 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
                 goStart()
               }}
             >
-              开始
+              {t('settings:protected.startLink')}
             </button>
-            ，再删除该工作区。
+            {t('settings:protected.bodyAfter')}
           </p>
           <div className="canvas-editor-dialog-actions">
             <button
               type="button"
               onClick={() => setProtectedWorkspace(null)}
             >
-              知道了
+              {t('settings:protected.ok')}
             </button>
           </div>
         </div>

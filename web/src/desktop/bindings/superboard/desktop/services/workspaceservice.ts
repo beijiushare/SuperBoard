@@ -43,6 +43,10 @@ export function ForgetWorkspace(path: string): $CancellablePromise<$models.Resul
     return $Call.ByID(2124358010, path);
 }
 
+export function GetLanguage(): $CancellablePromise<$models.Result> {
+    return $Call.ByID(3097622470);
+}
+
 /**
  * ImportFile stores a version of the browser file input flow. The frontend
  * sends base64 so the desktop app reuses the same insertion UI.
@@ -111,6 +115,10 @@ export function RestoreWorkspace(): $CancellablePromise<$models.Result> {
 
 export function RevealFile(relative: string): $CancellablePromise<void> {
     return $Call.ByID(3575625043, relative);
+}
+
+export function SetLanguage(language: string): $CancellablePromise<$models.Result> {
+    return $Call.ByID(1438367962, language);
 }
 
 export function UpdateBoard(slug: string, scope: string, title: string, nextSlug: string, folder: string, summary: string): $CancellablePromise<$models.Result> {

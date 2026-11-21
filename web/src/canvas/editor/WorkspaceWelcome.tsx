@@ -1,8 +1,11 @@
 import type { MouseEvent } from 'react'
 import { Browser } from '@wailsio/runtime'
+import { useTranslation } from 'react-i18next'
 import type { WorkspaceRecentItem } from './workspacePlatform'
+import { changeAppLanguage } from './workspacePlatform'
 import { APP_VERSION } from '../../shared/appVersion'
 import { Select } from '../../components/ui/select'
+import { getAppLanguage, SUPPORTED_LANGUAGES } from '../../i18n'
 import wordmarkUrl from '../../assets/superboard-wordmark.svg?url'
 import hashUrl from '../../assets/superboard-hash.svg?url'
 
@@ -22,14 +25,17 @@ function HashIcon({ size = 40 }: { size?: number }) {
 }
 
 export function WelcomeLoading({ desktop }: { desktop: boolean }) {
+  const { t } = useTranslation(['start'])
   return (
     <div className="sb-welcome sb-welcome-loading">
       <div className="sb-welcome-logo">
         <HashIcon size={40} />
       </div>
       <h1>SuperBoard</h1>
-      <p>正在打开工作区…</p>
-      <span>{desktop ? '桌面版' : '浏览器版'}</span>
+      <p>{t('start:loading')}</p>
+      <span>
+        {desktop ? t('start:loading.desktop') : t('start:loading.browser')}
+      </span>
     </div>
   )
 }
@@ -53,6 +59,8 @@ export function WorkspaceWelcome({
   onOpenFolder,
   onOpenRecent,
 }: WorkspaceWelcomeProps) {
+  const { t } = useTranslation(['start', 'common'])
+  const language = getAppLanguage()
   const openExternal = (event: MouseEvent, url: string) => {
     if (!desktop) return
     event.preventDefault()
@@ -75,7 +83,7 @@ export function WorkspaceWelcome({
           <img
             className="sb-start-wordmark"
             src={wordmarkUrl}
-            alt="SuperBoard"
+            alt={t('start:brand.alt')}
           />
         </header>
 
@@ -92,7 +100,7 @@ export function WorkspaceWelcome({
               )
             }
           >
-            版本 {APP_VERSION}
+            {t('start:meta.version', { version: APP_VERSION })}
           </a>
           <span aria-hidden="true">·</span>
           <a
@@ -104,15 +112,15 @@ export function WorkspaceWelcome({
               openExternal(event, 'https://beijiu.top/SuperBoard')
             }
           >
-            网站
+            {t('start:meta.website')}
           </a>
         </div>
 
-        <section className="sb-start-card" aria-label="开始">
+        <section className="sb-start-card" aria-label={t('start:page.aria')}>
           <div className="sb-start-row">
             <div className="sb-start-row-text">
-              <h2>打开文件夹</h2>
-              <p>打开指定文件夹作为工作区。</p>
+              <h2>{t('start:open.title')}</h2>
+              <p>{t('start:open.description')}</p>
             </div>
             <button
               type="button"
@@ -120,21 +128,21 @@ export function WorkspaceWelcome({
               disabled={busy || !supported}
               onClick={onOpenFolder}
             >
-              {busy ? '正在…' : '打开'}
+              {busy ? t('start:open.busy') : t('start:open.action')}
             </button>
           </div>
 
           <div className="sb-start-row">
             <div className="sb-start-row-text">
-              <h2>最近打开</h2>
-              <p>最近访问的工作区。</p>
+              <h2>{t('start:recent.title')}</h2>
+              <p>{t('start:recent.description')}</p>
             </div>
             <Select
               className="sb-start-select"
               value=""
-              placeholder="选择"
+              placeholder={t('start:recent.placeholder')}
               disabled={busy}
-              ariaLabel="最近工作区"
+              ariaLabel={t('start:recent.aria')}
               onChange={(id) => {
                 const item = recent.find((entry) => entry.id === id)
                 if (item) onOpenRecent(item)
@@ -145,9 +153,9 @@ export function WorkspaceWelcome({
                 disabled: !item.available,
                 title: item.path ?? item.name,
                 hint: !item.available
-                  ? '目录不存在'
+                  ? t('start:recent.missing')
                   : item.permission === 'prompt'
-                    ? '需要授权'
+                    ? t('start:recent.permission')
                     : undefined,
               }))}
             />
@@ -155,24 +163,24 @@ export function WorkspaceWelcome({
 
           <div className="sb-start-row">
             <div className="sb-start-row-text">
-              <h2>语言</h2>
-              <p>界面显示语言。</p>
+              <h2>{t('start:language.title')}</h2>
+              <p>{t('start:language.description')}</p>
             </div>
             <Select
               className="sb-start-select"
-              value="zh-CN"
-              onChange={() => undefined}
-              ariaLabel="语言"
-              options={[{ value: 'zh-CN', label: '简体中文' }]}
+              value={language}
+              onChange={(value) => void changeAppLanguage(value)}
+              ariaLabel={t('start:language.aria')}
+              options={SUPPORTED_LANGUAGES.map((lang) => ({
+                value: lang,
+                label: t(`common:language.${lang}`),
+              }))}
             />
           </div>
         </section>
 
         {!supported ? (
-          <p className="sb-welcome-error">
-            当前浏览器不支持 File System Access API，请使用 Edge / Chrome，
-            或改用 SuperBoard 桌面端。
-          </p>
+          <p className="sb-welcome-error">{t('start:unsupported')}</p>
         ) : null}
         {error ? <p className="sb-welcome-error">{error}</p> : null}
       </div>

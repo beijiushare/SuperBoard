@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { loadMathJax } from './mathjax'
 import { vditorCdn } from './vditorAssets'
+import { getAppLanguage } from '../../i18n'
 
 const MarkdownView = lazy(() =>
   import('./MarkdownView').then((module) => ({ default: module.MarkdownView })),
@@ -34,6 +35,7 @@ async function renderHtml(source: string) {
     const { default: Vditor } = await import('vditor')
     return Vditor.md2html(source, {
       cdn: vditorCdn,
+      lang: getAppLanguage() === 'en-US' ? 'en_US' : 'zh_CN',
       mode: 'light',
       math: { engine: 'MathJax' },
       markdown: {

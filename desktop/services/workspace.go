@@ -271,8 +271,24 @@ func (s *WorkspaceService) OpenWorkspaceAt(root string) Result {
 	})
 }
 
-func (s *WorkspaceService) RecentWorkspaces() Result {
-	s.mu.Lock()
+func (s *WorkspaceService) GetLanguage() Result {
+	config := loadConfig()
+	return ok(map[string]any{"language": config.Language})
+}
+
+func (s *WorkspaceService) SetLanguage(language string) Result {
+	if language != "zh-CN" && language != "en-US" {
+		return fail(400, "不支持的语言")
+	}
+	config := loadConfig()
+	config.Language = language
+	if err := saveConfig(config); err != nil {
+		return fail(500, err.Error())
+	}
+	return simpleOK()
+}
+
+func (s *WorkspaceService) RecentWorkspaces() Result {	s.mu.Lock()
 	defer s.mu.Unlock()
 	config := loadConfig()
 	if config.Workspace != "" {

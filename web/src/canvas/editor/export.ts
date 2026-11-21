@@ -8,6 +8,7 @@ import {
 } from '../model'
 import { edgeGeometry } from './edges'
 import { resolveFileUrl } from '../viewer/fileResolver'
+import { getAppLanguage } from '../../i18n'
 
 const PADDING = 64
 
@@ -343,7 +344,7 @@ export function buildCanvasHtml(canvas: CanvasDocument) {
   const svg = buildCanvasSvg(canvas)
   const title = escapeXml(canvas['x-superboard']?.meta.title || 'SuperBoard')
   return `<!doctype html>
-<html lang="zh-CN">
+<html lang="${getAppLanguage()}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -528,7 +529,7 @@ function buildSnapshotHtml(
 ) {
   const css = collectDocumentCss()
   return `<!doctype html>
-<html lang="zh-CN">
+<html lang="${getAppLanguage()}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">

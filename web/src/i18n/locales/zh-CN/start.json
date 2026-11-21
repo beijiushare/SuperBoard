@@ -1,0 +1,23 @@
+{
+  "brand.alt": "SuperBoard",
+  "page.aria": "开始",
+  "meta.version": "版本 {{version}}",
+  "meta.website": "网站",
+  "open.title": "打开文件夹",
+  "open.description": "打开指定文件夹作为工作区。",
+  "open.action": "打开",
+  "open.busy": "正在…",
+  "recent.title": "最近打开",
+  "recent.description": "最近访问的工作区。",
+  "recent.placeholder": "选择",
+  "recent.aria": "最近工作区",
+  "recent.missing": "目录不存在",
+  "recent.permission": "需要授权",
+  "language.title": "语言",
+  "language.description": "界面显示语言。",
+  "language.aria": "语言",
+  "unsupported": "当前浏览器不支持 File System Access API，请使用 Edge / Chrome，或改用 SuperBoard 桌面端。",
+  "loading": "正在打开工作区…",
+  "loading.desktop": "桌面版",
+  "loading.browser": "浏览器版"
+}

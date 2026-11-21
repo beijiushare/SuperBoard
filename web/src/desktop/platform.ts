@@ -100,6 +100,19 @@ export async function desktopForgetWorkspace(path: string) {
   if (data.error) throw new Error(data.error)
 }
 
+export async function desktopGetLanguage() {
+  const result = await Workspace.GetLanguage()
+  const data = parse<{ language?: string; error?: string }>(result)
+  if (data.error) throw new Error(data.error)
+  return data.language ?? ''
+}
+
+export async function desktopSetLanguage(language: string) {
+  const result = await Workspace.SetLanguage(language)
+  const data = parse<{ error?: string }>(result)
+  if (data.error) throw new Error(data.error)
+}
+
 function readAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader()

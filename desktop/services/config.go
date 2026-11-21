@@ -15,6 +15,7 @@ type RecentWorkspace struct {
 
 type Config struct {
 	Workspace string            `json:"workspace"`
+	Language  string            `json:"language,omitempty"`
 	Recent    []RecentWorkspace `json:"recent,omitempty"`
 }
 

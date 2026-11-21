@@ -13,6 +13,7 @@ import { setFileOpener, setFileUrlResolver } from '../viewer/fileResolver'
 import {
   detectDesktop,
   desktopFileUrl,
+  desktopGetLanguage,
   installDesktopFolderBackend,
   restoreDesktopWorkspace,
 } from '../../desktop/platform'
@@ -23,6 +24,7 @@ import {
   openWorkspaceFile,
   type WorkspaceRecentItem,
 } from './workspacePlatform'
+import { initI18n } from '../../i18n'
 import { WelcomeLoading, WorkspaceWelcome } from './WorkspaceWelcome'
 
 const LOCK_NAME = 'superboard-editor'
@@ -198,6 +200,15 @@ function EditorGate({ desktop }: { desktop: boolean }) {
 
 async function boot() {
   const desktop = await detectDesktop()
+  let language: string | null = null
+  if (desktop) {
+    try {
+      language = await desktopGetLanguage()
+    } catch {
+      language = null
+    }
+  }
+  await initI18n(language)
   document.documentElement.dataset.platform = desktop ? 'desktop' : 'browser'
   if (desktop) {
     installDesktopFolderBackend()
