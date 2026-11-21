@@ -10,6 +10,7 @@ import { ColorPicker } from './ColorPicker'
 import { DEFAULT_PREFERENCES, fontOptions } from './preferences'
 import { StyleNumberControl } from './StyleNumberControl'
 import { Select } from '../../components/ui/select'
+import { Switch } from '../../components/ui/switch'
 
 interface TransformFieldsProps {
   rotation: number
@@ -238,33 +239,19 @@ export function CanvasFields({
       />
       <div className="sb-style-row">
         <span>{t('editor:style.grid')}</span>
-        <div className="sb-style-buttons">
-          {(
-            [
-              ['none', t('editor:style.gridNone')],
-              ['lines', t('editor:style.gridLines')],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              className={grid === value ? 'is-active' : undefined}
-              onClick={() => onUpdate({ grid: value })}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <Switch
+          checked={grid === 'lines'}
+          onChange={(checked) => onUpdate({ grid: checked ? 'lines' : 'none' })}
+          ariaLabel={t('editor:style.grid')}
+        />
       </div>
       <div className="sb-style-row">
         <span>{t('editor:style.guides')}</span>
-        <button
-          type="button"
-          className={`sb-style-toggle${guides ? ' is-active' : ''}`}
-          onClick={onToggleGuides}
-        >
-          {guides ? t('editor:style.on') : t('editor:style.off')}
-        </button>
+        <Switch
+          checked={guides}
+          onChange={onToggleGuides}
+          ariaLabel={t('editor:style.guides')}
+        />
       </div>
     </section>
   )

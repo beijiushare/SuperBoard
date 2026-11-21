@@ -1,0 +1,360 @@
+/* Settings dialog — follows the SuperBoard design language (docs/DESIGN.md). */
+
+.sb-preferences-dialog {
+  display: grid;
+  width: min(1040px, calc(100vw - 48px));
+  height: min(760px, calc(100vh - 64px));
+  max-height: calc(100vh - 64px);
+  grid-template-columns: 224px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--sb-border);
+  border-radius: 18px;
+  background: var(--sb-surface);
+  box-shadow: 0 24px 64px rgb(20 18 10 / 18%);
+}
+
+.sb-preferences-dialog .sb-preferences-header {
+  display: flex;
+  grid-column: 2;
+  grid-row: 1;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 36px 18px;
+  border-bottom: 1px solid var(--sb-border-subtle);
+}
+
+.sb-preferences-dialog .sb-preferences-header h2 {
+  margin: 0;
+  color: var(--sb-text);
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.sb-preferences-dialog .sb-preferences-header p {
+  margin: 5px 0 0;
+  color: var(--sb-text-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.sb-preferences-dialog .sb-preferences-close {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--sb-radius-md);
+  background: transparent;
+  color: var(--sb-text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition:
+    background var(--sb-motion),
+    color var(--sb-motion);
+}
+
+.sb-preferences-dialog .sb-preferences-close:hover {
+  background: var(--sb-surface-muted);
+  color: var(--sb-text);
+}
+
+.sb-preferences-dialog .sb-preferences-tabs {
+  display: flex;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  flex-direction: column;
+  gap: 2px;
+  align-self: stretch;
+  margin: 0;
+  padding: 20px 14px;
+  border: 0;
+  border-right: 1px solid var(--sb-border);
+  border-radius: 0;
+  background: var(--sb-surface-muted);
+}
+
+.sb-preferences-dialog .sb-settings-search {
+  width: 100%;
+  height: 34px;
+  margin-bottom: 16px;
+  padding: 0 12px;
+  border: 1px solid var(--sb-border-control);
+  border-radius: var(--sb-radius-md);
+  background: var(--sb-surface);
+  color: var(--sb-text);
+  font-size: 13px;
+  outline: none;
+  transition:
+    border-color var(--sb-motion),
+    box-shadow var(--sb-motion);
+}
+
+.sb-preferences-dialog .sb-settings-search::placeholder {
+  color: var(--sb-text-faint);
+}
+
+.sb-preferences-dialog .sb-settings-search:focus {
+  border-color: #b9b5a9;
+  box-shadow: 0 0 0 3px rgb(34 33 31 / 6%);
+}
+
+.sb-preferences-dialog .sb-settings-group {
+  margin: 0 0 6px;
+  padding: 0 12px;
+  color: var(--sb-text-faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sb-preferences-dialog .sb-preferences-tabs button {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--sb-radius-md);
+  background: transparent;
+  color: var(--sb-text-secondary);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--sb-motion),
+    color var(--sb-motion);
+}
+
+.sb-preferences-dialog .sb-preferences-tabs button:hover {
+  background: rgb(60 55 45 / 5%);
+  color: var(--sb-text);
+}
+
+.sb-preferences-dialog .sb-preferences-tabs button.is-active {
+  background: var(--sb-surface);
+  color: var(--sb-text);
+  box-shadow: inset 0 0 0 1px var(--sb-border);
+  font-weight: 600;
+}
+
+.sb-preferences-dialog .sb-settings-content {
+  grid-column: 2;
+  grid-row: 2;
+  padding: 22px 36px 36px;
+  overflow: auto;
+  background: var(--sb-surface);
+}
+
+.sb-preferences-dialog .sb-settings-content > section {
+  margin: 0 0 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--sb-border);
+  border-radius: var(--sb-radius-lg);
+  background: var(--sb-surface);
+}
+
+.sb-preferences-dialog .sb-settings-content > section.sb-settings-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.sb-preferences-dialog .sb-settings-content > section > h3 {
+  margin: 0 0 6px;
+  color: var(--sb-text);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.sb-preferences-dialog .sb-settings-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--sb-border-subtle);
+}
+
+.sb-preferences-dialog .sb-settings-card-head:last-child {
+  border-bottom: 0;
+}
+
+.sb-preferences-dialog .sb-settings-card-head h3 {
+  margin: 0;
+  color: var(--sb-text);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.sb-preferences-dialog .sb-settings-card-head p {
+  margin: 5px 0 0;
+  color: var(--sb-text-muted);
+  font-size: 12px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.sb-preferences-dialog .sb-settings-rows {
+  padding: 4px 20px;
+}
+
+.sb-preferences-dialog .sb-settings-row {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--sb-border-subtle);
+}
+
+.sb-preferences-dialog .sb-settings-row:last-child {
+  border-bottom: 0;
+}
+
+.sb-preferences-dialog .sb-settings-row > span:first-child {
+  min-width: 0;
+  flex: 1;
+  color: var(--sb-text-secondary);
+  font-size: 13px;
+}
+
+.sb-preferences-dialog .sb-settings-row-title {
+  margin: 12px 0 6px;
+  color: var(--sb-text-faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sb-preferences-dialog .sb-settings-note {
+  margin: 10px 0;
+  color: var(--sb-text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.sb-preferences-dialog .sb-select-settings {
+  width: 180px;
+  flex: none;
+}
+
+/* Controls rendered by shared field components */
+
+.sb-preferences-dialog .sb-style-row,
+.sb-preferences-dialog .sb-style-number-control,
+.sb-preferences-dialog .sb-color-control {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--sb-border-subtle);
+}
+
+.sb-preferences-dialog .sb-style-row:last-child,
+.sb-preferences-dialog .sb-style-number-control:last-child,
+.sb-preferences-dialog .sb-color-control:last-child {
+  border-bottom: 0;
+}
+
+.sb-preferences-dialog .sb-style-row > span,
+.sb-preferences-dialog .sb-style-number-label,
+.sb-preferences-dialog .sb-color-control-label {
+  width: auto;
+  min-width: 0;
+  flex: 1;
+  color: var(--sb-text-secondary);
+  font-size: 13px;
+}
+
+.sb-preferences-dialog .sb-color-presets,
+.sb-preferences-dialog .sb-style-buttons {
+  flex: none;
+}
+
+.sb-preferences-dialog .sb-style-number-slider {
+  width: 120px;
+  flex: none;
+  accent-color: var(--sb-accent);
+}
+
+.sb-preferences-dialog .sb-style-spin {
+  width: 84px;
+  height: 30px;
+  flex: none;
+  border: 1px solid var(--sb-border-control);
+  border-radius: var(--sb-radius-md);
+  background: #fff;
+}
+
+.sb-preferences-dialog .sb-style-spin input {
+  height: 100%;
+  padding: 0 8px;
+  color: var(--sb-text);
+  font-size: 12px;
+}
+
+.sb-preferences-dialog .sb-style-spin span {
+  padding-right: 8px;
+  color: var(--sb-text-faint);
+  font-size: 11px;
+}
+
+.sb-preferences-dialog .sb-style-buttons button {
+  min-width: 36px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--sb-border-control);
+  border-radius: var(--sb-radius-md);
+  background: #fff;
+  color: var(--sb-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sb-preferences-dialog .sb-style-buttons button.is-active {
+  border-color: var(--sb-accent);
+  background: var(--sb-accent);
+  color: #fff;
+}
+
+/* Recent workspaces */
+
+.sb-preferences-dialog .sb-workspace-recent {
+  margin: 0 0 8px;
+  border-top: 0;
+}
+
+.sb-preferences-dialog .sb-workspace-recent-row {
+  border-bottom: 1px solid var(--sb-border-subtle);
+}
+
+.sb-preferences-dialog .sb-workspace-recent-open,
+.sb-preferences-dialog .sb-workspace-start {
+  padding: 10px 8px;
+  border: 0;
+  border-radius: var(--sb-radius-md);
+}
+
+.sb-preferences-dialog .sb-workspace-recent-open:hover:not(:disabled),
+.sb-preferences-dialog .sb-workspace-start:hover {
+  background: var(--sb-surface-muted);
+}
+
+.sb-preferences-dialog .sb-workspace-start {
+  border-bottom: 0;
+}
+
+.sb-preferences-dialog .sb-button-small {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--sb-radius-md);
+  font-size: 12px;
+}

@@ -9,6 +9,28 @@
   --sb-card-bg: #ffffff;
   --sb-card-border: #dddddd;
   --sb-card-radius: 8px;
+  /* Design tokens (see docs/DESIGN.md) */
+  --sb-paper: #faf9f5;
+  --sb-surface: #fffdf8;
+  --sb-surface-muted: #f6f4ee;
+  --sb-border: #e6e2d8;
+  --sb-border-subtle: #eeeae1;
+  --sb-border-control: #d8d4c9;
+  --sb-text: #1f1e1c;
+  --sb-text-secondary: #6f6b60;
+  --sb-text-muted: #8a857b;
+  --sb-text-faint: #a19c90;
+  --sb-accent: #28924f;
+  --sb-accent-soft: rgb(40 146 79 / 12%);
+  --sb-danger: #b4483c;
+  --sb-radius-xs: 4px;
+  --sb-radius-sm: 6px;
+  --sb-radius-md: 8px;
+  --sb-radius-lg: 14px;
+  --sb-radius-pill: 999px;
+  --sb-control-height: 34px;
+  --sb-shadow-popover: 0 12px 32px rgb(20 18 10 / 16%);
+  --sb-motion: 0.15s ease;
 }
 
 * {

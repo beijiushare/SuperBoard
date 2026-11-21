@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { ColorPicker } from './ColorPicker'
 import type { DrawingPatch } from './drawingStyle'
 import { StyleNumberControl } from './StyleNumberControl'
+import { Switch } from '../../components/ui/switch'
 
 interface DrawingStyleSectionProps {
   size: number
@@ -88,13 +89,11 @@ export function DrawingStyleSection({
       />
       <div className="sb-style-row">
         <span>{t('editor:style.simulatePressure')}</span>
-        <button
-          type="button"
-          className={`sb-style-toggle${simulatePressure ? ' is-active' : ''}`}
-          onClick={() => onChange({ simulatePressure: !simulatePressure })}
-        >
-          {simulatePressure ? t('editor:style.on') : t('editor:style.off')}
-        </button>
+        <Switch
+          checked={simulatePressure}
+          onChange={(checked) => onChange({ simulatePressure: checked })}
+          ariaLabel={t('editor:style.simulatePressure')}
+        />
       </div>
       <StyleNumberControl
         label={t('editor:style.start')}

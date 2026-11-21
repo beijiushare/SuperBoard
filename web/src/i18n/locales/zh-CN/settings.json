@@ -6,8 +6,7 @@
   "search.aria": "搜索设置",
   "tabs.about": "关于",
   "tabs.general": "常规",
-  "tabs.block": "默认块",
-  "tabs.text": "文本",
+  "tabs.defaults": "默认样式",
   "tabs.help": "帮助",
   "workspace.title": "工作区",
   "workspace.current": "当前目录：{{path}}",
@@ -53,7 +52,7 @@
   "start.open": "开始",
   "start.description": "返回开始页，选择其他工作区",
   "dialogAria": "偏好设置",
-  "textDefaults.title": "文本默认样式",
+  "textDefaults.title": "文本",
   "textDefaults.align": "对齐",
-  "blockDefaults.title": "形状默认样式"
+  "blockDefaults.title": "形状"
 }

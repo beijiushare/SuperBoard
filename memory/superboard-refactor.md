@@ -198,6 +198,9 @@
 - `npm run check:i18n` 校验中英文 key 一致性，已接入 `deploy.yml` 与 `pages.yml`
 - 开发用 Vite 中间件错误消息统一为英文（仅开发者可见）
 - `canvas-preview/fixture.ts` 的示例白板内容保持中文，视为样例数据
+- 设计语言：token 在 `web/src/styles/base.css`，规范见 `docs/DESIGN.md`
+- 开关统一 `web/src/components/ui/switch.tsx`，开启色 `#28924F`
+- 设置「默认样式」合并原「默认块」「文本」，统一卡片 + 行式布局
 - 最近下拉默认显示「选择」，选项悬停显示路径
 - 语言下拉暂时只有简体中文
 - 最近列表底部「开始」通过 `?start=1` 返回开始页

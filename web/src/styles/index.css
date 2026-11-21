@@ -11,4 +11,6 @@
 @import './style-panel.css';
 @import './responsive.css';
 @import './select.css';
+@import './controls.css';
+@import './settings.css';
 @import './welcome.css';

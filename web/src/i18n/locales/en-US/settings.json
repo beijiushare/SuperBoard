@@ -6,8 +6,7 @@
   "search.aria": "Search settings",
   "tabs.about": "About",
   "tabs.general": "General",
-  "tabs.block": "Blocks",
-  "tabs.text": "Text",
+  "tabs.defaults": "Defaults",
   "tabs.help": "Help",
   "workspace.title": "Workspace",
   "workspace.current": "Current folder: {{path}}",
@@ -53,7 +52,7 @@
   "start.open": "Start",
   "start.description": "Return to the start page and choose another workspace",
   "dialogAria": "Preferences",
-  "textDefaults.title": "Default text style",
+  "textDefaults.title": "Text",
   "textDefaults.align": "Align",
-  "blockDefaults.title": "Default shape style"
+  "blockDefaults.title": "Shape"
 }

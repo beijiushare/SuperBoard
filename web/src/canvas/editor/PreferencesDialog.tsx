@@ -38,7 +38,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
     structuredClone(getPreferences()),
   )
   const [confirmReset, setConfirmReset] = useState(false)
-  const [tab, setTab] = useState<'about' | 'general' | 'block' | 'text' | 'help'>(
+  const [tab, setTab] = useState<'about' | 'general' | 'defaults' | 'help'>(
     'general',
   )
   const [switching, setSwitching] = useState(false)
@@ -175,8 +175,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
             [
               ['about', 'settings:tabs.about'],
               ['general', 'settings:tabs.general'],
-              ['block', 'settings:tabs.block'],
-              ['text', 'settings:tabs.text'],
+              ['defaults', 'settings:tabs.defaults'],
               ['help', 'settings:tabs.help'],
             ] as const
           ).map(([value, labelKey]) => (
@@ -195,272 +194,323 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
 
         <div className="sb-settings-content">
         {tab === 'about' ? (
-          <section>
-            <h3>{t('settings:about.title')}</h3>
-            <p className="sb-preferences-note">
-              {t('settings:about.version', {
-                version: APP_VERSION,
-                platform: desktopMode()
-                  ? t('settings:about.desktop')
-                  : t('settings:about.browser'),
-              })}
-            </p>
-            <p className="sb-preferences-note">
-              {desktopMode()
-                ? t('settings:about.desktopNote')
-                : t('settings:about.browserNote')}
-            </p>
+          <section className="sb-settings-card">
+            <header className="sb-settings-card-head">
+              <div>
+                <h3>{t('settings:about.title')}</h3>
+                <p>
+                  {t('settings:about.version', {
+                    version: APP_VERSION,
+                    platform: desktopMode()
+                      ? t('settings:about.desktop')
+                      : t('settings:about.browser'),
+                  })}
+                </p>
+              </div>
+            </header>
+            <div className="sb-settings-rows">
+              <p className="sb-settings-note">
+                {desktopMode()
+                  ? t('settings:about.desktopNote')
+                  : t('settings:about.browserNote')}
+              </p>
+            </div>
           </section>
         ) : null}
 
         {tab === 'help' ? (
-          <section>
-            <h3>{t('settings:help.focusTitle')}</h3>
-            <p className="sb-preferences-note">
-              {t('settings:help.focusBody')}
-            </p>
-            <p className="sb-preferences-note">
-              {t('settings:help.focusNote')}
-            </p>
-            <h3>{t('settings:help.windowTitle')}</h3>
-            <p className="sb-preferences-note">
-              {t('settings:help.windowOrder')}
-            </p>
-            <p className="sb-preferences-note">
-              {t('settings:help.windowDrag')}
-            </p>
-          </section>
-        ) : null}
-
-        {tab === 'general' ? (
-          <section>
-            <h3>{t('settings:workspace.title')}</h3>
-            <p className="sb-preferences-note">
-              {t('settings:workspace.current', {
-                path:
-                  workspacePath ||
-                  workspaceName() ||
-                  t('settings:workspace.none'),
-              })}
-            </p>
-            {canOpenWorkspace() ? (
-              <button
-                type="button"
-                className="sb-button"
-                disabled={switching}
-                onClick={() => {
-                  setSwitching(true)
-                  void openWorkspace()
-                    .then(() => window.location.reload())
-                    .catch(() => setSwitching(false))
-                }}
-              >
-                {switching
-                  ? t('settings:workspace.switching')
-                  : t('settings:workspace.reselect')}
-              </button>
-            ) : null}
-
-            <h3>{t('settings:workspace.recent')}</h3>
-            {recent.length > 0 ? (
-              <div className="sb-workspace-recent">
-                {recent.map((item) => {
-                  const current = isCurrentWorkspace(item)
-                  const detail = !item.available
-                    ? t('settings:workspace.missing')
-                    : item.permission === 'prompt'
-                      ? t('settings:workspace.permission')
-                      : item.path || item.name
-                  return (
-                    <div
-                      key={item.id}
-                      className={`sb-workspace-recent-row${
-                        item.available ? '' : ' is-missing'
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        className="sb-workspace-recent-open"
-                        disabled={!item.available || switching}
-                        onClick={() => switchToRecent(item)}
-                      >
-                        <span className="sb-workspace-recent-name">
-                          {item.name}
-                          {current ? (
-                            <small>{t('settings:workspace.currentBadge')}</small>
-                          ) : null}
-                        </span>
-                        <span className="sb-workspace-recent-path">
-                          {detail}
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        className="sb-workspace-recent-remove"
-                        aria-label={t('settings:workspace.removeAria', {
-                          name: item.name,
-                        })}
-                        title={t('settings:workspace.remove')}
-                        onClick={() => removeRecent(item)}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )
-                })}
-                <button
-                  type="button"
-                  className="sb-workspace-start"
-                  onClick={goStart}
-                >
-                  <span className="sb-workspace-recent-name">
-                    {t('settings:start.open')}
-                  </span>
-                  <span className="sb-workspace-recent-path">
-                    {t('settings:start.description')}
-                  </span>
-                </button>
-              </div>
-            ) : (
-              <p className="sb-preferences-note">
-                {t('settings:workspace.noRecent')}
-              </p>
-            )}
-            <p className="sb-preferences-note">
-              {t('settings:workspace.prefsSaved')}
-            </p>
-            <h3>{t('settings:language.title')}</h3>
-            <p className="sb-preferences-note">
-              {t('settings:language.description')}
-            </p>
-            <Select
-              className="sb-select-compact"
-              value={language}
-              onChange={(value) => void changeAppLanguage(value)}
-              ariaLabel={t('settings:language.aria')}
-              options={SUPPORTED_LANGUAGES.map((lang) => ({
-                value: lang,
-                label: t(`common:language.${lang}`),
-              }))}
-            />
-            <h3>{t('settings:reset.title')}</h3>
-            <p className="sb-preferences-note">
-              {t('settings:reset.description')}
-            </p>
-            <button
-              type="button"
-              className="sb-button"
-              onClick={() => setConfirmReset(true)}
-            >
-              {t('settings:reset.action')}
-            </button>
-          </section>
-        ) : null}
-
-        {tab === 'block' ? (
           <>
-            <BackgroundFields
-          color={draft.block.backgroundColor}
-          opacity={Math.round(draft.block.backgroundOpacity * 100)}
-          allowNone={false}
-          onColor={(backgroundColor) => updateBlock({ backgroundColor })}
-          onOpacity={(value) => updateBlock({ backgroundOpacity: value / 100 })}
-        />
-        <BorderFields
-          color={draft.block.borderColor}
-          opacity={Math.round(draft.block.borderOpacity * 100)}
-          width={draft.block.borderWidth}
-          style={draft.block.borderStyle}
-          onColor={(borderColor) => updateBlock({ borderColor })}
-          onOpacity={(value) => updateBlock({ borderOpacity: value / 100 })}
-          onWidth={(borderWidth) => updateBlock({ borderWidth })}
-          onStyle={(borderStyle) =>
-            updateBlock({
-              borderStyle: borderStyle as EditorPreferences['block']['borderStyle'],
-            })
-          }
-        />
+            <section className="sb-settings-card">
+              <header className="sb-settings-card-head">
+                <div>
+                  <h3>{t('settings:help.focusTitle')}</h3>
+                  <p>{t('settings:help.focusBody')}</p>
+                </div>
+              </header>
+              <div className="sb-settings-rows">
+                <p className="sb-settings-note">
+                  {t('settings:help.focusNote')}
+                </p>
+              </div>
+            </section>
+            <section className="sb-settings-card">
+              <header className="sb-settings-card-head">
+                <div>
+                  <h3>{t('settings:help.windowTitle')}</h3>
+                  <p>{t('settings:help.windowOrder')}</p>
+                </div>
+              </header>
+              <div className="sb-settings-rows">
+                <p className="sb-settings-note">
+                  {t('settings:help.windowDrag')}
+                </p>
+              </div>
+            </section>
           </>
         ) : null}
 
-        {tab === 'text' ? (
-        <section>
-          <h3>{t('settings:textDefaults.title')}</h3>
-          <div className="sb-style-row">
-            <span>{t('editor:style.font')}</span>
-            <Select
-              className="sb-select-compact"
-              value={draft.text.fontFamily}
-              onChange={(value) => updateText({ fontFamily: value })}
-              ariaLabel={t('editor:style.font')}
-              options={fontOptions(t)}
-            />
-          </div>
-          <StyleNumberControl
-            label={t('editor:style.fontSize')}
-            value={draft.text.fontSize}
-            min={8}
-            max={200}
-            step={1}
-            unit="px"
-            onChange={(fontSize) => updateText({ fontSize })}
-          />
-          <ColorPicker
-            label={t('editor:style.color')}
-            value={draft.text.color}
-            onChange={(color) => updateText({ color })}
-          />
-          <StyleNumberControl
-            label={t('editor:style.opacity')}
-            value={Math.round(draft.text.opacity * 100)}
-            min={0}
-            max={100}
-            step={1}
-            unit="%"
-            slider
-            onChange={(value) => updateText({ opacity: value / 100 })}
-          />
-          <div className="sb-style-row">
-            <span>{t('settings:textDefaults.align')}</span>
-            <div className="sb-style-buttons">
-              {(
-                [
-                  ['left', t('editor:style.alignLeftShort')],
-                  ['center', t('editor:style.alignCenterShort')],
-                  ['right', t('editor:style.alignRightShort')],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={
-                    draft.text.textAlign === value ? 'is-active' : undefined
-                  }
-                  onClick={() => updateText({ textAlign: value as TextAlign })}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
+        {tab === 'general' ? (
+          <>
+            <section className="sb-settings-card">
+              <header className="sb-settings-card-head">
+                <div>
+                  <h3>{t('settings:workspace.title')}</h3>
+                  <p>
+                    {t('settings:workspace.current', {
+                      path:
+                        workspacePath ||
+                        workspaceName() ||
+                        t('settings:workspace.none'),
+                    })}
+                  </p>
+                </div>
+                {canOpenWorkspace() ? (
+                  <button
+                    type="button"
+                    className="sb-button sb-button-small"
+                    disabled={switching}
+                    onClick={() => {
+                      setSwitching(true)
+                      void openWorkspace()
+                        .then(() => window.location.reload())
+                        .catch(() => setSwitching(false))
+                    }}
+                  >
+                    {switching
+                      ? t('settings:workspace.switching')
+                      : t('settings:workspace.reselect')}
+                  </button>
+                ) : null}
+              </header>
+
+              <div className="sb-settings-rows">
+                <p className="sb-settings-row-title">
+                  {t('settings:workspace.recent')}
+                </p>
+                {recent.length > 0 ? (
+                  <div className="sb-workspace-recent">
+                    {recent.map((item) => {
+                      const current = isCurrentWorkspace(item)
+                      const detail = !item.available
+                        ? t('settings:workspace.missing')
+                        : item.permission === 'prompt'
+                          ? t('settings:workspace.permission')
+                          : item.path || item.name
+                      return (
+                        <div
+                          key={item.id}
+                          className={`sb-workspace-recent-row${
+                            item.available ? '' : ' is-missing'
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            className="sb-workspace-recent-open"
+                            disabled={!item.available || switching}
+                            onClick={() => switchToRecent(item)}
+                          >
+                            <span className="sb-workspace-recent-name">
+                              {item.name}
+                              {current ? (
+                                <small>{t('settings:workspace.currentBadge')}</small>
+                              ) : null}
+                            </span>
+                            <span className="sb-workspace-recent-path">
+                              {detail}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            className="sb-workspace-recent-remove"
+                            aria-label={t('settings:workspace.removeAria', {
+                              name: item.name,
+                            })}
+                            title={t('settings:workspace.remove')}
+                            onClick={() => removeRecent(item)}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )
+                    })}
+                    <button
+                      type="button"
+                      className="sb-workspace-start"
+                      onClick={goStart}
+                    >
+                      <span className="sb-workspace-recent-name">
+                        {t('settings:start.open')}
+                      </span>
+                      <span className="sb-workspace-recent-path">
+                        {t('settings:start.description')}
+                      </span>
+                    </button>
+                  </div>
+                ) : (
+                  <p className="sb-settings-note">
+                    {t('settings:workspace.noRecent')}
+                  </p>
+                )}
+                <p className="sb-settings-note">
+                  {t('settings:workspace.prefsSaved')}
+                </p>
+              </div>
+            </section>
+
+            <section className="sb-settings-card">
+              <header className="sb-settings-card-head">
+                <div>
+                  <h3>{t('settings:language.title')}</h3>
+                  <p>{t('settings:language.description')}</p>
+                </div>
+              </header>
+              <div className="sb-settings-rows">
+                <div className="sb-settings-row">
+                  <span>{t('settings:language.title')}</span>
+                  <Select
+                    className="sb-select-settings"
+                    value={language}
+                    onChange={(value) => void changeAppLanguage(value)}
+                    ariaLabel={t('settings:language.aria')}
+                    options={SUPPORTED_LANGUAGES.map((lang) => ({
+                      value: lang,
+                      label: t(`common:language.${lang}`),
+                    }))}
+                  />
+                </div>
+              </div>
+            </section>
+          </>
         ) : null}
 
-        {tab === 'block' ? (
-        <section>
-          <h3>{t('settings:blockDefaults.title')}</h3>
-          <StyleNumberControl
-            label={t('editor:style.cornerRadius')}
-            value={draft.shapeCornerRadius}
-            min={0}
-            max={200}
-            step={1}
-            unit="px"
-            onChange={(shapeCornerRadius) =>
-              setDraft((current) => ({ ...current, shapeCornerRadius }))
-            }
-          />
-        </section>
+        {tab === 'defaults' ? (
+          <>
+            <section className="sb-settings-card">
+              <header className="sb-settings-card-head">
+                <div>
+                  <h3>{t('settings:textDefaults.title')}</h3>
+                </div>
+              </header>
+              <div className="sb-settings-rows">
+                <div className="sb-settings-row">
+                  <span>{t('editor:style.font')}</span>
+                  <Select
+                    className="sb-select-settings"
+                    value={draft.text.fontFamily}
+                    onChange={(value) => updateText({ fontFamily: value })}
+                    ariaLabel={t('editor:style.font')}
+                    options={fontOptions(t)}
+                  />
+                </div>
+                <StyleNumberControl
+                  label={t('editor:style.fontSize')}
+                  value={draft.text.fontSize}
+                  min={8}
+                  max={200}
+                  step={1}
+                  unit="px"
+                  onChange={(fontSize) => updateText({ fontSize })}
+                />
+                <ColorPicker
+                  label={t('editor:style.color')}
+                  value={draft.text.color}
+                  onChange={(color) => updateText({ color })}
+                />
+                <StyleNumberControl
+                  label={t('editor:style.opacity')}
+                  value={Math.round(draft.text.opacity * 100)}
+                  min={0}
+                  max={100}
+                  step={1}
+                  unit="%"
+                  slider
+                  onChange={(value) => updateText({ opacity: value / 100 })}
+                />
+                <div className="sb-settings-row">
+                  <span>{t('settings:textDefaults.align')}</span>
+                  <div className="sb-style-buttons">
+                    {(
+                      [
+                        ['left', t('editor:style.alignLeftShort')],
+                        ['center', t('editor:style.alignCenterShort')],
+                        ['right', t('editor:style.alignRightShort')],
+                      ] as const
+                    ).map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        className={
+                          draft.text.textAlign === value ? 'is-active' : undefined
+                        }
+                        onClick={() => updateText({ textAlign: value as TextAlign })}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <BackgroundFields
+              color={draft.block.backgroundColor}
+              opacity={Math.round(draft.block.backgroundOpacity * 100)}
+              allowNone={false}
+              onColor={(backgroundColor) => updateBlock({ backgroundColor })}
+              onOpacity={(value) => updateBlock({ backgroundOpacity: value / 100 })}
+            />
+            <BorderFields
+              color={draft.block.borderColor}
+              opacity={Math.round(draft.block.borderOpacity * 100)}
+              width={draft.block.borderWidth}
+              style={draft.block.borderStyle}
+              onColor={(borderColor) => updateBlock({ borderColor })}
+              onOpacity={(value) => updateBlock({ borderOpacity: value / 100 })}
+              onWidth={(borderWidth) => updateBlock({ borderWidth })}
+              onStyle={(borderStyle) =>
+                updateBlock({
+                  borderStyle: borderStyle as EditorPreferences['block']['borderStyle'],
+                })
+              }
+            />
+
+            <section className="sb-settings-card">
+              <header className="sb-settings-card-head">
+                <div>
+                  <h3>{t('settings:blockDefaults.title')}</h3>
+                </div>
+              </header>
+              <div className="sb-settings-rows">
+                <StyleNumberControl
+                  label={t('editor:style.cornerRadius')}
+                  value={draft.shapeCornerRadius}
+                  min={0}
+                  max={200}
+                  step={1}
+                  unit="px"
+                  onChange={(shapeCornerRadius) =>
+                    setDraft((current) => ({ ...current, shapeCornerRadius }))
+                  }
+                />
+              </div>
+            </section>
+
+            <section className="sb-settings-card">
+              <header className="sb-settings-card-head">
+                <div>
+                  <h3>{t('settings:reset.title')}</h3>
+                  <p>{t('settings:reset.description')}</p>
+                </div>
+                <button
+                  type="button"
+                  className="sb-button sb-button-small sb-button-danger"
+                  onClick={() => setConfirmReset(true)}
+                >
+                  {t('settings:reset.action')}
+                </button>
+              </header>
+            </section>
+          </>
         ) : null}
         </div>
       </div>
