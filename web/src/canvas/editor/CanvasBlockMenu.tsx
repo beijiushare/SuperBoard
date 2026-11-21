@@ -1,4 +1,5 @@
 import type { CanvasDocument } from '../model'
+import { useTranslation } from 'react-i18next'
 import type { CanvasMenuState } from './appUtils'
 import { blockDefinition } from './blocks'
 import { isLocked, nodeMapOf } from './hierarchy'
@@ -58,6 +59,7 @@ export function CanvasBlockMenu({
   onInsertSchedule,
   onInsertMedia,
 }: CanvasBlockMenuProps) {
+  const { t } = useTranslation(['editor'])
   const nodeMap = nodeMapOf(canvas.nodes)
   const node = menu.nodeId ? nodeMap.get(menu.nodeId) ?? null : null
   const definition = node ? blockDefinition(node) : null
@@ -84,7 +86,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            删除箭头
+              {t('editor:menu.deleteEdge')}
           </button>
           <div className="sb-canvas-menu-sep" />
         </>
@@ -99,7 +101,7 @@ export function CanvasBlockMenu({
                 onClose()
               }}
             >
-              编辑内容
+              {t('editor:menu.editContent')}
             </button>
           ) : null}
           {(node.type === 'file' ||
@@ -113,7 +115,7 @@ export function CanvasBlockMenu({
                   onClose()
                 }}
               >
-                打开文件
+                {t('editor:menu.openFile')}
               </button>
               {onRevealFile ? (
                 <button
@@ -123,7 +125,7 @@ export function CanvasBlockMenu({
                     onClose()
                   }}
                 >
-                  在文件管理器中显示
+                  {t('editor:menu.revealFile')}
                 </button>
               ) : null}
               {onDeleteFile ? (
@@ -134,7 +136,7 @@ export function CanvasBlockMenu({
                     onClose()
                   }}
                 >
-                  删除文件
+                  {t('editor:menu.deleteFile')}
                 </button>
               ) : null}
             </>
@@ -146,7 +148,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            生成副本
+            {t('editor:menu.duplicate')}
           </button>
           <button
             type="button"
@@ -155,8 +157,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            删除
-          </button>
+            {t('editor:menu.delete')}          </button>
           <button
             type="button"
             disabled={!canGroup && !canUngroup}
@@ -165,7 +166,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            {canUngroup ? '解组' : '编组'}
+            {canUngroup ? t('editor:menu.ungroup') : t('editor:menu.group')}
           </button>
           <button
             type="button"
@@ -174,7 +175,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            {allSelectedLocked ? '解锁' : '锁定'}
+            {allSelectedLocked ? t('editor:menu.unlock') : t('editor:menu.lock')}
           </button>
           <button
             type="button"
@@ -183,7 +184,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            移至最前
+            {t('editor:menu.front')}
           </button>
           <button
             type="button"
@@ -192,7 +193,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            移至最后
+            {t('editor:menu.back')}
           </button>
           <button
             type="button"
@@ -201,7 +202,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            向前一层
+            {t('editor:menu.forward')}
           </button>
           <button
             type="button"
@@ -210,7 +211,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            向后一层
+            {t('editor:menu.backward')}
           </button>
           <div className="sb-canvas-menu-sep" />
         </>
@@ -224,7 +225,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            输入文本
+            {t('editor:menu.insertText')}
           </button>
           <button
             type="button"
@@ -233,7 +234,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            创建 Markdown 块
+            {t('editor:menu.insertMarkdown')}
           </button>
           <button
             type="button"
@@ -242,7 +243,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            创建图表
+            {t('editor:menu.insertPele')}
           </button>
           <button
             type="button"
@@ -251,7 +252,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            创建日程表
+            {t('editor:menu.insertSchedule')}
           </button>
           {!menu.quick ? (
             <button
@@ -261,7 +262,7 @@ export function CanvasBlockMenu({
                 onClose()
               }}
             >
-              插入媒体
+              {t('editor:menu.insertMedia')}
             </button>
           ) : null}
         </>
@@ -276,7 +277,7 @@ export function CanvasBlockMenu({
               onClose()
             }}
           >
-            全选
+            {t('editor:menu.selectAll')}
           </button>
           {hasLocked ? (
             <button
@@ -286,7 +287,7 @@ export function CanvasBlockMenu({
                 onClose()
               }}
             >
-              解锁全部
+              {t('editor:menu.unlockAll')}
             </button>
           ) : null}
         </>

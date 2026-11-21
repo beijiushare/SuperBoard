@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { BoardTreeContextTarget } from '../shared/board/BoardTree'
 import type { BoardTreeFile, BoardTreeFolder } from '../shared/board/types'
 
@@ -29,6 +30,7 @@ export function BoardContextMenu({
   onDelete,
   onDeleteFolder,
 }: BoardContextMenuProps) {
+  const { t } = useTranslation(['editor'])
   const menuRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ left: x, top: y })
 
@@ -104,7 +106,7 @@ export function BoardContextMenu({
       ref={menuRef}
       className="sb-context-menu"
       role="menu"
-      aria-label="白板操作"
+      aria-label={t('editor:context.aria')}
       tabIndex={-1}
       style={{ left: position.left, top: position.top }}
       onKeyDown={handleKeyDown}
@@ -119,7 +121,7 @@ export function BoardContextMenu({
               role="menuitem"
               onClick={() => run(() => onRename(target.node))}
             >
-              <span className="sb-context-menu-label">重命名…</span>
+              <span className="sb-context-menu-label">{t('editor:context.rename')}</span>
             </button>
           </div>
           <div className="sb-context-menu-group">
@@ -129,7 +131,7 @@ export function BoardContextMenu({
               role="menuitem"
               onClick={() => run(() => onDelete(target.node))}
             >
-              <span className="sb-context-menu-label">删除…</span>
+              <span className="sb-context-menu-label">{t('editor:context.delete')}</span>
             </button>
           </div>
         </>
@@ -141,18 +143,32 @@ export function BoardContextMenu({
               type="button"
               role="menuitem"
               onClick={() => run(() => onCreate(folder))}
-              title={folder ? `在 ${folder} 中新建白板` : '在根目录新建白板'}
+              title={
+                folder
+                  ? t('editor:context.newBoardIn', { folder })
+                  : t('editor:context.newBoardRoot')
+              }
             >
-              <span className="sb-context-menu-label">{target.type === 'folder' ? '在此新建白板…' : '新建白板…'}</span>
+              <span className="sb-context-menu-label">
+                {target.type === 'folder'
+                  ? t('editor:context.newBoardHere')
+                  : t('editor:context.newBoard')}
+              </span>
             </button>
             <button
               className="sb-context-menu-item"
               type="button"
               role="menuitem"
               onClick={() => run(() => onCreateFolder(folder))}
-              title={folder ? `在 ${folder} 中新建文件夹` : '在根目录新建文件夹'}
+              title={
+                folder
+                  ? t('editor:context.newFolderIn', { folder })
+                  : t('editor:context.newFolderRoot')
+              }
             >
-              <span className="sb-context-menu-label">新建文件夹</span>
+              <span className="sb-context-menu-label">
+                {t('editor:context.newFolder')}
+              </span>
             </button>
           </div>
           {target.type === 'folder' ? (
@@ -163,9 +179,9 @@ export function BoardContextMenu({
                   type="button"
                   role="menuitem"
                   onClick={() => run(() => onRenameFolder(target.node))}
-                  title={`重命名文件夹 ${folder}`}
+                  title={t('editor:context.renameFolderTitle', { folder })}
                 >
-                  <span className="sb-context-menu-label">重命名…</span>
+                  <span className="sb-context-menu-label">{t('editor:context.rename')}</span>
                 </button>
               </div>
               <div className="sb-context-menu-group">
@@ -174,9 +190,9 @@ export function BoardContextMenu({
                   type="button"
                   role="menuitem"
                   onClick={() => run(() => onDeleteFolder(target.node))}
-                  title={`删除文件夹 ${folder}`}
+                  title={t('editor:context.deleteFolderTitle', { folder })}
                 >
-                  <span className="sb-context-menu-label">删除文件夹…</span>
+                  <span className="sb-context-menu-label">{t('editor:context.deleteFolder')}</span>
                 </button>
               </div>
             </>
