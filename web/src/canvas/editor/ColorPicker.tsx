@@ -93,9 +93,7 @@ export function ColorPicker({
                 title={color}
                 onClick={() => choose(color)}
               />
-            ) : (
-              <span key={`empty-${index}`} className="sb-color-cell is-empty" />
-            ),
+            ) : null,
           )}
           <button
             ref={triggerRef}

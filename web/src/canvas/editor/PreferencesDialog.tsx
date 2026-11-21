@@ -358,15 +358,12 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
             </section>
 
             <section className="sb-settings-card">
-              <header className="sb-settings-card-head">
-                <div>
-                  <h3>{t('settings:language.title')}</h3>
-                  <p>{t('settings:language.description')}</p>
-                </div>
-              </header>
               <div className="sb-settings-rows">
                 <div className="sb-settings-row">
-                  <span>{t('settings:language.title')}</span>
+                  <div className="sb-settings-row-text">
+                    <span>{t('settings:language.title')}</span>
+                    <small>{t('settings:language.description')}</small>
+                  </div>
                   <Select
                     className="sb-select-settings"
                     value={language}

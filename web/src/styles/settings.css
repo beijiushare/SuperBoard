@@ -223,6 +223,25 @@
   font-size: 13px;
 }
 
+.sb-preferences-dialog .sb-settings-row-text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sb-preferences-dialog .sb-settings-row-text span {
+  color: var(--sb-text-secondary);
+  font-size: 13px;
+}
+
+.sb-preferences-dialog .sb-settings-row-text small {
+  color: var(--sb-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 .sb-preferences-dialog .sb-settings-row-title {
   margin: 12px 0 6px;
   color: var(--sb-text-faint);
