@@ -18,6 +18,15 @@
   border: 0;
 }
 
+.sb-schedule [data-color-scheme] {
+  border: 0;
+  border-radius: var(--sb-card-radius);
+}
+
+.sb-schedule [role='table'] {
+  border: 0;
+}
+
 .sb-schedule .fc-event.sb-schedule-event-selected,
 .sb-schedule .sb-schedule-event-selected {
   filter: brightness(0.88) saturate(1.15);
