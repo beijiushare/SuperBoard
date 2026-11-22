@@ -1841,6 +1841,10 @@
   display: none;
 }
 
+.JCV-overlay-container:has(.sb-block-scale) .JCV-overlay-border {
+  display: none;
+}
+
 .sb-text-editing-hidden {
   visibility: hidden;
 }
