@@ -1832,6 +1832,10 @@
   will-change: auto;
 }
 
+.JCV-overlay-container.JCV-overlay-container {
+  border-radius: 0 !important;
+}
+
 .JCV-overlay-container:has(.sb-plain-text) {
   border-radius: 0;
   background-color: transparent;
