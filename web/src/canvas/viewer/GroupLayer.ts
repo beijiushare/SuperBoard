@@ -1,4 +1,5 @@
 import { BaseModule, internal, type BaseArgs } from '../../vendor/json-canvas-viewer/src/index.ts'
+import { resolveNodeStyle, type SuperBoardStyle } from '../model'
 
 type GroupNode = {
   type: string
@@ -8,7 +9,11 @@ type GroupNode = {
   height: number
   color?: string
   label?: string
-  'x-superboard'?: { kind?: string }
+  'x-superboard'?: {
+    kind?: string
+    style?: SuperBoardStyle
+    rotation?: number
+  }
 }
 
 type DataManager = {
@@ -79,6 +84,17 @@ export class GroupLayer extends BaseModule {
       const kind = node['x-superboard']?.kind
       if (kind === 'shape' || kind === 'drawing') continue
       const colors = this.sm.getColor(node.color)
+      const style = resolveNodeStyle(node['x-superboard']?.style)
+      const background = style.background ?? colors.background
+      const backgroundOpacity = style.backgroundOpacity
+      const borderColor = style.borderColor ?? colors.border
+      const borderWidth = style.borderWidth ?? 2
+      const borderStyle = style.borderStyle || 'solid'
+      const radius = Math.min(
+        (style.cornerRadius ?? 12) + borderWidth,
+        node.width / 2,
+        node.height / 2,
+      )
       const box = document.createElement('div')
       box.className = 'sb-canvas-group'
       Object.assign(box.style, {
@@ -88,9 +104,18 @@ export class GroupLayer extends BaseModule {
         width: `${node.width}px`,
         height: `${node.height}px`,
         boxSizing: 'border-box',
-        borderRadius: '12px',
-        border: `2px solid ${colors.border}`,
-        backgroundColor: colors.background,
+        borderRadius: `${radius}px`,
+        border: borderWidth
+          ? `${borderWidth}px ${borderStyle} color-mix(in srgb, ${borderColor} ${
+              style.borderOpacity * 100
+            }%, transparent)`
+          : undefined,
+        backgroundColor: background
+          ? `color-mix(in srgb, ${background} ${
+              backgroundOpacity * 100
+            }%, transparent)`
+          : undefined,
+        opacity: String(style.opacity),
       })
       if (node.label) {
         const label = document.createElement('div')

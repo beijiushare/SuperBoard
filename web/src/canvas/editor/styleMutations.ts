@@ -28,11 +28,14 @@ export function withCommonStyle(
   patch: Partial<SuperBoardStyle>,
 ): CanvasNode {
   const current = node['x-superboard']?.style
+  const isGroup = node['x-superboard']?.kind === 'group'
   const nextPatch: Partial<SuperBoardStyle> = { ...patch }
   // Opacity only takes effect when the color is stored on the node. When the
   // user adjusts opacity for a default-colored block, persist that default
-  // color too so the change is visible and survives a reload.
+  // color too so the change is visible and survives a reload. Groups fall back
+  // to the JSON Canvas palette instead, so they must keep their color unset.
   if (
+    !isGroup &&
     patch.backgroundOpacity !== undefined &&
     !current?.backgroundColor &&
     !current?.fill
@@ -40,6 +43,7 @@ export function withCommonStyle(
     nextPatch.backgroundColor = DEFAULT_PREFERENCES.block.backgroundColor
   }
   if (
+    !isGroup &&
     patch.borderOpacity !== undefined &&
     !current?.borderColor &&
     !current?.stroke

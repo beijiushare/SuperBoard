@@ -434,6 +434,23 @@ assert.equal(
   opacityExplicit['x-superboard']?.style?.backgroundColor,
   undefined,
 )
+
+const groupOpacity = withCommonStyle(
+  {
+    id: 'group-opacity',
+    type: 'group',
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 80,
+    'x-superboard': { kind: 'group', style: {} },
+  },
+  { borderOpacity: 0.3, backgroundOpacity: 0.4 },
+)
+assert.equal(groupOpacity['x-superboard']?.style?.borderColor, undefined)
+assert.equal(groupOpacity['x-superboard']?.style?.backgroundColor, undefined)
+assert.equal(groupOpacity['x-superboard']?.style?.borderOpacity, 0.3)
+assert.equal(groupOpacity['x-superboard']?.style?.backgroundOpacity, 0.4)
 const geometryStyled = applyGeometry(styledBase, { width: 120, rotation: 30 })
 assert.equal(geometryStyled.width, 120)
 assert.equal(geometryStyled.height, 40)
