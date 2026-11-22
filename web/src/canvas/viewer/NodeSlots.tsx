@@ -172,8 +172,18 @@ export function TextSlot({
         {node.text}
       </div>
     )
+  const blockStyle = ext?.style
+  const hasTextSurface = Boolean(
+    blockStyle?.backgroundColor ||
+      blockStyle?.fill ||
+      blockStyle?.borderColor ||
+      blockStyle?.stroke,
+  )
   return (
-    <BlockSurface node={node} plain={!ext?.kind || ext.kind === 'text'}>
+    <BlockSurface
+      node={node}
+      plain={(!ext?.kind || ext.kind === 'text') && !hasTextSurface}
+    >
       {content}
     </BlockSurface>
   )

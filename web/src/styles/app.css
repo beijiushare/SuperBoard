@@ -810,6 +810,43 @@
   overflow-y: auto;
 }
 
+.sb-style-panel-body {
+  display: flex;
+  gap: 10px;
+}
+
+.sb-style-panel-sections {
+  min-width: 0;
+  flex: 1;
+}
+
+.sb-style-tabs {
+  display: flex;
+  width: 40px;
+  flex: none;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 2px;
+}
+
+.sb-style-tabs button {
+  padding: 8px 4px;
+  border: 1px solid #dedbd2;
+  border-radius: 6px;
+  background: #fff;
+  color: #6f6b60;
+  font-size: 11px;
+  cursor: pointer;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.sb-style-tabs button.is-active {
+  border-color: #28924f;
+  background: #28924f;
+  color: #fff;
+}
+
 .sb-style-panel section + section {
   margin-top: 14px;
   padding-top: 12px;

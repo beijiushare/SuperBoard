@@ -102,6 +102,8 @@
   "dialog.deploy.confirm": "Confirm",
   "style.panelAria": "Drag style panel",
   "style.panelTitle": "Style",
+  "style.tabElements": "Elements",
+  "style.tabGroup": "Group",
   "style.transform": "Transform",
   "style.angle": "Angle",
   "style.width": "Width",

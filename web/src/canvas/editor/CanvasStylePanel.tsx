@@ -46,6 +46,21 @@ function kindOf(node: CanvasNode) {
   return node['x-superboard']?.kind
 }
 
+function supportsSurface(node: CanvasNode) {
+  const extension = node['x-superboard']
+  const kind = extension?.kind
+  if (kind === 'drawing') return false
+  if (node.type === 'file') return false
+  if (node.type === 'link' && extension?.media?.kind === 'file') return false
+  return true
+}
+
+function supportsBackground(node: CanvasNode) {
+  if (!supportsSurface(node)) return false
+  const extension = node['x-superboard']
+  return !(extension?.kind === 'shape' && extension.shape === 'line')
+}
+
 function patchHistoryKey(prefix: string, patch: object) {
   return `${prefix}:${Object.keys(patch).sort().join(',')}`
 }
@@ -100,6 +115,21 @@ export function CanvasStylePanel({
   const uiState = useUiState()
   const selected = new Set(selectedIds)
   const nodes = canvas.nodes.filter((node) => selected.has(node.id))
+  const [panelTab, setPanelTab] = useState<'element' | 'group'>('element')
+  const groups = nodes.filter((node) => kindOf(node) === 'group')
+  const elementNodes = (() => {
+    const explicit = nodes.filter((node) => kindOf(node) !== 'group')
+    const fromGroups = groups
+      .flatMap((group) => collectDescendants(group, canvas.nodes))
+      .filter((node) => kindOf(node) !== 'group')
+    return [...new Map([...explicit, ...fromGroups].map((node) => [node.id, node])).values()]
+  })()
+  const activeTab = groups.length
+    ? elementNodes.length
+      ? panelTab
+      : 'group'
+    : 'element'
+  const targetNodes = activeTab === 'group' ? groups : elementNodes
   const edge = selectedEdgeId
     ? canvas.edges.find((item) => item.id === selectedEdgeId)
     : undefined
@@ -124,8 +154,8 @@ export function CanvasStylePanel({
     height?: number
     rotation?: number
   }) {
-    if (nodes.length === 0) return
-    const targetIds = new Set(nodes.map((node) => node.id))
+    if (targetNodes.length === 0) return
+    const targetIds = new Set(targetNodes.map((node) => node.id))
     onBeforeChange(patchHistoryKey('geometry', patch))
     onApply({
       ...canvas,
@@ -136,15 +166,37 @@ export function CanvasStylePanel({
   }
 
   function updateCommonStyle(patch: Partial<SuperBoardStyle>) {
+    const keys = Object.keys(patch)
+    const needsBackground = keys.some(
+      (key) =>
+        key === 'background' ||
+        key === 'backgroundColor' ||
+        key === 'backgroundOpacity' ||
+        key === 'fill',
+    )
+    const needsBorder = keys.some(
+      (key) =>
+        key === 'border' ||
+        key === 'borderColor' ||
+        key === 'borderOpacity' ||
+        key === 'borderWidth' ||
+        key === 'borderStyle' ||
+        key === 'stroke',
+    )
+    const targets = targetNodes.filter(
+      (node) =>
+        (!needsBackground || supportsBackground(node)) &&
+        (!needsBorder || supportsSurface(node)),
+    )
     applyTo(
-      nodes,
+      targets,
       (node) => withCommonStyle(node, patch),
       patchHistoryKey('style', patch),
     )
   }
 
   function updateDrawing(patch: DrawingPatch) {
-    const targets = nodes.filter((node) => kindOf(node) === 'drawing')
+    const targets = targetNodes.filter((node) => kindOf(node) === 'drawing')
     if (targets.length === 0) return
     applyTo(
       targets,
@@ -156,8 +208,8 @@ export function CanvasStylePanel({
     })
   }
 
-  const texts = nodes.filter((node) => node.type === 'text' && (!kindOf(node) || kindOf(node) === 'text'))
-  const mediaNodes = nodes.filter(
+  const texts = targetNodes.filter((node) => node.type === 'text' && (!kindOf(node) || kindOf(node) === 'text'))
+  const mediaNodes = targetNodes.filter(
     (node) => node['x-superboard']?.kind === 'media' && node['x-superboard']?.media,
   )
 
@@ -219,8 +271,8 @@ export function CanvasStylePanel({
   }
 
   function layoutRoots() {
-    const selectedSet = new Set(nodes.map((node) => node.id))
-    return nodes.filter((node) => {
+    const selectedSet = new Set(targetNodes.map((node) => node.id))
+    return targetNodes.filter((node) => {
       const groupId = node['x-superboard']?.groupId
       return !groupId || !selectedSet.has(groupId)
     })
@@ -298,20 +350,12 @@ export function CanvasStylePanel({
     moveBy(moves)
   }
 
-  const firstNode = nodes[0]
+  const firstNode = targetNodes[0]
   const firstKind = firstNode?.['x-superboard']?.kind
-  const firstIsPlainText =
-    firstNode?.type === 'text' && (!firstKind || firstKind === 'text')
-  const firstHasNoSurface =
-    firstIsPlainText ||
-    firstNode?.type === 'file' ||
-    (firstNode?.type === 'link' &&
-      firstNode?.['x-superboard']?.media?.kind === 'file')
-  const firstIsShape = firstKind === 'shape'
   const firstIsDrawing = firstKind === 'drawing'
-  const firstIsLine =
-    firstIsShape && firstNode?.['x-superboard']?.shape === 'line'
   const firstResolved = resolveNodeStyle(firstNode?.['x-superboard']?.style)
+  const showBackground = targetNodes.some(supportsBackground)
+  const showBorder = targetNodes.some(supportsSurface)
   const firstIsRoundedRect = firstNode ? isRoundedRect(firstNode) : false
   const firstCornerRadius =
     firstResolved.cornerRadius ?? preferences.shapeCornerRadius
@@ -320,12 +364,15 @@ export function CanvasStylePanel({
     : 100
   const hasExplicitBorder = firstResolved.borderColor !== undefined
   const hasExplicitBackground = firstResolved.background !== undefined
+  const firstStyle = firstNode?.['x-superboard']?.style
+  const hasBorderOpacity = firstStyle?.borderOpacity !== undefined
+  const hasBackgroundOpacity = firstStyle?.backgroundOpacity !== undefined
   const firstBorderColor =
     firstResolved.borderColor ?? preferences.block.borderColor
   const firstBorderWidth =
     firstResolved.borderWidth ?? preferences.block.borderWidth
   const firstBorderOpacity = Math.round(
-    (hasExplicitBorder
+    (hasExplicitBorder || hasBorderOpacity
       ? firstResolved.borderOpacity
       : preferences.block.borderOpacity) * 100,
   )
@@ -335,15 +382,15 @@ export function CanvasStylePanel({
   const firstBackgroundColor =
     firstResolved.background ?? preferences.block.backgroundColor
   const firstBackgroundOpacity = Math.round(
-    (hasExplicitBackground
+    (hasExplicitBackground || hasBackgroundOpacity
       ? firstResolved.backgroundOpacity
       : preferences.block.backgroundOpacity) * 100,
   )
   const firstText = texts[0]
   const firstMedia = mediaNodes[0]?.['x-superboard']?.media
   const firstStroke = firstNode?.['x-superboard']?.strokes?.[0]
-  const drawingSize = firstResolved.borderWidth ?? firstStroke?.size ?? 4
-  const drawingColor = firstResolved.borderColor ?? firstStroke?.color ?? '#1d1d1d'
+  const drawingSize = firstStroke?.size ?? firstResolved.borderWidth ?? 4
+  const drawingColor = firstStroke?.color ?? firstResolved.borderColor ?? '#1d1d1d'
   const drawingOpacity = Math.round(firstResolved.opacity * 100)
   const drawingThinning = firstStroke?.thinning ?? 0.5
   const drawingSmoothing = firstStroke?.smoothing ?? 0.5
@@ -371,6 +418,30 @@ export function CanvasStylePanel({
         <strong>{t('editor:style.panelTitle')}</strong>
       </div>
       <div className="sb-style-panel-content">
+      <div className="sb-style-panel-body">
+      {groups.length > 0 ? (
+        <div className="sb-style-tabs" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'element'}
+            className={activeTab === 'element' ? 'is-active' : undefined}
+            onClick={() => setPanelTab('element')}
+          >
+            {t('editor:style.tabElements')}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'group'}
+            className={activeTab === 'group' ? 'is-active' : undefined}
+            onClick={() => setPanelTab('group')}
+          >
+            {t('editor:style.tabGroup')}
+          </button>
+        </div>
+      ) : null}
+      <div className="sb-style-panel-sections">
       {firstNode ? (
         firstIsDrawing ? (
           <DrawingStyleSection
@@ -389,15 +460,17 @@ export function CanvasStylePanel({
           />
         ) : (
         <>
-          <TransformFields
-            rotation={firstNode['x-superboard']?.rotation ?? 0}
-            width={firstNode.width}
-            height={firstNode.height}
-            onRotation={(rotation) => updateGeometry({ rotation })}
-            onWidth={(width) => updateGeometry({ width })}
-            onHeight={(height) => updateGeometry({ height })}
-          />
-          {!firstIsDrawing && !firstIsLine && !firstHasNoSurface ? (
+          {activeTab === 'group' ? null : (
+            <TransformFields
+              rotation={firstNode['x-superboard']?.rotation ?? 0}
+              width={firstNode.width}
+              height={firstNode.height}
+              onRotation={(rotation) => updateGeometry({ rotation })}
+              onWidth={(width) => updateGeometry({ width })}
+              onHeight={(height) => updateGeometry({ height })}
+            />
+          )}
+          {showBackground ? (
             <BackgroundFields
               color={firstBackgroundColor}
               opacity={firstBackgroundOpacity}
@@ -411,7 +484,7 @@ export function CanvasStylePanel({
               onColorUsed={onRememberColor}
             />
           ) : null}
-          {!firstHasNoSurface ? (
+          {showBorder ? (
             <BorderFields
               color={firstBorderColor}
               opacity={firstBorderOpacity}
@@ -650,7 +723,7 @@ export function CanvasStylePanel({
         </section>
       ) : null}
 
-      {nodes.length >= 2 ? (
+      {targetNodes.length >= 2 ? (
         <section>
           <h3>{t('editor:style.align')}</h3>
           <div className="sb-style-buttons is-row">
@@ -784,6 +857,8 @@ export function CanvasStylePanel({
           ) : null}
         </section>
       ) : null}
+      </div>
+      </div>
       </div>
     </div>
   )

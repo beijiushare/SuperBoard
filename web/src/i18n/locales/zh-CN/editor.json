@@ -102,6 +102,8 @@
   "dialog.deploy.confirm": "确认",
   "style.panelAria": "拖动样式面板",
   "style.panelTitle": "样式面板",
+  "style.tabElements": "元素",
+  "style.tabGroup": "分组",
   "style.transform": "变换",
   "style.angle": "角度",
   "style.width": "宽度",
