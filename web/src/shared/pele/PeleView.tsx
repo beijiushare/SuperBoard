@@ -1,5 +1,5 @@
 import DOMPurify from 'dompurify'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { renderAsync } from 'pele/lazy'
 import { stripDiagramTitle } from './stripTitle'
@@ -21,26 +21,6 @@ export function PeleView({ code, className = '' }: PeleViewProps) {
   const { t } = useTranslation(['common'])
   const [svg, setSvg] = useState('')
   const [error, setError] = useState('')
-  const hostRef = useRef<HTMLDivElement | null>(null)
-  const [renderScale, setRenderScale] = useState(1)
-
-  // Render the SVG at a higher layout resolution when the canvas is zoomed in.
-  // The CSS transform downscales it back into the block, so text is rasterized
-  // at the zoomed size instead of being upscaled from a 1x bitmap.
-  useEffect(() => {
-    const layer = hostRef.current?.closest('.JCV-overlays') as HTMLElement | null
-    if (!layer) return
-    const update = () => {
-      const match = /scale\(([^)]+)\)/.exec(layer.style.transform)
-      const scale = match ? Number(match[1]) : 1
-      const next = Math.min(4, Math.max(1, Math.ceil(Number.isFinite(scale) ? scale : 1)))
-      setRenderScale((current) => (current === next ? current : next))
-    }
-    update()
-    const observer = new MutationObserver(update)
-    observer.observe(layer, { attributes: true, attributeFilter: ['style'] })
-    return () => observer.disconnect()
-  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -65,24 +45,11 @@ export function PeleView({ code, className = '' }: PeleViewProps) {
   }, [code])
 
   return (
-    <div ref={hostRef} className={`sb-pele ${className}`.trim()}>
+    <div className={`sb-pele ${className}`.trim()}>
       {error ? (
         <pre className="sb-pele-error">{error}</pre>
       ) : svg ? (
-        <div
-          className="sb-pele-svg"
-          style={
-            renderScale > 1
-              ? {
-                  width: `${renderScale * 100}%`,
-                  height: `${renderScale * 100}%`,
-                  transform: `scale(${1 / renderScale})`,
-                  transformOrigin: 'top left',
-                }
-              : undefined
-          }
-          dangerouslySetInnerHTML={{ __html: svg }}
-        />
+        <div className="sb-pele-svg" dangerouslySetInnerHTML={{ __html: svg }} />
       ) : (
         <div className="sb-pele-loading">{t('common:status.rendering')}</div>
       )}
