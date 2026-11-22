@@ -350,15 +350,20 @@ export function useCanvasInsertions({
     const url = normalizeMediaUrl(value)
     if (!url) return
     const kind = detectMediaKind(url)
+    // Close first so a slow image cannot be submitted twice while measuring.
+    const point = mediaInsertPoint
+    setMediaDialogOpen(false)
+    setMediaUrl('')
+    setMediaInsertPoint(null)
     const natural = await measureMediaUrl(url, kind)
     const size = mediaSize(natural)
     const current = canvasRef.current
     if (!current) return
     const id = nextFreeId(new Set(current.nodes.map((node) => node.id)), 'media')
-    const position = mediaInsertPoint
+    const position = point
       ? {
-          x: Math.round(mediaInsertPoint.x - size.width / 2),
-          y: Math.round(mediaInsertPoint.y - size.height / 2),
+          x: Math.round(point.x - size.width / 2),
+          y: Math.round(point.y - size.height / 2),
         }
       : viewportCenter(size.width, size.height)
     const node: CanvasNode = {
@@ -377,9 +382,6 @@ export function useCanvasInsertions({
     }
     recordHistory()
     applyDocument({ ...current, nodes: [...current.nodes, node] }, [id])
-    setMediaDialogOpen(false)
-    setMediaUrl('')
-    setMediaInsertPoint(null)
   }
 
   function fileNode(
