@@ -24,6 +24,7 @@ const theme = {
   accent: '#8a5cf5',
   critical: '#e93147',
   radius: 6,
+  // Keep in sync with --pele-font in web/src/styles/pele.css.
   font: '-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif',
   mono: 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace',
   series: [
