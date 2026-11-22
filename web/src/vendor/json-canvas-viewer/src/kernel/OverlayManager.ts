@@ -331,7 +331,6 @@ export default class OverlayManager extends BaseModule<Options, Augmentation> {
 		const scalable =
 			extension?.kind === 'text' ||
 			extension?.kind === 'markdown' ||
-			extension?.kind === 'pele' ||
 			extension?.kind === 'schedule' ||
 			extension?.kind === 'media' ||
 			(extension?.contentScale !== undefined && extension?.kind === undefined);

@@ -349,7 +349,9 @@ export function useCanvasDrag({
   function applyContentScale(drag: DragState, ratioScale: number) {
     if (!drag.ratioLocked || drag.nodes.length !== 1) return
     const kind = blockKind(drag.primary)
-    if (!kind) return
+    // Only DOM text blocks keep a content scale; an SVG diagram should fill its
+    // block and stay vector-sharp instead of being laid out small and upscaled.
+    if (kind !== 'text' && kind !== 'markdown') return
     const extension = ensureExtension(drag.primary)
     extension.contentScale =
       Math.round((drag.startContentScale ?? 1) * ratioScale * 1000) / 1000
