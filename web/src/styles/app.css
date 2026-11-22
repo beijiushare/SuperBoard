@@ -1887,6 +1887,14 @@
   border-radius: 0 !important;
 }
 
+/* Keep block text/SVG re-rasterized at the current zoom instead of scaling a
+   cached bitmap. Vendor sets will-change: transform on the layer. */
+.JSON-Canvas-Viewer .JCV-overlays,
+.sb-canvas .JCV-overlays,
+.sb-viewer .JCV-overlays {
+  will-change: auto !important;
+}
+
 .JCV-overlay-container:has(.sb-plain-text) {
   border-radius: 0;
   background-color: transparent;
