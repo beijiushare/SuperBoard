@@ -34,9 +34,10 @@
 
 .sb-card-pele {
   border: 0;
-  border-radius: 0;
+  border-radius: var(--sb-card-radius);
   background: var(--pele-bg);
   color: var(--pele-fg);
+  overflow: hidden;
 }
 
 .sb-pele {

@@ -1421,6 +1421,7 @@
 .sb-markdown-block-scale .sb-markdown-vditor.vditor-reset {
   height: 100%;
   overflow: auto;
+  border-radius: var(--sb-card-radius);
   box-sizing: border-box;
   font-size: var(--sb-markdown-font-size, 14px);
 }
