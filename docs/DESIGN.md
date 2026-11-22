@@ -148,6 +148,7 @@
 - `.JCV-overlay-container` 必须是 `border-radius: 0`：vendor 默认是 `12px` + `contain: strict`，会按 12px 裁剪后代，把细边框块的角削成尖角。
 - 块外层半径是 `--sb-card-radius + 边框宽度`；内容层（`.sb-card`、`.sb-card-pele`、`.sb-schedule`、Markdown 渲染层）使用 `--sb-card-radius` 并被裁剪，避免内容背景盖住边框内沿。
 - Pele、日程等内容在块内必须 `background: transparent`；独立预览场景可以保留白底。
+- Pele 的文字标签只允许 `fill`，不允许 `stroke`：继承到的描边会在字形外加一圈轮廓，被误认为「加粗 / 内轮廓」。`pele.css` 对 `text:not([fill='none'])` 强制 `stroke: none`，`fill="none"` 的 halo 文字保留。
 - 分组背景/边框也走样式面板：`GroupLayer` 使用 `resolveNodeStyle`，调色板只做兜底。
 - 新分组默认背景透明；`GroupLayer` 插在形状/手绘层之前，保证分组背景位于所有子元素下方。
 - 封闭形状由 `ShapeLayer` 拆成填充层 + 描边层，分别使用背景透明度和边框透明度；导出 HTML 保持同样结构。

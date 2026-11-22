@@ -50,6 +50,13 @@
   background: transparent;
 }
 
+/* Pele labels are fill-only. A stroke picked up from an inherited attribute or a
+   diagram style adds a rim around every glyph, which reads as an inner contour. */
+.sb-pele svg text:not([fill='none']),
+.sb-pele-svg text:not([fill='none']) {
+  stroke: none;
+}
+
 .sb-pele {
   width: 100%;
   height: 100%;
