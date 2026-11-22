@@ -60,23 +60,13 @@ export class ShapeLayer extends BaseModule {
     this.onDispose(this.dispose)
   }
 
-  private createShape(
-    node: ShapeNode,
-    shape: SuperBoardShapeKind,
-    radius: number,
-    borderWidth: number,
-  ) {
-    // Draw the stroke inside the node bounds so thick borders follow the same
-    // rounded corner instead of collapsing into spikes at the corners.
-    const inset = Math.max(0, borderWidth) / 2
-    const innerWidth = Math.max(0, node.width - inset * 2)
-    const innerHeight = Math.max(0, node.height - inset * 2)
+  private createShape(node: ShapeNode, shape: SuperBoardShapeKind, radius: number) {
     if (shape === 'ellipse') {
       const element = document.createElementNS(SVG_NS, 'ellipse')
       element.setAttribute('cx', String(node.width / 2))
       element.setAttribute('cy', String(node.height / 2))
-      element.setAttribute('rx', String(Math.abs(innerWidth / 2)))
-      element.setAttribute('ry', String(Math.abs(innerHeight / 2)))
+      element.setAttribute('rx', String(Math.abs(node.width / 2)))
+      element.setAttribute('ry', String(Math.abs(node.height / 2)))
       return element
     }
     if (shape === 'diamond') {
@@ -102,15 +92,10 @@ export class ShapeLayer extends BaseModule {
       return element
     }
     const element = document.createElementNS(SVG_NS, 'rect')
-    element.setAttribute('x', String(inset))
-    element.setAttribute('y', String(inset))
-    element.setAttribute('width', String(innerWidth))
-    element.setAttribute('height', String(innerHeight))
+    element.setAttribute('width', String(node.width))
+    element.setAttribute('height', String(node.height))
     if (radius > 0) {
-      element.setAttribute(
-        'rx',
-        String(Math.max(0, Math.min(radius - inset, innerWidth / 2, innerHeight / 2))),
-      )
+      element.setAttribute('rx', String(Math.min(radius, node.width / 2, node.height / 2)))
     }
     return element
   }
@@ -171,7 +156,6 @@ export class ShapeLayer extends BaseModule {
         shape,
         style.cornerRadius ??
           (shape === 'rect' ? DEFAULT_PREFERENCES.shapeCornerRadius : 0),
-        borderWidth,
       )
       element.setAttribute(
         'fill',

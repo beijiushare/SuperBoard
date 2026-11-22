@@ -113,6 +113,11 @@ function BlockSurface({
                   }%, transparent)`
                 : undefined,
               opacity: style.opacity,
+              ...(borderWidth
+                ? {
+                    ['--sb-block-border-width' as string]: `${borderWidth}px`,
+                  }
+                : {}),
               ...(background
                 ? {
                     ['--sb-block-bg-color' as string]: background,

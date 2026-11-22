@@ -1402,7 +1402,9 @@
   height: var(--sb-content-height, 100%);
   box-sizing: border-box;
   overflow: hidden;
-  border-radius: var(--sb-card-radius);
+  border-radius: calc(
+    var(--sb-card-radius) + var(--sb-block-border-width, 0px)
+  );
   transform: scale(var(--sb-content-scale, 1));
   transform-origin: top left;
 }
