@@ -40,6 +40,12 @@
   overflow: hidden;
 }
 
+/* The canvas surface owns block background; Pele content must stay transparent
+   inside a block. Standalone previews keep their own white background. */
+.sb-block-scale .sb-card-pele {
+  background: transparent;
+}
+
 .sb-pele {
   width: 100%;
   height: 100%;

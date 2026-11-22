@@ -144,7 +144,10 @@
 
 ## 9. 块渲染注意
 
+- **背景和边框只由外层 Surface 提供**：`.sb-block-scale`（DOM 块）或 `ShapeLayer`（形状）负责，内容组件必须是透明、无边框。
 - `.JCV-overlay-container` 必须是 `border-radius: 0`：vendor 默认是 `12px` + `contain: strict`，会按 12px 裁剪后代，把细边框块的角削成尖角。
 - 块外层半径是 `--sb-card-radius + 边框宽度`；内容层（`.sb-card`、`.sb-card-pele`、`.sb-schedule`、Markdown 渲染层）使用 `--sb-card-radius` 并被裁剪，避免内容背景盖住边框内沿。
+- Pele、日程等内容在块内必须 `background: transparent`；独立预览场景可以保留白底。
+- 文件、链接、普通文本没有外层 Surface，样式面板不应显示背景/边框选项。
 - 日程（FullCalendar v7）使用哈希类名，不能用 `.fc` 选择器；外框通过 `[data-color-scheme]`、`[role="table"]` 去除。
 - 详细排查过程见 `memory/superboard-refactor.md` 的「踩坑记录」。

@@ -25,6 +25,19 @@
 
 .sb-schedule [role='table'] {
   border: 0;
+  background: transparent;
+}
+
+.sb-schedule [role='rowgroup'] {
+  background: transparent;
+}
+
+/* Inside a block the canvas surface owns the background. Keep only the
+   calendar's internal grid lines. Standalone previews stay white. */
+.sb-block-scale .sb-schedule,
+.sb-block-scale .sb-schedule [data-color-scheme] {
+  background: transparent;
+  --fc-forma-background: transparent;
 }
 
 .sb-schedule .fc-event.sb-schedule-event-selected,
