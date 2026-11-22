@@ -102,6 +102,8 @@ export interface SuperBoardStyle {
   color?: string
   opacity?: number
   cornerRadius?: number
+  /** Inner padding between a group border and its child elements. */
+  padding?: number
   fontFamily?: string
   fontSize?: number
   fontWeight?: number | string

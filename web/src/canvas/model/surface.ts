@@ -4,6 +4,8 @@ import type { CanvasNode } from './types'
 export const BLOCK_SURFACE_RADIUS = 8
 /** Default group radius. */
 export const GROUP_SURFACE_RADIUS = 12
+/** Default gap between a new group border and its children. */
+export const GROUP_DEFAULT_PADDING = 16
 
 /** Nodes that render their background and border through a shared surface. */
 export function nodeSupportsSurface(node: CanvasNode) {

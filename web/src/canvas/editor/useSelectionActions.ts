@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import type { CanvasDocument, CanvasNode } from '../model'
+import { GROUP_DEFAULT_PADDING, type CanvasDocument, type CanvasNode } from '../model'
 import { PASTE_OFFSET, nextId, type Clipboard } from './appUtils'
 import {
   collectBlocks,
@@ -212,11 +212,14 @@ export function useSelectionActions({
     const groupNode: CanvasNode = {
       id: groupId,
       type: 'group',
-      x: minX,
-      y: minY,
-      width: Math.max(1, maxX - minX),
-      height: Math.max(1, maxY - minY),
-      'x-superboard': { kind: 'group' },
+      x: minX - GROUP_DEFAULT_PADDING,
+      y: minY - GROUP_DEFAULT_PADDING,
+      width: Math.max(1, maxX - minX + GROUP_DEFAULT_PADDING * 2),
+      height: Math.max(1, maxY - minY + GROUP_DEFAULT_PADDING * 2),
+      'x-superboard': {
+        kind: 'group',
+        style: { padding: GROUP_DEFAULT_PADDING },
+      },
     }
     for (const node of roots) ensureExtension(node).groupId = groupId
     const minimumIndex = Math.min(...roots.map((node) => canvas.nodes.indexOf(node)))

@@ -182,8 +182,33 @@ export function CanvasStylePanel({
     )
   }
 
-  function updateDrawing(patch: DrawingPatch) {
-    const targets = targetNodes.filter((node) => kindOf(node) === 'drawing')
+  function updateGroupPadding(value: number) {
+    const groups = targetNodes.filter((node) => kindOf(node) === 'group')
+    if (groups.length === 0) return
+    const padding = Math.max(0, value)
+    applyTo(
+      groups,
+      (node) => {
+        const current = node['x-superboard']?.style?.padding ?? 0
+        const delta = padding - current
+        if (delta === 0) return node
+        return {
+          ...node,
+          x: node.x - delta,
+          y: node.y - delta,
+          width: Math.max(1, node.width + delta * 2),
+          height: Math.max(1, node.height + delta * 2),
+          'x-superboard': {
+            ...(node['x-superboard'] ?? { kind: 'group' as const }),
+            style: { ...node['x-superboard']?.style, padding },
+          },
+        }
+      },
+      patchHistoryKey('group-padding', { padding }),
+    )
+  }
+
+  function updateDrawing(patch: DrawingPatch) {    const targets = targetNodes.filter((node) => kindOf(node) === 'drawing')
     if (targets.length === 0) return
     applyTo(
       targets,
@@ -457,6 +482,19 @@ export function CanvasStylePanel({
               onHeight={(height) => updateGeometry({ height })}
             />
           )}
+          {activeTab === 'group' ? (
+            <section>
+              <StyleNumberControl
+                label={t('editor:style.groupPadding')}
+                value={firstStyle?.padding ?? 0}
+                min={0}
+                max={200}
+                step={1}
+                unit="px"
+                onChange={updateGroupPadding}
+              />
+            </section>
+          ) : null}
           {showBackground ? (
             <BackgroundFields
               color={firstBackgroundColor}
