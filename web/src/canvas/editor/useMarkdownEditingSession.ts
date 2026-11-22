@@ -1,9 +1,5 @@
 import { useRef, useState, type Dispatch, type RefObject, type SetStateAction } from 'react'
-import type {
-  CanvasDocument,
-  CanvasNode,
-  SuperBoardNodeExtension,
-} from '../model'
+import type { CanvasDocument } from '../model'
 
 interface UseMarkdownEditingSessionOptions {
   canvas: CanvasDocument | null
@@ -14,7 +10,6 @@ interface UseMarkdownEditingSessionOptions {
   setSelectedIds: Dispatch<SetStateAction<string[]>>
   setSelectedEdgeId: (id: string | null) => void
   closeTextEditing: () => void
-  ensureExtension: (node: CanvasNode) => SuperBoardNodeExtension
 }
 
 export function useMarkdownEditingSession({
@@ -26,7 +21,6 @@ export function useMarkdownEditingSession({
   setSelectedIds,
   setSelectedEdgeId,
   closeTextEditing,
-  ensureExtension,
 }: UseMarkdownEditingSessionOptions) {
   const [markdownEditingId, setMarkdownEditingId] = useState<string | null>(null)
   const [markdownFocusId, setMarkdownFocusId] = useState<string | null>(null)
@@ -51,9 +45,6 @@ export function useMarkdownEditingSession({
     if (markdownEditingId) closeMarkdownEditor()
     setMarkdownFocusId(null)
     setMarkdownOverlayHidden(id, true)
-    const extension = ensureExtension(node)
-    extension.markdownLocked = false
-    markDirty()
     markdownHistoryRef.current = false
     setMarkdownEditingId(id)
   }
@@ -76,14 +67,26 @@ export function useMarkdownEditingSession({
 
   function closeMarkdownEditor() {
     if (!markdownEditingId) return
-    setMarkdownOverlayHidden(markdownEditingId, false)
-    const document = canvasRef.current
-    const node = document?.nodes.find((item) => item.id === markdownEditingId)
-    if (node) {
-      const extension = ensureExtension(node)
-      extension.markdownLocked = true
-      markDirty()
-    }
+    const id = markdownEditingId
+    setMarkdownOverlayHidden(id, false)
+    // Publish a new node object: the overlay only re-renders when the node
+    // changes, and the block has to leave the "editing" placeholder state.
+    setCanvas((current) => {
+      if (!current) return current
+      let changed = false
+      const nodes = current.nodes.map((item) => {
+        if (item.id !== id) return item
+        const extension = item['x-superboard']
+        if (!extension || extension.markdownLocked === true) return item
+        changed = true
+        return {
+          ...item,
+          'x-superboard': { ...extension, markdownLocked: true },
+        }
+      })
+      return changed ? { ...current, nodes } : current
+    })
+    markDirty()
     setMarkdownEditingId(null)
   }
 

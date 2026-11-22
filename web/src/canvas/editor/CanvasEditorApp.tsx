@@ -222,7 +222,6 @@ export function CanvasEditorApp() {
     setSelectedIds,
     setSelectedEdgeId,
     closeTextEditing,
-    ensureExtension,
   })
 
   const { scopedItems, folderPaths, treeNodes } = useBoardTreeData({

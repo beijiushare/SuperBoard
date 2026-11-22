@@ -199,7 +199,9 @@ export function useCanvasInsertions({
             text: i18n.t('editor:insert.defaultMarkdown'),
             'x-superboard': {
               kind: 'markdown',
-              markdownLocked: false,
+              // The floating Markdown editor covers the block, so the block can
+              // keep rendering its preview instead of an empty placeholder.
+              markdownLocked: true,
               style: blockStyleFromPreferences(),
             },
           }
