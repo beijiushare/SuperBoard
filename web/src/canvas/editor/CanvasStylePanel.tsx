@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  nodeSupportsBackground as supportsBackground,
+  nodeSupportsSurface as supportsSurface,
   resolveNodeStyle,
   type CanvasDocument,
   type CanvasEdge,
@@ -44,21 +46,6 @@ interface CanvasStylePanelProps {
 
 function kindOf(node: CanvasNode) {
   return node['x-superboard']?.kind
-}
-
-function supportsSurface(node: CanvasNode) {
-  const extension = node['x-superboard']
-  const kind = extension?.kind
-  if (kind === 'drawing') return false
-  if (node.type === 'file') return false
-  if (node.type === 'link' && extension?.media?.kind === 'file') return false
-  return true
-}
-
-function supportsBackground(node: CanvasNode) {
-  if (!supportsSurface(node)) return false
-  const extension = node['x-superboard']
-  return !(extension?.kind === 'shape' && extension.shape === 'line')
 }
 
 function patchHistoryKey(prefix: string, patch: object) {

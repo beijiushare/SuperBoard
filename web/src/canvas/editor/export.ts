@@ -1,5 +1,8 @@
 import { getStroke } from 'perfect-freehand'
 import {
+  BLOCK_SURFACE_RADIUS,
+  GROUP_SURFACE_RADIUS,
+  nodeSupportsSurface,
   resolveNodeStyle,
   type CanvasDocument,
   type CanvasEdge,
@@ -136,11 +139,17 @@ function textBlockFor(node: CanvasNode): TextBlock | null {
   return null
 }
 
-function nodeHasSurface(node: CanvasNode) {
-  const extension = node['x-superboard']
-  if (node.type === 'file') return false
-  if (node.type === 'link') return extension?.media?.kind !== 'file'
-  return Boolean(extension?.kind && extension.kind !== 'text')
+function textHasSurface(node: CanvasNode, style: SuperBoardStyle | undefined) {
+  if (!nodeSupportsSurface(node)) return false
+  if (node.type !== 'text') return true
+  const kind = node['x-superboard']?.kind
+  if (kind && kind !== 'text') return true
+  return Boolean(
+    style?.backgroundColor ||
+      style?.fill ||
+      style?.borderColor ||
+      style?.stroke,
+  )
 }
 
 function textMarkup(node: CanvasNode) {
@@ -176,11 +185,11 @@ function textMarkup(node: CanvasNode) {
   const strokeWidth = style.borderWidth ?? 1
   const strokeOpacity = style.opacity * style.borderOpacity
   const radius = Math.min(
-    8 + strokeWidth,
+    BLOCK_SURFACE_RADIUS + strokeWidth,
     node.width / 2,
     node.height / 2,
   )
-  const background = nodeHasSurface(node)
+  const background = textHasSurface(node, node['x-superboard']?.style)
     ? `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="${radius}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${stroke}" stroke-opacity="${strokeOpacity}" stroke-width="${strokeWidth}"${rotation}/>`
     : ''
   return `${background}<g${rotation}><text text-anchor="${anchor}" font-family="${block.fontFamily}" font-size="${block.fontSize}" fill="${block.color}">${tspans}</text></g>`
@@ -265,7 +274,7 @@ function groupMarkup(node: CanvasNode) {
     (node.color ? COLOR_TOKENS[node.color] ?? '#ffffff' : 'none')
   const stroke = style.borderColor ?? '#d9d5ca'
   const strokeWidth = style.borderWidth ?? 1.5
-  const radius = (style.cornerRadius ?? 12) + strokeWidth
+  const radius = (style.cornerRadius ?? GROUP_SURFACE_RADIUS) + strokeWidth
   const dash = style.borderDash?.length
     ? ` stroke-dasharray="${style.borderDash.join(' ')}"`
     : ''

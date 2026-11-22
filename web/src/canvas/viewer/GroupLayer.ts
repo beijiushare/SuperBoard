@@ -1,5 +1,10 @@
 import { BaseModule, internal, type BaseArgs } from '../../vendor/json-canvas-viewer/src/index.ts'
-import { resolveNodeStyle, type SuperBoardStyle } from '../model'
+import {
+  colorWithOpacity,
+  GROUP_SURFACE_RADIUS,
+  resolveNodeStyle,
+  type SuperBoardStyle,
+} from '../model'
 
 type GroupNode = {
   type: string
@@ -98,7 +103,7 @@ export class GroupLayer extends BaseModule {
       const borderWidth = style.borderWidth ?? 2
       const borderStyle = style.borderStyle || 'solid'
       const radius = Math.min(
-        (style.cornerRadius ?? 12) + borderWidth,
+        (style.cornerRadius ?? GROUP_SURFACE_RADIUS) + borderWidth,
         node.width / 2,
         node.height / 2,
       )
@@ -113,14 +118,13 @@ export class GroupLayer extends BaseModule {
         boxSizing: 'border-box',
         borderRadius: `${radius}px`,
         border: borderWidth
-          ? `${borderWidth}px ${borderStyle} color-mix(in srgb, ${borderColor} ${
-              style.borderOpacity * 100
-            }%, transparent)`
+          ? `${borderWidth}px ${borderStyle} ${colorWithOpacity(
+              borderColor,
+              style.borderOpacity,
+            )}`
           : undefined,
         backgroundColor: background
-          ? `color-mix(in srgb, ${background} ${
-              backgroundOpacity * 100
-            }%, transparent)`
+          ? colorWithOpacity(background, backgroundOpacity)
           : undefined,
         opacity: String(style.opacity),
       })

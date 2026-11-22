@@ -4,6 +4,7 @@ import { DEFAULT_PREFERENCES } from '../editor/preferences'
 import type { Hook, JSONCanvasFileNode, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
 import {
+  colorWithOpacity,
   resolveNodeStyle,
   TEXT_LINE_HEIGHT,
   TEXT_PADDING_X,
@@ -103,14 +104,13 @@ function BlockSurface({
           ? undefined
           : {
               border: borderWidth
-                ? `${borderWidth}px ${borderStyle} color-mix(in srgb, ${borderColor} ${
-                    borderOpacity * 100
-                  }%, transparent)`
+                ? `${borderWidth}px ${borderStyle} ${colorWithOpacity(
+                    borderColor,
+                    borderOpacity,
+                  )}`
                 : undefined,
               backgroundColor: background
-                ? `color-mix(in srgb, ${background} ${
-                    backgroundOpacity * 100
-                  }%, transparent)`
+                ? colorWithOpacity(background, backgroundOpacity)
                 : undefined,
               opacity: style.opacity,
               ...(borderWidth
