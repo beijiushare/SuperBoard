@@ -480,6 +480,47 @@ const exportSvg = buildCanvasSvg({
 assert.equal((exportSvg.match(/<rect/g) ?? []).length, 3)
 assert.match(exportSvg, /fill-opacity="0.35"/)
 assert.match(exportSvg, /stroke-opacity="1"/)
+
+const blockSvg = buildCanvasSvg({
+  nodes: [
+    {
+      id: 'markdown-export',
+      type: 'text',
+      x: 0,
+      y: 0,
+      width: 200,
+      height: 100,
+      text: '# hello',
+      'x-superboard': {
+        kind: 'markdown',
+        style: {
+          backgroundColor: '#ff0000',
+          backgroundOpacity: 0.5,
+          borderColor: '#0000ff',
+          borderOpacity: 1,
+          borderWidth: 3,
+        },
+      },
+    },
+    {
+      id: 'plain-export',
+      type: 'text',
+      x: 240,
+      y: 0,
+      width: 120,
+      height: 40,
+      text: 'plain',
+      'x-superboard': { kind: 'text', style: {} },
+    },
+  ],
+  edges: [],
+  'x-superboard': { version: 1, meta: { title: 'export', slug: 'export' } },
+})
+assert.equal((blockSvg.match(/<rect/g) ?? []).length, 2)
+assert.match(blockSvg, /fill="#ff0000"/)
+assert.match(blockSvg, /fill-opacity="0.5"/)
+assert.match(blockSvg, /stroke="#0000ff"/)
+assert.match(blockSvg, /stroke-width="3"/)
 const geometryStyled = applyGeometry(styledBase, { width: 120, rotation: 30 })
 assert.equal(geometryStyled.width, 120)
 assert.equal(geometryStyled.height, 40)

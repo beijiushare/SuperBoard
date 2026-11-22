@@ -136,6 +136,13 @@ function textBlockFor(node: CanvasNode): TextBlock | null {
   return null
 }
 
+function nodeHasSurface(node: CanvasNode) {
+  const extension = node['x-superboard']
+  if (node.type === 'file') return false
+  if (node.type === 'link') return extension?.media?.kind !== 'file'
+  return Boolean(extension?.kind && extension.kind !== 'text')
+}
+
 function textMarkup(node: CanvasNode) {
   const block = textBlockFor(node)
   if (!block) return ''
@@ -159,9 +166,23 @@ function textMarkup(node: CanvasNode) {
     )
     .join('')
   const rotation = rotateAttr(node)
+  const style = resolveNodeStyle(node['x-superboard']?.style)
   const fill =
-    COLOR_TOKENS[node.color ?? ''] ?? (block.muted ? '#f6f5f1' : '#ffffff')
-  const background = `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="12" fill="${fill}" stroke="#dedbd2" stroke-width="1"${rotation}/>`
+    style.background ??
+    COLOR_TOKENS[node.color ?? ''] ??
+    (block.muted ? '#f6f5f1' : '#ffffff')
+  const fillOpacity = style.opacity * style.backgroundOpacity
+  const stroke = style.borderColor ?? '#dedbd2'
+  const strokeWidth = style.borderWidth ?? 1
+  const strokeOpacity = style.opacity * style.borderOpacity
+  const radius = Math.min(
+    8 + strokeWidth,
+    node.width / 2,
+    node.height / 2,
+  )
+  const background = nodeHasSurface(node)
+    ? `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="${radius}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${stroke}" stroke-opacity="${strokeOpacity}" stroke-width="${strokeWidth}"${rotation}/>`
+    : ''
   return `${background}<g${rotation}><text text-anchor="${anchor}" font-family="${block.fontFamily}" font-size="${block.fontSize}" fill="${block.color}">${tspans}</text></g>`
 }
 
