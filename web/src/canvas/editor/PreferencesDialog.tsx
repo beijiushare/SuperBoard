@@ -167,10 +167,10 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           <p className="sb-settings-group">{t('settings:options')}</p>
           {(
             [
-              ['about', 'settings:tabs.about'],
               ['general', 'settings:tabs.general'],
               ['defaults', 'settings:tabs.defaults'],
               ['help', 'settings:tabs.help'],
+              ['about', 'settings:tabs.about'],
             ] as const
           ).map(([value, labelKey]) => (
             <button
