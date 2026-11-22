@@ -149,6 +149,7 @@
 - 块外层半径是 `--sb-card-radius + 边框宽度`；内容层（`.sb-card`、`.sb-card-pele`、`.sb-schedule`、Markdown 渲染层）使用 `--sb-card-radius` 并被裁剪，避免内容背景盖住边框内沿。
 - Pele、日程等内容在块内必须 `background: transparent`；独立预览场景可以保留白底。
 - 分组背景/边框也走样式面板：`GroupLayer` 使用 `resolveNodeStyle`，调色板只做兜底。
+- 新分组默认背景透明；`GroupLayer` 插在形状/手绘层之前，保证分组背景位于所有子元素下方。
 - 封闭形状由 `ShapeLayer` 拆成填充层 + 描边层，分别使用背景透明度和边框透明度；导出 HTML 保持同样结构。
 - 导出 HTML 的块、形状、分组都读取 `resolveNodeStyle`；普通文本、file 节点不输出 surface。
 - 文件、链接、普通文本没有外层 Surface，样式面板不应显示背景/边框选项。

@@ -66,8 +66,14 @@ export class GroupLayer extends BaseModule {
       willChange: 'transform',
     })
     const overlays = this.dm.data.container.querySelector('.JCV-overlays')
-    if (overlays) this.dm.data.container.insertBefore(this.layer, overlays)
-    else this.dm.data.container.appendChild(this.layer)
+    const firstShape = this.dm.data.container.querySelector('.sb-canvas-shape-layer')
+    const firstDrawing = this.dm.data.container.querySelector('.sb-canvas-drawing-layer')
+    const firstForeground = firstShape ?? firstDrawing ?? overlays
+    if (firstForeground) {
+      this.dm.data.container.insertBefore(this.layer, firstForeground)
+    } else {
+      this.dm.data.container.appendChild(this.layer)
+    }
     this.unsubscribe = this.controller.onRefresh.subscribe(this.draw)
     this.onStart(this.draw)
     this.onRestart(this.draw)
@@ -85,7 +91,8 @@ export class GroupLayer extends BaseModule {
       if (kind === 'shape' || kind === 'drawing') continue
       const colors = this.sm.getColor(node.color)
       const style = resolveNodeStyle(node['x-superboard']?.style)
-      const background = style.background ?? colors.background
+      const background =
+        style.background ?? (node.color ? colors.background : 'transparent')
       const backgroundOpacity = style.backgroundOpacity
       const borderColor = style.borderColor ?? colors.border
       const borderWidth = style.borderWidth ?? 2

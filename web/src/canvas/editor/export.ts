@@ -260,7 +260,9 @@ function groupMarkup(node: CanvasNode) {
   const extension = node['x-superboard']
   if (extension?.kind !== 'group') return ''
   const style = resolveNodeStyle(extension.style)
-  const fill = style.background ?? COLOR_TOKENS[node.color ?? '0'] ?? '#ffffff'
+  const fill =
+    style.background ??
+    (node.color ? COLOR_TOKENS[node.color] ?? '#ffffff' : 'none')
   const stroke = style.borderColor ?? '#d9d5ca'
   const strokeWidth = style.borderWidth ?? 1.5
   const radius = (style.cornerRadius ?? 12) + strokeWidth
