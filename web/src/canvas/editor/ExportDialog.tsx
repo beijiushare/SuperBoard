@@ -143,7 +143,7 @@ export function ExportDialog({
         </div>
         <div className="sb-dialog-body">
           <p className="sb-dialog-copy">
-            {t('editor:export.attachments', { count: attachments.length })}
+            {t('editor:export.attachments', { total: attachments.length })}
           </p>
           {attachments.length > 0 ? (
             <div className="sb-export-attachments">
