@@ -16,6 +16,12 @@ import { blockStyleFromPreferences, textStyleFromPreferences } from './preferenc
 import { detectMediaKind, type EditorTool } from './tools'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { peleBlockSize } from '../../shared/pele/size'
+import { estimateMarkdownHeight } from './markdownSize'
+import {
+  fitMediaSize,
+  measureMediaFile,
+  measureMediaUrl,
+} from './mediaSize'
 
 interface UseCanvasInsertionsOptions {
   canvas: CanvasDocument | null
@@ -130,13 +136,25 @@ export function useCanvasInsertions({
     return measured ? sizeWithNaturalRatio(measured) : defaultBlockSize('pele')
   }
 
+  function markdownSize(text: string, width: number) {
+    return { width, height: estimateMarkdownHeight(text, width) }
+  }
+
   async function insertTextBlock(
     kind: 'text' | 'markdown' | 'pele',
     point?: { x: number; y: number },
   ) {
     if (!canvas) return
     const code = i18n.t('editor:insert.defaultPele')
-    const size = kind === 'pele' ? await peleSize(code) : defaultBlockSize(kind)
+    const size =
+      kind === 'pele'
+        ? await peleSize(code)
+        : kind === 'markdown'
+          ? markdownSize(
+              i18n.t('editor:insert.defaultMarkdown'),
+              defaultBlockSize('markdown').width,
+            )
+          : defaultBlockSize(kind)
     const position = point
       ? {
           x: Math.round(point.x - size.width / 2),
@@ -322,12 +340,21 @@ export function useCanvasInsertions({
     setTool('select')
   }
 
-  function insertMedia(value = mediaUrl) {
+  function mediaSize(natural: { width: number; height: number } | null) {
+    if (!natural) return defaultBlockSize('media')
+    return sizeWithNaturalRatio(fitMediaSize(natural))
+  }
+
+  async function insertMedia(value = mediaUrl) {
     if (!canvas) return
     const url = normalizeMediaUrl(value)
     if (!url) return
-    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'media')
-    const size = defaultBlockSize('media')
+    const kind = detectMediaKind(url)
+    const natural = await measureMediaUrl(url, kind)
+    const size = mediaSize(natural)
+    const current = canvasRef.current
+    if (!current) return
+    const id = nextFreeId(new Set(current.nodes.map((node) => node.id)), 'media')
     const position = mediaInsertPoint
       ? {
           x: Math.round(mediaInsertPoint.x - size.width / 2),
@@ -344,19 +371,24 @@ export function useCanvasInsertions({
       height: size.height,
       'x-superboard': {
         kind: 'media',
-        media: { kind: detectMediaKind(url), url },
+        media: { kind, url },
         style: blockStyleFromPreferences(),
       },
     }
     recordHistory()
-    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    applyDocument({ ...current, nodes: [...current.nodes, node] }, [id])
     setMediaDialogOpen(false)
     setMediaUrl('')
     setMediaInsertPoint(null)
   }
 
-  function fileNode(id: string, imported: ImportedFile, index: number) {
-    const size = defaultBlockSize('media')
+  function fileNode(
+    id: string,
+    imported: ImportedFile,
+    index: number,
+    natural?: { width: number; height: number } | null,
+  ) {
+    const size = mediaSize(natural ?? null)
     const base = mediaInsertPoint
       ? {
           x: Math.round(mediaInsertPoint.x - size.width / 2),
@@ -389,11 +421,17 @@ export function useCanvasInsertions({
 
   async function insertLocalFile(file: File) {
     if (!canvas) return
+    const natural = await measureMediaFile(file)
     const imported = await importLocalFile(file, scope)
-    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'file')
+    const current = canvasRef.current
+    if (!current) return
+    const id = nextFreeId(new Set(current.nodes.map((node) => node.id)), 'file')
     recordHistory()
     applyDocument(
-      { ...canvas, nodes: [...canvas.nodes, fileNode(id, imported, 0)] },
+      {
+        ...current,
+        nodes: [...current.nodes, fileNode(id, imported, 0, natural)],
+      },
       [id],
     )
     setMediaDialogOpen(false)

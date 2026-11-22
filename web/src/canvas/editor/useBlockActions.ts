@@ -14,6 +14,7 @@ import {
 import type { EditorTool } from './tools'
 import { nodeFilePath, openWorkspaceFile } from './workspacePlatform'
 import { peleBlockSize } from '../../shared/pele/size'
+import { estimateMarkdownHeight } from './markdownSize'
 
 interface UseBlockActionsOptions {
   canvasRef: RefObject<CanvasDocument | null>
@@ -180,7 +181,15 @@ export function useBlockActions({
       return
     }
     const target = kind
-      ? DEFAULT_BLOCK_SIZES[kind]
+      ? kind === 'markdown'
+        ? {
+            width: DEFAULT_BLOCK_SIZES.markdown.width,
+            height: estimateMarkdownHeight(
+              node.type === 'text' ? node.text : '',
+              DEFAULT_BLOCK_SIZES.markdown.width,
+            ),
+          }
+        : DEFAULT_BLOCK_SIZES[kind]
       : isShapeNode(node)
         ? SHAPE_DEFAULT_SIZE
         : null
