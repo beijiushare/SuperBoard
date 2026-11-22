@@ -302,6 +302,11 @@ export function CanvasStylePanel({
   const firstKind = firstNode?.['x-superboard']?.kind
   const firstIsPlainText =
     firstNode?.type === 'text' && (!firstKind || firstKind === 'text')
+  const firstHasNoSurface =
+    firstIsPlainText ||
+    firstNode?.type === 'file' ||
+    (firstNode?.type === 'link' &&
+      firstNode?.['x-superboard']?.media?.kind === 'file')
   const firstIsShape = firstKind === 'shape'
   const firstIsDrawing = firstKind === 'drawing'
   const firstIsLine =
@@ -392,7 +397,7 @@ export function CanvasStylePanel({
             onWidth={(width) => updateGeometry({ width })}
             onHeight={(height) => updateGeometry({ height })}
           />
-          {!firstIsDrawing && !firstIsLine && !firstIsPlainText ? (
+          {!firstIsDrawing && !firstIsLine && !firstHasNoSurface ? (
             <BackgroundFields
               color={firstBackgroundColor}
               opacity={firstBackgroundOpacity}
@@ -406,7 +411,7 @@ export function CanvasStylePanel({
               onColorUsed={onRememberColor}
             />
           ) : null}
-          {!firstIsPlainText ? (
+          {!firstHasNoSurface ? (
             <BorderFields
               color={firstBorderColor}
               opacity={firstBorderOpacity}
