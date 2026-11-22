@@ -136,15 +136,12 @@ export class DrawingLayer extends BaseModule {
       )
       nodeGroup.setAttribute('opacity', String(resolved.opacity))
       for (const stroke of strokes) {
-        const width = resolved.borderWidth ?? stroke.size
+        const width = stroke.size ?? resolved.borderWidth ?? 4
         const pathData = this.pathFor(stroke, width)
         if (!pathData) continue
         const path = document.createElementNS(SVG_NS, 'path')
         path.setAttribute('d', pathData)
-        path.setAttribute(
-          'fill',
-          resolved.borderColor ?? stroke.color ?? '#1d1d1d',
-        )
+        path.setAttribute('fill', stroke.color ?? '#1d1d1d')
         nodeGroup.appendChild(path)
       }
       group.appendChild(nodeGroup)
