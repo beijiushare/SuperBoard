@@ -141,3 +141,10 @@
 4. 主按钮是否唯一？危险操作是否有独立视觉？
 5. 中文/英文文案是否都走 i18n？
 6. 焦点、悬停、禁用三种状态是否齐全？
+
+## 9. 块渲染注意
+
+- `.JCV-overlay-container` 必须是 `border-radius: 0`：vendor 默认是 `12px` + `contain: strict`，会按 12px 裁剪后代，把细边框块的角削成尖角。
+- 块外层半径是 `--sb-card-radius + 边框宽度`；内容层（`.sb-card`、`.sb-card-pele`、`.sb-schedule`、Markdown 渲染层）使用 `--sb-card-radius` 并被裁剪，避免内容背景盖住边框内沿。
+- 日程（FullCalendar v7）使用哈希类名，不能用 `.fc` 选择器；外框通过 `[data-color-scheme]`、`[role="table"]` 去除。
+- 详细排查过程见 `memory/superboard-refactor.md` 的「踩坑记录」。

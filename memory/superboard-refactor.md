@@ -262,6 +262,21 @@
 - 仓储层单测、浏览器 File System Access 适配测试
 - Markdown fallback `MarkdownView` 542 kB 懒加载体积优化
 
+## 踩坑记录
+
+### 块边框细线时角部出现尖角 / 缺口
+
+- 现象：markdown、Pele、日程等块的边框在细线时四角被削掉，粗线时不明显；普通文本块正常。
+- 根因不在块自身，而在祖先 `.JCV-overlay-container`：
+  - vendor 样式给它 `border-radius: 12px` 和 `contain: strict`（含 paint containment）；
+  - 祖先按 12px 圆角裁剪后代；
+  - 块边框外圆角是 `calc(var(--sb-card-radius) + 边框宽度)`，1px 边框时为 9px，小于 12px，角部被裁成尖角。
+- 为什么粗边框看起来正常：`边框宽度 ≥ 4px` 时外半径 ≥ 12px，不再被祖先裁掉。
+- 为什么普通文本块没事：`.JCV-overlay-container:has(.sb-plain-text) { border-radius: 0 }` 早已覆盖。
+- 修复：`.JCV-overlay-container.JCV-overlay-container { border-radius: 0 !important; }`（vendor 样式运行时注入，需 `!important` 或更高优先级）。
+- 排查方法：用真实 `.canvas` 数据在 8 倍视图下复现，逐个禁用祖先的 `border-radius` / `contain` 二分定位，不要只改块自身。
+- 日程块另有 FullCalendar v7 的哈希类名问题：`.fc`、`.fc-scrollgrid` 选择器无效，需用 `[data-color-scheme]`、`[role="table"]`。
+
 ## 验证命令
 
 ```bash
