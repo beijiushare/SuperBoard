@@ -34,6 +34,7 @@ import { StyleNumberControl } from './StyleNumberControl'
 import { getUiState, updateUiState, useUiState } from './uiState'
 import { useFloatingPanel } from './useFloatingPanel'
 import { WindowDragHandle } from './WindowDragHandle'
+import { peleHeightForWidth } from '../../shared/pele/size'
 
 interface CanvasStylePanelProps {
   canvas: CanvasDocument
@@ -146,9 +147,32 @@ export function CanvasStylePanel({
     onBeforeChange(patchHistoryKey('geometry', patch))
     onApply({
       ...canvas,
-      nodes: canvas.nodes.map((node) =>
-        targetIds.has(node.id) ? applyGeometry(node, patch) : node,
-      ),
+      nodes: canvas.nodes.map((node) => {
+        if (!targetIds.has(node.id)) return node
+        // Pele blocks keep their diagram's ratio, also through the number fields.
+        if (
+          node['x-superboard']?.kind === 'pele' &&
+          patch.rotation === undefined &&
+          !(patch.width !== undefined && patch.height !== undefined) &&
+          node.width > 0 &&
+          node.height > 0
+        ) {
+          const ratio = node.width / node.height
+          if (patch.width !== undefined) {
+            return applyGeometry(node, {
+              width: patch.width,
+              height: Math.max(40, Math.round(patch.width / ratio)),
+            })
+          }
+          if (patch.height !== undefined) {
+            return applyGeometry(node, {
+              width: Math.max(40, Math.round(patch.height * ratio)),
+              height: patch.height,
+            })
+          }
+        }
+        return applyGeometry(node, patch)
+      }),
     }, selectedIds)
   }
 
@@ -208,7 +232,42 @@ export function CanvasStylePanel({
     )
   }
 
-  function updateDrawing(patch: DrawingPatch) {    const targets = targetNodes.filter((node) => kindOf(node) === 'drawing')
+  function applyPeleNarrow(narrow: boolean) {
+    const targets = peleNodes
+    if (targets.length === 0) return
+    void (async () => {
+      const heights = new Map<string, number>()
+      for (const node of targets) {
+        const extension = node['x-superboard']
+        const code =
+          typeof extension?.code === 'string'
+            ? extension.code
+            : node.type === 'text'
+              ? node.text
+              : ''
+        const height = await peleHeightForWidth(code, narrow, node.width)
+        if (height) heights.set(node.id, height)
+      }
+      applyTo(
+        targets,
+        (node) => {
+          const height = heights.get(node.id)
+          return {
+            ...node,
+            ...(height ? { height } : {}),
+            'x-superboard': {
+              ...(node['x-superboard'] ?? { kind: 'pele' as const }),
+              narrow,
+            },
+          }
+        },
+        patchHistoryKey('pele-narrow', { narrow }),
+      )
+    })()
+  }
+
+  function updateDrawing(patch: DrawingPatch) {
+    const targets = targetNodes.filter((node) => kindOf(node) === 'drawing')
     if (targets.length === 0) return
     applyTo(
       targets,
@@ -223,6 +282,9 @@ export function CanvasStylePanel({
   const texts = targetNodes.filter((node) => node.type === 'text' && (!kindOf(node) || kindOf(node) === 'text'))
   const mediaNodes = targetNodes.filter(
     (node) => node['x-superboard']?.kind === 'media' && node['x-superboard']?.media,
+  )
+  const peleNodes = targetNodes.filter(
+    (node) => node['x-superboard']?.kind === 'pele',
   )
 
   function applyTo(
@@ -493,6 +555,20 @@ export function CanvasStylePanel({
                 unit="px"
                 onChange={updateGroupPadding}
               />
+            </section>
+          ) : null}
+          {activeTab === 'group' ? null : peleNodes.length > 0 ? (
+            <section>
+              <h3>{t('editor:style.diagram')}</h3>
+              <div className="sb-style-row">
+                <span>{t('editor:style.peleNarrow')}</span>
+                <Switch
+                  checked={peleNodes[0]?.['x-superboard']?.narrow === true}
+                  onChange={applyPeleNarrow}
+                  ariaLabel={t('editor:style.peleNarrow')}
+                  title={t('editor:style.peleNarrowHint')}
+                />
+              </div>
             </section>
           ) : null}
           {showBackground ? (

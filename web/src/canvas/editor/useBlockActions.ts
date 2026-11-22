@@ -4,6 +4,7 @@ import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
   DEFAULT_BLOCK_SIZES,
   SHAPE_DEFAULT_SIZE,
+  blockDefinition,
   blockEditor,
   blockKind,
   isActionableNode,
@@ -12,6 +13,7 @@ import {
 } from './blocks'
 import type { EditorTool } from './tools'
 import { nodeFilePath, openWorkspaceFile } from './workspacePlatform'
+import { peleBlockSize } from '../../shared/pele/size'
 
 interface UseBlockActionsOptions {
   canvasRef: RefObject<CanvasDocument | null>
@@ -111,6 +113,8 @@ export function useBlockActions({
     const document = canvasRef.current
     const node = document?.nodes.find((item) => item.id === id)
     if (!document || !node || !isActionableNode(node)) return
+    // Pele blocks always follow their diagram's natural ratio.
+    if (blockDefinition(node)?.ratioLockable === false) return
     recordHistory()
     const extension = ensureExtension(node)
     const wasLocked = isRatioLocked(node)
@@ -120,17 +124,10 @@ export function useBlockActions({
     viewerRef.current?.viewer?.refresh?.()
   }
 
-  function resetBlockSize(id: string) {
+  function applyBlockSize(id: string, target: { width: number; height: number }) {
     const document = canvasRef.current
     const node = document?.nodes.find((item) => item.id === id)
     if (!document || !node) return
-    const kind = blockKind(node)
-    const target = kind
-      ? DEFAULT_BLOCK_SIZES[kind]
-      : isShapeNode(node)
-        ? SHAPE_DEFAULT_SIZE
-        : null
-    if (!target) return
     if (
       node.width === target.width &&
       node.height === target.height &&
@@ -161,6 +158,34 @@ export function useBlockActions({
     setSelectedIds([id])
     setCanvas(next)
     markDirty()
+  }
+
+  function resetBlockSize(id: string) {
+    const document = canvasRef.current
+    const node = document?.nodes.find((item) => item.id === id)
+    if (!document || !node) return
+    const kind = blockKind(node)
+    // Pele blocks reset to the diagram's own natural size, not a fixed box.
+    if (kind === 'pele') {
+      const extension = node['x-superboard']
+      const code =
+        typeof extension?.code === 'string'
+          ? extension.code
+          : node.type === 'text'
+            ? node.text
+            : ''
+      void peleBlockSize(code, extension?.narrow === true).then((size) => {
+        if (size) applyBlockSize(id, size)
+      })
+      return
+    }
+    const target = kind
+      ? DEFAULT_BLOCK_SIZES[kind]
+      : isShapeNode(node)
+        ? SHAPE_DEFAULT_SIZE
+        : null
+    if (!target) return
+    applyBlockSize(id, target)
   }
 
   function handleMarkdownCommit(id: string, value: string) {

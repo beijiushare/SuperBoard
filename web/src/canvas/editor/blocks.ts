@@ -20,6 +20,8 @@ export interface BlockDefinition {
   kind: BlockKind
   defaultSize: { width: number; height: number }
   ratioLocked: boolean
+  /** Whether the floating bar may toggle the ratio lock. */
+  ratioLockable: boolean
   scalable: boolean
   editor: BlockEditor
   focusable: boolean
@@ -30,6 +32,7 @@ export const BLOCK_DEFINITIONS: Record<BlockKind, BlockDefinition> = {
     kind: 'text',
     defaultSize: DEFAULT_BLOCK_SIZES.text,
     ratioLocked: false,
+    ratioLockable: true,
     scalable: true,
     editor: 'text',
     focusable: false,
@@ -38,6 +41,7 @@ export const BLOCK_DEFINITIONS: Record<BlockKind, BlockDefinition> = {
     kind: 'markdown',
     defaultSize: DEFAULT_BLOCK_SIZES.markdown,
     ratioLocked: true,
+    ratioLockable: true,
     scalable: true,
     editor: 'markdown',
     focusable: true,
@@ -46,6 +50,8 @@ export const BLOCK_DEFINITIONS: Record<BlockKind, BlockDefinition> = {
     kind: 'pele',
     defaultSize: DEFAULT_BLOCK_SIZES.pele,
     ratioLocked: true,
+    // A diagram's size follows its natural ratio, so there is nothing to unlock.
+    ratioLockable: false,
     scalable: true,
     editor: 'pele',
     focusable: false,
@@ -54,6 +60,7 @@ export const BLOCK_DEFINITIONS: Record<BlockKind, BlockDefinition> = {
     kind: 'schedule',
     defaultSize: DEFAULT_BLOCK_SIZES.schedule,
     ratioLocked: true,
+    ratioLockable: true,
     scalable: true,
     editor: 'schedule',
     focusable: false,
@@ -62,6 +69,7 @@ export const BLOCK_DEFINITIONS: Record<BlockKind, BlockDefinition> = {
     kind: 'media',
     defaultSize: DEFAULT_BLOCK_SIZES.media,
     ratioLocked: true,
+    ratioLockable: true,
     scalable: true,
     editor: 'media',
     focusable: false,
@@ -111,6 +119,7 @@ export function isRatioLocked(node: CanvasNode) {
   const locked = node['x-superboard']?.ratioLocked
   if (isShapeNode(node)) return locked ?? false
   if (!definition) return false
+  if (!definition.ratioLockable) return true
   return locked !== undefined ? locked : definition.ratioLocked
 }
 

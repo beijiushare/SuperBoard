@@ -154,7 +154,10 @@ export function TextSlot({
     ) : ext?.kind === 'pele' ? (
       <div className="sb-card sb-card-pele">
         <Suspense fallback={<div className="sb-pele-loading">{t('common:status.rendering')}</div>}>
-          <PeleView code={typeof ext.code === 'string' ? ext.code : node.text} />
+          <PeleView
+            code={typeof ext.code === 'string' ? ext.code : node.text}
+            narrow={ext.narrow === true}
+          />
         </Suspense>
       </div>
     ) : ext?.kind === 'schedule' ? (

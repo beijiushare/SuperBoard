@@ -165,6 +165,8 @@ export interface SuperBoardNodeExtension {
   locked?: boolean
   markdownLocked?: boolean
   ratioLocked?: boolean
+  /** Pele blocks only: draw the diagram narrow (the small-screen layout). */
+  narrow?: boolean
   contentScale?: number
   style?: SuperBoardStyle
   shape?: SuperBoardShapeKind

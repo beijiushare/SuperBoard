@@ -15,6 +15,7 @@ import type { BoardScope } from '../../shared/board/types'
 import { blockStyleFromPreferences, textStyleFromPreferences } from './preferences'
 import { detectMediaKind, type EditorTool } from './tools'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
+import { peleBlockSize } from '../../shared/pele/size'
 
 interface UseCanvasInsertionsOptions {
   canvas: CanvasDocument | null
@@ -103,12 +104,39 @@ export function useCanvasInsertions({
     }
   }
 
-  function insertTextBlock(
+  /** Keep a diagram's natural ratio, but let an explicit default width/height
+   *  from the board settings decide one side. */
+  function sizeWithNaturalRatio(natural: { width: number; height: number }) {
+    const settings = canvasRef.current?.['x-superboard']?.settings
+    const width = settings?.defaultBlockWidth
+    const height = settings?.defaultBlockHeight
+    if (width) {
+      return {
+        width,
+        height: Math.max(40, Math.round((width * natural.height) / natural.width)),
+      }
+    }
+    if (height) {
+      return {
+        width: Math.max(40, Math.round((height * natural.width) / natural.height)),
+        height,
+      }
+    }
+    return natural
+  }
+
+  async function peleSize(code: string, narrow = false) {
+    const measured = await peleBlockSize(code, narrow)
+    return measured ? sizeWithNaturalRatio(measured) : defaultBlockSize('pele')
+  }
+
+  async function insertTextBlock(
     kind: 'text' | 'markdown' | 'pele',
     point?: { x: number; y: number },
   ) {
     if (!canvas) return
-    const size = defaultBlockSize(kind)
+    const code = i18n.t('editor:insert.defaultPele')
+    const size = kind === 'pele' ? await peleSize(code) : defaultBlockSize(kind)
     const position = point
       ? {
           x: Math.round(point.x - size.width / 2),
@@ -139,8 +167,8 @@ export function useCanvasInsertions({
       setEditRequest({ id, nonce: Date.now() })
       return
     }
-    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), kind)
-    const code = i18n.t('editor:insert.defaultPele')
+    const base = canvasRef.current ?? canvas
+    const id = nextFreeId(new Set(base.nodes.map((node) => node.id)), kind)
     const node: CanvasNode =
       kind === 'markdown'
         ? {
@@ -173,7 +201,8 @@ export function useCanvasInsertions({
             },
           }
     recordHistory()
-    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    const latest = canvasRef.current ?? canvas
+    applyDocument({ ...latest, nodes: [...latest.nodes, node] }, [id])
     if (kind === 'markdown') {
       setTool('select')
       startMarkdownEditing(id)
@@ -197,7 +226,7 @@ export function useCanvasInsertions({
     setPeleDialog({ mode: 'edit', nodeId: id })
   }
 
-  function insertPele({ code, diagram }: { code: string; diagram: string }) {
+  async function insertPele({ code, diagram }: { code: string; diagram: string }) {
     if (!canvas || !peleDialog) return
     const text = `\`\`\`mermaid\n${code}\n\`\`\``
     if (peleDialog.mode === 'edit') {
@@ -227,13 +256,17 @@ export function useCanvasInsertions({
       setPeleDialog(null)
       return
     }
-    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'pele')
-    const offset = (canvas.nodes.length % 6) * 24
-    const size = defaultBlockSize('pele')
-    const position = peleDialog.point
+    const narrow = false
+    const createdFor = peleDialog
+    const size = await peleSize(code, narrow)
+    const current = canvasRef.current
+    if (!current) return
+    const id = nextFreeId(new Set(current.nodes.map((node) => node.id)), 'pele')
+    const offset = (current.nodes.length % 6) * 24
+    const position = createdFor.point
       ? {
-          x: Math.round(peleDialog.point.x - size.width / 2),
-          y: Math.round(peleDialog.point.y - size.height / 2),
+          x: Math.round(createdFor.point.x - size.width / 2),
+          y: Math.round(createdFor.point.y - size.height / 2),
         }
       : (() => {
           const center = viewportCenter(size.width, size.height)
@@ -255,7 +288,7 @@ export function useCanvasInsertions({
       },
     }
     recordHistory()
-    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    applyDocument({ ...current, nodes: [...current.nodes, node] }, [id])
     setTool('select')
     setPeleDialog(null)
   }

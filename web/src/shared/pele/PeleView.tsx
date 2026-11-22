@@ -2,6 +2,7 @@ import DOMPurify from 'dompurify'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { renderAsync } from 'pele/lazy'
+import { peleRenderOptions } from './size'
 import { stripDiagramTitle } from './stripTitle'
 
 const SVG_SANITIZE_OPTIONS = {
@@ -15,9 +16,11 @@ const SVG_SANITIZE_OPTIONS = {
 interface PeleViewProps {
   code: string
   className?: string
+  /** Draw the diagram narrow, the way it adapts to a small screen. */
+  narrow?: boolean
 }
 
-export function PeleView({ code, className = '' }: PeleViewProps) {
+export function PeleView({ code, className = '', narrow = false }: PeleViewProps) {
   const { t } = useTranslation(['common'])
   const [svg, setSvg] = useState('')
   const [error, setError] = useState('')
@@ -29,7 +32,7 @@ export function PeleView({ code, className = '' }: PeleViewProps) {
 
     if (!code.trim()) return
 
-    renderAsync(stripDiagramTitle(code))
+    renderAsync(stripDiagramTitle(code), peleRenderOptions(narrow))
       .then((result) => {
         if (cancelled) return
         setSvg(DOMPurify.sanitize(result.svg, SVG_SANITIZE_OPTIONS))
@@ -42,7 +45,7 @@ export function PeleView({ code, className = '' }: PeleViewProps) {
     return () => {
       cancelled = true
     }
-  }, [code])
+  }, [code, narrow])
 
   return (
     <div className={`sb-pele ${className}`.trim()}>

@@ -105,18 +105,20 @@ export function BlockActions({
         event.stopPropagation()
       }}
     >
-      <button
-        type="button"
-        className={`sb-block-action${ratioLocked ? ' is-active' : ''}`}
-        title={ratioLocked ? t('editor:block.unlockRatio') : t('editor:block.lockRatio')}
-        onClick={(event) => {
-          event.stopPropagation()
-          onToggleRatioLock?.(node.id)
-        }}
-      >
-        <span className={`sb-block-check${ratioLocked ? ' is-checked' : ''}`} />
-        <LockIcon size={14} />
-      </button>
+      {definition?.ratioLockable ? (
+        <button
+          type="button"
+          className={`sb-block-action${ratioLocked ? ' is-active' : ''}`}
+          title={ratioLocked ? t('editor:block.unlockRatio') : t('editor:block.lockRatio')}
+          onClick={(event) => {
+            event.stopPropagation()
+            onToggleRatioLock?.(node.id)
+          }}
+        >
+          <span className={`sb-block-check${ratioLocked ? ' is-checked' : ''}`} />
+          <LockIcon size={14} />
+        </button>
+      ) : null}
       {canEdit ? (
         <button
           type="button"
