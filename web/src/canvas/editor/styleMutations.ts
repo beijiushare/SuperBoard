@@ -3,6 +3,7 @@ import {
   type CanvasNode,
   type SuperBoardStyle,
 } from '../model'
+import { DEFAULT_PREFERENCES } from './preferences'
 
 function fallbackKind(node: CanvasNode) {
   return node.type === 'text' ? 'text' : node.type === 'group' ? 'group' : 'media'
@@ -26,7 +27,26 @@ export function withCommonStyle(
   node: CanvasNode,
   patch: Partial<SuperBoardStyle>,
 ): CanvasNode {
-  const next = withStyle(node, patch)
+  const current = node['x-superboard']?.style
+  const nextPatch: Partial<SuperBoardStyle> = { ...patch }
+  // Opacity only takes effect when the color is stored on the node. When the
+  // user adjusts opacity for a default-colored block, persist that default
+  // color too so the change is visible and survives a reload.
+  if (
+    patch.backgroundOpacity !== undefined &&
+    !current?.backgroundColor &&
+    !current?.fill
+  ) {
+    nextPatch.backgroundColor = DEFAULT_PREFERENCES.block.backgroundColor
+  }
+  if (
+    patch.borderOpacity !== undefined &&
+    !current?.borderColor &&
+    !current?.stroke
+  ) {
+    nextPatch.borderColor = DEFAULT_PREFERENCES.block.borderColor
+  }
+  const next = withStyle(node, nextPatch)
   if (patch.borderStyle === undefined) return next
   const extension = next['x-superboard']
   if (!extension?.style) return next

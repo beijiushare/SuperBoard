@@ -47,6 +47,7 @@ import {
   applyErasure,
   planErasure,
 } from '../web/src/canvas/editor/eraser'
+import { DEFAULT_PREFERENCES } from '../web/src/canvas/editor/preferences'
 
 const nodes: CanvasNode[] = [
   {
@@ -405,6 +406,34 @@ assert.equal(styledBase['x-superboard']?.style?.borderColor, undefined)
 const commonStyled = withCommonStyle(styledBase, { borderStyle: 'dashed' })
 assert.equal(commonStyled['x-superboard']?.style?.strokeDash, undefined)
 assert.equal(commonStyled['x-superboard']?.style?.borderStyle, 'dashed')
+
+const opacityDefault = withCommonStyle(
+  {
+    ...styledBase,
+    'x-superboard': { kind: 'text', style: {} },
+  },
+  { borderOpacity: 0.4, backgroundOpacity: 0.5 },
+)
+assert.equal(
+  opacityDefault['x-superboard']?.style?.borderColor,
+  DEFAULT_PREFERENCES.block.borderColor,
+)
+assert.equal(
+  opacityDefault['x-superboard']?.style?.backgroundColor,
+  DEFAULT_PREFERENCES.block.backgroundColor,
+)
+assert.equal(opacityDefault['x-superboard']?.style?.borderOpacity, 0.4)
+assert.equal(opacityDefault['x-superboard']?.style?.backgroundOpacity, 0.5)
+
+const opacityExplicit = withCommonStyle(styledBase, {
+  borderOpacity: 0.6,
+  backgroundOpacity: 0.7,
+})
+assert.equal(opacityExplicit['x-superboard']?.style?.fill, '#eee')
+assert.equal(
+  opacityExplicit['x-superboard']?.style?.backgroundColor,
+  undefined,
+)
 const geometryStyled = applyGeometry(styledBase, { width: 120, rotation: 30 })
 assert.equal(geometryStyled.width, 120)
 assert.equal(geometryStyled.height, 40)
