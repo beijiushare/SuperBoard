@@ -148,6 +148,7 @@
 - `.JCV-overlay-container` 必须是 `border-radius: 0`：vendor 默认是 `12px` + `contain: strict`，会按 12px 裁剪后代，把细边框块的角削成尖角。
 - 块外层半径是 `--sb-card-radius + 边框宽度`；内容层（`.sb-card`、`.sb-card-pele`、`.sb-schedule`、Markdown 渲染层）使用 `--sb-card-radius` 并被裁剪，避免内容背景盖住边框内沿。
 - Pele、日程等内容在块内必须 `background: transparent`；独立预览场景可以保留白底。
+- Pele 在画布缩放时按 1x/2x/3x/4x 分档放大 SVG 布局尺寸再缩放回块内，提高文字栅格化分辨率；缓存由 React 状态分档，不随每帧缩放重渲染。
 - 分组背景/边框也走样式面板：`GroupLayer` 使用 `resolveNodeStyle`，调色板只做兜底。
 - 新分组默认背景透明；`GroupLayer` 插在形状/手绘层之前，保证分组背景位于所有子元素下方。
 - 封闭形状由 `ShapeLayer` 拆成填充层 + 描边层，分别使用背景透明度和边框透明度；导出 HTML 保持同样结构。

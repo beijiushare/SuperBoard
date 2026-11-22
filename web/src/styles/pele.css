@@ -49,6 +49,10 @@
   background: transparent;
 }
 
+.sb-block-scale .sb-pele {
+  overflow: hidden;
+}
+
 .sb-pele {
   width: 100%;
   height: 100%;
