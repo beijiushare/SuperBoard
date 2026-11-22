@@ -113,6 +113,9 @@ function BlockSurface({
                 ? colorWithOpacity(background, backgroundOpacity)
                 : undefined,
               opacity: style.opacity,
+              ...(ext?.style?.padding
+                ? { padding: `${ext.style.padding}px` }
+                : {}),
               ...(borderWidth
                 ? {
                     ['--sb-block-border-width' as string]: `${borderWidth}px`,

@@ -102,7 +102,7 @@ export interface SuperBoardStyle {
   color?: string
   opacity?: number
   cornerRadius?: number
-  /** Inner padding between a group border and its child elements. */
+  /** Inner padding between the block surface and its content, or a group border and its children. */
   padding?: number
   fontFamily?: string
   fontSize?: number

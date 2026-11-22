@@ -54,13 +54,20 @@ export async function peleBlockSize(
   return natural ? fitPeleSize(natural) : null
 }
 
-/** Height that keeps the diagram's natural ratio at the given width. */
-export async function peleHeightForWidth(
+/** New block size when switching layouts: keep the block's area, adopt the
+ *  layout's natural ratio, so it neither explodes in height nor shrinks away. */
+export async function peleSizeForLayout(
   code: string,
   narrow: boolean,
-  width: number,
-): Promise<number | null> {
+  current: PeleSize,
+): Promise<PeleSize | null> {
   const natural = await measurePele(code, narrow)
   if (!natural) return null
-  return Math.max(1, Math.round((width * natural.height) / natural.width))
+  const ratio = natural.width / natural.height
+  const area = Math.max(1, current.width * current.height)
+  const height = Math.sqrt(area / ratio)
+  return {
+    width: Math.max(1, Math.round(height * ratio)),
+    height: Math.max(1, Math.round(height)),
+  }
 }

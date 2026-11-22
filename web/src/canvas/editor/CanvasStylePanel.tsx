@@ -34,7 +34,7 @@ import { StyleNumberControl } from './StyleNumberControl'
 import { getUiState, updateUiState, useUiState } from './uiState'
 import { useFloatingPanel } from './useFloatingPanel'
 import { WindowDragHandle } from './WindowDragHandle'
-import { peleHeightForWidth } from '../../shared/pele/size'
+import { peleSizeForLayout } from '../../shared/pele/size'
 
 interface CanvasStylePanelProps {
   canvas: CanvasDocument
@@ -52,6 +52,9 @@ function kindOf(node: CanvasNode) {
 function patchHistoryKey(prefix: string, patch: object) {
   return `${prefix}:${Object.keys(patch).sort().join(',')}`
 }
+
+/** Blocks whose content can be inset from the surface. */
+const CONTENT_PADDING_KINDS = new Set(['markdown', 'pele', 'schedule', 'media'])
 
 function CropSlider({
   label,
@@ -232,11 +235,31 @@ export function CanvasStylePanel({
     )
   }
 
+  function updateContentPadding(value: number) {
+    if (paddingNodes.length === 0) return
+    const padding = Math.max(0, Math.min(96, Math.round(value)))
+    applyTo(
+      paddingNodes,
+      (node) => {
+        const extension = node['x-superboard']
+        if (!extension) return node
+        return {
+          ...node,
+          'x-superboard': {
+            ...extension,
+            style: { ...extension.style, padding },
+          },
+        }
+      },
+      patchHistoryKey('content-padding', { padding }),
+    )
+  }
+
   function applyPeleNarrow(narrow: boolean) {
     const targets = peleNodes
     if (targets.length === 0) return
     void (async () => {
-      const heights = new Map<string, number>()
+      const sizes = new Map<string, { width: number; height: number }>()
       for (const node of targets) {
         const extension = node['x-superboard']
         const code =
@@ -245,16 +268,19 @@ export function CanvasStylePanel({
             : node.type === 'text'
               ? node.text
               : ''
-        const height = await peleHeightForWidth(code, narrow, node.width)
-        if (height) heights.set(node.id, height)
+        const size = await peleSizeForLayout(code, narrow, {
+          width: node.width,
+          height: node.height,
+        })
+        if (size) sizes.set(node.id, size)
       }
       applyTo(
         targets,
         (node) => {
-          const height = heights.get(node.id)
+          const size = sizes.get(node.id)
           return {
             ...node,
-            ...(height ? { height } : {}),
+            ...(size ?? {}),
             'x-superboard': {
               ...(node['x-superboard'] ?? { kind: 'pele' as const }),
               narrow,
@@ -286,6 +312,10 @@ export function CanvasStylePanel({
   const peleNodes = targetNodes.filter(
     (node) => node['x-superboard']?.kind === 'pele',
   )
+  const paddingNodes = targetNodes.filter((node) => {
+    const kind = kindOf(node)
+    return kind ? CONTENT_PADDING_KINDS.has(kind) : false
+  })
 
   function applyTo(
     targets: CanvasNode[],
@@ -554,6 +584,19 @@ export function CanvasStylePanel({
                 step={1}
                 unit="px"
                 onChange={updateGroupPadding}
+              />
+            </section>
+          ) : null}
+          {activeTab === 'group' ? null : paddingNodes.length > 0 ? (
+            <section>
+              <StyleNumberControl
+                label={t('editor:style.contentPadding')}
+                value={paddingNodes[0]?.['x-superboard']?.style?.padding ?? 0}
+                min={0}
+                max={96}
+                step={1}
+                unit="px"
+                onChange={updateContentPadding}
               />
             </section>
           ) : null}
