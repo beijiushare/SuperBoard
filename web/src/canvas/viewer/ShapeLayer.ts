@@ -151,22 +151,47 @@ export class ShapeLayer extends BaseModule {
         'transform',
         `translate(${node.x} ${node.y})${rotate}`,
       )
-      const element = this.createShape(
+      const geometry = this.createShape(
         node,
         shape,
         style.cornerRadius ??
           (shape === 'rect' ? DEFAULT_PREFERENCES.shapeCornerRadius : 0),
       )
-      element.setAttribute(
-        'fill',
-        background && background !== 'none' ? background : 'transparent',
-      )
-      element.setAttribute('fill-opacity', String(style.opacity * backgroundOpacity))
-      element.setAttribute('stroke', borderColor)
-      element.setAttribute('stroke-opacity', String(style.opacity * borderOpacity))
-      element.setAttribute('stroke-width', String(borderWidth))
-      if (dash?.length) element.setAttribute('stroke-dasharray', dash.join(' '))
-      nodeGroup.appendChild(element)
+      if (shape === 'line') {
+        geometry.setAttribute('fill', 'none')
+        geometry.setAttribute('stroke', borderColor)
+        geometry.setAttribute(
+          'stroke-opacity',
+          String(style.opacity * borderOpacity),
+        )
+        geometry.setAttribute('stroke-width', String(borderWidth))
+        if (dash?.length) geometry.setAttribute('stroke-dasharray', dash.join(' '))
+        nodeGroup.appendChild(geometry)
+      } else {
+        const fillElement = geometry
+        fillElement.setAttribute(
+          'fill',
+          background && background !== 'none' ? background : 'transparent',
+        )
+        fillElement.setAttribute(
+          'fill-opacity',
+          String(style.opacity * backgroundOpacity),
+        )
+        fillElement.setAttribute('stroke', 'none')
+
+        const strokeElement = geometry.cloneNode(true) as SVGElement
+        strokeElement.setAttribute('fill', 'none')
+        strokeElement.setAttribute('stroke', borderColor)
+        strokeElement.setAttribute(
+          'stroke-opacity',
+          String(style.opacity * borderOpacity),
+        )
+        strokeElement.setAttribute('stroke-width', String(borderWidth))
+        if (dash?.length) {
+          strokeElement.setAttribute('stroke-dasharray', dash.join(' '))
+        }
+        nodeGroup.append(fillElement, strokeElement)
+      }
       group.appendChild(nodeGroup)
     }
   }

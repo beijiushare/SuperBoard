@@ -178,29 +178,34 @@ function shapeMarkup(node: CanvasNode) {
     : ''
   const opacity = style.opacity
   const rotation = rotateAttr(node)
-  const common = `fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"${dash} opacity="${opacity}"${rotation}`
-  if (shape === 'ellipse') {
-    return `<ellipse cx="${node.x + node.width / 2}" cy="${node.y + node.height / 2}" rx="${Math.abs(node.width / 2)}" ry="${Math.abs(node.height / 2)}" ${common}/>`
-  }
-  if (shape === 'diamond') {
-    const points = [
-      `${node.x + node.width / 2},${node.y}`,
-      `${node.x + node.width},${node.y + node.height / 2}`,
-      `${node.x + node.width / 2},${node.y + node.height}`,
-      `${node.x},${node.y + node.height / 2}`,
-    ].join(' ')
-    return `<polygon points="${points}" ${common}/>`
-  }
   if (shape === 'line') {
     const flip = extension.lineFlip
     const x1 = node.x + (flip?.x ? node.width : 0)
     const y1 = node.y + (flip?.y ? node.height : 0)
     const x2 = node.x + (flip?.x ? 0 : node.width)
     const y2 = node.y + (flip?.y ? 0 : node.height)
-    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${strokeWidth}"${dash} opacity="${opacity}"${rotation}/>`
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-opacity="${opacity * style.borderOpacity}" stroke-width="${strokeWidth}"${dash}${rotation}/>`
   }
-  const radius = style.cornerRadius ?? 0
-  return `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="${radius}" ${common}/>`
+
+  const fillPaint = `fill="${fill}" fill-opacity="${opacity * style.backgroundOpacity}" stroke="none"`
+  const strokePaint = `fill="none" stroke="${stroke}" stroke-opacity="${opacity * style.borderOpacity}" stroke-width="${strokeWidth}"${dash}`
+  const paint = (attributes: string) => {
+    if (shape === 'ellipse') {
+      return `<ellipse cx="${node.x + node.width / 2}" cy="${node.y + node.height / 2}" rx="${Math.abs(node.width / 2)}" ry="${Math.abs(node.height / 2)}" ${attributes}${rotation}/>`
+    }
+    if (shape === 'diamond') {
+      const points = [
+        `${node.x + node.width / 2},${node.y}`,
+        `${node.x + node.width},${node.y + node.height / 2}`,
+        `${node.x + node.width / 2},${node.y + node.height}`,
+        `${node.x},${node.y + node.height / 2}`,
+      ].join(' ')
+      return `<polygon points="${points}" ${attributes}${rotation}/>`
+    }
+    const radius = style.cornerRadius ?? 0
+    return `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="${radius}" ${attributes}${rotation}/>`
+  }
+  return paint(fillPaint) + paint(strokePaint)
 }
 
 function drawingMarkup(node: CanvasNode) {
@@ -233,10 +238,17 @@ function drawingMarkup(node: CanvasNode) {
 function groupMarkup(node: CanvasNode) {
   const extension = node['x-superboard']
   if (extension?.kind !== 'group') return ''
-  const fill = COLOR_TOKENS[node.color ?? '0'] ?? '#ffffff'
+  const style = resolveNodeStyle(extension.style)
+  const fill = style.background ?? COLOR_TOKENS[node.color ?? '0'] ?? '#ffffff'
+  const stroke = style.borderColor ?? '#d9d5ca'
+  const strokeWidth = style.borderWidth ?? 1.5
+  const radius = (style.cornerRadius ?? 12) + strokeWidth
+  const dash = style.borderDash?.length
+    ? ` stroke-dasharray="${style.borderDash.join(' ')}"`
+    : ''
   const label = node.type === 'group' && node.label ? node.label : ''
   const rotation = rotateAttr(node)
-  const rect = `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="12" fill="${fill}" fill-opacity="0.6" stroke="#d9d5ca" stroke-width="1.5"${rotation}/>`
+  const rect = `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="${radius}" fill="${fill}" fill-opacity="${style.opacity * style.backgroundOpacity}" stroke="${stroke}" stroke-opacity="${style.opacity * style.borderOpacity}" stroke-width="${strokeWidth}"${dash}${rotation}/>`
   if (!label) return rect
   const bar = `<text x="${node.x + 8}" y="${node.y - 10}" font-family="'Inter', sans-serif" font-size="14" fill="#6b7280">${escapeXml(label)}</text>`
   return rect + bar

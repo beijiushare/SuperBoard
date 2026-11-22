@@ -451,6 +451,35 @@ assert.equal(groupOpacity['x-superboard']?.style?.borderColor, undefined)
 assert.equal(groupOpacity['x-superboard']?.style?.backgroundColor, undefined)
 assert.equal(groupOpacity['x-superboard']?.style?.borderOpacity, 0.3)
 assert.equal(groupOpacity['x-superboard']?.style?.backgroundOpacity, 0.4)
+
+const exportSvg = buildCanvasSvg({
+  nodes: [
+    {
+      id: 'shape-export',
+      type: 'group',
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 80,
+      'x-superboard': {
+        kind: 'shape',
+        shape: 'rect',
+        style: {
+          backgroundColor: '#ffd166',
+          backgroundOpacity: 0.35,
+          borderColor: '#1d1d1d',
+          borderOpacity: 1,
+          borderWidth: 6,
+        },
+      },
+    },
+  ],
+  edges: [],
+  'x-superboard': { version: 1, meta: { title: 'export', slug: 'export' } },
+})
+assert.equal((exportSvg.match(/<rect/g) ?? []).length, 3)
+assert.match(exportSvg, /fill-opacity="0.35"/)
+assert.match(exportSvg, /stroke-opacity="1"/)
 const geometryStyled = applyGeometry(styledBase, { width: 120, rotation: 30 })
 assert.equal(geometryStyled.width, 120)
 assert.equal(geometryStyled.height, 40)
