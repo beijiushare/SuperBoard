@@ -1065,6 +1065,10 @@
   background: #e6e2d8;
 }
 
+.sb-canvas-context-menu > .sb-canvas-menu-sep:last-child {
+  display: none;
+}
+
 .canvas-editor-dialog-backdrop {
   position: fixed;
   z-index: 10000;

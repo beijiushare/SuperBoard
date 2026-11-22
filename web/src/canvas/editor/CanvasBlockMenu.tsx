@@ -88,7 +88,6 @@ export function CanvasBlockMenu({
           >
               {t('editor:menu.deleteEdge')}
           </button>
-          <div className="sb-canvas-menu-sep" />
         </>
       ) : null}
       {node ? (
@@ -213,8 +212,10 @@ export function CanvasBlockMenu({
           >
             {t('editor:menu.backward')}
           </button>
-          <div className="sb-canvas-menu-sep" />
         </>
+      ) : null}
+      {!menu.quick && (selectedIds.length === 0 || hasLocked) ? (
+        <div className="sb-canvas-menu-sep" />
       ) : null}
       {!node ? (
         <>
