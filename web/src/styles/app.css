@@ -812,39 +812,49 @@
 
 .sb-style-panel-body {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 0;
 }
 
 .sb-style-panel-sections {
   min-width: 0;
   flex: 1;
+  padding-top: 10px;
 }
 
 .sb-style-tabs {
   display: flex;
-  width: 40px;
+  width: 100%;
   flex: none;
-  flex-direction: column;
-  gap: 4px;
-  padding-top: 2px;
+  flex-direction: row;
+  gap: 20px;
+  padding: 0 4px;
+  border-bottom: 1px solid #e6e2d8;
 }
 
 .sb-style-tabs button {
-  padding: 8px 4px;
-  border: 1px solid #dedbd2;
-  border-radius: 6px;
-  background: #fff;
-  color: #6f6b60;
-  font-size: 11px;
+  position: relative;
+  padding: 6px 2px 8px;
+  border: 0;
+  background: transparent;
+  color: #8a857b;
+  font-size: 13px;
   cursor: pointer;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
 }
 
 .sb-style-tabs button.is-active {
-  border-color: #28924f;
-  background: #28924f;
-  color: #fff;
+  color: #1f1e1c;
+  font-weight: 600;
+}
+
+.sb-style-tabs button.is-active::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: #1f1e1c;
+  content: '';
 }
 
 .sb-style-panel section + section {
