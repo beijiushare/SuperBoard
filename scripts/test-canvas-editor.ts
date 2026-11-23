@@ -48,6 +48,8 @@ import {
   planErasure,
 } from '../web/src/canvas/editor/eraser'
 import { DEFAULT_PREFERENCES } from '../web/src/canvas/editor/preferences'
+import { fitNaturalSize } from '../web/src/shared/fitSize'
+import { estimateMarkdownHeight } from '../web/src/canvas/editor/markdownSize'
 
 /**
  * The viewer and the exported page inherit `fill`/`stroke` from their roots.
@@ -67,6 +69,35 @@ function assertExplicitPaint(markup: string, label: string) {
     )
   }
 }
+
+// Natural sizing: shrink into a box without changing the ratio, never upscale
+// on its own, and honour minimum sides by growing uniformly.
+assert.deepEqual(
+  fitNaturalSize({ width: 1000, height: 500 }, { width: 500, height: 500 }),
+  { width: 500, height: 250 },
+)
+assert.deepEqual(
+  fitNaturalSize({ width: 100, height: 50 }, { width: 500, height: 500 }),
+  { width: 100, height: 50 },
+)
+assert.deepEqual(
+  fitNaturalSize({ width: 100, height: 50 }, { width: 500, height: 500 }, { width: 200 }),
+  { width: 200, height: 100 },
+)
+assert.deepEqual(
+  fitNaturalSize({ width: 0, height: 0 }, { width: 500, height: 500 }),
+  { width: 1, height: 1 },
+)
+
+// Markdown height estimation: grows with content, clamps to the editor range.
+const shortHeight = estimateMarkdownHeight('# hi', 420)
+const longHeight = estimateMarkdownHeight(
+  Array.from({ length: 80 }, (_, index) => `- item ${index}`).join('\n'),
+  420,
+)
+assert.ok(shortHeight >= 180, `short markdown height ${shortHeight}`)
+assert.ok(longHeight > shortHeight, 'long markdown should be taller')
+assert.ok(longHeight <= 900, `long markdown height ${longHeight}`)
 
 const nodes: CanvasNode[] = [
   {

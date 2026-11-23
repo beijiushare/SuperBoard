@@ -1,4 +1,5 @@
 import { renderAsync } from 'pele/lazy'
+import { fitNaturalSize } from '../fitSize'
 import { stripDiagramTitle } from './stripTitle'
 
 /** Width the diagram is told it has in narrow mode. Pele then draws itself
@@ -34,15 +35,7 @@ export async function measurePele(
 
 /** Shrink into the fit box without changing the natural ratio. */
 export function fitPeleSize(natural: PeleSize): PeleSize {
-  const scale = Math.min(
-    1,
-    PELE_FIT_BOX.width / natural.width,
-    PELE_FIT_BOX.height / natural.height,
-  )
-  return {
-    width: Math.max(1, Math.round(natural.width * scale)),
-    height: Math.max(1, Math.round(natural.height * scale)),
-  }
+  return fitNaturalSize(natural, PELE_FIT_BOX)
 }
 
 /** Size for a newly created Pele block, or null if the diagram fails to render. */

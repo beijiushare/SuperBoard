@@ -1,4 +1,5 @@
 import type { SuperBoardMediaKind } from '../model'
+import { fitNaturalSize } from '../../shared/fitSize'
 
 export interface MediaSize {
   width: number
@@ -87,13 +88,5 @@ export async function measureMediaFile(file: File): Promise<MediaSize | null> {
 
 /** Shrink into the fit box without changing the source ratio. */
 export function fitMediaSize(natural: MediaSize): MediaSize {
-  const scale = Math.min(
-    1,
-    MEDIA_FIT_BOX.width / natural.width,
-    MEDIA_FIT_BOX.height / natural.height,
-  )
-  return {
-    width: Math.max(1, Math.round(natural.width * scale)),
-    height: Math.max(1, Math.round(natural.height * scale)),
-  }
+  return fitNaturalSize(natural, MEDIA_FIT_BOX)
 }
