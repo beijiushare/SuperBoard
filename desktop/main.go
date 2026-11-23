@@ -113,7 +113,12 @@ func main() {
 				if mainWindow == nil {
 					return
 				}
-				mainWindow.Restore()
+				// Restore() also cancels maximisation, which would shrink the
+				// default full-work-area window on every second launch. Only a
+				// minimised window needs restoring.
+				if mainWindow.IsMinimised() {
+					mainWindow.UnMinimise()
+				}
 				mainWindow.Show()
 				mainWindow.Focus()
 			},
