@@ -35,6 +35,7 @@ import { useCanvasViewport } from './useCanvasViewport'
 import { useDirectorSession } from './useDirectorSession'
 import { useMarkdownEditingSession } from './useMarkdownEditingSession'
 import { useSelectionActions } from './useSelectionActions'
+import { MODAL_OVERLAY_SELECTOR } from './overlaySelectors'
 import { useBoardWorkspace } from './useBoardWorkspace'
 import { useBoardFiles } from './useBoardFiles'
 import { useBoardTreeData } from './useBoardTreeData'
@@ -600,7 +601,7 @@ export function CanvasEditorApp() {
       if (!target) return
       if (
         target.closest(
-          '.sb-style-panel, .sb-color-popover, .sb-color-trigger, .sb-modal-backdrop, .canvas-tool-palette, .canvas-tool-flyout, .JCV-controls, .JCV-minimap-container',
+          `.sb-style-panel, .sb-color-popover, .sb-color-trigger, ${MODAL_OVERLAY_SELECTOR}, .canvas-tool-palette, .canvas-tool-flyout, .JCV-controls, .JCV-minimap-container`,
         )
       ) {
         return
@@ -685,7 +686,7 @@ export function CanvasEditorApp() {
       const target = event.target as HTMLElement | null
       if (
         target?.closest(
-          '.sb-modal-backdrop, .sb-style-panel, .sb-canvas-context-menu, .canvas-tool-palette, .JCV-controls, .JCV-minimap-container',
+          `${MODAL_OVERLAY_SELECTOR}, .sb-style-panel, .sb-canvas-context-menu, .canvas-tool-palette, .JCV-controls, .JCV-minimap-container`,
         )
       ) {
         return

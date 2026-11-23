@@ -25,8 +25,10 @@ interface UseCanvasMenuOptions {
   setCanvasMenu: (menu: CanvasMenuState | null) => void
 }
 
+import { MODAL_OVERLAY_SELECTOR } from './overlaySelectors'
+
 const BLOCK_SELECTOR =
-  'button, input, textarea, select, .sb-style-panel, .sb-color-popover, .sb-color-trigger, .sb-modal-backdrop, .canvas-tool-palette, .canvas-tool-flyout, .sb-director-overlay, .sb-frame-controller, .JCV-controls, .JCV-minimap-container'
+  `button, input, textarea, select, .sb-style-panel, .sb-color-popover, .sb-color-trigger, ${MODAL_OVERLAY_SELECTOR}, .canvas-tool-palette, .canvas-tool-flyout, .sb-director-overlay, .sb-frame-controller, .JCV-controls, .JCV-minimap-container`
 
 const QUICK_SELECTOR = `${BLOCK_SELECTOR}, .sb-editor-tool-surface, .sb-editor-text-input, .sb-editor-selection, .sb-editor-hitbox, .sb-block-actions, .JCV-overlay-container`
 

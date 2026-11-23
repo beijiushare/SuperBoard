@@ -36,6 +36,7 @@ import {
   type Marquee,
 } from './overlayGeometry'
 import { useMarqueeSelection } from './useMarqueeSelection'
+import { MODAL_OVERLAY_SELECTOR } from './overlaySelectors'
 import { useOverlayViewport } from './useOverlayViewport'
 import { useEdgeDrag } from './useEdgeDrag'
 import { useCanvasDrag } from './useCanvasDrag'
@@ -216,7 +217,7 @@ export function CanvasEditorOverlay({
       if (isAdditiveSelection(event)) return
       if (
         target.closest('.JCV-overlay-container') ||
-        target.closest('.sb-modal-backdrop') ||
+        target.closest(MODAL_OVERLAY_SELECTOR) ||
         target.closest('button, a, input, textarea, select, [contenteditable="true"]')
       ) {
         return

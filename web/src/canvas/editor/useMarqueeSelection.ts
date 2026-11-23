@@ -7,6 +7,7 @@ import {
   screenRect,
   type Marquee,
 } from './overlayGeometry'
+import { MODAL_OVERLAY_SELECTOR } from './overlaySelectors'
 
 type DataManager = {
   data: {
@@ -58,7 +59,7 @@ export function useMarqueeSelection({
       const target = event.target as HTMLElement | null
       if (
         target?.closest(
-          '.sb-editor-selection, .sb-editor-hitbox, .sb-editor-edge-hit, .sb-editor-edge-endpoint, .sb-block-actions, .sb-md-editor, .sb-style-panel, .sb-color-popover, .sb-color-trigger, .sb-modal-backdrop, .canvas-tool-palette, .canvas-tool-flyout, .JCV-overlay-container, .JCV-controls, .JCV-minimap-container, .sb-frame-controller, button, a, input, textarea, [contenteditable="true"]',
+          `.sb-editor-selection, .sb-editor-hitbox, .sb-editor-edge-hit, .sb-editor-edge-endpoint, .sb-block-actions, .sb-md-editor, .sb-style-panel, .sb-color-popover, .sb-color-trigger, ${MODAL_OVERLAY_SELECTOR}, .canvas-tool-palette, .canvas-tool-flyout, .JCV-overlay-container, .JCV-controls, .JCV-minimap-container, .sb-frame-controller, button, a, input, textarea, [contenteditable="true"]`,
         )
       ) {
         return
