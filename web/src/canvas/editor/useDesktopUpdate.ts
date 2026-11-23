@@ -7,7 +7,7 @@ import {
   desktopUpdateEnvironment,
   desktopUpdateVersion,
   type UpdateStatus,
-} from '../../desktop/platform'
+} from '../../desktop/update'
 
 export type UpdatePhase = 'idle' | 'checking' | 'installing' | 'restarting'
 
