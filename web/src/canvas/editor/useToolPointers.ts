@@ -249,6 +249,10 @@ export function useToolPointers({
     }
     if (tool === 'arrow') {
       commitArrow()
+      // Without this the ref keeps the finished draft, and the next pointer
+      // move resurrects it: clicking another block would draw a second arrow
+      // from the previous source.
+      arrowRef.current = null
       return
     }
     if (tool === 'eraser') {
