@@ -50,6 +50,10 @@ import {
 import { DEFAULT_PREFERENCES } from '../web/src/canvas/editor/preferences'
 import { fitNaturalSize } from '../web/src/shared/fitSize'
 import { estimateMarkdownHeight } from '../web/src/canvas/editor/markdownSize'
+import {
+  defaultBlockSize,
+  sizeWithNaturalRatio,
+} from '../web/src/canvas/editor/insertionSizing'
 
 /**
  * The viewer and the exported page inherit `fill`/`stroke` from their roots.
@@ -98,6 +102,25 @@ const longHeight = estimateMarkdownHeight(
 assert.ok(shortHeight >= 180, `short markdown height ${shortHeight}`)
 assert.ok(longHeight > shortHeight, 'long markdown should be taller')
 assert.ok(longHeight <= 900, `long markdown height ${longHeight}`)
+
+// New-block sizing honours board defaults without losing the natural ratio.
+assert.deepEqual(defaultBlockSize('markdown'), { width: 420, height: 220 })
+assert.deepEqual(
+  defaultBlockSize('markdown', { defaultBlockWidth: 500 }),
+  { width: 500, height: 220 },
+)
+assert.deepEqual(
+  sizeWithNaturalRatio({ width: 100, height: 50 }, { defaultBlockWidth: 200 }),
+  { width: 200, height: 100 },
+)
+assert.deepEqual(
+  sizeWithNaturalRatio({ width: 100, height: 50 }, { defaultBlockHeight: 100 }),
+  { width: 200, height: 100 },
+)
+assert.deepEqual(
+  sizeWithNaturalRatio({ width: 100, height: 50 }),
+  { width: 100, height: 50 },
+)
 
 const nodes: CanvasNode[] = [
   {
