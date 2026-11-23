@@ -38,7 +38,8 @@ export function DownloadPage(): $CancellablePromise<string> {
 }
 
 /**
- * Install downloads, verifies and stages the release, then restarts into it.
+ * Install downloads, verifies and stages the release. The UI calls Restart
+ * afterwards, once it has received this response and can show a hint.
  */
 export function Install(): $CancellablePromise<$models.Result> {
     return $Call.ByID(3807640923);
@@ -50,6 +51,14 @@ export function Install(): $CancellablePromise<$models.Result> {
  */
 export function OpenDownloadPage(): $CancellablePromise<$models.Result> {
     return $Call.ByID(900509643);
+}
+
+/**
+ * Restart applies the staged update and relaunches. The short delay lets this
+ * binding response reach the webview before the process exits.
+ */
+export function Restart(): $CancellablePromise<$models.Result> {
+    return $Call.ByID(101556483);
 }
 
 export function Version(): $CancellablePromise<string> {

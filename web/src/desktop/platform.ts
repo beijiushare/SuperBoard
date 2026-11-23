@@ -206,6 +206,13 @@ export async function desktopInstallUpdate() {
   if (body.error) throw new Error(translateServerError(body.error))
 }
 
+export async function desktopRestartUpdate() {
+  const body = parse<{ restarting?: boolean; error?: string }>(
+    await Updates.Restart(),
+  )
+  if (body.error) throw new Error(translateServerError(body.error))
+}
+
 export async function desktopOpenUpdatePage() {
   const body = parse<{ ok?: boolean; error?: string }>(
     await Updates.OpenDownloadPage(),

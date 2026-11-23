@@ -120,7 +120,8 @@ func (s *UpdateService) Check() Result {
 	})
 }
 
-// Install downloads, verifies and stages the release, then restarts into it.
+// Install downloads, verifies and stages the release. The UI calls Restart
+// afterwards, once it has received this response and can show a hint.
 func (s *UpdateService) Install() Result {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -134,12 +135,24 @@ func (s *UpdateService) Install() Result {
 	if err := app.Updater.DownloadAndInstall(context.Background()); err != nil {
 		return fail(500, err.Error())
 	}
-	// Give the binding response time to reach the webview before quitting.
+	return ok(map[string]any{"ready": true})
+}
+
+// Restart applies the staged update and relaunches. The short delay lets this
+// binding response reach the webview before the process exits.
+func (s *UpdateService) Restart() Result {
+	app := application.Get()
+	if app == nil {
+		return fail(500, "update service is not ready")
+	}
+	if app.Updater.State() != updater.StateReady {
+		return fail(400, "no update has been staged yet")
+	}
 	go func() {
-		time.Sleep(300 * time.Millisecond)
+		time.Sleep(150 * time.Millisecond)
 		_ = app.Updater.Restart(context.Background())
 	}()
-	return ok(map[string]any{"ready": true})
+	return ok(map[string]any{"restarting": true})
 }
 
 // OpenDownloadPage opens the GitHub releases page in the system browser, used

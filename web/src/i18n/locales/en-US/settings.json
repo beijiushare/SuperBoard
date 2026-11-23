@@ -48,6 +48,7 @@
   "update.available": "Version {{version}} is available",
   "update.install": "Update now",
   "update.installing": "Downloading and installing; the app will restart when it's done…",
+  "update.restarting": "Update ready, restarting…",
   "update.manual": "Download manually",
   "update.readonly": "This folder is read-only, so the app cannot update itself. Download the new build and replace it manually.",
   "update.failed": "Update check failed: {{message}}",
