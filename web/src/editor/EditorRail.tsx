@@ -8,7 +8,7 @@ import {
   FilmIcon,
   FocusIcon,
   GitBranchIcon,
-  MinimiseIcon,
+  MaximiseIcon,
   SettingsIcon,
   SidebarIcon,
   UploadCloudIcon,
@@ -213,15 +213,15 @@ export function EditorRail({
           <button
             type="button"
             className="sb-rail-button sb-rail-window-button"
-            data-tooltip={t('editor:rail.minimise')}
-            aria-label={t('editor:rail.minimise')}
+            data-tooltip={t('editor:rail.maximise')}
+            aria-label={t('editor:rail.maximise')}
             onMouseDown={(event) => event.preventDefault()}
             onClick={(event) => {
               event.currentTarget.blur()
-              void WailsWindow.Minimise()
+              void WailsWindow.Maximise()
             }}
           >
-            <MinimiseIcon size={17} />
+            <MaximiseIcon size={17} />
           </button>
           <button
             type="button"

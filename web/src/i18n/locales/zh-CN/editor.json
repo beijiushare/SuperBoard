@@ -255,6 +255,7 @@
   "rail.director": "导演幕布",
   "rail.settings": "设置",
   "rail.minimise": "最小化",
+  "rail.maximise": "最大化",
   "rail.focusTooltip": "专注模式（Esc 退出）",
   "rail.exitFocusTooltip": "退出专注模式（Esc）",
   "rail.focus": "专注模式",

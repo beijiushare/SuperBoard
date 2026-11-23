@@ -255,6 +255,7 @@
   "rail.director": "Director mode",
   "rail.settings": "Settings",
   "rail.minimise": "Minimise",
+  "rail.maximise": "Maximise",
   "rail.focusTooltip": "Focus mode (Esc to exit)",
   "rail.exitFocusTooltip": "Exit focus mode (Esc)",
   "rail.focus": "Focus mode",
