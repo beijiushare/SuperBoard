@@ -392,7 +392,12 @@ export function useCanvasInsertions({
     index: number,
     natural?: { width: number; height: number } | null,
   ) {
-    const size = mediaSize(natural ?? null)
+    const source =
+      natural ??
+      (imported.width && imported.height
+        ? { width: imported.width, height: imported.height }
+        : null)
+    const size = mediaSize(source)
     const base = mediaInsertPoint
       ? {
           x: Math.round(mediaInsertPoint.x - size.width / 2),
@@ -425,8 +430,11 @@ export function useCanvasInsertions({
 
   async function insertLocalFile(file: File) {
     if (!canvas) return
-    const natural = await measureMediaFile(file)
     const imported = await importLocalFile(file, scope)
+    const natural =
+      imported.width && imported.height
+        ? { width: imported.width, height: imported.height }
+        : await measureMediaFile(file)
     const current = canvasRef.current
     if (!current) return
     const id = nextFreeId(new Set(current.nodes.map((node) => node.id)), 'file')

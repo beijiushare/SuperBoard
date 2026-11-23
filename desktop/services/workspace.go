@@ -877,13 +877,18 @@ func (s *WorkspaceService) ImportFile(name string, dataBase64 string, scope stri
 		mimeType = "application/octet-stream"
 	}
 	relative := scope + "/assets/files/" + fileName
-	return created(map[string]any{
+	payload := map[string]any{
 		"ok":   true,
 		"path": relative,
 		"name": name,
 		"mime": mimeType,
 		"size": len(data),
-	})
+	}
+	if width, height := mediaDimensions(target, mimeType); width > 0 && height > 0 {
+		payload["width"] = width
+		payload["height"] = height
+	}
+	return created(payload)
 }
 
 // PickFiles copies files chosen through the native dialog into the workspace
@@ -950,6 +955,10 @@ func (s *WorkspaceService) PickFiles(scope string) Result {
 			"mime": mimeType,
 			"size": info.Size(),
 		})
+		if width, height := mediaDimensions(source, mimeType); width > 0 && height > 0 {
+			files[len(files)-1]["width"] = width
+			files[len(files)-1]["height"] = height
+		}
 	}
 	return ok(map[string]any{"files": files})
 }

@@ -158,6 +158,7 @@
 - 选中分组时样式面板显示「元素 / 分组」横向 tab（下划线指示当前项）：元素控制组内元素，分组控制分组背景、边框和内部间距。
 - 新建分组默认内部间距 `16px`；修改间距时以分组中心外扩/内缩，子元素位置不变。
 - 新建块尺寸按内容决定：Pele 用 `RenderResult.width/height` 的自然比例（过大时等比缩进 760×640），媒体用原始宽高比，Markdown 用默认宽度 + 内容估算高度；之后仍是普通块尺寸，不会被内容反向改写。
+- 媒体尺寸来源：在线 URL 由浏览器解码；本地文件优先用桌面端 `PickFiles`/`ImportFile` 返回的 `width/height`（Go 只读文件头：png/jpeg/gif/webp/bmp/svg、mp4/mov/m4v），拿不到才让浏览器测量，最后退回默认 480×320。
 - Pele 块永远锁定比例（浮动条不提供解锁）：拖拽和样式面板的宽/高输入都按比例联动。Pele 的「窄屏模式」把 `maxWidth` 交给 Pele 的窄屏布局（`autoDirection`），并把块改为该布局的自然比例；切换时保持块面积，避免突然变得极高或极窄。
 - 内容内边距写入 `style.padding`，由 `.sb-block-scale` 的 padding 实现，背景/边框仍由 Surface 覆盖全部区域；分组复用同一字段。
 - 日程（FullCalendar v7）使用哈希类名，不能用 `.fc` 选择器；外框通过 `[data-color-scheme]`、`[role="table"]` 去除。

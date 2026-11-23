@@ -132,6 +132,9 @@ export interface ImportedFile {
   name: string
   mime: string
   size: number
+  /** Pixel size when the platform could read it from the file header. */
+  width?: number
+  height?: number
 }
 
 export async function desktopImportFile(
