@@ -36,3 +36,15 @@ syncFile('desktop/build/windows/info.json', (text) => {
   }
   return `${JSON.stringify(data, null, '\t')}\n`
 })
+
+const versionGoPath = path.join(root, 'desktop/version.go')
+const versionGo = `package main
+
+// appVersion mirrors package.json. It is rewritten by
+// scripts/sync-desktop-version.mjs before every desktop build.
+const appVersion = ${JSON.stringify(version)}
+`
+if (readFileSync(versionGoPath, 'utf8') !== versionGo) {
+  writeFileSync(versionGoPath, versionGo)
+  console.log(`[version] desktop/version.go -> ${version}`)
+}

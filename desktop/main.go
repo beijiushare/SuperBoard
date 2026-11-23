@@ -59,6 +59,7 @@ func main() {
 	var openCanvas func(string)
 	workspace := services.NewWorkspaceService()
 	exporter := services.NewExportService(workspace)
+	updates := services.NewUpdateService(appVersion)
 
 	// Opt-in WebView2 debugging for local UI verification.
 	browserArgs := []string{}
@@ -92,6 +93,7 @@ func main() {
 		Services: []application.Service{
 			application.NewService(workspace),
 			application.NewService(exporter),
+			application.NewService(updates),
 		},
 		Assets: application.AssetOptions{
 			Handler: services.NewAssetHandler(

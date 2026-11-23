@@ -25,6 +25,8 @@ export interface EditorPreferences {
   block: BlockStyleDefaults
   text: TextStyleDefaults
   shapeCornerRadius: number
+  /** Open the most recent workspace on launch instead of showing the picker. */
+  autoOpenRecentWorkspace: boolean
 }
 
 export function fontOptions(t: (key: string) => string) {
@@ -56,6 +58,7 @@ export const DEFAULT_PREFERENCES: EditorPreferences = {
     textAlign: 'left',
   },
   shapeCornerRadius: 0,
+  autoOpenRecentWorkspace: true,
 }
 
 let cached = loadPreferences()
@@ -82,6 +85,10 @@ function mergePreferences(value: unknown): EditorPreferences {
       typeof value.shapeCornerRadius === 'number'
         ? value.shapeCornerRadius
         : DEFAULT_PREFERENCES.shapeCornerRadius,
+    autoOpenRecentWorkspace:
+      typeof value.autoOpenRecentWorkspace === 'boolean'
+        ? value.autoOpenRecentWorkspace
+        : DEFAULT_PREFERENCES.autoOpenRecentWorkspace,
   } as EditorPreferences
 }
 

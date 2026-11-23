@@ -22,6 +22,15 @@ npm run dev
 
 打开终端输出的地址，选择本地工作区文件夹。刷新后会自动恢复上次目录权限。
 
+## 桌面端
+
+桌面版是绿色版，直接运行 `superboard.exe`，工作区仍然是你在应用里选的本地文件夹。
+
+- 请放在**可写目录**（用户目录、桌面、自定义文件夹）。不要放 `C:\Program Files`、`C:\Windows` 或系统盘根目录，否则自动更新无法替换文件；
+- 设置 → 关于 可以检查更新，更新包来自 GitHub Releases，校验 SHA256 后自动替换并重启；
+- 若当前目录不可写，检查更新会被禁用，改为手动下载替换；
+- 发布流程见 [`docs/RELEASE.md`](docs/RELEASE.md)。
+
 ```bash
 npm run test:model
 npm run test:editor

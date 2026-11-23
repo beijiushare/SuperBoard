@@ -13,7 +13,8 @@ import {
 import { BackgroundFields, BorderFields } from './StyleFieldGroups'
 import { StyleNumberControl } from './StyleNumberControl'
 import { Select } from '../../components/ui/select'
-import { desktopMode, desktopWorkspacePath } from '../../desktop/platform'
+import { Switch } from '../../components/ui/switch'
+import { desktopMode, desktopWorkspacePath, desktopCheckUpdate, desktopInstallUpdate, desktopOpenUpdatePage, desktopUpdateEnvironment, type UpdateStatus } from '../../desktop/platform'
 import { APP_VERSION } from '../../shared/appVersion'
 import {
   canOpenWorkspace,
@@ -46,6 +47,13 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
   const [recent, setRecent] = useState<WorkspaceRecentItem[]>([])
   const [protectedWorkspace, setProtectedWorkspace] =
     useState<WorkspaceRecentItem | null>(null)
+  const [updateWritable, setUpdateWritable] = useState<boolean | null>(null)
+  const [updateBusy, setUpdateBusy] = useState<'idle' | 'checking' | 'installing'>(
+    'idle',
+  )
+  const [updateChecked, setUpdateChecked] = useState(false)
+  const [updateInfo, setUpdateInfo] = useState<UpdateStatus | null>(null)
+  const [updateError, setUpdateError] = useState('')
 
   const refreshRecent = () => {
     void listRecentWorkspaces()
@@ -67,6 +75,52 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
       alive = false
     }
   }, [])
+
+  useEffect(() => {
+    if (!desktopMode()) return
+    let alive = true
+    void desktopUpdateEnvironment()
+      .then((env) => {
+        if (alive) setUpdateWritable(env.writable)
+      })
+      .catch(() => {
+        if (alive) setUpdateWritable(null)
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  function checkUpdates() {
+    setUpdateBusy('checking')
+    setUpdateError('')
+    void desktopCheckUpdate()
+      .then((status) => {
+        setUpdateChecked(true)
+        setUpdateInfo(status.update ? status : null)
+      })
+      .catch((reason: unknown) => {
+        setUpdateChecked(true)
+        setUpdateInfo(null)
+        setUpdateError(reason instanceof Error ? reason.message : String(reason))
+      })
+      .finally(() => setUpdateBusy('idle'))
+  }
+
+  function installUpdate() {
+    setUpdateBusy('installing')
+    setUpdateError('')
+    void desktopInstallUpdate().catch((reason: unknown) => {
+      setUpdateBusy('idle')
+      setUpdateError(reason instanceof Error ? reason.message : String(reason))
+    })
+  }
+
+  function openUpdatePage() {
+    void desktopOpenUpdatePage().catch((reason: unknown) => {
+      setUpdateError(reason instanceof Error ? reason.message : String(reason))
+    })
+  }
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -212,6 +266,85 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
           </section>
         ) : null}
 
+        {tab === 'about' && desktopMode() ? (
+          <section className="sb-settings-card">
+            <header className="sb-settings-card-head">
+              <div>
+                <h3>{t('settings:update.title')}</h3>
+                <p>{t('settings:update.hint')}</p>
+              </div>
+            </header>
+            <div className="sb-settings-rows">
+              <div className="sb-settings-row">
+                <div className="sb-settings-row-text">
+                  <span>
+                    {t('settings:update.current', { version: APP_VERSION })}
+                  </span>
+                  {updateWritable === false ? (
+                    <small>{t('settings:update.readonly')}</small>
+                  ) : null}
+                </div>
+                <div className="sb-settings-actions">
+                  <button
+                    type="button"
+                    className="sb-button sb-button-small"
+                    disabled={updateBusy !== 'idle' || updateWritable === false}
+                    onClick={checkUpdates}
+                  >
+                    {updateBusy === 'checking'
+                      ? t('settings:update.checking')
+                      : t('settings:update.check')}
+                  </button>
+                  <button
+                    type="button"
+                    className="sb-button sb-button-small sb-button-ghost"
+                    onClick={openUpdatePage}
+                  >
+                    {t('settings:update.manual')}
+                  </button>
+                </div>
+              </div>
+              {updateBusy === 'installing' ? (
+                <p className="sb-settings-note">
+                  {t('settings:update.installing')}
+                </p>
+              ) : updateInfo ? (
+                <div className="sb-settings-update">
+                  <p className="sb-settings-row-title">
+                    {t('settings:update.available', {
+                      version: updateInfo.version ?? '',
+                    })}
+                  </p>
+                  <p className="sb-settings-note">
+                    {updateInfo.size
+                      ? `${(updateInfo.size / 1024 / 1024).toFixed(1)} MB · `
+                      : ''}
+                    {updateInfo.name ?? ''}
+                  </p>
+                  {updateInfo.notes ? (
+                    <pre className="sb-settings-update-notes">
+                      {updateInfo.notes}
+                    </pre>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="sb-button sb-button-primary sb-button-small"
+                    onClick={installUpdate}
+                  >
+                    {t('settings:update.install')}
+                  </button>
+                </div>
+              ) : updateError ? (
+                <p className="sb-settings-note sb-settings-note-error">
+                  {t('settings:update.failed', { message: updateError })}
+                </p>
+              ) : updateChecked ? (
+                <p className="sb-settings-note">{t('settings:update.latest')}</p>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
         {tab === 'help' ? (
           <>
             <section className="sb-settings-card">
@@ -278,6 +411,22 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
               </header>
 
               <div className="sb-settings-rows">
+                <div className="sb-settings-row">
+                  <div className="sb-settings-row-text">
+                    <span>{t('settings:workspace.autoOpen.title')}</span>
+                    <small>{t('settings:workspace.autoOpen.description')}</small>
+                  </div>
+                  <Switch
+                    checked={draft.autoOpenRecentWorkspace}
+                    onChange={(checked) =>
+                      setDraft((current) => ({
+                        ...current,
+                        autoOpenRecentWorkspace: checked,
+                      }))
+                    }
+                    ariaLabel={t('settings:workspace.autoOpen.title')}
+                  />
+                </div>
                 <p className="sb-settings-row-title">
                   {t('settings:workspace.recent')}
                 </p>

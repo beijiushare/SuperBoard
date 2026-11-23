@@ -27,6 +27,7 @@ import {
 } from './workspacePlatform'
 import { initI18n } from '../../i18n'
 import { WelcomeLoading, WorkspaceWelcome } from './WorkspaceWelcome'
+import { getPreferences } from './preferences'
 
 const LOCK_NAME = 'superboard-editor'
 
@@ -117,21 +118,39 @@ function EditorGate({ desktop }: { desktop: boolean }) {
         .finally(() => setInitializing(false))
       return
     }
-    const restore = desktop
-      ? restoreDesktopWorkspace
-      : () => restoreBrowserWorkspace()
-    void restore()
-      .then(async (value) => {
-        if (value) {
+    if (!getPreferences().autoOpenRecentWorkspace) {
+      void listRecentWorkspaces()
+        .then(setRecent)
+        .catch(() => setRecent([]))
+        .finally(() => setInitializing(false))
+      return
+    }
+    void (async () => {
+      try {
+        const restored = await (desktop
+          ? restoreDesktopWorkspace()
+          : restoreBrowserWorkspace())
+        if (restored) {
           setReady(true)
           return
         }
-        setRecent(await listRecentWorkspaces())
-      })
-      .catch(() => {
+        // The saved workspace is gone; fall back to the most recent one that
+        // needs no permission prompt. Browsers require a gesture for that.
+        const items = await listRecentWorkspaces()
+        const next = items.find(
+          (item) => item.available && item.permission !== 'prompt',
+        )
+        if (next && (await openRecentWorkspace(next))) {
+          setReady(true)
+          return
+        }
+        setRecent(items)
+      } catch {
         refreshRecent()
-      })
-      .finally(() => setInitializing(false))
+      } finally {
+        setInitializing(false)
+      }
+    })()
   }, [desktop, startRequested, supported, lockState])
 
   const handleOpenFolder = () => {
