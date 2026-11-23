@@ -46,14 +46,7 @@ import { useCanvasMenu } from './useCanvasMenu'
 import { EditorInsertDialogs } from './EditorInsertDialogs'
 import { ExportDialog } from './ExportDialog'
 import { EditorBoardDialogs } from './EditorBoardDialogs'
-import { CanvasBlockMenu } from './CanvasBlockMenu'
-import {
-  deleteWorkspaceFile,
-  nodeFilePath,
-  openWorkspaceFile,
-  revealWorkspaceFile,
-  supportsDesktopFileActions,
-} from './workspacePlatform'
+import { CanvasContextMenuLayer } from './CanvasContextMenuLayer'
 import { EditorWorkspace } from './EditorWorkspace'
 import { loadWorkspace, readBoard, WORKSPACE_VERSION_KEY } from './workspaceApi'
 import {
@@ -1015,83 +1008,29 @@ export function CanvasEditorApp() {
         />
       ) : null}
 
-      {canvasMenu && canvas ? (
-        <CanvasBlockMenu
-          canvas={canvas}
-          menu={canvasMenu}
-          selectedIds={selectedIds}
-          canGroup={canGroup}
-          canUngroup={canUngroup}
-          allSelectedLocked={allSelectedLocked}
-          hasLocked={hasLocked}
-          onClose={() => setCanvasMenu(null)}
-          onDuplicate={duplicateSelection}
-          onDelete={() => deleteSelection()}
-          onDeleteEdge={() => deleteSelection()}
-          onToggleGroup={toggleGroup}
-          onToggleLock={toggleLockSelection}
-          onReorder={reorderSelection}
-          onUnlockAll={unlockAllLocked}
-          onSelectAll={selectAllUnlocked}
-          onEditBlock={openBlockEditor}
-          onOpenFile={(id) => {
-            const node = canvas.nodes.find((item) => item.id === id)
-            const path = nodeFilePath(node)
-            if (path) void openWorkspaceFile(path)
-          }}
-          onRevealFile={
-            supportsDesktopFileActions()
-              ? (id) => {
-                  const node = canvas.nodes.find((item) => item.id === id)
-                  const path = nodeFilePath(node)
-                  if (path) void revealWorkspaceFile(path)
-                }
-              : undefined
-          }
-          onDeleteFile={
-            supportsDesktopFileActions()
-              ? (id) => {
-                  const node = canvas.nodes.find((item) => item.id === id)
-                  const path = nodeFilePath(node)
-                  if (!path) return
-                  if (
-                    !window.confirm(t('editor:file.deleteConfirm'))
-                  ) {
-                    return
-                  }
-                  void deleteWorkspaceFile(path)
-                }
-              : undefined
-          }
-          onInsertText={() =>
-            insertTextBlock('text', {
-              x: canvasMenu.worldX,
-              y: canvasMenu.worldY,
-            })
-          }
-          onInsertMarkdown={() =>
-            insertTextBlock('markdown', {
-              x: canvasMenu.worldX,
-              y: canvasMenu.worldY,
-            })
-          }
-          onInsertPele={() =>
-            openPeleDialog({
-              x: canvasMenu.worldX,
-              y: canvasMenu.worldY,
-            })
-          }
-          onInsertSchedule={() =>
-            insertScheduleBlock({
-              x: canvasMenu.worldX,
-              y: canvasMenu.worldY,
-            })
-          }
-          onInsertMedia={() =>
-            openMediaDialog({ x: canvasMenu.worldX, y: canvasMenu.worldY })
-          }
-        />
-      ) : null}
+      <CanvasContextMenuLayer
+        menu={canvasMenu}
+        canvas={canvas}
+        selectedIds={selectedIds}
+        canGroup={canGroup}
+        canUngroup={canUngroup}
+        allSelectedLocked={allSelectedLocked}
+        hasLocked={hasLocked}
+        onClose={() => setCanvasMenu(null)}
+        onDuplicate={duplicateSelection}
+        onDelete={() => deleteSelection()}
+        onToggleGroup={toggleGroup}
+        onToggleLock={toggleLockSelection}
+        onReorder={reorderSelection}
+        onUnlockAll={unlockAllLocked}
+        onSelectAll={selectAllUnlocked}
+        onEditBlock={openBlockEditor}
+        onInsertText={(point) => insertTextBlock('text', point)}
+        onInsertMarkdown={(point) => insertTextBlock('markdown', point)}
+        onInsertPele={openPeleDialog}
+        onInsertSchedule={insertScheduleBlock}
+        onInsertMedia={openMediaDialog}
+      />
 
       <EditorInsertDialogs
         peleDialog={peleDialog}
