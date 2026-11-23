@@ -257,7 +257,7 @@ function drawingMarkup(node: CanvasNode) {
       const d = outline
         .map(([x, y], index) => `${index === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`)
         .join(' ')
-      return `<path d="${d} Z" fill="${svgColor(stroke.color, '#1d1d1d')}"/>`
+      return `<path d="${d} Z" fill="${svgColor(stroke.color, '#1d1d1d')}" stroke="none"/>`
     })
     .join('')
   const centerX = node.width / 2

@@ -142,6 +142,9 @@ export class DrawingLayer extends BaseModule {
         const path = document.createElementNS(SVG_NS, 'path')
         path.setAttribute('d', pathData)
         path.setAttribute('fill', stroke.color ?? '#1d1d1d')
+        // The viewer inherits `stroke: var(--text)` from its root; without this
+        // every freehand shape gets a dark rim around its fill.
+        path.setAttribute('stroke', 'none')
         nodeGroup.appendChild(path)
       }
       group.appendChild(nodeGroup)
