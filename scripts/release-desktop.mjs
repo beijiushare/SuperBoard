@@ -39,15 +39,28 @@ const sourceExe = path.join(root, 'desktop', 'bin', 'superboard.exe')
 
 if (!skipBuild) {
   console.log('[release] building desktop app…')
-  const build = spawnSync('npm', ['run', 'desktop:build'], {
+  const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
+  const build = spawnSync(npm, ['run', 'desktop:build'], {
     cwd: root,
     stdio: 'inherit',
-    shell: process.platform === 'win32',
   })
   if (build.status !== 0) {
     console.error('[release] desktop build failed')
     process.exit(build.status ?? 1)
   }
+}
+
+// The updater compares the version inside the binary, not the asset name.
+// A stale desktop/version.go would publish a release that keeps updating to
+// itself, so refuse to package a mismatched build.
+const versionGo = readFileSync(path.join(root, 'desktop', 'version.go'), 'utf8')
+const builtVersion = /const appVersion = "([^"]+)"/.exec(versionGo)?.[1]
+if (builtVersion !== version) {
+  console.error(
+    `[release] desktop/version.go is ${builtVersion ?? 'missing'}, package.json is ${version}`,
+  )
+  console.error('[release] run `npm run sync:version` or build without --skip-build')
+  process.exit(1)
 }
 
 if (!existsSync(sourceExe)) {
@@ -98,3 +111,4 @@ execFileSync(
   { cwd: root, stdio: 'inherit' },
 )
 console.log(`[release] published https://github.com/beijiushare/SuperBoard/releases/tag/${tag}`)
+process.exit(0)
