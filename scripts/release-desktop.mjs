@@ -39,10 +39,14 @@ const sourceExe = path.join(root, 'desktop', 'bin', 'superboard.exe')
 
 if (!skipBuild) {
   console.log('[release] building desktop app…')
+  // npm is a .cmd shim on Windows; run it through the shell as one string so
+  // Node does not have to spawn a .cmd directly (ENOENT) and does not warn
+  // about passing an argument array with shell: true.
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
-  const build = spawnSync(npm, ['run', 'desktop:build'], {
+  const build = spawnSync(`${npm} run desktop:build`, {
     cwd: root,
     stdio: 'inherit',
+    shell: true,
   })
   if (build.status !== 0) {
     console.error('[release] desktop build failed')
