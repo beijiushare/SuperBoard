@@ -95,6 +95,25 @@ func TestMP4Dimensions(t *testing.T) {
 	}
 }
 
+func TestAVIFDimensions(t *testing.T) {
+	ispe := func(width, height uint32) []byte {
+		body := make([]byte, 12)
+		binary.BigEndian.PutUint32(body[4:8], width)
+		binary.BigEndian.PutUint32(body[8:12], height)
+		return mp4Box("ispe", body)
+	}
+	co := append(ispe(64, 64), ispe(800, 600)...)
+	meta := mp4Box("meta", append(make([]byte, 4), mp4Box("iprp", mp4Box("ipco", co))...))
+	file := append(mp4Box("ftyp", []byte("avif0000")), mp4Box("mdat", []byte("payload"))...)
+	file = append(file, meta...)
+	path := writeTemp(t, "sample.avif", file)
+
+	width, height := mediaDimensions(path, "image/avif")
+	if width != 800 || height != 600 {
+		t.Fatalf("got %dx%d, want 800x600", width, height)
+	}
+}
+
 func TestUnknownFileHasNoDimensions(t *testing.T) {
 	path := writeTemp(t, "notes.txt", []byte("hello"))
 	width, height := mediaDimensions(path, "text/plain")

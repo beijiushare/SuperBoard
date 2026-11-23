@@ -50,6 +50,13 @@ func imageDimensions(path, mimeType string) (int, int) {
 	if mimeType == "image/svg+xml" || strings.EqualFold(filepath.Ext(path), ".svg") {
 		return svgDimensions(head)
 	}
+	if isAVIF(head, path) {
+		if info, statErr := file.Stat(); statErr == nil {
+			if width, height := avifDimensions(file, info.Size()); width > 0 && height > 0 {
+				return width, height
+			}
+		}
+	}
 	if strings.EqualFold(filepath.Ext(path), ".webp") || bytes.HasPrefix(head, []byte("RIFF")) && len(head) > 12 && string(head[8:12]) == "WEBP" {
 		return webpDimensions(head)
 	}
@@ -68,6 +75,19 @@ func imageDimensions(path, mimeType string) (int, int) {
 		}
 	}
 	return 0, 0
+}
+
+// isAVIF matches both the extension and the file brand, since the picker may
+// hand over a renamed file with a generic mime type.
+func isAVIF(head []byte, path string) bool {
+	if strings.EqualFold(filepath.Ext(path), ".avif") {
+		return true
+	}
+	if len(head) >= 12 && string(head[4:8]) == "ftyp" {
+		brand := string(head[8:12])
+		return brand == "avif" || brand == "avis"
+	}
+	return false
 }
 
 func svgDimensions(head []byte) (int, int) {
@@ -160,18 +180,29 @@ func videoDimensions(path string) (int, int) {
 // mp4Dimensions scans the top-level boxes for the movie header and reads the
 // first track with a non-zero size. It covers mp4, mov and m4v.
 func mp4Dimensions(file *os.File, size int64) (int, int) {
+	moov := readTopLevelBox(file, size, "moov")
+	if moov == nil {
+		return 0, 0
+	}
+	return tkhdDimensions(moov)
+}
+
+// readTopLevelBox returns the payload of the first top-level box of the given
+// kind. Only box headers are read while skipping, so a movie header at the end
+// of a large file is found without loading the media.
+func readTopLevelBox(file *os.File, size int64, wanted string) []byte {
 	var offset int64
 	for offset+8 <= size {
 		var header [16]byte
 		if _, err := file.ReadAt(header[:8], offset); err != nil {
-			return 0, 0
+			return nil
 		}
 		boxSize := int64(binary.BigEndian.Uint32(header[:4]))
 		boxType := string(header[4:8])
 		headerLen := int64(8)
 		if boxSize == 1 {
 			if _, err := file.ReadAt(header[8:16], offset+8); err != nil {
-				return 0, 0
+				return nil
 			}
 			boxSize = int64(binary.BigEndian.Uint64(header[8:16]))
 			headerLen = 16
@@ -179,52 +210,106 @@ func mp4Dimensions(file *os.File, size int64) (int, int) {
 			boxSize = size - offset
 		}
 		if boxSize < headerLen || offset+boxSize > size {
-			return 0, 0
+			return nil
 		}
-		if boxType == "moov" {
+		if boxType == wanted {
 			if boxSize-headerLen > maxHeaderRead {
-				return 0, 0
+				return nil
 			}
 			data := make([]byte, boxSize-headerLen)
-			if _, err := file.ReadAt(data, offset+headerLen); err == nil {
-				if width, height := tkhdDimensions(data); width > 0 && height > 0 {
-					return width, height
-				}
+			if _, err := file.ReadAt(data, offset+headerLen); err != nil {
+				return nil
 			}
+			return data
 		}
 		offset += boxSize
 	}
-	return 0, 0
+	return nil
+}
+
+// walkBoxes visits the children of an in-memory ISOBMFF box list.
+func walkBoxes(data []byte, visit func(kind string, body []byte) bool) {
+	for offset := 0; offset+8 <= len(data); {
+		size := int(binary.BigEndian.Uint32(data[offset : offset+4]))
+		kind := string(data[offset+4 : offset+8])
+		header := 8
+		if size == 1 {
+			if offset+16 > len(data) {
+				return
+			}
+			size = int(binary.BigEndian.Uint64(data[offset+8 : offset+16]))
+			header = 16
+		} else if size == 0 {
+			size = len(data) - offset
+		}
+		if size < header || offset+size > len(data) {
+			return
+		}
+		if visit(kind, data[offset+header:offset+size]) {
+			return
+		}
+		offset += size
+	}
+}
+
+// avifDimensions reads the image spatial extents from the item properties.
+// A file may carry several (tiles, thumbnails); the largest one is the image.
+func avifDimensions(file *os.File, size int64) (int, int) {
+	meta := readTopLevelBox(file, size, "meta")
+	if len(meta) < 4 {
+		return 0, 0
+	}
+	width, height := 0, 0
+	walkBoxes(meta[4:], func(kind string, iprp []byte) bool {
+		if kind != "iprp" {
+			return false
+		}
+		walkBoxes(iprp, func(kind string, ipco []byte) bool {
+			if kind != "ipco" {
+				return false
+			}
+			walkBoxes(ipco, func(kind string, ispe []byte) bool {
+				if kind == "ispe" {
+					if w, h := readIspe(ispe); w*h > width*height {
+						width, height = w, h
+					}
+				}
+				return false
+			})
+			return false
+		})
+		return false
+	})
+	return width, height
+}
+
+func readIspe(body []byte) (int, int) {
+	if len(body) < 12 {
+		return 0, 0
+	}
+	return int(binary.BigEndian.Uint32(body[4:8])), int(binary.BigEndian.Uint32(body[8:12]))
 }
 
 // tkhdDimensions walks the moov payload looking for track headers. Width and
 // height are 16.16 fixed point at the end of every version of the box.
 func tkhdDimensions(moov []byte) (int, int) {
-	for offset := 0; offset+8 <= len(moov); {
-		size := int(binary.BigEndian.Uint32(moov[offset : offset+4]))
-		kind := string(moov[offset+4 : offset+8])
-		header := 8
-		if size == 1 && offset+16 <= len(moov) {
-			size = int(binary.BigEndian.Uint64(moov[offset+8 : offset+16]))
-			header = 16
-		}
-		if size < header || offset+size > len(moov) {
-			return 0, 0
-		}
-		body := moov[offset+header : offset+size]
+	width, height := 0, 0
+	walkBoxes(moov, func(kind string, body []byte) bool {
 		switch kind {
 		case "trak":
-			if width, height := tkhdDimensions(body); width > 0 && height > 0 {
-				return width, height
+			if w, h := tkhdDimensions(body); w > 0 && h > 0 {
+				width, height = w, h
+				return true
 			}
 		case "tkhd":
-			if width, height := readTkhd(body); width > 0 && height > 0 {
-				return width, height
+			if w, h := readTkhd(body); w > 0 && h > 0 {
+				width, height = w, h
+				return true
 			}
 		}
-		offset += size
-	}
-	return 0, 0
+		return false
+	})
+	return width, height
 }
 
 func readTkhd(body []byte) (int, int) {
