@@ -26,8 +26,8 @@ import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { useCanvasEditorSession } from './useCanvasEditorSession'
 import { useEditorKeyboard } from './useEditorKeyboard'
 import { useDirectorSession } from './useDirectorSession'
-import { useMarkdownEditingSession } from './useMarkdownEditingSession'
-import { useSelectionActions } from './useSelectionActions'
+import { useEditorTextEditing } from './useEditorTextEditing'
+import { useEditorSelection } from './useEditorSelection'
 import { isCanvasChromeTarget } from './overlaySelectors'
 import { useEditorDialogState } from './useEditorDialogState'
 import { useBlockActions } from './useBlockActions'
@@ -47,10 +47,8 @@ import {
 import { blockEditor } from './blocks'
 import type { EditorTool } from './tools'
 import {
-  isInsideGroup,
   isLocked,
   nodeMapOf,
-  selectableAncestor,
 } from './hierarchy'
 
 export function CanvasEditorApp() {
@@ -100,8 +98,6 @@ export function CanvasEditorApp() {
   } = useEditorDialogState()
   const viewerRef = useRef<CanvasViewerHandle>(null)
   const stageRef = useRef<HTMLDivElement>(null)
-  const shiftRef = useRef(false)
-  const rightDragRef = useRef<{ x: number; y: number } | null>(null)
   // The session hook needs these two resets before their own hooks are called;
   // refs keep the stable callbacks without creating a hook cycle.
   const resetDirectorRef = useRef<() => void>(() => undefined)
@@ -158,6 +154,8 @@ export function CanvasEditorApp() {
     setNewFolderParent,
   })
   const {
+    rightDragRef,
+    handleNodeSelect,
     copySelection,
     pasteClipboard,
     duplicateSelection,
@@ -169,16 +167,17 @@ export function CanvasEditorApp() {
     unlockAllLocked,
     reorderSelection,
     selectAllUnlocked,
-  } = useSelectionActions({
+  } = useEditorSelection({
     canvas,
     selectedIds,
+    setSelectedIds,
     selectedEdgeId,
+    setSelectedEdgeId,
+    focusedGroupId,
+    setFocusedGroupId,
     recordHistory,
     applyDocument,
     markDirty,
-    setSelectedIds,
-    setSelectedEdgeId,
-    setFocusedGroupId,
   })
   const {
     directorMode,
@@ -210,7 +209,8 @@ export function CanvasEditorApp() {
     startMarkdownEditing,
     handleMarkdownInput,
     resetMarkdownEditing,
-  } = useMarkdownEditingSession({
+    closeTextEditing,
+  } = useEditorTextEditing({
     canvas,
     canvasRef,
     setCanvas,
@@ -218,7 +218,6 @@ export function CanvasEditorApp() {
     recordHistory,
     setSelectedIds,
     setSelectedEdgeId,
-    closeTextEditing,
   })
   resetMarkdownRef.current = resetMarkdownEditing
 
@@ -292,38 +291,6 @@ export function CanvasEditorApp() {
     ensureExtension,
   })
 
-  useEffect(() => {
-    const onPointerDown = (event: PointerEvent) => {
-      shiftRef.current = event.shiftKey
-      if (event.button === 2) {
-        rightDragRef.current = { x: event.clientX, y: event.clientY }
-      }
-    }
-    window.addEventListener('pointerdown', onPointerDown, true)
-    return () => window.removeEventListener('pointerdown', onPointerDown, true)
-  }, [])
-
-  const handleNodeSelect = useCallback(
-    (id: string) => {
-      if (!canvas) return
-      const map = nodeMapOf(canvas.nodes)
-      const node = map.get(id)
-      if (!node) return
-      const target = selectableAncestor(node, map, focusedGroupId)
-      if (isLocked(target, map)) return
-      if (focusedGroupId && !isInsideGroup(node, focusedGroupId, map)) {
-        setFocusedGroupId(null)
-      }
-      setSelectedIds((current) => {
-        if (!shiftRef.current) return [target.id]
-        return current.includes(target.id)
-          ? current.filter((item) => item !== target.id)
-          : [...current, target.id]
-      })
-    },
-    [canvas, focusedGroupId],
-  )
-
   const updateScheduleEvents = useCallback(
     (id: string, events: SuperBoardScheduleEvent[]) => {
       const document = canvasRef.current
@@ -379,32 +346,8 @@ export function CanvasEditorApp() {
     return () => container.removeEventListener('dblclick', onDoubleClick)
   }, [canvas])
 
-  useEffect(() => {
-    if (selectedIds.length > 0) setSelectedEdgeId(null)
-  }, [selectedIds])
-
-  useEffect(() => {
-    if (!focusedGroupId) return
-    const group = canvas?.nodes.find((node) => node.id === focusedGroupId)
-    if (!group || group['x-superboard']?.kind !== 'group') {
-      setFocusedGroupId(null)
-    }
-  }, [canvas, focusedGroupId])
-
-  useEffect(() => {
-    if (!selectedEdgeId) return
-    if (!canvas?.edges.some((edge) => edge.id === selectedEdgeId)) {
-      setSelectedEdgeId(null)
-    }
-  }, [canvas, selectedEdgeId])
-
   function rememberBoardColor(color: string) {
     rememberRecentColor(color)
-  }
-
-  function closeTextEditing() {
-    const active = document.activeElement as HTMLElement | null
-    active?.blur()
   }
 
   function deleteBlock(id: string) {
