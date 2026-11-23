@@ -44,5 +44,12 @@
   "canvas.version": "x-superboard.version must be 1",
   "canvas.emptyTitle": "x-superboard.meta.title must not be empty",
   "canvas.invalidSlug": "x-superboard.meta.slug is invalid",
-  "canvas.jsonParse": "JSON parse failed: {{message}}"
+  "canvas.jsonParse": "JSON parse failed: {{message}}",
+  "update.notReady": "The update service is not ready yet",
+  "update.initFailed": "Could not initialize the update service: {{value}}",
+  "update.noRelease": "Check for updates first",
+  "update.noStage": "No downloaded update is waiting",
+  "update.checkFailed": "Update check failed: {{value}}",
+  "update.installFailed": "Update install failed: {{value}}",
+  "update.pageFailed": "Could not open the download page: {{value}}"
 }

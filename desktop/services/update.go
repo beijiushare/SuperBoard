@@ -74,23 +74,23 @@ func (s *UpdateService) ensure() error {
 	}
 	app := application.Get()
 	if app == nil {
-		return errors.New("update service is not ready")
+		return errors.New("update.notReady")
 	}
 	provider, err := github.New(github.Config{
 		Repository:    updateRepository,
 		ChecksumAsset: "SHA256SUMS",
 	})
 	if err != nil {
-		s.initErr = err.Error()
-		return err
+		s.initErr = "update.initFailed|" + err.Error()
+		return errors.New(s.initErr)
 	}
 	if err := app.Updater.Init(updater.Config{
 		CurrentVersion: s.version,
 		Providers:      []updater.Provider{provider},
 		Window:         updater.WindowNone,
 	}); err != nil {
-		s.initErr = err.Error()
-		return err
+		s.initErr = "update.initFailed|" + err.Error()
+		return errors.New(s.initErr)
 	}
 	s.ready = true
 	return nil
@@ -105,7 +105,7 @@ func (s *UpdateService) Check() Result {
 	}
 	release, err := application.Get().Updater.Check(context.Background())
 	if err != nil {
-		return fail(500, err.Error())
+		return fail(502, "update.checkFailed|"+err.Error())
 	}
 	if release == nil {
 		return ok(map[string]any{"update": false, "current": s.version})
@@ -127,13 +127,13 @@ func (s *UpdateService) Install() Result {
 	defer s.mu.Unlock()
 	app := application.Get()
 	if app == nil {
-		return fail(500, "update service is not ready")
+		return fail(500, "update.notReady")
 	}
 	if app.Updater.State() != updater.StateAvailable {
-		return fail(400, "no release has been checked yet")
+		return fail(400, "update.noRelease")
 	}
 	if err := app.Updater.DownloadAndInstall(context.Background()); err != nil {
-		return fail(500, err.Error())
+		return fail(500, "update.installFailed|"+err.Error())
 	}
 	return ok(map[string]any{"ready": true})
 }
@@ -143,10 +143,10 @@ func (s *UpdateService) Install() Result {
 func (s *UpdateService) Restart() Result {
 	app := application.Get()
 	if app == nil {
-		return fail(500, "update service is not ready")
+		return fail(500, "update.notReady")
 	}
 	if app.Updater.State() != updater.StateReady {
-		return fail(400, "no update has been staged yet")
+		return fail(400, "update.noStage")
 	}
 	go func() {
 		time.Sleep(150 * time.Millisecond)
@@ -160,10 +160,10 @@ func (s *UpdateService) Restart() Result {
 func (s *UpdateService) OpenDownloadPage() Result {
 	app := application.Get()
 	if app == nil {
-		return fail(500, "update service is not ready")
+		return fail(500, "update.notReady")
 	}
 	if err := app.Browser.OpenURL(updateReleases); err != nil {
-		return fail(500, err.Error())
+		return fail(500, "update.pageFailed|"+err.Error())
 	}
 	return simpleOK()
 }
