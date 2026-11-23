@@ -47,6 +47,7 @@ import { EditorInsertDialogs } from './EditorInsertDialogs'
 import { ExportDialog } from './ExportDialog'
 import { EditorBoardDialogs } from './EditorBoardDialogs'
 import { CanvasContextMenuLayer } from './CanvasContextMenuLayer'
+import { SaveConflictBanner } from './SaveConflictBanner'
 import { EditorWorkspace } from './EditorWorkspace'
 import { loadWorkspace, readBoard, WORKSPACE_VERSION_KEY } from './workspaceApi'
 import {
@@ -830,50 +831,17 @@ export function CanvasEditorApp() {
     <div
       className={`sb-app sb-app-editor${directorMode ? ' is-director-mode' : ''}${presentation ? ' is-presenting' : ''}`}
     >
-      {conflict ? (
-        <div className="sb-save-conflict" role="alert">
-          <div className="sb-save-conflict-text">
-            <strong>{t('editor:save.conflictTitle')}</strong>
-            <span>{t('editor:save.conflictBody')}</span>
-          </div>
-          <div className="sb-save-conflict-actions">
-            <button
-              type="button"
-              onClick={() => void resolveConflict(false)}
-            >
-              {t('editor:save.overwrite')}
-            </button>
-            <button
-              type="button"
-              className="is-secondary"
-              onClick={() => {
-                if (
-                  !window.confirm(
-                    t('editor:save.reloadConfirm'),
-                  )
-                ) {
-                  return
-                }
-                void reloadBoard().then((ok) => {
-                  if (ok) clearConflict()
-                })
-              }}
-            >
-              {t('editor:save.reload')}
-            </button>
-          </div>
-        </div>
-      ) : saveState === 'error' ? (
-        <div className="sb-save-conflict is-error" role="alert">
-          <div className="sb-save-conflict-text">
-            <strong>{t('editor:save.failed')}</strong>
-            <span>{t('editor:save.failedBody')}</span>
-          </div>
-          <button type="button" onClick={() => void save()}>
-            {t('editor:save.retry')}
-          </button>
-        </div>
-      ) : null}
+      <SaveConflictBanner
+        conflict={conflict}
+        saveState={saveState}
+        onOverwrite={() => void resolveConflict(false)}
+        onReload={() =>
+          void reloadBoard().then((ok) => {
+            if (ok) clearConflict()
+          })
+        }
+        onRetry={() => void save()}
+      />
       <EditorWorkspace
         treeMode={treeMode}
         treeOpen={treeOpen}
