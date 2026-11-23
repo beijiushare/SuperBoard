@@ -2,26 +2,19 @@ import type { RefObject } from 'react'
 import i18n from '../../i18n'
 import type { CanvasDocument, CanvasNode } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
-import {
-  normalizeMediaUrl,
-  type DataManagerLike,
-  type ViewerInternals,
-} from './appUtils'
+import type { BoardScope } from '../../shared/board/types'
 import { DEFAULT_BLOCK_SIZES } from './blocks'
 import { nextFreeId } from './hierarchy'
-import { importLocalFile, pickLocalFiles as pickWorkspaceFiles } from './workspacePlatform'
-import type { ImportedFile } from '../../desktop/platform'
-import type { BoardScope } from '../../shared/board/types'
 import { blockStyleFromPreferences, textStyleFromPreferences } from './preferences'
-import { detectMediaKind, type EditorTool } from './tools'
-import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
+import type { EditorTool } from './tools'
 import { peleBlockSize } from '../../shared/pele/size'
 import { estimateMarkdownHeight } from './markdownSize'
 import {
-  fitMediaSize,
-  measureMediaFile,
-  measureMediaUrl,
-} from './mediaSize'
+  defaultBlockSize as blockSizeFor,
+  sizeWithNaturalRatio,
+} from './insertionSizing'
+import { viewportCenter } from './insertionViewport'
+import { useMediaInsertions } from './useMediaInsertions'
 
 interface UseCanvasInsertionsOptions {
   canvas: CanvasDocument | null
@@ -79,61 +72,32 @@ export function useCanvasInsertions({
   closeMarkdownEditor,
   ensureExtension,
 }: UseCanvasInsertionsOptions) {
-  function viewportCenter(width: number, height: number) {
-    try {
-      const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
-      if (viewer?.container) {
-        const dm = viewer.container.get(internal.DataManager as never) as DataManagerLike
-        const { offsetX, offsetY, scale } = dm.data
-        const container = dm.data.container
-        return {
-          x: Math.round(
-            (container.clientWidth / 2 - offsetX) / scale - width / 2,
-          ),
-          y: Math.round(
-            (container.clientHeight / 2 - offsetY) / scale - height / 2,
-          ),
-        }
-      }
-    } catch {
-      // ignore
-    }
-    return { x: -width / 2, y: -height / 2 }
-  }
+  const media = useMediaInsertions({
+    canvas,
+    canvasRef,
+    scope,
+    viewerRef,
+    mediaUrl,
+    mediaInsertPoint,
+    setMediaDialogOpen,
+    setMediaUrl,
+    setMediaInsertPoint,
+    applyDocument,
+    recordHistory,
+  })
 
   function defaultBlockSize(kind: keyof typeof DEFAULT_BLOCK_SIZES) {
-    const settings = canvasRef.current?.['x-superboard']?.settings
-    const base = DEFAULT_BLOCK_SIZES[kind]
-    return {
-      width: settings?.defaultBlockWidth ?? base.width,
-      height: settings?.defaultBlockHeight ?? base.height,
-    }
-  }
-
-  /** Keep a diagram's natural ratio, but let an explicit default width/height
-   *  from the board settings decide one side. */
-  function sizeWithNaturalRatio(natural: { width: number; height: number }) {
-    const settings = canvasRef.current?.['x-superboard']?.settings
-    const width = settings?.defaultBlockWidth
-    const height = settings?.defaultBlockHeight
-    if (width) {
-      return {
-        width,
-        height: Math.max(40, Math.round((width * natural.height) / natural.width)),
-      }
-    }
-    if (height) {
-      return {
-        width: Math.max(40, Math.round((height * natural.width) / natural.height)),
-        height,
-      }
-    }
-    return natural
+    return blockSizeFor(kind, canvasRef.current?.['x-superboard']?.settings)
   }
 
   async function peleSize(code: string, narrow = false) {
     const measured = await peleBlockSize(code, narrow)
-    return measured ? sizeWithNaturalRatio(measured) : defaultBlockSize('pele')
+    return measured
+      ? sizeWithNaturalRatio(
+          measured,
+          canvasRef.current?.['x-superboard']?.settings,
+        )
+      : defaultBlockSize('pele')
   }
 
   function markdownSize(text: string, width: number) {
@@ -160,7 +124,7 @@ export function useCanvasInsertions({
           x: Math.round(point.x - size.width / 2),
           y: Math.round(point.y - size.height / 2),
         }
-      : viewportCenter(size.width, size.height)
+      : viewportCenter(viewerRef, size.width, size.height)
     if (kind === 'text') {
       const id = nextFreeId(
         new Set(canvas.nodes.map((node) => node.id)),
@@ -289,7 +253,7 @@ export function useCanvasInsertions({
           y: Math.round(createdFor.point.y - size.height / 2),
         }
       : (() => {
-          const center = viewportCenter(size.width, size.height)
+          const center = viewportCenter(viewerRef, size.width, size.height)
           return { x: center.x + offset, y: center.y + offset }
         })()
     const node: CanvasNode = {
@@ -322,7 +286,7 @@ export function useCanvasInsertions({
           x: Math.round(point.x - size.width / 2),
           y: Math.round(point.y - size.height / 2),
         }
-      : viewportCenter(size.width, size.height)
+      : viewportCenter(viewerRef, size.width, size.height)
     const node: CanvasNode = {
       id,
       type: 'text',
@@ -342,152 +306,15 @@ export function useCanvasInsertions({
     setTool('select')
   }
 
-  function mediaSize(natural: { width: number; height: number } | null) {
-    if (!natural) return defaultBlockSize('media')
-    return sizeWithNaturalRatio(fitMediaSize(natural))
-  }
-
-  async function insertMedia(value = mediaUrl) {
-    if (!canvas) return
-    const url = normalizeMediaUrl(value)
-    if (!url) return
-    const kind = detectMediaKind(url)
-    // Close first so a slow image cannot be submitted twice while measuring.
-    const point = mediaInsertPoint
-    setMediaDialogOpen(false)
-    setMediaUrl('')
-    setMediaInsertPoint(null)
-    const natural = await measureMediaUrl(url, kind)
-    const size = mediaSize(natural)
-    const current = canvasRef.current
-    if (!current) return
-    const id = nextFreeId(new Set(current.nodes.map((node) => node.id)), 'media')
-    const position = point
-      ? {
-          x: Math.round(point.x - size.width / 2),
-          y: Math.round(point.y - size.height / 2),
-        }
-      : viewportCenter(size.width, size.height)
-    const node: CanvasNode = {
-      id,
-      type: 'link',
-      url,
-      x: position.x,
-      y: position.y,
-      width: size.width,
-      height: size.height,
-      'x-superboard': {
-        kind: 'media',
-        media: { kind, url },
-        style: blockStyleFromPreferences(),
-      },
-    }
-    recordHistory()
-    applyDocument({ ...current, nodes: [...current.nodes, node] }, [id])
-  }
-
-  function fileNode(
-    id: string,
-    imported: ImportedFile,
-    index: number,
-    natural?: { width: number; height: number } | null,
-  ) {
-    const source =
-      natural ??
-      (imported.width && imported.height
-        ? { width: imported.width, height: imported.height }
-        : null)
-    const size = mediaSize(source)
-    const base = mediaInsertPoint
-      ? {
-          x: Math.round(mediaInsertPoint.x - size.width / 2),
-          y: Math.round(mediaInsertPoint.y - size.height / 2),
-        }
-      : viewportCenter(size.width, size.height)
-    const node: CanvasNode = {
-      id,
-      type: 'file',
-      file: imported.path,
-      x: base.x + index * 24,
-      y: base.y + index * 24,
-      width: size.width,
-      height: size.height,
-      'x-superboard': {
-        kind: 'media',
-        media: {
-          kind: 'file',
-          url: imported.path,
-          file: imported.path,
-          name: imported.name,
-          mime: imported.mime,
-          size: imported.size,
-        },
-        style: blockStyleFromPreferences(),
-      },
-    }
-    return node
-  }
-
-  async function insertLocalFile(file: File) {
-    if (!canvas) return
-    const imported = await importLocalFile(file, scope)
-    const natural =
-      imported.width && imported.height
-        ? { width: imported.width, height: imported.height }
-        : await measureMediaFile(file)
-    const current = canvasRef.current
-    if (!current) return
-    const id = nextFreeId(new Set(current.nodes.map((node) => node.id)), 'file')
-    recordHistory()
-    applyDocument(
-      {
-        ...current,
-        nodes: [...current.nodes, fileNode(id, imported, 0, natural)],
-      },
-      [id],
-    )
-    setMediaDialogOpen(false)
-    setMediaUrl('')
-    setMediaInsertPoint(null)
-  }
-
-  async function pickLocalFilesFromDialog() {
-    if (!canvas) return
-    const imported = await pickWorkspaceFiles(scope)
-    if (imported.length === 0) return
-    // The native picker can stay open for a while; re-read the document so
-    // edits made meanwhile are not replaced by the stale closure copy.
-    const current = canvasRef.current
-    if (!current) return
-    const ids = new Set(current.nodes.map((node) => node.id))
-    const added: string[] = []
-    const nodes = imported.map((item, index) => {
-      const id = nextFreeId(ids, 'file')
-      ids.add(id)
-      added.push(id)
-      return fileNode(id, item, index)
-    })
-    recordHistory()
-    applyDocument({ ...current, nodes: [...current.nodes, ...nodes] }, added)
-    setMediaDialogOpen(false)
-    setMediaUrl('')
-    setMediaInsertPoint(null)
-  }
-
-  function openMediaDialog(point?: { x: number; y: number }) {
-    setMediaInsertPoint(point ?? null)
-    setMediaDialogOpen(true)
-  }
-
   return {
     insertTextBlock,
     openPeleDialog,
     openPeleEditor,
     insertPele,
     insertScheduleBlock,
-    insertMedia,
-    insertLocalFile,
-    pickLocalFilesFromDialog,
-    openMediaDialog,
+    insertMedia: media.insertMedia,
+    insertLocalFile: media.insertLocalFile,
+    pickLocalFilesFromDialog: media.pickLocalFilesFromDialog,
+    openMediaDialog: media.openMediaDialog,
   }
 }
