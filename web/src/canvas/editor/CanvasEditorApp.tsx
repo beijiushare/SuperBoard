@@ -8,8 +8,6 @@ import {
 import { useTranslation } from 'react-i18next'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { BoardContextTarget } from '../../editor/BoardContextMenu'
-import type { BoardScope } from '../../shared/board/types'
-import { useTreeExpansion } from '../../shared/board/useTreeExpansion'
 import { DirectorHud } from '../../shared/director/DirectorHud'
 import { PresentationOverlay } from '../../shared/director/PresentationOverlay'
 import type {
@@ -19,26 +17,18 @@ import type {
 } from '../model'
 import { CanvasEditorStage } from './CanvasEditorStage'
 import {
-  normalizeMarkdownLocks,
-  updateEditorUrl,
-  type CanvasListItem,
   type CanvasMenuState,
   type ControllerLike,
   type DataManagerLike,
   type ViewerInternals,
 } from './appUtils'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
-import { useCanvasHistory } from './useCanvasHistory'
+import { useCanvasEditorSession } from './useCanvasEditorSession'
 import { useEditorKeyboard } from './useEditorKeyboard'
-import { useCanvasSave } from './useCanvasSave'
-import { useCanvasViewport } from './useCanvasViewport'
 import { useDirectorSession } from './useDirectorSession'
 import { useMarkdownEditingSession } from './useMarkdownEditingSession'
 import { useSelectionActions } from './useSelectionActions'
 import { isCanvasChromeTarget } from './overlaySelectors'
-import { useBoardWorkspace } from './useBoardWorkspace'
-import { useBoardFiles } from './useBoardFiles'
-import { useBoardTreeData } from './useBoardTreeData'
 import { useEditorDialogState } from './useEditorDialogState'
 import { useBlockActions } from './useBlockActions'
 import { useCanvasInsertions } from './useCanvasInsertions'
@@ -49,7 +39,6 @@ import { EditorBoardDialogs } from './EditorBoardDialogs'
 import { CanvasContextMenuLayer } from './CanvasContextMenuLayer'
 import { SaveConflictBanner } from './SaveConflictBanner'
 import { EditorWorkspace } from './EditorWorkspace'
-import { loadWorkspace, readBoard, WORKSPACE_VERSION_KEY } from './workspaceApi'
 import {
   rememberRecentColor,
   updateUiState,
@@ -66,12 +55,6 @@ import {
 
 export function CanvasEditorApp() {
   const { t } = useTranslation(['editor'])
-  const [items, setItems] = useState<CanvasListItem[]>([])
-  const [folders, setFolders] = useState<
-    Array<{ path: string; scope: 'public' | 'private' }>
-  >([])
-  const [selectedSlug, setSelectedSlug] = useState('')
-  const [canvas, setCanvas] = useState<CanvasDocument | null>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
   const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
@@ -94,17 +77,6 @@ export function CanvasEditorApp() {
     null,
   )
   const [canvasMenu, setCanvasMenu] = useState<CanvasMenuState | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [treeMode, setTreeMode] = useState(() =>
-    new URLSearchParams(window.location.search).has('tree'),
-  )
-  const [treeOpen, setTreeOpen] = useState(true)
-  const [scope, setScope] = useState<BoardScope>(() =>
-    new URLSearchParams(window.location.search).get('scope') === 'private'
-      ? 'private'
-      : 'public',
-  )
   const uiState = useUiState()
   const stylePanelOpen = uiState.stylePanelOpen
   const menuPanelOpen = uiState.toolPaletteOpen
@@ -130,31 +102,60 @@ export function CanvasEditorApp() {
   const stageRef = useRef<HTMLDivElement>(null)
   const shiftRef = useRef(false)
   const rightDragRef = useRef<{ x: number; y: number } | null>(null)
-  const canvasRef = useRef<CanvasDocument | null>(null)
-  const { applyCanvasUiSettings, captureViewport } = useCanvasViewport({
+  // The session hook needs these two resets before their own hooks are called;
+  // refs keep the stable callbacks without creating a hook cycle.
+  const resetDirectorRef = useRef<() => void>(() => undefined)
+  const resetMarkdownRef = useRef<() => void>(() => undefined)
+  const {
     canvas,
+    setCanvas,
+    canvasRef,
     selectedSlug,
     scope,
-    viewerRef,
-  })
-  const { recordHistory, undo, redo, resetHistory } = useCanvasHistory({
-    canvasRef,
-    onRestore: applyDocument,
-  })
-  const {
+    loading,
+    error,
+    treeMode,
+    treeOpen,
+    setTreeOpen,
     saveState,
-    setSaveState,
     save,
+    conflict,
     resolveConflict,
     clearConflict,
-    conflict,
     markDirty,
-    savingRef,
-  } = useCanvasSave({
-    canvas,
-    items,
-    selectedSlug,
-    scope,
+    recordHistory,
+    undo,
+    redo,
+    applyDocument,
+    captureViewport,
+    folderPaths,
+    treeNodes,
+    expanded,
+    toggleFolder,
+    openBoard,
+    reloadBoard,
+    switchScope,
+    toggleTree,
+    handleCreate,
+    handleRename,
+    handleDelete,
+    handleCreateFolder,
+    handleRenameFolder,
+    handleDeleteFolder,
+  } = useCanvasEditorSession({
+    viewerRef,
+    setSelectedIds,
+    setSelectedEdgeId,
+    setFocusedGroupId,
+    setTool,
+    setTextEditingId,
+    setTextCreateRequest,
+    resetMarkdownEditing: () => resetMarkdownRef.current(),
+    resetDirectorSession: () => resetDirectorRef.current(),
+    boardDialog,
+    folderDialog,
+    newFolderParent,
+    setNewFolderParent,
   })
   const {
     copySelection,
@@ -196,6 +197,7 @@ export function CanvasEditorApp() {
     toggleDirector,
     resetDirectorSession,
   } = useDirectorSession({ canvas, viewerRef, markDirty })
+  resetDirectorRef.current = resetDirectorSession
   const {
     markdownEditingId,
     markdownFocusId,
@@ -218,81 +220,8 @@ export function CanvasEditorApp() {
     setSelectedEdgeId,
     closeTextEditing,
   })
+  resetMarkdownRef.current = resetMarkdownEditing
 
-  const { scopedItems, folderPaths, treeNodes } = useBoardTreeData({
-    items,
-    folders,
-    scope,
-  })
-  const { expanded, toggleFolder, expandPath, renameExpandedPath } =
-    useTreeExpansion(scopedItems)
-  const {
-    fetchCanvasDocument,
-    activateCanvas,
-    openBoard,
-    reloadBoard,
-    refreshItems,
-    switchScope,
-    toggleTree,
-  } = useBoardWorkspace({
-    items,
-    selectedSlug,
-    scope,
-    saveState,
-    savingRef,
-    save,
-    setSaveState,
-    setItems,
-    setFolders,
-    setCanvas,
-    setSelectedIds,
-    setSelectedEdgeId,
-    setFocusedGroupId,
-    setScope,
-    setSelectedSlug,
-    resetMarkdownEditing,
-    setTextEditingId,
-    setTextCreateRequest,
-    setTool,
-    resetDirectorSession,
-    applyCanvasUiSettings,
-    resetHistory,
-    expandPath,
-    treeMode,
-    setTreeOpen,
-    setTreeMode,
-    setLoading,
-    setError,
-  })
-  const {
-    handleCreate,
-    handleRename,
-    handleDelete,
-    handleCreateFolder,
-    handleRenameFolder,
-    handleDeleteFolder,
-  } = useBoardFiles({
-    items,
-    selectedSlug,
-    scope,
-    saveState,
-    savingRef,
-    save,
-    boardDialog,
-    folderDialog,
-    newFolderParent,
-    setNewFolderParent,
-    treeMode,
-    refreshItems,
-    activateCanvas,
-    fetchCanvasDocument,
-    expandPath,
-    renameExpandedPath,
-    setCanvas,
-    setSelectedSlug,
-    setSaveState,
-    setLoading,
-  })
   const {
     insertTextBlock,
     openPeleDialog,
@@ -362,19 +291,6 @@ export function CanvasEditorApp() {
     openPeleEditor,
     ensureExtension,
   })
-  canvasRef.current = canvas
-
-  const refreshItemsRef = useRef(refreshItems)
-  refreshItemsRef.current = refreshItems
-  useEffect(() => {
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === WORKSPACE_VERSION_KEY) {
-        void refreshItemsRef.current()
-      }
-    }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
-  }, [])
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -438,56 +354,6 @@ export function CanvasEditorApp() {
   )
 
   useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      try {
-        const data = await loadWorkspace()
-        if (cancelled) return
-        const list = data.boards
-        setItems(list)
-        setFolders(data.folders)
-        const params = new URLSearchParams(window.location.search)
-        const initialScope: BoardScope =
-          params.get('scope') === 'private' ? 'private' : 'public'
-        const initialTree = params.has('tree')
-        setScope(initialScope)
-        setTreeMode(initialTree)
-        const scoped = list.filter((item) => item.scope === initialScope)
-        const requested = params.get('board')
-        const first = scoped.find((item) => item.slug === requested) ?? scoped[0]
-        if (!first) {
-          setLoading(false)
-          return
-        }
-        const next = await readBoard(first)
-        if (cancelled) return
-        resetHistory()
-        setSelectedIds([])
-        setTool('select')
-        normalizeMarkdownLocks(next)
-        setSelectedSlug(first.slug)
-        setScope(first.scope)
-        applyCanvasUiSettings(next, first.slug, first.scope)
-        setCanvas(next)
-        resetMarkdownEditing()
-        setTextEditingId(null)
-        setSaveState('saved')
-        expandPath(first.path)
-        updateEditorUrl(first.slug, first.scope, initialTree)
-        setLoading(false)
-      } catch (loadError) {
-        if (!cancelled) {
-          setError(loadError instanceof Error ? loadError.message : String(loadError))
-          setLoading(false)
-        }
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  useEffect(() => {
     const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
     if (!viewer?.container) return
     let dm: DataManagerLike
@@ -534,13 +400,6 @@ export function CanvasEditorApp() {
 
   function rememberBoardColor(color: string) {
     rememberRecentColor(color)
-  }
-
-  function applyDocument(next: CanvasDocument, selection: string[] = []) {
-    captureViewport()
-    setSelectedIds(selection)
-    setCanvas(next)
-    markDirty()
   }
 
   function closeTextEditing() {
