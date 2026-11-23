@@ -35,7 +35,7 @@ import { useCanvasViewport } from './useCanvasViewport'
 import { useDirectorSession } from './useDirectorSession'
 import { useMarkdownEditingSession } from './useMarkdownEditingSession'
 import { useSelectionActions } from './useSelectionActions'
-import { MODAL_OVERLAY_SELECTOR } from './overlaySelectors'
+import { isCanvasChromeTarget } from './overlaySelectors'
 import { useBoardWorkspace } from './useBoardWorkspace'
 import { useBoardFiles } from './useBoardFiles'
 import { useBoardTreeData } from './useBoardTreeData'
@@ -599,11 +599,7 @@ export function CanvasEditorApp() {
     const onWheel = (event: WheelEvent) => {
       const target = event.target as HTMLElement | null
       if (!target) return
-      if (
-        target.closest(
-          `.sb-style-panel, .sb-color-popover, .sb-color-trigger, ${MODAL_OVERLAY_SELECTOR}, .canvas-tool-palette, .canvas-tool-flyout, .JCV-controls, .JCV-minimap-container`,
-        )
-      ) {
+      if (isCanvasChromeTarget(target)) {
         return
       }
       if (event.altKey && !event.ctrlKey && !event.metaKey) {
@@ -685,9 +681,8 @@ export function CanvasEditorApp() {
       if (event.button !== 1 && event.button !== 2) return
       const target = event.target as HTMLElement | null
       if (
-        target?.closest(
-          `${MODAL_OVERLAY_SELECTOR}, .sb-style-panel, .sb-canvas-context-menu, .canvas-tool-palette, .JCV-controls, .JCV-minimap-container`,
-        )
+        isCanvasChromeTarget(target) ||
+        target?.closest('.sb-canvas-context-menu')
       ) {
         return
       }

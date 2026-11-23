@@ -25,12 +25,13 @@ interface UseCanvasMenuOptions {
   setCanvasMenu: (menu: CanvasMenuState | null) => void
 }
 
-import { MODAL_OVERLAY_SELECTOR } from './overlaySelectors'
+import { isCanvasChromeTarget } from './overlaySelectors'
 
-const BLOCK_SELECTOR =
-  `button, input, textarea, select, .sb-style-panel, .sb-color-popover, .sb-color-trigger, ${MODAL_OVERLAY_SELECTOR}, .canvas-tool-palette, .canvas-tool-flyout, .sb-director-overlay, .sb-frame-controller, .JCV-controls, .JCV-minimap-container`
+const MENU_EXTRA_SELECTOR =
+  'button, input, textarea, select, .sb-director-overlay, .sb-frame-controller'
 
-const QUICK_SELECTOR = `${BLOCK_SELECTOR}, .sb-editor-tool-surface, .sb-editor-text-input, .sb-editor-selection, .sb-editor-hitbox, .sb-block-actions, .JCV-overlay-container`
+const QUICK_EXTRA_SELECTOR =
+  '.sb-editor-tool-surface, .sb-editor-text-input, .sb-editor-selection, .sb-editor-hitbox, .sb-block-actions, .JCV-overlay-container'
 
 export function useCanvasMenu({
   canvas,
@@ -84,7 +85,7 @@ export function useCanvasMenu({
     }
     if (!canvas || directorMode) return
     const target = event.target as HTMLElement
-    if (target.closest(BLOCK_SELECTOR)) return
+    if (isCanvasChromeTarget(target) || target.closest(MENU_EXTRA_SELECTOR)) return
     try {
       const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
       if (!viewer?.container) return
@@ -146,7 +147,12 @@ export function useCanvasMenu({
   function openQuickMenu(event: ReactMouseEvent<HTMLDivElement>) {
     if (!canvas || directorMode || tool !== 'select') return
     const target = event.target as HTMLElement
-    if (target.closest(QUICK_SELECTOR)) return
+    if (
+      isCanvasChromeTarget(target) ||
+      target.closest(MENU_EXTRA_SELECTOR) ||
+      target.closest(QUICK_EXTRA_SELECTOR)
+    )
+      return
     try {
       const viewer = viewerRef.current?.viewer as ViewerInternals | undefined
       if (!viewer?.container) return

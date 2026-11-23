@@ -36,7 +36,7 @@ import {
   type Marquee,
 } from './overlayGeometry'
 import { useMarqueeSelection } from './useMarqueeSelection'
-import { MODAL_OVERLAY_SELECTOR } from './overlaySelectors'
+import { isCanvasChromeTarget } from './overlaySelectors'
 import { useOverlayViewport } from './useOverlayViewport'
 import { useEdgeDrag } from './useEdgeDrag'
 import { useCanvasDrag } from './useCanvasDrag'
@@ -216,8 +216,8 @@ export function CanvasEditorOverlay({
       if (!dm.data.container.contains(target)) return
       if (isAdditiveSelection(event)) return
       if (
+        isCanvasChromeTarget(target) ||
         target.closest('.JCV-overlay-container') ||
-        target.closest(MODAL_OVERLAY_SELECTOR) ||
         target.closest('button, a, input, textarea, select, [contenteditable="true"]')
       ) {
         return

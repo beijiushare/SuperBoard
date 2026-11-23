@@ -6,3 +6,15 @@
  */
 export const MODAL_OVERLAY_SELECTOR =
   '.sb-modal-backdrop, .canvas-editor-dialog-backdrop'
+
+/**
+ * Chrome that belongs to the editor UI rather than the board. Pointer gestures
+ * starting here must not move, zoom, marquee or select canvas content.
+ */
+export const CANVAS_CHROME_SELECTOR =
+  `${MODAL_OVERLAY_SELECTOR}, .sb-style-panel, .sb-color-popover, .sb-color-trigger, .canvas-tool-palette, .canvas-tool-flyout, .JCV-controls, .JCV-minimap-container`
+
+export function isCanvasChromeTarget(target: EventTarget | null) {
+  const element = target as HTMLElement | null
+  return Boolean(element?.closest(CANVAS_CHROME_SELECTOR))
+}
