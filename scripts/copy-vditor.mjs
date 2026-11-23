@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync, rmSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -27,3 +27,16 @@ for (const asset of assets) {
 }
 
 console.log('SuperBoard: 已复制 Vditor 运行时资源到 public/__vditor')
+
+const required = [
+  'index.css',
+  'js/lute/lute.min.js',
+  'js/highlight.js/highlight.min.js',
+  'js/icons',
+]
+for (const relative of required) {
+  if (!existsSync(path.join(target, relative))) {
+    console.error(`SuperBoard: Vditor 白名单缺少 ${relative}`)
+    process.exit(1)
+  }
+}

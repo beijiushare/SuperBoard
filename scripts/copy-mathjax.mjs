@@ -1,4 +1,4 @@
-import { access, cp, mkdir, rm } from 'node:fs/promises'
+import { access, cp, mkdir, readdir, rm } from 'node:fs/promises'
 import path from 'node:path'
 
 // The app only loads MathJax through web/src/shared/markdown/mathjax.ts:
@@ -47,3 +47,29 @@ await cp(path.join(fontSource, 'svg'), path.join(fontTarget, 'svg'), {
 })
 
 console.log('SuperBoard: 已复制 MathJax（AsciiMath + SVG + NewCM 字体）到 public/mathjax')
+
+// Fail loudly if a package update moves a file the whitelist depends on;
+// otherwise math silently stops rendering in production.
+const required = [
+  'startup.js',
+  'loader.js',
+  'core.js',
+  'input/asciimath.js',
+  'output/svg.js',
+  'fonts/mathjax-newcm-font/svg.js',
+]
+for (const relative of required) {
+  try {
+    await access(path.join(target, relative))
+  } catch {
+    console.error(`SuperBoard: MathJax 白名单缺少 ${relative}`)
+    process.exit(1)
+  }
+}
+const fontChunks = await readdir(
+  path.join(target, 'fonts', 'mathjax-newcm-font', 'svg', 'dynamic'),
+).catch(() => [])
+if (fontChunks.length === 0) {
+  console.error('SuperBoard: MathJax 字体分块缺失')
+  process.exit(1)
+}
