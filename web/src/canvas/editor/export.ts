@@ -192,7 +192,7 @@ function textMarkup(node: CanvasNode) {
   const background = textHasSurface(node, node['x-superboard']?.style)
     ? `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="${radius}" fill="${fill}" fill-opacity="${fillOpacity}" stroke="${stroke}" stroke-opacity="${strokeOpacity}" stroke-width="${strokeWidth}"${rotation}/>`
     : ''
-  return `${background}<g${rotation}><text text-anchor="${anchor}" font-family="${block.fontFamily}" font-size="${block.fontSize}" fill="${block.color}">${tspans}</text></g>`
+  return `${background}<g${rotation}><text text-anchor="${anchor}" font-family="${block.fontFamily}" font-size="${block.fontSize}" fill="${block.color}" stroke="none">${tspans}</text></g>`
 }
 
 function shapeMarkup(node: CanvasNode) {
@@ -282,7 +282,7 @@ function groupMarkup(node: CanvasNode) {
   const rotation = rotateAttr(node)
   const rect = `<rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="${radius}" fill="${fill}" fill-opacity="${style.opacity * style.backgroundOpacity}" stroke="${stroke}" stroke-opacity="${style.opacity * style.borderOpacity}" stroke-width="${strokeWidth}"${dash}${rotation}/>`
   if (!label) return rect
-  const bar = `<text x="${node.x + 8}" y="${node.y - 10}" font-family="'Inter', sans-serif" font-size="14" fill="#6b7280">${escapeXml(label)}</text>`
+  const bar = `<text x="${node.x + 8}" y="${node.y - 10}" font-family="'Inter', sans-serif" font-size="14" fill="#6b7280" stroke="none">${escapeXml(label)}</text>`
   return rect + bar
 }
 
@@ -310,7 +310,7 @@ function arrowHead(
     x: tip.x - Math.cos(angle) * length + Math.sin(angle) * width,
     y: tip.y - Math.sin(angle) * length - Math.cos(angle) * width,
   }
-  return `<polygon points="${tip.x},${tip.y} ${left.x},${left.y} ${right.x},${right.y}" fill="${color}"/>`
+  return `<polygon points="${tip.x},${tip.y} ${left.x},${left.y} ${right.x},${right.y}" fill="${color}" stroke="none"/>`
 }
 
 function edgeMarkup(edge: CanvasEdge, nodes: Map<string, CanvasNode>) {
@@ -338,8 +338,8 @@ function edgeMarkup(edge: CanvasEdge, nodes: Map<string, CanvasNode>) {
     const text = edge.label.replace(/\n/g, ' ')
     const width = Math.max(24, Array.from(text).length * 8 + 16)
     const height = 20
-    markup += `<rect x="${midX - width / 2}" y="${midY - height / 2}" width="${width}" height="${height}" rx="4" fill="${color}"/>`
-    markup += `<text x="${midX}" y="${midY + 4}" text-anchor="middle" font-family="'Inter', 'Noto Sans SC', sans-serif" font-size="12" fill="#fff">${escapeXml(text)}</text>`
+    markup += `<rect x="${midX - width / 2}" y="${midY - height / 2}" width="${width}" height="${height}" rx="4" fill="${color}" stroke="none"/>`
+    markup += `<text x="${midX}" y="${midY + 4}" text-anchor="middle" font-family="'Inter', 'Noto Sans SC', sans-serif" font-size="12" fill="#fff" stroke="none">${escapeXml(text)}</text>`
   }
   return markup
 }
@@ -370,7 +370,7 @@ export function buildCanvasSvg(canvas: CanvasDocument) {
     ...canvas.nodes.map(nodeMarkup),
     ...canvas.edges.map((edge) => edgeMarkup(edge, nodes)),
   ].join('')
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" fill="#faf9f5"/><g transform="translate(${offsetX} ${offsetY})">${body}</g></svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" fill="#faf9f5" stroke="none"/><g transform="translate(${offsetX} ${offsetY})">${body}</g></svg>`
 }
 
 export function exportFilename(canvas: CanvasDocument, extension: string) {

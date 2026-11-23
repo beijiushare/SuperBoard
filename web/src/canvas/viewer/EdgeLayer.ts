@@ -2,6 +2,7 @@ import { BaseModule, internal, type BaseArgs } from '../../vendor/json-canvas-vi
 import type { CanvasEdge, CanvasNode } from '../model'
 import { edgeGeometry, edgePath } from '../editor/edges'
 import { viewportWorldRect } from './culling'
+import { warnUnpaintedGraphics } from './paintInvariant'
 
 type DataManager = {
   data: {
@@ -141,12 +142,14 @@ export class EdgeLayer extends BaseModule {
           String((geometry.start.y + geometry.end.y) / 2 - 6),
         )
         label.setAttribute('fill', color)
+        label.setAttribute('stroke', 'none')
         label.setAttribute('font-size', '13')
         label.setAttribute('text-anchor', 'middle')
         label.textContent = edge.label
         group.appendChild(label)
       }
     }
+    warnUnpaintedGraphics(this.svg)
   }
 
   private readonly dispose = () => {

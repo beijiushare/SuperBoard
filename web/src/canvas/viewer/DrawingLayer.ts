@@ -5,6 +5,7 @@ import {
   type SuperBoardStroke,
 } from '../model'
 import { intersectsViewport, nodeWorldRect, viewportWorldRect } from './culling'
+import { warnUnpaintedGraphics } from './paintInvariant'
 
 type DrawingNode = {
   x: number
@@ -149,6 +150,7 @@ export class DrawingLayer extends BaseModule {
       }
       group.appendChild(nodeGroup)
     }
+    warnUnpaintedGraphics(this.svg)
   }
 
   private readonly dispose = () => {

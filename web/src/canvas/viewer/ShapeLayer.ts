@@ -6,6 +6,7 @@ import {
   type SuperBoardShapeKind,
 } from '../model'
 import { intersectsViewport, nodeWorldRect, viewportWorldRect } from './culling'
+import { warnUnpaintedGraphics } from './paintInvariant'
 
 type ShapeNode = {
   x: number
@@ -194,6 +195,7 @@ export class ShapeLayer extends BaseModule {
       }
       group.appendChild(nodeGroup)
     }
+    warnUnpaintedGraphics(this.svg)
   }
 
   private readonly dispose = () => {

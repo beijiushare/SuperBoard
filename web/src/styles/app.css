@@ -1706,6 +1706,16 @@
   pointer-events: none;
 }
 
+/* The viewer root sets fill/stroke, which SVG inherits. Our layers always state
+   both on every element; the roots declare none as a safety net so a forgotten
+   attribute cannot pick up the dark default. */
+.sb-canvas-drawing-layer,
+.sb-canvas-shape-layer,
+.sb-canvas-edge-layer {
+  fill: none;
+  stroke: none;
+}
+
 .sb-editor-edge-hit {
   fill: none;
   stroke: transparent;

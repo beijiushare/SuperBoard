@@ -49,6 +49,25 @@ import {
 } from '../web/src/canvas/editor/eraser'
 import { DEFAULT_PREFERENCES } from '../web/src/canvas/editor/preferences'
 
+/**
+ * The viewer and the exported page inherit `fill`/`stroke` from their roots.
+ * A graphic that omits one of them silently picks up the dark default, which is
+ * how freehand strokes grew an outline. Every graphic must state both.
+ */
+function assertExplicitPaint(markup: string, label: string) {
+  for (const match of markup.matchAll(
+    /<(path|rect|ellipse|line|polygon|circle|text)\b([^>]*)>/g,
+  )) {
+    const attributes = match[2]
+    assert.match(attributes, /\bfill="/, `${label}: <${match[1]}> is missing fill`)
+    assert.match(
+      attributes,
+      /\bstroke="/,
+      `${label}: <${match[1]}> is missing stroke`,
+    )
+  }
+}
+
 const nodes: CanvasNode[] = [
   {
     id: 'g',
@@ -164,6 +183,7 @@ assert.ok(svg.endsWith('</svg>'))
 assert.ok(svg.includes('<path'))
 assert.ok(svg.includes('连接'))
 assert.ok(svg.match(/<polygon/g)?.length === 2)
+assertExplicitPaint(svg, 'canvas svg')
 const html = buildCanvasHtml(canvas)
 assert.ok(html.startsWith('<!doctype html>'))
 assert.ok(html.endsWith('</html>'))
@@ -247,6 +267,7 @@ assert.ok(styledSvg.includes('fill="#112233"'))
 assert.ok(styledSvg.includes('stroke="#445566"'))
 assert.ok(styledSvg.includes('stroke-width="4"'))
 assert.ok(styledSvg.includes('stroke-dasharray="7 4"'))
+assertExplicitPaint(styledSvg, 'styled svg')
 
 const brush = {
   size: 4,
@@ -299,6 +320,12 @@ const hitNode: CanvasNode = {
 }
 assert.equal(strokeHit(stroke, hitNode, 5, 3, 2), true)
 assert.equal(strokeHit(stroke, hitNode, 5, 10, 2), false)
+const drawingSvg = buildCanvasSvg({
+  nodes: [hitNode],
+  edges: [],
+  'x-superboard': { version: 1, meta: { title: 'draw', slug: 'draw' } },
+})
+assertExplicitPaint(drawingSvg, 'drawing export svg')
 assert.equal(closestSide(hitNode, 9, 5), 'right')
 assert.deepEqual(
   arrowSides(
@@ -480,6 +507,7 @@ const exportSvg = buildCanvasSvg({
 assert.equal((exportSvg.match(/<rect/g) ?? []).length, 3)
 assert.match(exportSvg, /fill-opacity="0.35"/)
 assert.match(exportSvg, /stroke-opacity="1"/)
+assertExplicitPaint(exportSvg, 'shape export svg')
 
 const blockSvg = buildCanvasSvg({
   nodes: [
@@ -521,6 +549,7 @@ assert.match(blockSvg, /fill="#ff0000"/)
 assert.match(blockSvg, /fill-opacity="0.5"/)
 assert.match(blockSvg, /stroke="#0000ff"/)
 assert.match(blockSvg, /stroke-width="3"/)
+assertExplicitPaint(blockSvg, 'block export svg')
 const geometryStyled = applyGeometry(styledBase, { width: 120, rotation: 30 })
 assert.equal(geometryStyled.width, 120)
 assert.equal(geometryStyled.height, 40)
