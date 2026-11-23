@@ -10,6 +10,8 @@ export interface ResolvedNodeStyle {
   borderDash: number[] | undefined
   opacity: number
   cornerRadius: number | undefined
+  /** Space between the surface and its content (or a group's children). */
+  padding: number
 }
 
 export function resolveNodeStyle(style?: SuperBoardStyle): ResolvedNodeStyle {
@@ -34,5 +36,6 @@ export function resolveNodeStyle(style?: SuperBoardStyle): ResolvedNodeStyle {
     borderDash,
     opacity: style?.opacity ?? 1,
     cornerRadius: style?.cornerRadius,
+    padding: Math.max(0, style?.padding ?? 0),
   }
 }
