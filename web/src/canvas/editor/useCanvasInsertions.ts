@@ -455,7 +455,11 @@ export function useCanvasInsertions({
     if (!canvas) return
     const imported = await pickWorkspaceFiles(scope)
     if (imported.length === 0) return
-    const ids = new Set(canvas.nodes.map((node) => node.id))
+    // The native picker can stay open for a while; re-read the document so
+    // edits made meanwhile are not replaced by the stale closure copy.
+    const current = canvasRef.current
+    if (!current) return
+    const ids = new Set(current.nodes.map((node) => node.id))
     const added: string[] = []
     const nodes = imported.map((item, index) => {
       const id = nextFreeId(ids, 'file')
@@ -464,7 +468,7 @@ export function useCanvasInsertions({
       return fileNode(id, item, index)
     })
     recordHistory()
-    applyDocument({ ...canvas, nodes: [...canvas.nodes, ...nodes] }, added)
+    applyDocument({ ...current, nodes: [...current.nodes, ...nodes] }, added)
     setMediaDialogOpen(false)
     setMediaUrl('')
     setMediaInsertPoint(null)
