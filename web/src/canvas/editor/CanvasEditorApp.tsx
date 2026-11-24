@@ -14,6 +14,7 @@ import type {
   CanvasDocument,
   CanvasNode,
   SuperBoardScheduleEvent,
+  SuperBoardTreeData,
 } from '../model'
 import { CanvasEditorStage } from './CanvasEditorStage'
 import {
@@ -320,6 +321,34 @@ export function CanvasEditorApp() {
     [canvas],
   )
 
+  const updateTreeChange = useCallback(
+    (id: string, tree: SuperBoardTreeData) => {
+      const document = canvasRef.current
+      const node = document?.nodes.find((item) => item.id === id)
+      if (!document || !node) return
+      recordHistory()
+      captureViewport()
+      const next: CanvasDocument = {
+        ...document,
+        nodes: document.nodes.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                'x-superboard': {
+                  ...ensureExtension(item),
+                  kind: 'tree',
+                  tree,
+                },
+              }
+            : item,
+        ),
+      }
+      setCanvas(next)
+      markDirty()
+    },
+    [canvas],
+  )
+
   const updateTreeSize = useCallback(
     (id: string, size: { width: number; height: number }) => {
       setCanvas((current) => {
@@ -576,6 +605,7 @@ export function CanvasEditorApp() {
           onNodeSelect={handleNodeSelect}
           onScheduleEventsChange={updateScheduleEvents}
           onTreeSize={updateTreeSize}
+          onTreeChange={updateTreeChange}
           selection={{
             selectedIds,
             onSelect: setSelectedIds,

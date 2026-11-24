@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   TREE_BLOCK_PADDING,
-  TREE_CARD_MAX_HEIGHT,
-  TREE_CARD_WIDTH,
-  colorWithOpacity,
+  addTreeChild,
   layoutTree,
+  removeTreeNode,
   treeBlockSize,
   treeEdges,
+  treeNodeById,
+  updateTreeNode,
   visibleTreeNodes,
   type SuperBoardTreeData,
-  type SuperBoardTreeNode,
 } from '../../canvas/model'
 import { usePreferences } from '../../canvas/editor/preferences'
-import { MarkdownVditorPreview } from '../markdown/MarkdownVditorPreview'
+import { TreeCard } from './TreeCard'
 
 export interface KnowledgeTreeSize {
   width: number
@@ -23,6 +23,8 @@ interface KnowledgeTreeProps {
   data: SuperBoardTreeData
   /** Called whenever the cards settle on a new block size. */
   onSize?: (size: KnowledgeTreeSize) => void
+  /** Structure changed: add, remove or edit a card. */
+  onChange?: (next: SuperBoardTreeData) => void
   /** A card was pressed with the primary button; selects the block. */
   onActivate?: () => void
 }
@@ -83,24 +85,12 @@ function useCardHeights() {
   return { heights, register }
 }
 
-function CardBody({ node }: { node: SuperBoardTreeNode }) {
-  if (node.status === 'draft' || !node.answer.trim()) {
-    return (
-      <div className="sb-kt-card-empty">
-        {node.status === 'draft'
-          ? '等待提问'
-          : node.status === 'generating'
-            ? '生成中…'
-            : node.status === 'error'
-              ? '生成失败'
-              : '暂无回答'}
-      </div>
-    )
-  }
-  return <MarkdownVditorPreview source={node.answer} />
-}
-
-export function KnowledgeTree({ data, onSize, onActivate }: KnowledgeTreeProps) {
+export function KnowledgeTree({
+  data,
+  onSize,
+  onChange,
+  onActivate,
+}: KnowledgeTreeProps) {
   const { heights, register } = useCardHeights()
   const blockDefaults = usePreferences().block
   const layout = layoutTree(data, heights)
@@ -118,6 +108,39 @@ export function KnowledgeTree({ data, onSize, onActivate }: KnowledgeTreeProps) 
   }, [size.width, size.height])
 
   const nodes = visibleTreeNodes(data)
+
+  const addChild = (parentId: string) => {
+    const { data: next } = addTreeChild(data, parentId)
+    onChange?.(next)
+  }
+
+  const submitQuestion = (id: string, text: string) => {
+    const question = text.trim()
+    if (!question) {
+      cancelDraft(id)
+      return
+    }
+    onChange?.(
+      updateTreeNode(data, id, {
+        question,
+        title: question.slice(0, 20),
+        status: 'done',
+      }),
+    )
+  }
+
+  const cancelDraft = (id: string) => {
+    const node = treeNodeById(data, id)
+    // The root card is the tree's starting point and never disappears.
+    if (!node || node.id === data.rootId) return
+    onChange?.(removeTreeNode(data, id, 'branch'))
+  }
+
+  const toggleBranch = (id: string) => {
+    const node = treeNodeById(data, id)
+    if (!node) return
+    onChange?.(updateTreeNode(data, id, { branchCollapsed: !node.branchCollapsed }))
+  }
 
   return (
     <div
@@ -145,64 +168,21 @@ export function KnowledgeTree({ data, onSize, onActivate }: KnowledgeTreeProps) 
             </g>
           ))}
         </svg>
-        {nodes.map((node) => {
-          const position = layout.positions[node.id] ?? { x: 0, y: 0 }
-          return (
-            <article
-              key={node.id}
-              ref={register(node.id)}
-              data-tree-node-id={node.id}
-              className={`sb-kt-card${node.bodyCollapsed ? ' is-collapsed' : ''}${
-                node.status === 'draft' ? ' is-draft' : ''
-              }`}
-              onPointerDown={(event) => {
-                if (event.button === 0) onActivate?.()
-              }}
-              style={{
-                left: position.x,
-                top: position.y,
-                width: TREE_CARD_WIDTH,
-                maxHeight: TREE_CARD_MAX_HEIGHT,
-                // Cards follow the shared block defaults unless they carry an
-                // explicit colour, exactly like a normal block surface.
-                background: colorWithOpacity(
-                  node.style?.background ?? blockDefaults.backgroundColor,
-                  blockDefaults.backgroundOpacity,
-                ),
-                borderColor: colorWithOpacity(
-                  node.style?.border ?? blockDefaults.borderColor,
-                  blockDefaults.borderOpacity,
-                ),
-                borderWidth: `${blockDefaults.borderWidth}px`,
-                borderStyle: blockDefaults.borderStyle,
-              }}
-            >
-              <header className="sb-kt-head">
-                <span className="sb-kt-title">
-                  {node.title.trim() || node.question.trim() || '未命名'}
-                </span>
-              </header>
-              {node.quote ? (
-                <blockquote className="sb-kt-quote">
-                  {node.quote.title ? (
-                    <span className="sb-kt-quote-source">
-                      {node.quote.title}
-                    </span>
-                  ) : null}
-                  {node.quote.text}
-                </blockquote>
-              ) : null}
-              {node.question ? (
-                <blockquote className="sb-kt-question">
-                  {node.question}
-                </blockquote>
-              ) : null}
-              <div className="sb-kt-body">
-                <CardBody node={node} />
-              </div>
-            </article>
-          )
-        })}
+        {nodes.map((node) => (
+          <TreeCard
+            key={node.id}
+            node={node}
+            hasChildren={data.nodes.some((item) => item.parentId === node.id)}
+            position={layout.positions[node.id] ?? { x: 0, y: 0 }}
+            defaults={blockDefaults}
+            register={register(node.id)}
+            onActivate={() => onActivate?.()}
+            onAddChild={() => addChild(node.id)}
+            onSubmitQuestion={(text) => submitQuestion(node.id, text)}
+            onCancelDraft={() => cancelDraft(node.id)}
+            onToggleBranch={() => toggleBranch(node.id)}
+          />
+        ))}
       </div>
     </div>
   )

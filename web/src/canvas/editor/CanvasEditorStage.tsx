@@ -9,6 +9,7 @@ import type {
   CanvasFrame,
   CanvasNode,
   SuperBoardScheduleEvent,
+  SuperBoardTreeData,
 } from '../model'
 import { CanvasViewer, type CanvasViewerHandle } from '../viewer/CanvasViewer'
 import { CanvasEditorOverlay } from './CanvasEditorOverlay'
@@ -96,6 +97,7 @@ interface CanvasEditorStageProps {
     events: SuperBoardScheduleEvent[],
   ) => void
   onTreeSize?: (id: string, size: { width: number; height: number }) => void
+  onTreeChange?: (id: string, data: SuperBoardTreeData) => void
   selection: StageSelection
   tools: StageTools
   markdown: StageMarkdown
@@ -115,6 +117,7 @@ export function CanvasEditorStage({
   onNodeSelect,
   onScheduleEventsChange,
   onTreeSize,
+  onTreeChange,
   selection,
   tools,
   markdown,
@@ -142,6 +145,7 @@ export function CanvasEditorStage({
                   onNodeSelect={onNodeSelect}
                   onScheduleEventsChange={onScheduleEventsChange}
                   onTreeSize={onTreeSize}
+                  onTreeChange={onTreeChange}
                   style={{ width: '100%', height: '100%' }}
                 />
               </div>

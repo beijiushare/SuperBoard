@@ -51,8 +51,79 @@
   display: flex;
   flex: none;
   align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px 6px;
+  gap: 6px;
+  padding: 10px 30px 6px 12px;
+}
+
+/* Card actions stay out of the way until the card is hovered. */
+.sb-kt-add {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--sb-border-control, #d8d4c9);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--sb-text-secondary, #6f6b60);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0;
+  place-items: center;
+  transition: opacity 120ms ease;
+}
+
+.sb-kt-card:hover .sb-kt-add,
+.sb-kt-add:focus-visible {
+  opacity: 1;
+}
+
+.sb-kt-add:hover {
+  border-color: var(--sb-text-secondary, #6f6b60);
+  color: var(--sb-text, #1f1e1c);
+}
+
+.sb-kt-toggle {
+  display: grid;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin-top: 1px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sb-text-faint, #a19c90);
+  cursor: pointer;
+  place-items: center;
+  transform: rotate(90deg);
+  transition: transform 120ms ease;
+}
+
+.sb-kt-toggle.is-collapsed {
+  transform: none;
+}
+
+.sb-kt-draft {
+  padding: 0 12px 10px;
+}
+
+.sb-kt-draft textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sb-text, #1f1e1c);
+  font: inherit;
+  outline: none;
+  resize: none;
+}
+
+.sb-kt-draft textarea::placeholder {
+  color: var(--sb-text-faint, #a19c90);
 }
 
 .sb-kt-title {

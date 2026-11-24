@@ -13,6 +13,7 @@ import {
   type SuperBoardMedia,
   type SuperBoardNodeExtension,
   type SuperBoardScheduleEvent,
+  type SuperBoardTreeData,
 } from '../model'
 import '../../styles/markdown.css'
 import '../../styles/pele.css'
@@ -142,12 +143,14 @@ export function TextSlot({
   onSelect,
   onScheduleEventsChange,
   onTreeSize,
+  onTreeChange,
 }: {
   node: JSONCanvasTextNode
   onActive?: Hook
   onSelect?: (id: string) => void
   onScheduleEventsChange?: (events: SuperBoardScheduleEvent[]) => void
   onTreeSize?: (size: { width: number; height: number }) => void
+  onTreeChange?: (data: SuperBoardTreeData) => void
 }) {
   const { t } = useTranslation(['common'])
   useNodeSelection(node.id, onActive, onSelect)
@@ -177,6 +180,7 @@ export function TextSlot({
       <KnowledgeTree
         data={ext.tree}
         onSize={onTreeSize}
+        onChange={onTreeChange}
         onActivate={() => onSelect?.(node.id)}
       />
     ) : (
