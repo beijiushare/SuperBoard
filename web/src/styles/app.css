@@ -1329,9 +1329,20 @@
   background: #fff !important;
 }
 
-/* Editing must look like the rendered block: same size and inset. Vditor's
-   editor defaults (16px, its own padding) otherwise differ from the preview. */
-.sb-md-editor .vditor-ir pre.vditor-reset,
+/* Editing must look like the rendered block: same size and inset. The editor
+   adds a 2px frame and Vditor its own 1px border, so the content box is
+   compensated here (18+2 and 20+2 match the preview's 18/20). */
+.sb-md-editor .vditor {
+  border: 0;
+}
+
+.sb-md-editor .vditor-ir pre.vditor-reset {
+  padding: 16px 18px;
+  color: inherit;
+  font-family: inherit;
+  font-size: 14px;
+}
+
 .sb-md-focus-editor .vditor-ir pre.vditor-reset {
   padding: 18px 20px;
   color: inherit;
