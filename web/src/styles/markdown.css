@@ -119,26 +119,6 @@
   overflow-x: auto;
 }
 
-/* GitHub style alerts: Vditor owns the markup (icon + title + body), so only
-   the surface is restyled here. Applies to the editor and the preview alike. */
-.vditor-reset .callout.callout,
-.vditor-ir blockquote.callout,
-.vditor-wysiwyg blockquote.callout {
-  padding: 8px 12px 8px 10px;
-  border-radius: 0 6px 6px 0;
-  background: color-mix(in srgb, var(--callout-color, #3575f0) 8%, transparent);
-}
-
-.vditor-reset .callout.callout::before,
-.vditor-ir blockquote.callout::before,
-.vditor-wysiwyg blockquote.callout::before {
-  border-radius: 6px;
-}
-
-.vditor-reset .callout > :last-child {
-  margin-bottom: 0;
-}
-
 .sb-markdown th {
   background: var(--tl-color-low, #f1efe8);
   font-weight: 700;
