@@ -391,11 +391,17 @@ export function CanvasEditorApp() {
         // to the parent, so the next request stays inside the context window.
         let workingTree = tree
         const node = tree.nodes.find((item) => item.id === nodeId)
-        const hasSummary = tree.nodes.some(
-          (item) => item.parentId === nodeId && item.role === 'summary',
-        )
+        // The summary hangs under the deepest ancestor: it covers that ancestor
+        // and everything above it, so both this question and the ancestor's own
+        // later questions start from the summary.
+        const summaryParent = node?.parentId ?? null
+        const hasSummary =
+          summaryParent !== null &&
+          tree.nodes.some(
+            (item) => item.parentId === summaryParent && item.role === 'summary',
+          )
         if (
-          node?.parentId &&
+          summaryParent &&
           !hasSummary &&
           estimateTokens(messages) > preferences.ai.compactionThreshold
         ) {
@@ -412,7 +418,7 @@ export function CanvasEditorApp() {
                 ...tree.nodes,
                 {
                   id: newTreeNodeId(),
-                  parentId: nodeId,
+                  parentId: summaryParent,
                   title: '',
                   question: '',
                   answer: summary.trim(),
