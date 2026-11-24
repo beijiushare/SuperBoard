@@ -26,6 +26,7 @@
     "prepare:canvas": "tsx scripts/prepare-canvas.ts",
     "typecheck": "tsc --noEmit",
     "check:i18n": "node scripts/check-i18n.mjs",
+    "audit:css": "node scripts/audit-css.mjs",
     "sync:version": "node scripts/sync-desktop-version.mjs",
     "test:model": "tsx scripts/test-canvas-model.ts",
     "test:editor": "tsx scripts/test-canvas-editor.ts"
