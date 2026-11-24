@@ -33,6 +33,7 @@
   "tree.addChild": "新建子问题",
   "tree.collapseBranch": "折叠分支",
   "tree.expandBranch": "展开分支",
+  "tree.expandBranchCount": "展开这 {{count}} 个后续问题",
   "tree.delete": "删除这张卡",
   "tree.renameHint": "双击改标题",
   "tree.deleteAsk": "这张卡还有子问题",

@@ -211,6 +211,8 @@ export interface TreeEdge {
 const TREE_ARROW_LENGTH = 7
 const TREE_ARROW_HALF = 4
 const TREE_ELBOW_RADIUS = 8
+/** Half the expand button, so branch lines start just past its circle. */
+export const TREE_EXPAND_RADIUS = 10
 
 /** Polyline with quadratic corner rounding, like a mind-map branch line. */
 function roundedElbow(points: Array<[number, number]>, radius: number) {
@@ -254,7 +256,11 @@ export function treeEdges(
     const from = positions[parent?.id ?? '']
     const to = positions[node.id]
     if (!parent || !from || !to || !visible.has(parent.id)) continue
-    const startX = from.x + TREE_CARD_WIDTH
+    const parentHasToggle = data.nodes.some(
+      (item) => item.parentId === parent.id,
+    )
+    const startX =
+      from.x + TREE_CARD_WIDTH + (parentHasToggle ? TREE_EXPAND_RADIUS : 0)
     const startY = from.y + resolveCardHeight(heights, parent) / 2
     const endX = to.x - TREE_ARROW_LENGTH
     const endY = to.y + resolveCardHeight(heights, node) / 2

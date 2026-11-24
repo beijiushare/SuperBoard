@@ -1,10 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   TREE_BLOCK_PADDING,
+  TREE_CARD_WIDTH,
   TREE_DRAFT_HEIGHT,
+  TREE_EXPAND_RADIUS,
   addTreeChild,
   layoutTree,
   removeTreeNode,
+  resolveCardHeight,
   treeBlockSize,
   treeDescendantIds,
   treeEdges,
@@ -108,6 +112,7 @@ export function KnowledgeTree({
   onGenerate,
 }: KnowledgeTreeProps) {
   const { heights, register, seed } = useCardHeights()
+  const { t } = useTranslation(['editor'])
   const blockDefaults = usePreferences().block
   const layout = layoutTree(data, heights)
   const edges = treeEdges(data, layout.positions, heights)
@@ -123,6 +128,8 @@ export function KnowledgeTree({
   } | null>(null)
   // Cards fade out before they leave the data, so deleting reads like adding.
   const [exiting, setExiting] = useState<Set<string>>(() => new Set())
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const hoverTimer = useRef(0)
   const dataRef = useRef(data)
   dataRef.current = data
 
@@ -147,6 +154,17 @@ export function KnowledgeTree({
   )
 
   const nodes = visibleTreeNodes(data)
+  const childrenOf = (id: string) => data.nodes.some((item) => item.parentId === id)
+
+  /** Hover state keeps the expand button reachable when the pointer moves onto it. */
+  const setHover = (id: string | null) => {
+    window.clearTimeout(hoverTimer.current)
+    if (id) {
+      setHoveredId(id)
+      return
+    }
+    hoverTimer.current = window.setTimeout(() => setHoveredId(null), 140)
+  }
 
   const addChild = (parentId: string) => {
     const { data: next, node } = addTreeChild(data, parentId)
@@ -271,7 +289,7 @@ export function KnowledgeTree({
           <TreeCard
             key={node.id}
             node={node}
-            hasChildren={data.nodes.some((item) => item.parentId === node.id)}
+            hasChildren={childrenOf(node.id)}
             canDelete={node.id !== data.rootId}
             exiting={exiting.has(node.id)}
             position={layout.positions[node.id] ?? { x: 0, y: 0 }}
@@ -281,14 +299,74 @@ export function KnowledgeTree({
             onAddChild={() => addChild(node.id)}
             onSubmitQuestion={(text) => submitQuestion(node.id, text)}
             onCancelDraft={() => cancelDraft(node.id)}
-            onToggleBranch={() => toggleBranch(node.id)}
             onToggleBody={() => toggleBody(node.id)}
+            onHover={(hovering) => setHover(hovering ? node.id : null)}
             onRename={(title) => renameNode(node.id, title)}
             onDelete={(mode) => deleteNode(node.id, mode)}
             onRetry={() => onGenerate?.(node.id)}
             onOpenMenu={(anchor) => setMenu({ nodeId: node.id, ...anchor })}
           />
         ))}
+        {nodes
+          .filter((node) => childrenOf(node.id))
+          .map((node) => {
+            const position = layout.positions[node.id] ?? { x: 0, y: 0 }
+            const height = resolveCardHeight(heights, node)
+            const collapsed = node.branchCollapsed === true
+            const hiddenCount = collapsed
+              ? treeDescendantIds(data, node.id).size
+              : 0
+            return (
+              <button
+                key={`expand-${node.id}`}
+                type="button"
+                className={`sb-kt-expand${collapsed ? ' is-collapsed' : ''}${
+                  collapsed || hoveredId === node.id ? ' is-visible' : ''
+                }`}
+                style={
+                  {
+                    '--sb-kt-ex': `${position.x + TREE_CARD_WIDTH - TREE_EXPAND_RADIUS}px`,
+                    '--sb-kt-ey': `${position.y + height / 2 - TREE_EXPAND_RADIUS}px`,
+                  } as CSSProperties
+                }
+                aria-label={
+                  collapsed
+                    ? t('editor:tree.expandBranch')
+                    : t('editor:tree.collapseBranch')
+                }
+                title={
+                  collapsed
+                    ? t('editor:tree.expandBranchCount', { count: hiddenCount })
+                    : t('editor:tree.collapseBranch')
+                }
+                onPointerDown={(event) => event.stopPropagation()}
+                onPointerEnter={() => setHover(node.id)}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  toggleBranch(node.id)
+                }}
+              >
+                {collapsed ? (
+                  <span className="sb-kt-expand-count">{hiddenCount}</span>
+                ) : (
+                  <svg
+                    viewBox="0 0 16 16"
+                    width="10"
+                    height="10"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3.5 8h9"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+              </button>
+            )
+          })}
       </div>
       {menu && treeNodeById(data, menu.nodeId) ? (
         <TreeCardMenu

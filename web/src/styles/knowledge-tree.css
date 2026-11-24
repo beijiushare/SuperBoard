@@ -181,24 +181,52 @@
   color: var(--sb-danger, #b4483c);
 }
 
-.sb-kt-toggle {
+/* Branch toggle: a small circle straddling the card's right edge. Collapsed
+   state shows how many questions are hidden, so nothing disappears silently. */
+.sb-kt-expand {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
   display: grid;
-  width: 16px;
-  height: 16px;
-  flex: none;
-  margin-top: 1px;
+  width: 20px;
+  height: 20px;
   padding: 0;
-  border: 0;
-  background: none;
-  color: var(--sb-text-faint, #a19c90);
+  border: 1px solid #cfcabe;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--sb-text-secondary, #6f6b60);
   cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
   place-items: center;
-  transform: rotate(90deg);
-  transition: transform 120ms ease;
+  transform: translate3d(var(--sb-kt-ex, 0), var(--sb-kt-ey, 0), 0);
+  transition:
+    transform 190ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
 }
 
-.sb-kt-toggle.is-collapsed {
-  transform: none;
+.sb-kt-expand.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sb-kt-expand:hover {
+  border-color: var(--sb-text-secondary, #6f6b60);
+  color: var(--sb-text, #1f1e1c);
+}
+
+.sb-kt-expand-count {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.sb-kt-expand.is-collapsed {
+  border-color: var(--sb-text-secondary, #6f6b60);
+  color: var(--sb-text, #1f1e1c);
 }
 
 .sb-kt-draft {

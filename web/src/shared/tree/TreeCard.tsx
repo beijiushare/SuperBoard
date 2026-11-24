@@ -21,8 +21,8 @@ interface TreeCardProps {
   onAddChild: () => void
   onSubmitQuestion: (text: string) => void
   onCancelDraft: () => void
-  onToggleBranch: () => void
   onToggleBody: () => void
+  onHover: (hovering: boolean) => void
   onRename: (title: string) => void
   onDelete: (mode: 'branch' | 'promote') => void
   onRetry: () => void
@@ -81,8 +81,8 @@ export function TreeCard({
   onAddChild,
   onSubmitQuestion,
   onCancelDraft,
-  onToggleBranch,
   onToggleBody,
+  onHover,
   onRename,
   onDelete,
   onRetry,
@@ -139,6 +139,8 @@ export function TreeCard({
       onPointerDown={(event) => {
         if (event.button === 0) onActivate()
       }}
+      onPointerEnter={() => onHover(true)}
+      onPointerLeave={() => onHover(false)}
       onContextMenu={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -166,33 +168,6 @@ export function TreeCard({
       }}
     >
       <header className="sb-kt-head">
-        {hasChildren ? (
-          <button
-            type="button"
-            className={`sb-kt-toggle${node.branchCollapsed ? ' is-collapsed' : ''}`}
-            aria-label={
-              node.branchCollapsed
-                ? t('editor:tree.expandBranch')
-                : t('editor:tree.collapseBranch')
-            }
-            onPointerDown={(event) => event.stopPropagation()}
-            onClick={(event) => {
-              event.stopPropagation()
-              onToggleBranch()
-            }}
-          >
-            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
-              <path
-                d="M5 3.5 10.5 8 5 12.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        ) : null}
         {editingTitle ? (
           <input
             ref={titleRef}

@@ -33,6 +33,7 @@
   "tree.addChild": "New sub-question",
   "tree.collapseBranch": "Collapse branch",
   "tree.expandBranch": "Expand branch",
+  "tree.expandBranchCount": "Show {{count}} hidden questions",
   "tree.delete": "Delete this card",
   "tree.renameHint": "Double-click to rename",
   "tree.deleteAsk": "This card has sub-questions",
