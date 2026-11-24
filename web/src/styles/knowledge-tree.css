@@ -474,9 +474,3 @@
   max-width: 100%;
 }
 
-/* GitHub-style callouts (`> [!WARNING]`), enabled in the preview options. */
-.sb-kt-body .vditor-callout {
-  margin: 0 0 0.6em;
-  border-radius: 6px;
-  font-size: 12px;
-}

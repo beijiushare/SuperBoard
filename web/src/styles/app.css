@@ -156,14 +156,6 @@
   cursor: default;
 }
 
-.sb-director-curtain {
-  position: absolute;
-  border: 1px solid rgb(47 128 237 / 30%);
-  border-radius: 10px;
-  background: rgb(47 128 237 / 3%);
-  pointer-events: none;
-}
-
 .sb-director-frame {
   position: absolute;
   z-index: 1;
@@ -760,26 +752,6 @@
   white-space: nowrap;
 }
 
-.sb-style-swatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.sb-style-swatches button {
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: 1px solid #d5d1c6;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.sb-style-swatches button.is-active {
-  outline: 2px solid #28924f;
-  outline-offset: 1px;
-}
-
 .sb-style-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -811,54 +783,6 @@
 }
 
 .sb-style-buttons button.is-active {
-  border-color: #28924f;
-  background: #28924f;
-  color: #fff;
-}
-
-.sb-style-color-row {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-wrap: wrap;
-}
-
-.sb-style-color {
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: 1px solid #d5d1c6;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.sb-style-color.is-active {
-  outline: 2px solid #28924f;
-  outline-offset: 1px;
-}
-
-.sb-style-color-input {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 1px solid #d5d1c6;
-  border-radius: 5px;
-  background: #fff;
-  cursor: pointer;
-}
-
-.sb-style-toggle {
-  min-width: 48px;
-  padding: 3px 8px;
-  border: 1px solid #dedbd2;
-  border-radius: 5px;
-  background: #fff;
-  color: #5c584e;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.sb-style-toggle.is-active {
   border-color: #28924f;
   background: #28924f;
   color: #fff;
