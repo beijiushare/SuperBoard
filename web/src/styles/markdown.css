@@ -251,118 +251,13 @@
   margin-inline: auto;
 }
 
-.sb-markdown-vditor.vditor-reset h1,
-.sb-markdown-vditor.vditor-reset h2,
-.sb-markdown-vditor.vditor-reset h3,
-.sb-markdown-vditor.vditor-reset h4 {
-  color: inherit;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.sb-markdown-vditor.vditor-reset h1 {
-  border-bottom: 0;
-  font-size: 1.8em;
-}
-
-.sb-markdown-vditor.vditor-reset h2 {
-  border-bottom: 1px solid var(--tl-color-low-border, #dedbd2);
-  font-size: 1.38em;
-}
-
-.sb-markdown-vditor.vditor-reset h3 {
-  font-size: 1.16em;
-}
-
-.sb-markdown-vditor.vditor-reset h4 {
-  font-size: 1em;
-}
-
-.sb-markdown-vditor.vditor-reset a {
-  color: #205ea6;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.sb-markdown-vditor.vditor-reset hr {
-  height: 1px;
-  border: 0;
-  background: var(--tl-color-low-border, #dedbd2);
-}
-
-.sb-markdown-vditor.vditor-reset blockquote {
-  color: var(--tl-color-text-3, #6f6d66);
-}
-
-.sb-markdown-vditor.vditor-reset code {
-  border-radius: 4px;
-  background: var(--tl-color-low, #f1efe8);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
-  font-size: 0.88em;
-}
-
-.sb-markdown-vditor.vditor-reset pre {
-  overflow: auto;
-  border: 1px solid var(--tl-color-low-border, #dedbd2);
-  border-radius: 9px;
-  background: var(--tl-color-low, #f1efe8);
-  tab-size: 2;
-}
-
-.sb-markdown-vditor.vditor-reset pre code {
-  padding: 0;
-  background: transparent;
-  font-size: 12px;
-}
-
+/* Tables scroll inside their own box rather than widening the container. */
 .sb-markdown-vditor.vditor-reset table {
   display: block;
   width: max-content;
   max-width: 100%;
-  margin: 0 0 1em;
   overflow: auto;
   border-collapse: collapse;
-  font-size: 13px;
-}
-
-.sb-markdown-vditor.vditor-reset th,
-.sb-markdown-vditor.vditor-reset td {
-  padding: 7px 10px;
-  border: 1px solid var(--tl-color-low-border, #dedbd2);
-  text-align: left;
-}
-
-.sb-markdown-vditor.vditor-reset th {
-  background: var(--tl-color-low, #f1efe8);
-  font-weight: 700;
-}
-
-.sb-markdown-vditor.vditor-reset img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-}
-
-.sb-markdown-vditor.vditor-reset iframe {
-  width: 100%;
-  min-height: 280px;
-  border: 0;
-  border-radius: 9px;
-  background: #fff;
-}
-
-.sb-markdown iframe[src*='player.bilibili.com'],
-.sb-markdown-vditor.vditor-reset iframe[src*='player.bilibili.com'] {
-  width: min(100%, 177.78cqh);
-  min-height: 0;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  margin-inline: auto;
-  display: block;
-}
-
-.sb-markdown-vditor.vditor-reset input[type='checkbox'] {
-  margin-right: 0.4em;
 }
 
 /* Editor-only fixes on top of Vditor */
