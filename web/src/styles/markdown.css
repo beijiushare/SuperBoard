@@ -4,7 +4,6 @@
   padding: 18px 20px;
   color: inherit;
   font-size: 14px;
-  line-height: 1.7;
   overflow-wrap: anywhere;
 }
 
@@ -35,10 +34,8 @@
 .sb-markdown h2,
 .sb-markdown h3,
 .sb-markdown h4 {
-  margin: 1.25em 0 0.55em;
   color: inherit;
   font-weight: 700;
-  line-height: 1.25;
   letter-spacing: -0.02em;
 }
 
@@ -47,7 +44,6 @@
 }
 
 .sb-markdown h2 {
-  padding-bottom: 0.22em;
   border-bottom: 1px solid var(--tl-color-low-border, #dedbd2);
   font-size: 1.38em;
 }
@@ -58,26 +54,6 @@
 
 .sb-markdown h4 {
   font-size: 1em;
-}
-
-.sb-markdown p {
-  margin: 0 0 0.85em;
-}
-
-.sb-markdown ul,
-.sb-markdown ol {
-  margin: 0 0 0.9em;
-  padding-left: 1.35em;
-}
-
-.sb-markdown li + li {
-  margin-top: 0.25em;
-}
-
-.sb-markdown li > ul,
-.sb-markdown li > ol {
-  margin-top: 0.25em;
-  margin-bottom: 0;
 }
 
 .sb-markdown a {
@@ -92,24 +68,16 @@
 
 .sb-markdown hr {
   height: 1px;
-  margin: 1.4em 0;
   border: 0;
   background: var(--tl-color-low-border, #dedbd2);
 }
 
 .sb-markdown blockquote {
-  margin: 1em 0;
-  padding: 0.15em 0 0.15em 1em;
   border-left: 3px solid var(--tl-color-low-border, #cbc7bc);
   color: var(--tl-color-text-3, #6f6d66);
 }
 
-.sb-markdown blockquote > :last-child {
-  margin-bottom: 0;
-}
-
 .sb-markdown code {
-  padding: 0.13em 0.36em;
   border-radius: 4px;
   background: var(--tl-color-low, #f1efe8);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
@@ -118,12 +86,9 @@
 
 .sb-markdown pre {
   overflow: auto;
-  margin: 0 0 1em;
-  padding: 14px 16px;
   border: 1px solid var(--tl-color-low-border, #dedbd2);
   border-radius: 9px;
   background: var(--tl-color-low, #f1efe8);
-  line-height: 1.55;
   tab-size: 2;
 }
 
@@ -137,7 +102,6 @@
   display: block;
   width: max-content;
   max-width: 100%;
-  margin: 0 0 1em;
   overflow: auto;
   border-collapse: collapse;
   font-size: 13px;
@@ -145,7 +109,6 @@
 
 .sb-markdown th,
 .sb-markdown td {
-  padding: 7px 10px;
   border: 1px solid var(--tl-color-low-border, #dedbd2);
   text-align: left;
 }
@@ -153,7 +116,6 @@
 /* Tables scroll inside their own box rather than widening the container. */
 .sb-table-scroll {
   max-width: 100%;
-  margin: 0 0 1em;
   overflow-x: auto;
 }
 
@@ -323,7 +285,6 @@
   color: inherit;
   font-family: inherit;
   font-size: 14px;
-  line-height: 1.7;
 }
 
 .sb-markdown-vditor.vditor-reset div.language-math,
@@ -331,7 +292,6 @@
 .sb-md-focus-body .vditor-ir__preview div.language-math {
   display: flex;
   justify-content: center;
-  margin: 0.9em 0;
   overflow-x: auto;
 }
 
@@ -345,21 +305,17 @@
 .sb-markdown-vditor.vditor-reset h2,
 .sb-markdown-vditor.vditor-reset h3,
 .sb-markdown-vditor.vditor-reset h4 {
-  margin: 1.25em 0 0.55em;
   color: inherit;
   font-weight: 700;
-  line-height: 1.25;
   letter-spacing: -0.02em;
 }
 
 .sb-markdown-vditor.vditor-reset h1 {
-  padding-bottom: 0;
   border-bottom: 0;
   font-size: 1.8em;
 }
 
 .sb-markdown-vditor.vditor-reset h2 {
-  padding-bottom: 0.22em;
   border-bottom: 1px solid var(--tl-color-low-border, #dedbd2);
   font-size: 1.38em;
 }
@@ -372,26 +328,6 @@
   font-size: 1em;
 }
 
-.sb-markdown-vditor.vditor-reset p {
-  margin: 0 0 0.85em;
-}
-
-.sb-markdown-vditor.vditor-reset ul,
-.sb-markdown-vditor.vditor-reset ol {
-  margin: 0 0 0.9em;
-  padding-left: 1.35em;
-}
-
-.sb-markdown-vditor.vditor-reset li + li {
-  margin-top: 0.25em;
-}
-
-.sb-markdown-vditor.vditor-reset li > ul,
-.sb-markdown-vditor.vditor-reset li > ol {
-  margin-top: 0.25em;
-  margin-bottom: 0;
-}
-
 .sb-markdown-vditor.vditor-reset a {
   color: #205ea6;
   text-decoration: underline;
@@ -400,24 +336,16 @@
 
 .sb-markdown-vditor.vditor-reset hr {
   height: 1px;
-  margin: 1.4em 0;
   border: 0;
   background: var(--tl-color-low-border, #dedbd2);
 }
 
 .sb-markdown-vditor.vditor-reset blockquote {
-  margin: 1em 0;
-  padding: 0.15em 0 0.15em 1em;
   border-left: 3px solid var(--tl-color-low-border, #cbc7bc);
   color: var(--tl-color-text-3, #6f6d66);
 }
 
-.sb-markdown-vditor.vditor-reset blockquote > :last-child {
-  margin-bottom: 0;
-}
-
 .sb-markdown-vditor.vditor-reset code {
-  padding: 0.13em 0.36em;
   border-radius: 4px;
   background: var(--tl-color-low, #f1efe8);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
@@ -426,12 +354,9 @@
 
 .sb-markdown-vditor.vditor-reset pre {
   overflow: auto;
-  margin: 0 0 1em;
-  padding: 14px 16px;
   border: 1px solid var(--tl-color-low-border, #dedbd2);
   border-radius: 9px;
   background: var(--tl-color-low, #f1efe8);
-  line-height: 1.55;
   tab-size: 2;
 }
 

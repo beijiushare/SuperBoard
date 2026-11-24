@@ -329,7 +329,6 @@
 .sb-kt-body .sb-markdown-raw {
   padding: 0;
   font-size: 12.5px;
-  line-height: 1.65;
 }
 
 /* Collapsed body keeps the title, the quote and the first three lines. */
