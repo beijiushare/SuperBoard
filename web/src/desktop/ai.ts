@@ -10,6 +10,8 @@ export interface AIRequestSettings {
   model: string
   /** Local runtimes do not need a key. */
   keyless: boolean
+  /** Extra headers some gateways require. */
+  headers?: Record<string, string>
 }
 
 export interface AIChatMessage {
@@ -24,6 +26,34 @@ export interface AIKeyStatus {
 
 function parse<T>(result: Result): T & { error?: string } {
   return JSON.parse(result.body) as T & { error?: string }
+}
+
+/**
+ * OpenCode Zen routes requests by session, so every call needs a stable id.
+ * Generated once per page load and reused.
+ */
+const aiSessionId =
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `sb-${Date.now().toString(36)}`
+
+function isOpenCodeZen(baseURL: string) {
+  try {
+    return /(^|\.)opencode\.ai$/i.test(new URL(baseURL).hostname)
+  } catch {
+    return false
+  }
+}
+
+function resolveHeaders(settings: AIRequestSettings) {
+  const headers: Record<string, string> = { ...(settings.headers ?? {}) }
+  if (isOpenCodeZen(settings.baseURL)) {
+    const hasSession = Object.keys(headers).some(
+      (name) => name.toLowerCase() === 'x-opencode-session',
+    )
+    if (!hasSession) headers['x-opencode-session'] = aiSessionId
+  }
+  return headers
 }
 
 function throwIfError(body: { error?: string }) {
@@ -69,6 +99,7 @@ export async function aiChat(
         model: settings.model,
         messages,
         keyless: settings.keyless,
+        headers: resolveHeaders(settings),
       }),
     ),
   )

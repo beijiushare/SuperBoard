@@ -39,6 +39,8 @@ type aiChatRequest struct {
 	Temperature *float64        `json:"temperature,omitempty"`
 	// Keyless providers (Ollama, LM Studio) run on the local machine.
 	Keyless bool `json:"keyless,omitempty"`
+	// Extra headers some gateways require (session ids, attribution).
+	Headers map[string]string `json:"headers,omitempty"`
 }
 
 func maskKey(key string) string {
@@ -165,6 +167,13 @@ func (s *AIService) AIChat(requestJSON string) Result {
 	httpRequest.Header.Set("Content-Type", "application/json")
 	if key != "" {
 		httpRequest.Header.Set("Authorization", "Bearer "+key)
+	}
+	for name, value := range request.Headers {
+		// The key stays authoritative: a header field may not override auth.
+		if strings.EqualFold(name, "authorization") {
+			continue
+		}
+		httpRequest.Header.Set(name, value)
 	}
 
 	response, err := s.client.Do(httpRequest)

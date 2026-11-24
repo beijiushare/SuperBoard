@@ -7,6 +7,7 @@ import {
   AI_SLOTS,
   AI_SLOT_DEFAULTS,
   aiSlotDefinition,
+  parseHeaderLines,
   type AIPreferences,
   type AISlotId,
 } from './preferences'
@@ -14,7 +15,10 @@ import {
 interface SettingsAITabProps {
   draft: AIPreferences
   onChange: (patch: Partial<AIPreferences>) => void
-  onSlotChange: (id: AISlotId, patch: { baseURL?: string; model?: string }) => void
+  onSlotChange: (
+    id: AISlotId,
+    patch: { baseURL?: string; model?: string; headers?: string },
+  ) => void
 }
 
 export function SettingsAITab({
@@ -102,6 +106,7 @@ export function SettingsAITab({
           baseURL: values.baseURL,
           model: values.model,
           keyless: slot.keyless,
+          headers: parseHeaderLines(values.headers ?? ''),
         },
         [{ role: 'user', content: 'Reply with the single word: ok' }],
       )
@@ -191,6 +196,22 @@ export function SettingsAITab({
           {slot.id === 'local' ? (
             <p className="sb-settings-note">{t('settings:ai.localNote')}</p>
           ) : null}
+          <div className="sb-settings-row sb-settings-row-stack">
+            <div className="sb-settings-row-text">
+              <span>{t('settings:ai.headers')}</span>
+              <small>{t('settings:ai.headersNote')}</small>
+            </div>
+            <textarea
+              className="sb-text-area"
+              rows={2}
+              spellCheck={false}
+              value={values.headers ?? ''}
+              placeholder={t('settings:ai.headersPlaceholder')}
+              onChange={(event) =>
+                onSlotChange(slot.id, { headers: event.target.value })
+              }
+            />
+          </div>
           {message ? (
             <p className="sb-settings-note sb-settings-note-result">{message}</p>
           ) : null}

@@ -35,6 +35,8 @@ export type AISlotId = 'local' | 'online-a' | 'online-b'
 export interface AISlot {
   baseURL: string
   model: string
+  /** Extra request headers, one `Name: value` per line. */
+  headers?: string
 }
 
 export interface AIPreferences {
@@ -65,6 +67,19 @@ export function aiSlotDefinition(id: string) {
   return AI_SLOTS.find((item) => item.id === id) ?? AI_SLOTS[0]
 }
 
+/** `Name: value` per line; blank lines and `#` comments are ignored. */
+export function parseHeaderLines(text: string): Record<string, string> {
+  const headers: Record<string, string> = {}
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const index = trimmed.indexOf(':')
+    if (index <= 0) continue
+    headers[trimmed.slice(0, index).trim()] = trimmed.slice(index + 1).trim()
+  }
+  return headers
+}
+
 /** Resolved request settings for the active slot. */
 export function activeAISettings(ai: AIPreferences = getPreferences().ai) {
   const slot = aiSlotDefinition(ai.active)
@@ -75,6 +90,7 @@ export function activeAISettings(ai: AIPreferences = getPreferences().ai) {
     baseURL: values.baseURL,
     model: values.model,
     keyless: slot.keyless,
+    headers: parseHeaderLines(values.headers ?? ''),
   }
 }
 
@@ -176,6 +192,7 @@ function mergeAI(value: Record<string, unknown>): AIPreferences {
           typeof raw.model === 'string'
             ? raw.model
             : defaults.slots[definition.id].model,
+        ...(typeof raw.headers === 'string' ? { headers: raw.headers } : {}),
       }
     }
     const active = AI_SLOTS.some((item) => item.id === value.active)
@@ -200,6 +217,9 @@ function mergeAI(value: Record<string, unknown>): AIPreferences {
       typeof value.model === 'string'
         ? value.model
         : defaults.slots[legacySlot].model,
+    ...(typeof value.headers === 'string'
+      ? { headers: value.headers }
+      : {}),
   }
   return { active: legacySlot, slots }
 }
