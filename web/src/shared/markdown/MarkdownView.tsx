@@ -1,4 +1,5 @@
 import { defaultSchema } from 'hast-util-sanitize'
+import { useEffect, useRef } from 'react'
 import type { Components } from 'react-markdown'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
@@ -8,6 +9,7 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import { useTranslation } from 'react-i18next'
 import { MathSpan } from './MathSpan'
+import { enhancePreview } from './previewEnhance'
 import { rehypeSafeEmbeds } from './safeEmbeds'
 import { remarkAsciiMath } from './remarkAsciiMath'
 
@@ -64,12 +66,20 @@ interface MarkdownViewProps {
 
 export function MarkdownView({ source, className = '' }: MarkdownViewProps) {
   const { t } = useTranslation(['common'])
+  const hostRef = useRef<HTMLDivElement>(null)
+
+  // This renderer is the fallback for content Vditor cannot handle (embeds),
+  // so it needs the same alert and table post-processing.
+  useEffect(() => {
+    if (hostRef.current) enhancePreview(hostRef.current)
+  }, [source])
+
   if (!source.trim()) {
     return <p className="sb-empty">{t('common:markdown.empty')}</p>
   }
 
   return (
-    <div className={`sb-markdown ${className}`.trim()}>
+    <div ref={hostRef} className={`sb-markdown ${className}`.trim()}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath, remarkAsciiMath]}
         rehypePlugins={[
