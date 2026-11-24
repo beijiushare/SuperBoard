@@ -122,17 +122,8 @@ export function KnowledgeTree({
   const { heights, register, seed } = useCardHeights()
   const { t } = useTranslation(['editor'])
   const blockDefaults = usePreferences().block
-  // Cached heights are merged during render, not in an effect: the first paint
-  // then already has the right geometry instead of shifting cards downwards
-  // once measurement lands.
-  const renderHeights: Record<string, number> = { ...heights }
-  for (const item of data.nodes) {
-    if (renderHeights[item.id] !== undefined) continue
-    const cached = cachedCardHeight(nodeHeightSignature(item))
-    if (cached) renderHeights[item.id] = cached
-  }
-  const layout = layoutTree(data, renderHeights)
-  const edges = treeEdges(data, layout.positions, renderHeights)
+  const layout = layoutTree(data, heights)
+  const edges = treeEdges(data, layout.positions, heights)
   const size = treeBlockSize(layout)
   const onSizeRef = useRef(onSize)
   onSizeRef.current = onSize
@@ -177,6 +168,15 @@ export function KnowledgeTree({
   )
 
   const nodes = visibleTreeNodes(data)
+
+  // Seed from the last measurement so a reload does not start from the default
+  // card height and re-flow when Markdown finishes rendering.
+  useEffect(() => {
+    for (const item of nodes) {
+      const cached = cachedCardHeight(nodeHeightSignature(item))
+      if (cached) seed(item.id, cached)
+    }
+  }, [data])
   const childrenOf = (id: string) => data.nodes.some((item) => item.parentId === id)
 
   /** Hover state keeps the expand button reachable when the pointer moves onto it. */
@@ -403,7 +403,7 @@ export function KnowledgeTree({
           .filter((node) => childrenOf(node.id))
           .map((node) => {
             const position = layout.positions[node.id] ?? { x: 0, y: 0 }
-            const height = resolveCardHeight(renderHeights, node)
+            const height = resolveCardHeight(heights, node)
             const collapsed = node.branchCollapsed === true
             const hiddenCount = collapsed
               ? treeDescendantIds(data, node.id).size
