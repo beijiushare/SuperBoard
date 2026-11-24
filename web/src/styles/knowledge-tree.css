@@ -52,14 +52,26 @@
   flex: none;
   align-items: flex-start;
   gap: 6px;
-  padding: 10px 30px 6px 12px;
+  padding: 10px 52px 6px 12px;
 }
 
 /* Card actions stay out of the way until the card is hovered. */
-.sb-kt-add {
+.sb-kt-tools {
   position: absolute;
   top: 6px;
   right: 6px;
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.sb-kt-card:hover .sb-kt-tools,
+.sb-kt-tools:focus-within {
+  opacity: 1;
+}
+
+.sb-kt-tool {
   display: grid;
   width: 20px;
   height: 20px;
@@ -71,19 +83,68 @@
   cursor: pointer;
   font-size: 13px;
   line-height: 1;
-  opacity: 0;
   place-items: center;
-  transition: opacity 120ms ease;
 }
 
-.sb-kt-card:hover .sb-kt-add,
-.sb-kt-add:focus-visible {
-  opacity: 1;
-}
-
-.sb-kt-add:hover {
+.sb-kt-tool:hover {
   border-color: var(--sb-text-secondary, #6f6b60);
   color: var(--sb-text, #1f1e1c);
+}
+
+.sb-kt-tool-delete:hover {
+  border-color: var(--sb-danger, #b4483c);
+  color: var(--sb-danger, #b4483c);
+}
+
+.sb-kt-title-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--sb-border-control, #d8d4c9);
+  background: transparent;
+  color: var(--sb-text, #1f1e1c);
+  font: inherit;
+  font-weight: 600;
+  outline: none;
+}
+
+.sb-kt-confirm {
+  flex: none;
+  margin: 0 12px 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--sb-border-subtle, #eeeae1);
+  border-radius: 8px;
+  background: #faf9f5;
+  font-size: 12px;
+}
+
+.sb-kt-confirm > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--sb-text-secondary, #6f6b60);
+}
+
+.sb-kt-confirm > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sb-kt-confirm button {
+  padding: 2px 8px;
+  border: 1px solid var(--sb-border-control, #d8d4c9);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--sb-text, #1f1e1c);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.sb-kt-confirm button:first-child:hover {
+  border-color: var(--sb-danger, #b4483c);
+  color: var(--sb-danger, #b4483c);
 }
 
 .sb-kt-toggle {

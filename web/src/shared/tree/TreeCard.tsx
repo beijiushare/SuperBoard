@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   TREE_CARD_MAX_HEIGHT,
   TREE_CARD_WIDTH,
@@ -11,6 +12,7 @@ import { MarkdownVditorPreview } from '../markdown/MarkdownVditorPreview'
 interface TreeCardProps {
   node: SuperBoardTreeNode
   hasChildren: boolean
+  canDelete: boolean
   position: { x: number; y: number }
   defaults: BlockStyleDefaults
   register: (element: HTMLElement | null) => void
@@ -19,7 +21,8 @@ interface TreeCardProps {
   onSubmitQuestion: (text: string) => void
   onCancelDraft: () => void
   onToggleBranch: () => void
-  /** Ask again after a failure. */
+  onRename: (title: string) => void
+  onDelete: (mode: 'branch' | 'promote') => void
   onRetry: () => void
 }
 
@@ -30,10 +33,11 @@ function CardBody({
   node: SuperBoardTreeNode
   onRetry: () => void
 }) {
+  const { t } = useTranslation(['editor'])
   if (node.status === 'error') {
     return (
       <div className="sb-kt-card-error">
-        <span>{node.error || '生成失败'}</span>
+        <span>{node.error || t('editor:tree.failed')}</span>
         <button
           type="button"
           onPointerDown={(event) => event.stopPropagation()}
@@ -42,7 +46,7 @@ function CardBody({
             onRetry()
           }}
         >
-          重试
+          {t('editor:tree.retry')}
         </button>
       </div>
     )
@@ -51,10 +55,10 @@ function CardBody({
     return (
       <div className="sb-kt-card-empty">
         {node.status === 'draft'
-          ? '等待提问'
+          ? t('editor:tree.draftHint')
           : node.status === 'generating'
-            ? '生成中…'
-            : '暂无回答'}
+            ? t('editor:tree.generating')
+            : t('editor:tree.noAnswer')}
       </div>
     )
   }
@@ -65,6 +69,7 @@ function CardBody({
 export function TreeCard({
   node,
   hasChildren,
+  canDelete,
   position,
   defaults,
   register,
@@ -73,11 +78,18 @@ export function TreeCard({
   onSubmitQuestion,
   onCancelDraft,
   onToggleBranch,
+  onRename,
+  onDelete,
   onRetry,
 }: TreeCardProps) {
+  const { t } = useTranslation(['editor'])
   const draft = node.status === 'draft'
   const [draftText, setDraftText] = useState('')
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [titleDraft, setTitleDraft] = useState('')
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const titleRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!draft) return
@@ -86,6 +98,29 @@ export function TreeCard({
     element.focus()
     element.setSelectionRange(element.value.length, element.value.length)
   }, [draft])
+
+  useEffect(() => {
+    if (!editingTitle) return
+    const element = titleRef.current
+    if (!element) return
+    element.focus()
+    element.select()
+  }, [editingTitle])
+
+  const commitTitle = () => {
+    setEditingTitle(false)
+    const next = titleDraft.trim()
+    if (next && next !== node.title) onRename(next)
+  }
+
+  const requestDelete = () => {
+    if (!canDelete) return
+    if (!hasChildren) {
+      onDelete('branch')
+      return
+    }
+    setConfirmingDelete(true)
+  }
 
   return (
     <article
@@ -121,7 +156,11 @@ export function TreeCard({
           <button
             type="button"
             className={`sb-kt-toggle${node.branchCollapsed ? ' is-collapsed' : ''}`}
-            aria-label={node.branchCollapsed ? '展开分支' : '折叠分支'}
+            aria-label={
+              node.branchCollapsed
+                ? t('editor:tree.expandBranch')
+                : t('editor:tree.collapseBranch')
+            }
             onPointerDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation()
@@ -140,22 +179,69 @@ export function TreeCard({
             </svg>
           </button>
         ) : null}
-        <span className="sb-kt-title">
-          {node.title.trim() || node.question.trim() || '未命名'}
-        </span>
-        <button
-          type="button"
-          className="sb-kt-add"
-          aria-label="新建子问题"
-          title="新建子问题"
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => {
-            event.stopPropagation()
-            onAddChild()
-          }}
-        >
-          ＋
-        </button>
+        {editingTitle ? (
+          <input
+            ref={titleRef}
+            className="sb-kt-title-input"
+            value={titleDraft}
+            onPointerDown={(event) => event.stopPropagation()}
+            onChange={(event) => setTitleDraft(event.target.value)}
+            onBlur={commitTitle}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                commitTitle()
+              }
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                setEditingTitle(false)
+              }
+            }}
+          />
+        ) : (
+          <span
+            className="sb-kt-title"
+            title={t('editor:tree.renameHint')}
+            onDoubleClick={(event) => {
+              if (draft) return
+              event.stopPropagation()
+              setTitleDraft(node.title || node.question.trim())
+              setEditingTitle(true)
+            }}
+          >
+            {node.title.trim() || node.question.trim() || t('editor:tree.untitled')}
+          </span>
+        )}
+        <div className="sb-kt-tools">
+          <button
+            type="button"
+            className="sb-kt-tool"
+            aria-label={t('editor:tree.addChild')}
+            title={t('editor:tree.addChild')}
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation()
+              onAddChild()
+            }}
+          >
+            ＋
+          </button>
+          {canDelete ? (
+            <button
+              type="button"
+              className="sb-kt-tool sb-kt-tool-delete"
+              aria-label={t('editor:tree.delete')}
+              title={t('editor:tree.delete')}
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation()
+                requestDelete()
+              }}
+            >
+              ×
+            </button>
+          ) : null}
+        </div>
       </header>
       {node.quote ? (
         <blockquote className="sb-kt-quote">
@@ -165,13 +251,52 @@ export function TreeCard({
           {node.quote.text}
         </blockquote>
       ) : null}
+      {confirmingDelete ? (
+        <div className="sb-kt-confirm">
+          <span>{t('editor:tree.deleteAsk')}</span>
+          <div>
+            <button
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation()
+                setConfirmingDelete(false)
+                onDelete('branch')
+              }}
+            >
+              {t('editor:tree.deleteBranch')}
+            </button>
+            <button
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation()
+                setConfirmingDelete(false)
+                onDelete('promote')
+              }}
+            >
+              {t('editor:tree.promoteChildren')}
+            </button>
+            <button
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation()
+                setConfirmingDelete(false)
+              }}
+            >
+              {t('editor:tree.cancel')}
+            </button>
+          </div>
+        </div>
+      ) : null}
       {draft ? (
         <div className="sb-kt-draft">
           <textarea
             ref={textareaRef}
             value={draftText}
             rows={2}
-            placeholder="输入问题，回车提交"
+            placeholder={t('editor:tree.questionPlaceholder')}
             onChange={(event) => setDraftText(event.target.value)}
             onPointerDown={(event) => event.stopPropagation()}
             onKeyDown={(event) => {

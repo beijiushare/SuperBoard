@@ -145,6 +145,14 @@ export function KnowledgeTree({
     onChange?.(updateTreeNode(data, id, { branchCollapsed: !node.branchCollapsed }))
   }
 
+  const renameNode = (id: string, title: string) => {
+    onChange?.(updateTreeNode(data, id, { title }))
+  }
+
+  const deleteNode = (id: string, mode: 'branch' | 'promote') => {
+    onChange?.(removeTreeNode(data, id, mode))
+  }
+
   return (
     <div
       className="sb-kt"
@@ -176,6 +184,7 @@ export function KnowledgeTree({
             key={node.id}
             node={node}
             hasChildren={data.nodes.some((item) => item.parentId === node.id)}
+            canDelete={node.id !== data.rootId}
             position={layout.positions[node.id] ?? { x: 0, y: 0 }}
             defaults={blockDefaults}
             register={register(node.id)}
@@ -184,6 +193,8 @@ export function KnowledgeTree({
             onSubmitQuestion={(text) => submitQuestion(node.id, text)}
             onCancelDraft={() => cancelDraft(node.id)}
             onToggleBranch={() => toggleBranch(node.id)}
+            onRename={(title) => renameNode(node.id, title)}
+            onDelete={(mode) => deleteNode(node.id, mode)}
             onRetry={() => onGenerate?.(node.id)}
           />
         ))}
