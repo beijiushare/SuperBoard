@@ -289,4 +289,18 @@ assert.equal(
   '引用自「root」：\n> a snippet\n\nwhy',
 )
 
+// An ancestor's quote stays in the history: without it the earlier turn reads
+// as a bare "explain this paragraph" with no referent.
+const ancestorQuoted = updateTreeNode(quoted, 'a', {
+  question: '解释这段话',
+  answer: 'a2',
+  quote: { text: 'ancestor snippet', title: 'root' },
+})
+const historyMessages = buildTreeMessages(ancestorQuoted, 'a1')
+assert.equal(
+  historyMessages.find((message) => message.content.includes('解释这段话'))
+    ?.content,
+  '引用自「root」：\n> ancestor snippet\n\n解释这段话',
+)
+
 console.log('canvas model tests passed')

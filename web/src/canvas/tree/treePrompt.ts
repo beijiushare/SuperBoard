@@ -1,4 +1,4 @@
-import { treePath, type SuperBoardTreeData } from '../model'
+import { treePath, type SuperBoardTreeData, type SuperBoardTreeNode } from '../model'
 import type { AIChatMessage } from '../../desktop/ai'
 
 /**
@@ -16,6 +16,19 @@ const SYSTEM_PROMPT = [
 ].join('\n')
 
 /**
+ * A quoted excerpt belongs to the question it was asked with. Dropping it from
+ * the history would leave a bare "解释这段话" with no referent, and the model
+ * would (correctly) complain that it is ambiguous.
+ */
+function questionWithQuote(node: SuperBoardTreeNode): string {
+  const text = node.quote?.text.trim()
+  if (!text) return node.question
+  const source = node.quote?.title?.trim()
+  const quoted = source ? `引用自「${source}」：\n> ${text}` : `引用：\n> ${text}`
+  return `${quoted}\n\n${node.question}`
+}
+
+/**
  * Context is the root -> node path only. Sibling branches never enter the
  * prompt, so exploring two directions does not pollute either answer.
  */
@@ -31,24 +44,14 @@ export function buildTreeMessages(
   const messages: AIChatMessage[] = [{ role: 'system', content: SYSTEM_PROMPT }]
   for (const ancestor of path.slice(0, -1)) {
     if (ancestor.question.trim()) {
-      messages.push({ role: 'user', content: ancestor.question })
+      messages.push({ role: 'user', content: questionWithQuote(ancestor) })
     }
     if (ancestor.answer.trim()) {
       messages.push({ role: 'assistant', content: ancestor.answer })
     }
   }
 
-  const parts: string[] = []
-  if (current.quote?.text.trim()) {
-    const source = current.quote.title?.trim()
-    parts.push(
-      source
-        ? `引用自「${source}」：\n> ${current.quote.text.trim()}`
-        : `引用：\n> ${current.quote.text.trim()}`,
-    )
-  }
-  parts.push(current.question.trim())
-  messages.push({ role: 'user', content: parts.join('\n\n') })
+  messages.push({ role: 'user', content: questionWithQuote(current) })
   return messages
 }
 
