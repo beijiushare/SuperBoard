@@ -146,6 +146,18 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
                     ai: { ...current.ai, ...patch },
                   }))
                 }
+                onSlotChange={(id, patch) =>
+                  setDraft((current) => ({
+                    ...current,
+                    ai: {
+                      ...current.ai,
+                      slots: {
+                        ...current.ai.slots,
+                        [id]: { ...current.ai.slots[id], ...patch },
+                      },
+                    },
+                  }))
+                }
               />
             ) : null}
             {tab === 'about' ? <SettingsAboutTab /> : null}

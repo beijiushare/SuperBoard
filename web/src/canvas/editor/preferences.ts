@@ -30,54 +30,52 @@ export interface EditorPreferences {
   ai: AIPreferences
 }
 
-export interface AIPreferences {
-  /** Credential-store namespace; also selects the provider preset. */
-  provider: string
+export type AISlotId = 'local' | 'online-a' | 'online-b'
+
+export interface AISlot {
   baseURL: string
   model: string
 }
 
-export interface AIProviderPreset {
-  id: string
+export interface AIPreferences {
+  active: AISlotId
+  slots: Record<AISlotId, AISlot>
+}
+
+export interface AISlotDefinition {
+  id: AISlotId
   labelKey: string
-  baseURL: string
-  model: string
   keyless: boolean
 }
 
-export const AI_PROVIDERS: AIProviderPreset[] = [
-  {
-    id: 'openai',
-    labelKey: 'settings:ai.providers.openai',
-    baseURL: 'https://api.openai.com/v1',
-    model: 'gpt-4o-mini',
-    keyless: false,
-  },
-  {
-    id: 'compatible',
-    labelKey: 'settings:ai.providers.compatible',
-    baseURL: 'https://api.deepseek.com/v1',
-    model: 'deepseek-chat',
-    keyless: false,
-  },
-  {
-    id: 'ollama',
-    labelKey: 'settings:ai.providers.ollama',
-    baseURL: 'http://127.0.0.1:11434/v1',
-    model: 'llama3.2',
-    keyless: true,
-  },
-  {
-    id: 'lmstudio',
-    labelKey: 'settings:ai.providers.lmstudio',
-    baseURL: 'http://127.0.0.1:1234/v1',
-    model: 'local-model',
-    keyless: true,
-  },
+/** One local runtime and two online endpoints: enough to switch without re-pasting a key. */
+export const AI_SLOTS: AISlotDefinition[] = [
+  { id: 'local', labelKey: 'settings:ai.slots.local', keyless: true },
+  { id: 'online-a', labelKey: 'settings:ai.slots.onlineA', keyless: false },
+  { id: 'online-b', labelKey: 'settings:ai.slots.onlineB', keyless: false },
 ]
 
-export function aiProviderPreset(id: string) {
-  return AI_PROVIDERS.find((item) => item.id === id) ?? AI_PROVIDERS[0]
+export const AI_SLOT_DEFAULTS: Record<AISlotId, AISlot> = {
+  local: { baseURL: 'http://127.0.0.1:11434/v1', model: 'llama3.2' },
+  'online-a': { baseURL: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
+  'online-b': { baseURL: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
+}
+
+export function aiSlotDefinition(id: string) {
+  return AI_SLOTS.find((item) => item.id === id) ?? AI_SLOTS[0]
+}
+
+/** Resolved request settings for the active slot. */
+export function activeAISettings(ai: AIPreferences = getPreferences().ai) {
+  const slot = aiSlotDefinition(ai.active)
+  const values = ai.slots[slot.id] ?? AI_SLOT_DEFAULTS[slot.id]
+  return {
+    // The credential name is the slot id, so renaming a slot never orphans a key.
+    keyName: slot.id,
+    baseURL: values.baseURL,
+    model: values.model,
+    keyless: slot.keyless,
+  }
 }
 
 export function fontOptions(t: (key: string) => string) {
@@ -111,9 +109,12 @@ export const DEFAULT_PREFERENCES: EditorPreferences = {
   shapeCornerRadius: 0,
   autoOpenRecentWorkspace: true,
   ai: {
-    provider: 'openai',
-    baseURL: 'https://api.openai.com/v1',
-    model: 'gpt-4o-mini',
+    active: 'online-a',
+    slots: {
+      local: { ...AI_SLOT_DEFAULTS.local },
+      'online-a': { ...AI_SLOT_DEFAULTS['online-a'] },
+      'online-b': { ...AI_SLOT_DEFAULTS['online-b'] },
+    },
   },
 }
 
@@ -146,19 +147,61 @@ function mergePreferences(value: unknown): EditorPreferences {
       typeof value.autoOpenRecentWorkspace === 'boolean'
         ? value.autoOpenRecentWorkspace
         : DEFAULT_PREFERENCES.autoOpenRecentWorkspace,
-    ai: {
-      provider:
-        typeof ai.provider === 'string'
-          ? ai.provider
-          : DEFAULT_PREFERENCES.ai.provider,
-      baseURL:
-        typeof ai.baseURL === 'string'
-          ? ai.baseURL
-          : DEFAULT_PREFERENCES.ai.baseURL,
-      model:
-        typeof ai.model === 'string' ? ai.model : DEFAULT_PREFERENCES.ai.model,
-    },
+    ai: mergeAI(ai),
   } as EditorPreferences
+}
+
+/**
+ * Migrates the first AI shape (`provider` + one baseURL/model) into the slot
+ * layout, so existing installs keep their endpoint instead of losing it.
+ */
+function mergeAI(value: Record<string, unknown>): AIPreferences {
+  const defaults = DEFAULT_PREFERENCES.ai
+  const slots: Record<AISlotId, AISlot> = {
+    local: { ...defaults.slots.local },
+    'online-a': { ...defaults.slots['online-a'] },
+    'online-b': { ...defaults.slots['online-b'] },
+  }
+  const rawSlots = isRecord(value.slots) ? value.slots : null
+  if (rawSlots) {
+    for (const definition of AI_SLOTS) {
+      const raw = rawSlots[definition.id]
+      if (!isRecord(raw)) continue
+      slots[definition.id] = {
+        baseURL:
+          typeof raw.baseURL === 'string'
+            ? raw.baseURL
+            : defaults.slots[definition.id].baseURL,
+        model:
+          typeof raw.model === 'string'
+            ? raw.model
+            : defaults.slots[definition.id].model,
+      }
+    }
+    const active = AI_SLOTS.some((item) => item.id === value.active)
+      ? (value.active as AISlotId)
+      : defaults.active
+    return { active, slots }
+  }
+
+  // Legacy shape: { provider, baseURL, model }.
+  const legacySlot: AISlotId =
+    value.provider === 'compatible'
+      ? 'online-b'
+      : value.provider === 'ollama' || value.provider === 'lmstudio'
+        ? 'local'
+        : 'online-a'
+  slots[legacySlot] = {
+    baseURL:
+      typeof value.baseURL === 'string'
+        ? value.baseURL
+        : defaults.slots[legacySlot].baseURL,
+    model:
+      typeof value.model === 'string'
+        ? value.model
+        : defaults.slots[legacySlot].model,
+  }
+  return { active: legacySlot, slots }
 }
 
 export function loadPreferences(): EditorPreferences {

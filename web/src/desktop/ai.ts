@@ -3,9 +3,9 @@ import * as AI from './bindings/superboard/desktop/services/aiservice'
 import type { Result } from './bindings/superboard/desktop/services/models'
 import { desktopMode } from './platform'
 
-export interface AIProviderSettings {
-  /** Credential-store namespace, also the provider preset id. */
-  provider: string
+export interface AIRequestSettings {
+  /** Credential-store name; the slot id. */
+  keyName: string
   baseURL: string
   model: string
   /** Local runtimes do not need a key. */
@@ -55,7 +55,7 @@ export async function aiClearAllKeys() {
 }
 
 export async function aiChat(
-  settings: AIProviderSettings,
+  settings: AIRequestSettings,
   messages: AIChatMessage[],
 ): Promise<string> {
   if (!desktopMode()) {
@@ -64,7 +64,7 @@ export async function aiChat(
   const body = parse<{ content?: string }>(
     await AI.AIChat(
       JSON.stringify({
-        provider: settings.provider,
+        provider: settings.keyName,
         baseURL: settings.baseURL,
         model: settings.model,
         messages,

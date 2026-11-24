@@ -3,20 +3,28 @@ import { useTranslation } from 'react-i18next'
 import { desktopMode } from '../../desktop/platform'
 import { aiChat, aiClearAllKeys, aiClearKey, aiKeyStatus, aiSetKey } from '../../desktop/ai'
 import {
-  AI_PROVIDERS,
-  aiProviderPreset,
+  AI_SLOTS,
+  AI_SLOT_DEFAULTS,
+  aiSlotDefinition,
   type AIPreferences,
+  type AISlotId,
 } from './preferences'
 
 interface SettingsAITabProps {
   draft: AIPreferences
   onChange: (patch: Partial<AIPreferences>) => void
+  onSlotChange: (id: AISlotId, patch: { baseURL?: string; model?: string }) => void
 }
 
-export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
+export function SettingsAITab({
+  draft,
+  onChange,
+  onSlotChange,
+}: SettingsAITabProps) {
   const { t } = useTranslation(['settings', 'editor'])
   const desktop = desktopMode()
-  const preset = aiProviderPreset(draft.provider)
+  const slot = aiSlotDefinition(draft.active)
+  const values = draft.slots[slot.id] ?? AI_SLOT_DEFAULTS[slot.id]
   const [keyInput, setKeyInput] = useState('')
   const [status, setStatus] = useState<{ hasKey: boolean; masked?: string }>({
     hasKey: false,
@@ -28,7 +36,8 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
   useEffect(() => {
     if (!desktop) return
     let alive = true
-    void aiKeyStatus(draft.provider)
+    setMessage('')
+    void aiKeyStatus(slot.id)
       .then((next) => {
         if (alive) setStatus(next)
       })
@@ -36,26 +45,16 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
     return () => {
       alive = false
     }
-  }, [desktop, draft.provider])
-
-  const chooseProvider = (id: string) => {
-    const next = aiProviderPreset(id)
-    onChange({
-      provider: next.id,
-      baseURL: next.baseURL,
-      model: next.model,
-    })
-    setMessage('')
-  }
+  }, [desktop, slot.id])
 
   const saveKey = async () => {
     if (!keyInput.trim()) return
     setBusy(true)
     setMessage('')
     try {
-      await aiSetKey(draft.provider, keyInput.trim())
+      await aiSetKey(slot.id, keyInput.trim())
       setKeyInput('')
-      setStatus(await aiKeyStatus(draft.provider))
+      setStatus(await aiKeyStatus(slot.id))
       setMessage(t('settings:ai.keySaved'))
     } catch (error) {
       setMessage(error instanceof Error ? error.message : String(error))
@@ -68,8 +67,8 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
     setBusy(true)
     setMessage('')
     try {
-      await aiClearKey(draft.provider)
-      setStatus(await aiKeyStatus(draft.provider))
+      await aiClearKey(slot.id)
+      setStatus(await aiKeyStatus(slot.id))
     } catch (error) {
       setMessage(error instanceof Error ? error.message : String(error))
     } finally {
@@ -82,7 +81,7 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
     setMessage('')
     try {
       await aiClearAllKeys()
-      setStatus(await aiKeyStatus(draft.provider))
+      setStatus(await aiKeyStatus(slot.id))
       setConfirmClearAll(false)
       setMessage(t('settings:ai.clearedAll'))
     } catch (error) {
@@ -98,10 +97,10 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
     try {
       const reply = await aiChat(
         {
-          provider: draft.provider,
-          baseURL: draft.baseURL,
-          model: draft.model,
-          keyless: preset.keyless,
+          keyName: slot.id,
+          baseURL: values.baseURL,
+          model: values.model,
+          keyless: slot.keyless,
         },
         [{ role: 'user', content: 'Reply with the single word: ok' }],
       )
@@ -129,21 +128,24 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
       <section className="sb-settings-card">
         <header className="sb-settings-card-head">
           <div>
-            <h3>{t('settings:ai.provider')}</h3>
-            <p>{t('settings:ai.providerNote')}</p>
+            <h3>{t('settings:ai.endpoint')}</h3>
+            <p>{t('settings:ai.endpointNote')}</p>
           </div>
         </header>
         <div className="sb-settings-rows">
           <div className="sb-settings-row">
-            <span>{t('settings:ai.provider')}</span>
+            <span>{t('settings:ai.active')}</span>
             <select
-              value={draft.provider}
+              value={draft.active}
               disabled={!desktop}
-              onChange={(event) => chooseProvider(event.target.value)}
+              onChange={(event) =>
+                onChange({ active: event.target.value as AISlotId })
+              }
             >
-              {AI_PROVIDERS.map((item) => (
+              {AI_SLOTS.map((item) => (
                 <option key={item.id} value={item.id}>
                   {t(item.labelKey)}
+                  {item.keyless ? ` · ${t('settings:ai.noKey')}` : ''}
                 </option>
               ))}
             </select>
@@ -151,23 +153,40 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
           <div className="sb-settings-row">
             <span>{t('settings:ai.baseURL')}</span>
             <input
-              value={draft.baseURL}
+              value={values.baseURL}
               disabled={!desktop}
               spellCheck={false}
-              placeholder={preset.baseURL}
-              onChange={(event) => onChange({ baseURL: event.target.value })}
+              placeholder={AI_SLOT_DEFAULTS[slot.id].baseURL}
+              onChange={(event) =>
+                onSlotChange(slot.id, { baseURL: event.target.value })
+              }
             />
           </div>
           <div className="sb-settings-row">
             <span>{t('settings:ai.model')}</span>
             <input
-              value={draft.model}
+              value={values.model}
               disabled={!desktop}
               spellCheck={false}
-              placeholder={preset.model}
-              onChange={(event) => onChange({ model: event.target.value })}
+              placeholder={AI_SLOT_DEFAULTS[slot.id].model}
+              onChange={(event) =>
+                onSlotChange(slot.id, { model: event.target.value })
+              }
             />
           </div>
+          {slot.id === 'local' ? (
+            <p className="sb-settings-note">{t('settings:ai.localNote')}</p>
+          ) : null}
+          <div className="canvas-editor-dialog-actions">
+            <button
+              type="button"
+              disabled={!desktop || busy}
+              onClick={() => void testConnection()}
+            >
+              {busy ? t('settings:ai.testing') : t('settings:ai.test')}
+            </button>
+          </div>
+          {message ? <p className="sb-settings-note">{message}</p> : null}
         </div>
       </section>
 
@@ -176,14 +195,14 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
           <div>
             <h3>{t('settings:ai.key')}</h3>
             <p>
-              {preset.keyless
+              {slot.keyless
                 ? t('settings:ai.keylessNote')
                 : t('settings:ai.keyNote')}
             </p>
           </div>
         </header>
         <div className="sb-settings-rows">
-          {!preset.keyless ? (
+          {!slot.keyless ? (
             <>
               <div className="sb-settings-row">
                 <span>{t('settings:ai.keyStatus')}</span>
@@ -222,17 +241,9 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
                 </button>
               </div>
             </>
-          ) : null}
-          <div className="canvas-editor-dialog-actions">
-            <button
-              type="button"
-              disabled={!desktop || busy}
-              onClick={() => void testConnection()}
-            >
-              {busy ? t('settings:ai.testing') : t('settings:ai.test')}
-            </button>
-          </div>
-          {message ? <p className="sb-settings-note">{message}</p> : null}
+          ) : (
+            <p className="sb-settings-note">{t('settings:ai.keylessBody')}</p>
+          )}
         </div>
       </section>
 

@@ -23,7 +23,7 @@ import {
 import { CanvasEditorStage } from './CanvasEditorStage'
 import { aiChat } from '../../desktop/ai'
 import { buildTreeMessages } from '../tree/treePrompt'
-import { aiProviderPreset, getPreferences } from './preferences'
+import { activeAISettings, getPreferences } from './preferences'
 import {
   type CanvasMenuState,
   type DataManagerLike,
@@ -364,7 +364,7 @@ export function CanvasEditorApp() {
   const runTreeAnswer = useCallback(
     async (blockId: string, nodeId: string, snapshot?: SuperBoardTreeData) => {
       const preferences = getPreferences()
-      const preset = aiProviderPreset(preferences.ai.provider)
+      const settings = activeAISettings(preferences.ai)
       patchTree(blockId, (tree) =>
         updateTreeNode(tree, nodeId, {
           status: 'generating',
@@ -382,15 +382,7 @@ export function CanvasEditorApp() {
         if (!tree) return
         const messages = buildTreeMessages(tree, nodeId)
         if (!messages.length) throw new Error('empty prompt')
-        const content = await aiChat(
-          {
-            provider: preferences.ai.provider,
-            baseURL: preferences.ai.baseURL,
-            model: preferences.ai.model,
-            keyless: preset.keyless,
-          },
-          messages,
-        )
+        const content = await aiChat(settings, messages)
         patchTree(blockId, (current) =>
           updateTreeNode(current, nodeId, {
             status: 'done',
