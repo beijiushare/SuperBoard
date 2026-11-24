@@ -6,6 +6,8 @@ export const TREE_DEFAULT_CARD_HEIGHT = 132
 export const TREE_COLUMN_GAP = 76
 export const TREE_ROW_GAP = 24
 export const TREE_BLOCK_PADDING = 16
+/** Measured height of a fresh draft card: head, draft area and border. */
+export const TREE_DRAFT_HEIGHT = 96
 
 export interface TreeLayout {
   /** Card top-left positions, relative to the block content box. */
@@ -208,10 +210,36 @@ export interface TreeEdge {
 
 const TREE_ARROW_LENGTH = 7
 const TREE_ARROW_HALF = 4
+const TREE_ELBOW_RADIUS = 8
+
+/** Polyline with quadratic corner rounding, like a mind-map branch line. */
+function roundedElbow(points: Array<[number, number]>, radius: number) {
+  if (points.length < 2) return ''
+  let path = `M ${points[0][0]} ${points[0][1]}`
+  for (let index = 1; index < points.length - 1; index += 1) {
+    const [previousX, previousY] = points[index - 1]
+    const [cornerX, cornerY] = points[index]
+    const [nextX, nextY] = points[index + 1]
+    const inLength = Math.hypot(cornerX - previousX, cornerY - previousY)
+    const outLength = Math.hypot(nextX - cornerX, nextY - cornerY)
+    if (!inLength || !outLength) continue
+    const r = Math.min(radius, inLength / 2, outLength / 2)
+    const startX = cornerX + ((previousX - cornerX) / inLength) * r
+    const startY = cornerY + ((previousY - cornerY) / inLength) * r
+    const endX = cornerX + ((nextX - cornerX) / outLength) * r
+    const endY = cornerY + ((nextY - cornerY) / outLength) * r
+    path += ` L ${startX} ${startY} Q ${cornerX} ${cornerY} ${endX} ${endY}`
+  }
+  const last = points[points.length - 1]
+  return `${path} L ${last[0]} ${last[1]}`
+}
 
 /**
  * Edges are derived from parent/child relations, never stored. Layout positions
  * are card top-left corners, so the anchor is right/left middle of each card.
+ *
+ * Branches leave the parent horizontally, turn once in the gap and arrive
+ * horizontally, which reads far calmer than a full S-curve.
  */
 export function treeEdges(
   data: SuperBoardTreeData,
@@ -226,23 +254,29 @@ export function treeEdges(
     const from = positions[parent?.id ?? '']
     const to = positions[node.id]
     if (!parent || !from || !to || !visible.has(parent.id)) continue
-    const start = {
-      x: from.x + TREE_CARD_WIDTH,
-      y: from.y + resolveCardHeight(heights, parent) / 2,
-    }
-    const end = {
-      x: to.x,
-      y: to.y + resolveCardHeight(heights, node) / 2,
-    }
-    const bend = Math.max(36, (end.x - start.x) * 0.45)
-    const tipX = end.x
-    const lineX = tipX - TREE_ARROW_LENGTH
+    const startX = from.x + TREE_CARD_WIDTH
+    const startY = from.y + resolveCardHeight(heights, parent) / 2
+    const endX = to.x - TREE_ARROW_LENGTH
+    const endY = to.y + resolveCardHeight(heights, node) / 2
+    const kneeX = startX + (endX - startX) / 2
+    const points: Array<[number, number]> =
+      Math.abs(endY - startY) < 0.5
+        ? [
+            [startX, startY],
+            [endX, endY],
+          ]
+        : [
+            [startX, startY],
+            [kneeX, startY],
+            [kneeX, endY],
+            [endX, endY],
+          ]
     edges.push({
       id: `${parent.id}->${node.id}`,
       parentId: parent.id,
       childId: node.id,
-      path: `M ${start.x} ${start.y} C ${start.x + bend} ${start.y} ${lineX - bend} ${end.y} ${lineX} ${end.y}`,
-      arrow: `M ${tipX} ${end.y} L ${tipX - TREE_ARROW_LENGTH} ${end.y - TREE_ARROW_HALF} L ${tipX - TREE_ARROW_LENGTH} ${end.y + TREE_ARROW_HALF} Z`,
+      path: roundedElbow(points, TREE_ELBOW_RADIUS),
+      arrow: `M ${to.x} ${endY} L ${to.x - TREE_ARROW_LENGTH} ${endY - TREE_ARROW_HALF} L ${to.x - TREE_ARROW_LENGTH} ${endY + TREE_ARROW_HALF} Z`,
     })
   }
   return edges

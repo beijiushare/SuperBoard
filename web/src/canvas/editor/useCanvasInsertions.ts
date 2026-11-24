@@ -1,7 +1,13 @@
 import type { RefObject } from 'react'
 import i18n from '../../i18n'
 import type { CanvasDocument, CanvasNode } from '../model'
-import { emptyTreeData, newTreeNodeId } from '../model'
+import {
+  TREE_DRAFT_HEIGHT,
+  emptyTreeData,
+  layoutTree,
+  newTreeNodeId,
+  treeBlockSize,
+} from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import type { BoardScope } from '../../shared/board/types'
 import { DEFAULT_BLOCK_SIZES } from './blocks'
@@ -310,14 +316,18 @@ export function useCanvasInsertions({
   function insertTreeBlock(point?: { x: number; y: number }) {
     if (!canvas) return
     const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'tree')
-    const size = defaultBlockSize('tree')
+    const tree = emptyTreeData(newTreeNodeId(), new Date().toISOString())
+    // Size the block to its single draft card up front; otherwise the node
+    // would appear at the default size and snap smaller on the next frame.
+    const size = treeBlockSize(
+      layoutTree(tree, { [tree.rootId]: TREE_DRAFT_HEIGHT }),
+    )
     const position = point
       ? {
           x: Math.round(point.x - size.width / 2),
           y: Math.round(point.y - size.height / 2),
         }
       : viewportCenter(viewerRef, size.width, size.height)
-    const tree = emptyTreeData(newTreeNodeId(), new Date().toISOString())
     const node: CanvasNode = {
       id,
       type: 'text',

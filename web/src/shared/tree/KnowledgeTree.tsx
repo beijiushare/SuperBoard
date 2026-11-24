@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   TREE_BLOCK_PADDING,
+  TREE_DRAFT_HEIGHT,
   addTreeChild,
   layoutTree,
   removeTreeNode,
@@ -13,6 +14,7 @@ import {
 } from '../../canvas/model'
 import { usePreferences } from '../../canvas/editor/preferences'
 import { TreeCard } from './TreeCard'
+import { TreeCardMenu } from './TreeCardMenu'
 
 export interface KnowledgeTreeSize {
   width: number
@@ -84,7 +86,14 @@ function useCardHeights() {
     observer.current?.observe(element)
   }
 
-  return { heights, register }
+  /** Give a brand new card a known height so the layout does not jump twice. */
+  const seed = (id: string, height: number) => {
+    setHeights((current) =>
+      current[id] === height ? current : { ...current, [id]: height },
+    )
+  }
+
+  return { heights, register, seed }
 }
 
 export function KnowledgeTree({
@@ -94,7 +103,7 @@ export function KnowledgeTree({
   onActivate,
   onGenerate,
 }: KnowledgeTreeProps) {
-  const { heights, register } = useCardHeights()
+  const { heights, register, seed } = useCardHeights()
   const blockDefaults = usePreferences().block
   const layout = layoutTree(data, heights)
   const edges = treeEdges(data, layout.positions, heights)
@@ -102,18 +111,38 @@ export function KnowledgeTree({
   const onSizeRef = useRef(onSize)
   onSizeRef.current = onSize
   const lastSize = useRef<KnowledgeTreeSize>({ width: 0, height: 0 })
+  const sizeFrame = useRef(0)
+  const [menu, setMenu] = useState<{
+    nodeId: string
+    left: number
+    top: number
+  } | null>(null)
 
   useEffect(() => {
     const previous = lastSize.current
     if (previous.width === size.width && previous.height === size.height) return
     lastSize.current = size
-    onSizeRef.current?.(size)
+    // Coalesce the block resize into one frame: two updates in a row make the
+    // whole canvas flash while the new card is still being measured.
+    if (sizeFrame.current) return
+    sizeFrame.current = requestAnimationFrame(() => {
+      sizeFrame.current = 0
+      onSizeRef.current?.(lastSize.current)
+    })
   }, [size.width, size.height])
+
+  useEffect(
+    () => () => {
+      if (sizeFrame.current) cancelAnimationFrame(sizeFrame.current)
+    },
+    [],
+  )
 
   const nodes = visibleTreeNodes(data)
 
   const addChild = (parentId: string) => {
-    const { data: next } = addTreeChild(data, parentId)
+    const { data: next, node } = addTreeChild(data, parentId)
+    if (node) seed(node.id, TREE_DRAFT_HEIGHT)
     onChange?.(next)
   }
 
@@ -151,6 +180,20 @@ export function KnowledgeTree({
 
   const deleteNode = (id: string, mode: 'branch' | 'promote') => {
     onChange?.(removeTreeNode(data, id, mode))
+  }
+
+  const toggleBody = (id: string) => {
+    const node = treeNodeById(data, id)
+    if (!node) return
+    onChange?.(updateTreeNode(data, id, { bodyCollapsed: !node.bodyCollapsed }))
+  }
+
+  const setCardStyle = (id: string, patch: { background?: string; border?: string }) => {
+    const node = treeNodeById(data, id)
+    if (!node) return
+    onChange?.(
+      updateTreeNode(data, id, { style: { ...node.style, ...patch } }),
+    )
   }
 
   return (
@@ -193,12 +236,24 @@ export function KnowledgeTree({
             onSubmitQuestion={(text) => submitQuestion(node.id, text)}
             onCancelDraft={() => cancelDraft(node.id)}
             onToggleBranch={() => toggleBranch(node.id)}
+            onToggleBody={() => toggleBody(node.id)}
             onRename={(title) => renameNode(node.id, title)}
             onDelete={(mode) => deleteNode(node.id, mode)}
             onRetry={() => onGenerate?.(node.id)}
+            onOpenMenu={(anchor) => setMenu({ nodeId: node.id, ...anchor })}
           />
         ))}
       </div>
+      {menu && treeNodeById(data, menu.nodeId) ? (
+        <TreeCardMenu
+          anchor={{ left: menu.left, top: menu.top }}
+          node={treeNodeById(data, menu.nodeId) ?? data.nodes[0]}
+          defaults={blockDefaults}
+          onBackground={(color) => setCardStyle(menu.nodeId, { background: color })}
+          onBorder={(color) => setCardStyle(menu.nodeId, { border: color })}
+          onClose={() => setMenu(null)}
+        />
+      ) : null}
     </div>
   )
 }

@@ -12,7 +12,7 @@ export const DEFAULT_BLOCK_SIZES = {
   pele: { width: 580, height: 380 },
   schedule: { width: 900, height: 600 },
   media: { width: 480, height: 320 },
-  tree: { width: 420, height: 320 },
+  tree: { width: 372, height: 128 },
 } as const
 
 export const SHAPE_DEFAULT_SIZE = { width: 160, height: 160 } as const

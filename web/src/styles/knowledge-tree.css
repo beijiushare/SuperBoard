@@ -31,8 +31,11 @@
 
 .sb-kt-card {
   position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   box-sizing: border-box;
+  width: 340px;
   min-height: 56px;
   flex-direction: column;
   overflow: hidden;
@@ -45,6 +48,27 @@
   font-size: 13px;
   line-height: 1.6;
   user-select: text;
+  /* Position is a transform so existing cards glide when the tree re-lays out. */
+  transform: translate3d(var(--sb-kt-x, 0), var(--sb-kt-y, 0), 0);
+  transition: transform 190ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation: sb-kt-in 160ms ease-out;
+}
+
+@keyframes sb-kt-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-kt-card {
+    animation: none;
+    transition: none;
+  }
 }
 
 .sb-kt-head {
@@ -52,7 +76,7 @@
   flex: none;
   align-items: flex-start;
   gap: 6px;
-  padding: 10px 52px 6px 12px;
+  padding: 10px 76px 6px 12px;
 }
 
 /* Card actions stay out of the way until the card is hovered. */
@@ -241,6 +265,24 @@
 .sb-kt-card-empty {
   color: var(--sb-text-faint, #a19c90);
   font-size: 12px;
+}
+
+.sb-kt-menu {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  width: 288px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #d8d4ca;
+  border-radius: 8px;
+  background: #fffdf8;
+  box-shadow: 0 12px 32px rgb(20 18 10 / 16%);
+}
+
+.sb-kt-menu .sb-color-control {
+  width: 100%;
 }
 
 .sb-kt-card-error {

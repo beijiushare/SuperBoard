@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   TREE_CARD_MAX_HEIGHT,
@@ -21,9 +21,11 @@ interface TreeCardProps {
   onSubmitQuestion: (text: string) => void
   onCancelDraft: () => void
   onToggleBranch: () => void
+  onToggleBody: () => void
   onRename: (title: string) => void
   onDelete: (mode: 'branch' | 'promote') => void
   onRetry: () => void
+  onOpenMenu: (anchor: { left: number; top: number }) => void
 }
 
 function CardBody({
@@ -78,11 +80,12 @@ export function TreeCard({
   onSubmitQuestion,
   onCancelDraft,
   onToggleBranch,
+  onToggleBody,
   onRename,
   onDelete,
   onRetry,
-}: TreeCardProps) {
-  const { t } = useTranslation(['editor'])
+  onOpenMenu,
+}: TreeCardProps) {  const { t } = useTranslation(['editor'])
   const draft = node.status === 'draft'
   const [draftText, setDraftText] = useState('')
   const [editingTitle, setEditingTitle] = useState(false)
@@ -95,7 +98,9 @@ export function TreeCard({
     if (!draft) return
     const element = textareaRef.current
     if (!element) return
-    element.focus()
+    // Focusing without scrolling: the canvas would jump when the new card sits
+    // outside the current viewport.
+    element.focus({ preventScroll: true })
     element.setSelectionRange(element.value.length, element.value.length)
   }, [draft])
 
@@ -103,7 +108,7 @@ export function TreeCard({
     if (!editingTitle) return
     const element = titleRef.current
     if (!element) return
-    element.focus()
+    element.focus({ preventScroll: true })
     element.select()
   }, [editingTitle])
 
@@ -132,9 +137,16 @@ export function TreeCard({
       onPointerDown={(event) => {
         if (event.button === 0) onActivate()
       }}
+      onContextMenu={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onOpenMenu({ left: event.clientX, top: event.clientY })
+      }}
       style={{
-        left: position.x,
-        top: position.y,
+        ...({
+          '--sb-kt-x': `${position.x}px`,
+          '--sb-kt-y': `${position.y}px`,
+        } as CSSProperties),
         width: TREE_CARD_WIDTH,
         maxHeight: TREE_CARD_MAX_HEIGHT,
         // Cards follow the shared block defaults unless they carry an explicit
@@ -213,6 +225,42 @@ export function TreeCard({
           </span>
         )}
         <div className="sb-kt-tools">
+          {node.answer.trim() ? (
+            <button
+              type="button"
+              className="sb-kt-tool"
+              aria-label={
+                node.bodyCollapsed
+                  ? t('editor:tree.expandBody')
+                  : t('editor:tree.collapseBody')
+              }
+              title={
+                node.bodyCollapsed
+                  ? t('editor:tree.expandBody')
+                  : t('editor:tree.collapseBody')
+              }
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation()
+                onToggleBody()
+              }}
+            >
+              <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
+                <path
+                  d={
+                    node.bodyCollapsed
+                      ? 'M3.5 6 8 10.5 12.5 6'
+                      : 'M3.5 10 8 5.5 12.5 10'
+                  }
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          ) : null}
           <button
             type="button"
             className="sb-kt-tool"
