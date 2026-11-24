@@ -125,6 +125,14 @@ export function isActionableNode(node: CanvasNode) {
   return isBlockNode(node) || isShapeNode(node)
 }
 
+/**
+ * Blocks whose size is derived from their content. Their size is rewritten on
+ * every layout pass, so resize handles and the rotate handle would be a lie.
+ */
+export function isAutoSizedBlock(node: CanvasNode) {
+  return blockKind(node) === 'tree'
+}
+
 export function isRatioLocked(node: CanvasNode) {
   const definition = blockDefinition(node)
   const locked = node['x-superboard']?.ratioLocked

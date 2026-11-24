@@ -76,7 +76,7 @@ export function useBlockActions({
       openPeleEditor(id)
       return
     }
-    if (editor === 'schedule') {
+    if (editor === 'schedule' || editor === 'tree') {
       closeMarkdownEditor()
       setSelectedIds([id])
       setTool('select')
@@ -98,7 +98,7 @@ export function useBlockActions({
       toggleMarkdownEdit(id)
       return
     }
-    if (editor === 'schedule') {
+    if (editor === 'schedule' || editor === 'tree') {
       setSelectedIds([id])
       setTool('select')
       return

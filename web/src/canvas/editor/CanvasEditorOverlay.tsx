@@ -10,6 +10,7 @@ import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import {
   blockKind,
   isActionableNode,
+  isAutoSizedBlock,
   isBlockNode,
 } from './blocks'
 import { BlockActions } from './BlockActions'
@@ -440,42 +441,46 @@ export function CanvasEditorOverlay({
                     />
                   ))
                 : null}
-              {visibleSelectionCorners(
-                node.width * scale,
-                node.height * scale,
-              ).map((corner) => (
-                <span
-                  key={corner}
-                  className="sb-editor-handle"
-                  style={selectionHandleStyle(corner)}
-                  onPointerDown={(event) => beginResize(event, node, corner)}
-                  onPointerMove={movePointer}
-                  onPointerUp={endDrag}
-                />
-              ))}
-              {SELECTION_SIDES.map((side) => (
-                <span
-                  key={side}
-                  className="sb-editor-edge-handle"
-                  style={selectionEdgeStyle(side)}
-                  onPointerDown={(event) => beginResize(event, node, side)}
-                  onPointerMove={movePointer}
-                  onPointerUp={endDrag}
-                />
-              ))}
-              {node['x-superboard']?.kind !== 'group' &&
-              canShowSelectionRotate(node.width * scale, node.height * scale)
-                ? SELECTION_CORNERS.map((corner) => (
+              {isAutoSizedBlock(node) ? null : (
+                <>
+                  {visibleSelectionCorners(
+                    node.width * scale,
+                    node.height * scale,
+                  ).map((corner) => (
                     <span
                       key={corner}
-                      className="sb-editor-rotate"
-                      style={selectionRotateStyle(corner)}
-                      onPointerDown={(event) => beginRotate(event, node)}
+                      className="sb-editor-handle"
+                      style={selectionHandleStyle(corner)}
+                      onPointerDown={(event) => beginResize(event, node, corner)}
                       onPointerMove={movePointer}
                       onPointerUp={endDrag}
                     />
-                  ))
-                : null}
+                  ))}
+                  {SELECTION_SIDES.map((side) => (
+                    <span
+                      key={side}
+                      className="sb-editor-edge-handle"
+                      style={selectionEdgeStyle(side)}
+                      onPointerDown={(event) => beginResize(event, node, side)}
+                      onPointerMove={movePointer}
+                      onPointerUp={endDrag}
+                    />
+                  ))}
+                  {node['x-superboard']?.kind !== 'group' &&
+                  canShowSelectionRotate(node.width * scale, node.height * scale)
+                    ? SELECTION_CORNERS.map((corner) => (
+                        <span
+                          key={corner}
+                          className="sb-editor-rotate"
+                          style={selectionRotateStyle(corner)}
+                          onPointerDown={(event) => beginRotate(event, node)}
+                          onPointerMove={movePointer}
+                          onPointerUp={endDrag}
+                        />
+                      ))
+                    : null}
+                </>
+              )}
             </>
           ) : null}
         </div>

@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { CanvasNode } from '../model'
 import { HashIcon, LockIcon, RefreshIcon, TrashIcon, TypeIcon } from './BlockActionIcons'
-import { blockDefinition, isRatioLocked } from './blocks'
+import { blockDefinition, isAutoSizedBlock, isRatioLocked } from './blocks'
 
 interface BlockActionsProps {
   node: CanvasNode
@@ -39,7 +39,11 @@ export function BlockActions({
   const definition = blockDefinition(node)
   const ratioLocked = isRatioLocked(node)
   const markdownBlock = definition?.focusable ?? false
-  const canEdit = definition ? definition.editor !== 'schedule' : false
+  const autoSized = isAutoSizedBlock(node)
+  // Schedule and tree blocks own their content; there is no text overlay.
+  const canEdit = definition
+    ? definition.editor !== 'schedule' && definition.editor !== 'tree'
+    : false
 
   useLayoutEffect(() => {
     const element = actionsRef.current
@@ -146,17 +150,19 @@ export function BlockActions({
           <HashIcon size={14} />
         </button>
       ) : null}
-      <button
-        type="button"
-        className="sb-block-action"
-        title={t('editor:block.resetSize')}
-        onClick={(event) => {
-          event.stopPropagation()
-          onResetBlockSize?.(node.id)
-        }}
-      >
-        <RefreshIcon size={14} />
-      </button>
+      {autoSized ? null : (
+        <button
+          type="button"
+          className="sb-block-action"
+          title={t('editor:block.resetSize')}
+          onClick={(event) => {
+            event.stopPropagation()
+            onResetBlockSize?.(node.id)
+          }}
+        >
+          <RefreshIcon size={14} />
+        </button>
+      )}
       <button
         type="button"
         className="sb-block-action"
