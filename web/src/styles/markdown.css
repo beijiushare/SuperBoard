@@ -8,6 +8,17 @@
   overflow-wrap: anywhere;
 }
 
+/* Vditor failure fallback: show the source instead of a blank block. */
+.sb-markdown-raw {
+  margin: 0;
+  padding: 18px 20px;
+  overflow: auto;
+  color: var(--sb-text-muted, #8a857b);
+  font: 12px/1.6 ui-monospace, Consolas, monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .sb-markdown > :first-child,
 .sb-markdown-vditor > :first-child,
 .sb-markdown-vditor.vditor-reset > :first-child {

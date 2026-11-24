@@ -1,13 +1,9 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { loadMathJax } from './mathjax'
 import { enhancePreview } from './previewEnhance'
 import { vditorCdn } from './vditorAssets'
 import { getAppLanguage } from '../../i18n'
-
-const MarkdownView = lazy(() =>
-  import('./MarkdownView').then((module) => ({ default: module.MarkdownView })),
-)
 
 const HTML_CACHE_LIMIT = 100
 const htmlCache = new Map<string, Promise<string>>()
@@ -63,6 +59,11 @@ interface MarkdownVditorPreviewProps {
   className?: string
 }
 
+/**
+ * Vditor is the only Markdown renderer: `MarkdownView` was removed so every
+ * preview goes through one pipeline. Raw HTML in a document (iframes included)
+ * is sanitised away by Vditor; embeds belong in their own canvas block.
+ */
 export function MarkdownVditorPreview({
   source,
   className = '',
@@ -71,7 +72,6 @@ export function MarkdownVditorPreview({
   const hostRef = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
-  const useLegacyRenderer = /<iframe\b/i.test(source)
 
   useEffect(() => {
     const host = hostRef.current
@@ -79,7 +79,7 @@ export function MarkdownVditorPreview({
     let cancelled = false
     setReady(false)
     setFailed(false)
-    if (!source.trim() || useLegacyRenderer) {
+    if (!source.trim()) {
       setReady(true)
       return
     }
@@ -121,14 +121,10 @@ export function MarkdownVditorPreview({
     return <p className="sb-empty">{t('common:markdown.empty')}</p>
   }
 
-  if (useLegacyRenderer || failed) {
+  if (failed) {
+    // No second renderer any more: show the source verbatim so nothing is lost.
     return (
-      <Suspense fallback={null}>
-        <MarkdownView
-          source={source}
-          className={`sb-md-docs ${className}`.trim()}
-        />
-      </Suspense>
+      <pre className={`sb-markdown-raw ${className}`.trim()}>{source}</pre>
     )
   }
 

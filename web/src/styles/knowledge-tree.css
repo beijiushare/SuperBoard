@@ -325,7 +325,8 @@
 /* The card is already narrow; markdown's own generous padding would leave
    almost no room for text. */
 .sb-kt-body .sb-markdown.sb-markdown,
-.sb-kt-body .sb-markdown-vditor.vditor-reset {
+.sb-kt-body .sb-markdown-vditor.vditor-reset,
+.sb-kt-body .sb-markdown-raw {
   padding: 0;
   font-size: 12.5px;
   line-height: 1.65;
