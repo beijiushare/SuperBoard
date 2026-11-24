@@ -241,7 +241,8 @@ function roundedElbow(points: Array<[number, number]>, radius: number) {
  * are card top-left corners, so the anchor is right/left middle of each card.
  *
  * Branches leave the parent horizontally, turn once in the gap and arrive
- * horizontally, which reads far calmer than a full S-curve.
+ * horizontally, which reads far calmer than a full S-curve. The expand toggle
+ * sits on the anchor point and hides it, so the line never needs an offset.
  */
 export function treeEdges(
   data: SuperBoardTreeData,
@@ -256,11 +257,7 @@ export function treeEdges(
     const from = positions[parent?.id ?? '']
     const to = positions[node.id]
     if (!parent || !from || !to || !visible.has(parent.id)) continue
-    const parentHasToggle = data.nodes.some(
-      (item) => item.parentId === parent.id,
-    )
-    const startX =
-      from.x + TREE_CARD_WIDTH + (parentHasToggle ? TREE_EXPAND_RADIUS : 0)
+    const startX = from.x + TREE_CARD_WIDTH
     const startY = from.y + resolveCardHeight(heights, parent) / 2
     const endX = to.x - TREE_ARROW_LENGTH
     const endY = to.y + resolveCardHeight(heights, node) / 2
