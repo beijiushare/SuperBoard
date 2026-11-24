@@ -272,6 +272,60 @@
   flex: none;
 }
 
+/* Settings text field, sized to the row controls beside it. */
+.sb-preferences-dialog .sb-text-field {
+  width: 260px;
+  height: 34px;
+  flex: none;
+  padding: 0 10px;
+  border: 1px solid var(--sb-border-control);
+  border-radius: var(--sb-radius-md);
+  background: #fff;
+  color: var(--sb-text);
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.sb-preferences-dialog .sb-text-field:focus {
+  border-color: var(--sb-accent);
+  outline: 2px solid var(--sb-accent-soft);
+  outline-offset: 0;
+}
+
+.sb-preferences-dialog .sb-settings-badge {
+  flex: none;
+  padding: 3px 10px;
+  border: 1px solid var(--sb-border-control);
+  border-radius: var(--sb-radius-pill);
+  color: var(--sb-text-faint);
+  font: 11px/1.5 ui-monospace, Consolas, monospace;
+}
+
+.sb-preferences-dialog .sb-settings-badge.is-on {
+  border-color: color-mix(in srgb, var(--sb-accent) 35%, transparent);
+  background: var(--sb-accent-soft);
+  color: var(--sb-accent);
+}
+
+.sb-preferences-dialog .sb-settings-row-actions {
+  border-bottom: 0;
+}
+
+.sb-preferences-dialog .sb-settings-note-result {
+  color: var(--sb-text-secondary);
+  font-family: inherit;
+}
+
+.sb-preferences-dialog .sb-button-danger {
+  border-color: color-mix(in srgb, var(--sb-danger) 40%, transparent);
+  color: var(--sb-danger);
+}
+
+.sb-preferences-dialog .sb-button-danger:hover {
+  border-color: var(--sb-danger);
+  background: color-mix(in srgb, var(--sb-danger) 8%, transparent);
+}
+
 /* Controls rendered by shared field components */
 
 .sb-preferences-dialog .sb-style-row,

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Select } from '../../components/ui/select'
 import { desktopMode } from '../../desktop/platform'
 import { aiChat, aiClearAllKeys, aiClearKey, aiKeyStatus, aiSetKey } from '../../desktop/ai'
 import {
@@ -112,49 +113,62 @@ export function SettingsAITab({
     }
   }
 
+  if (!desktop) {
+    return (
+      <section className="sb-settings-card">
+        <header className="sb-settings-card-head">
+          <div>
+            <h3>{t('settings:ai.title')}</h3>
+            <p>{t('settings:ai.browserNote')}</p>
+          </div>
+        </header>
+      </section>
+    )
+  }
+
   return (
     <>
-      {!desktop ? (
-        <section className="sb-settings-card">
-          <header className="sb-settings-card-head">
-            <div>
-              <h3>{t('settings:ai.title')}</h3>
-              <p>{t('settings:ai.browserNote')}</p>
-            </div>
-          </header>
-        </section>
-      ) : null}
-
       <section className="sb-settings-card">
         <header className="sb-settings-card-head">
           <div>
             <h3>{t('settings:ai.endpoint')}</h3>
             <p>{t('settings:ai.endpointNote')}</p>
           </div>
+          <button
+            type="button"
+            className="sb-button sb-button-small"
+            disabled={busy}
+            onClick={() => void testConnection()}
+          >
+            {busy ? t('settings:ai.testing') : t('settings:ai.test')}
+          </button>
         </header>
         <div className="sb-settings-rows">
           <div className="sb-settings-row">
-            <span>{t('settings:ai.active')}</span>
-            <select
+            <div className="sb-settings-row-text">
+              <span>{t('settings:ai.active')}</span>
+              <small>
+                {slot.keyless
+                  ? t('settings:ai.noKey')
+                  : t('settings:ai.needsKey')}
+              </small>
+            </div>
+            <Select
+              className="sb-select-settings"
               value={draft.active}
-              disabled={!desktop}
-              onChange={(event) =>
-                onChange({ active: event.target.value as AISlotId })
-              }
-            >
-              {AI_SLOTS.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {t(item.labelKey)}
-                  {item.keyless ? ` · ${t('settings:ai.noKey')}` : ''}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => onChange({ active: value as AISlotId })}
+              ariaLabel={t('settings:ai.active')}
+              options={AI_SLOTS.map((item) => ({
+                value: item.id,
+                label: t(item.labelKey),
+              }))}
+            />
           </div>
           <div className="sb-settings-row">
             <span>{t('settings:ai.baseURL')}</span>
             <input
+              className="sb-text-field"
               value={values.baseURL}
-              disabled={!desktop}
               spellCheck={false}
               placeholder={AI_SLOT_DEFAULTS[slot.id].baseURL}
               onChange={(event) =>
@@ -165,8 +179,8 @@ export function SettingsAITab({
           <div className="sb-settings-row">
             <span>{t('settings:ai.model')}</span>
             <input
+              className="sb-text-field"
               value={values.model}
-              disabled={!desktop}
               spellCheck={false}
               placeholder={AI_SLOT_DEFAULTS[slot.id].model}
               onChange={(event) =>
@@ -177,16 +191,9 @@ export function SettingsAITab({
           {slot.id === 'local' ? (
             <p className="sb-settings-note">{t('settings:ai.localNote')}</p>
           ) : null}
-          <div className="canvas-editor-dialog-actions">
-            <button
-              type="button"
-              disabled={!desktop || busy}
-              onClick={() => void testConnection()}
-            >
-              {busy ? t('settings:ai.testing') : t('settings:ai.test')}
-            </button>
-          </div>
-          {message ? <p className="sb-settings-note">{message}</p> : null}
+          {message ? (
+            <p className="sb-settings-note sb-settings-note-result">{message}</p>
+          ) : null}
         </div>
       </section>
 
@@ -202,11 +209,15 @@ export function SettingsAITab({
           </div>
         </header>
         <div className="sb-settings-rows">
-          {!slot.keyless ? (
+          {slot.keyless ? (
+            <p className="sb-settings-note">{t('settings:ai.keylessBody')}</p>
+          ) : (
             <>
               <div className="sb-settings-row">
                 <span>{t('settings:ai.keyStatus')}</span>
-                <span>
+                <span
+                  className={`sb-settings-badge${status.hasKey ? ' is-on' : ''}`}
+                >
                   {status.hasKey
                     ? status.masked ?? t('settings:ai.keyPresent')
                     : t('settings:ai.keyMissing')}
@@ -215,78 +226,78 @@ export function SettingsAITab({
               <div className="sb-settings-row">
                 <span>{t('settings:ai.keyInput')}</span>
                 <input
+                  className="sb-text-field"
                   type="password"
                   value={keyInput}
-                  disabled={!desktop || busy}
                   spellCheck={false}
                   autoComplete="off"
                   onChange={(event) => setKeyInput(event.target.value)}
                   placeholder="sk-..."
                 />
               </div>
-              <div className="canvas-editor-dialog-actions">
-                <button
-                  type="button"
-                  disabled={!desktop || busy || !keyInput.trim()}
-                  onClick={() => void saveKey()}
-                >
-                  {t('settings:ai.saveKey')}
-                </button>
-                <button
-                  type="button"
-                  disabled={!desktop || busy || !status.hasKey}
-                  onClick={() => void clearKey()}
-                >
-                  {t('settings:ai.clearKey')}
-                </button>
+              <div className="sb-settings-row sb-settings-row-actions">
+                <span />
+                <div className="sb-settings-actions">
+                  <button
+                    type="button"
+                    className="sb-button sb-button-small"
+                    disabled={busy || !keyInput.trim()}
+                    onClick={() => void saveKey()}
+                  >
+                    {t('settings:ai.saveKey')}
+                  </button>
+                  <button
+                    type="button"
+                    className="sb-button sb-button-small"
+                    disabled={busy || !status.hasKey}
+                    onClick={() => void clearKey()}
+                  >
+                    {t('settings:ai.clearKey')}
+                  </button>
+                </div>
               </div>
             </>
-          ) : (
-            <p className="sb-settings-note">{t('settings:ai.keylessBody')}</p>
           )}
         </div>
       </section>
 
-      {desktop ? (
-        <section className="sb-settings-card">
-          <header className="sb-settings-card-head">
-            <div>
-              <h3>{t('settings:ai.clearAllTitle')}</h3>
-              <p>{t('settings:ai.clearAllNote')}</p>
-            </div>
-          </header>
-          <div className="sb-settings-rows">
-            {confirmClearAll ? (
-              <div className="canvas-editor-dialog-actions">
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => setConfirmClearAll(false)}
-                >
-                  {t('settings:ai.clearAllCancel')}
-                </button>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void clearAll()}
-                >
-                  {t('settings:ai.clearAllConfirm')}
-                </button>
-              </div>
-            ) : (
-              <div className="canvas-editor-dialog-actions">
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => setConfirmClearAll(true)}
-                >
-                  {t('settings:ai.clearAll')}
-                </button>
-              </div>
-            )}
+      <section className="sb-settings-card">
+        <header className="sb-settings-card-head">
+          <div>
+            <h3>{t('settings:ai.clearAllTitle')}</h3>
+            <p>{t('settings:ai.clearAllNote')}</p>
           </div>
-        </section>
-      ) : null}
+          {confirmClearAll ? (
+            <div className="sb-settings-actions">
+              <button
+                type="button"
+                className="sb-button sb-button-small"
+                disabled={busy}
+                onClick={() => setConfirmClearAll(false)}
+              >
+                {t('settings:ai.clearAllCancel')}
+              </button>
+              <button
+                type="button"
+                className="sb-button sb-button-small sb-button-danger"
+                disabled={busy}
+                onClick={() => void clearAll()}
+              >
+                {t('settings:ai.clearAllConfirm')}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="sb-button sb-button-small"
+              disabled={busy}
+              onClick={() => setConfirmClearAll(true)}
+            >
+              {t('settings:ai.clearAll')}
+            </button>
+          )}
+        </header>
+      </section>
     </>
   )
 }
