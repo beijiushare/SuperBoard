@@ -73,7 +73,6 @@
 }
 
 .sb-markdown blockquote {
-  border-left: 3px solid var(--tl-color-low-border, #cbc7bc);
   color: var(--tl-color-text-3, #6f6d66);
 }
 
@@ -292,7 +291,6 @@
 }
 
 .sb-markdown-vditor.vditor-reset blockquote {
-  border-left: 3px solid var(--tl-color-low-border, #cbc7bc);
   color: var(--tl-color-text-3, #6f6d66);
 }
 
@@ -479,7 +477,6 @@
 .sb-markdown-vditor.vditor-reset blockquote,
 .sb-md-editor .vditor-reset blockquote,
 .sb-md-focus-body .vditor-reset blockquote {
-  border-left: 3px solid #e4e4e4;
   background: transparent;
   color: #555;
   font-size: inherit;
