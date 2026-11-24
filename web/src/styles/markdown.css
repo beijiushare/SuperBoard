@@ -119,40 +119,6 @@
   overflow-x: auto;
 }
 
-/* Vditor's stylesheet is injected at runtime, i.e. after ours, so equal
-   specificity loses. Every override below is therefore scoped to its container.
-   Defaults indent a list by 2em and add a 16px gap inside each item, which reads
-   as half a screen of indent for task lists. */
-.sb-markdown-vditor.vditor-reset ul,
-.sb-markdown-vditor.vditor-reset ol,
-.sb-md-editor .vditor-reset ul,
-.sb-md-editor .vditor-reset ol,
-.sb-md-focus-editor .vditor-reset ul,
-.sb-md-focus-editor .vditor-reset ol {
-  padding-left: 1.4em;
-  margin-top: 0.15em;
-  margin-bottom: 0.7em;
-}
-
-.sb-markdown-vditor.vditor-reset li > p,
-.sb-md-editor .vditor-reset li > p,
-.sb-md-focus-editor .vditor-reset li > p {
-  margin: 0;
-}
-
-.sb-markdown-vditor.vditor-reset ul.vditor-task,
-.sb-md-editor .vditor-reset ul.vditor-task,
-.sb-md-focus-editor .vditor-reset ul.vditor-task {
-  padding-left: 0.2em;
-}
-
-.sb-markdown-vditor.vditor-reset ul.vditor-task input,
-.sb-md-editor .vditor-reset ul.vditor-task input,
-.sb-md-focus-editor .vditor-reset ul.vditor-task input {
-  margin-right: 0.45em;
-  margin-left: 0;
-}
-
 /* GitHub style alerts: Vditor owns the markup (icon + title + body), so only
    the surface is restyled here. Applies to the editor and the preview alike. */
 .vditor-reset .callout.callout,
@@ -964,21 +930,16 @@
   color: #20232a;
   font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
     -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: var(--sb-markdown-font-size, 16px);
-  line-height: 1.7;
 }
 
 .sb-markdown h1,
 .sb-markdown-vditor.vditor-reset h1,
 .sb-md-editor .vditor-reset h1,
 .sb-md-focus-body .vditor-reset h1 {
-  margin: 1.4em 0;
-  padding: 0;
   border: 0;
   color: #20232a;
   font-size: 2.125em;
   font-weight: 900;
-  line-height: 1.25;
   text-align: left;
 }
 
@@ -994,12 +955,9 @@
 .sb-md-focus-body .vditor-reset h2,
 .sb-md-focus-body .vditor-reset h3,
 .sb-md-focus-body .vditor-reset h4 {
-  margin: 2.3em 0 1.3em;
-  padding: 0;
   border: 0;
   color: #20232a;
   font-weight: 800;
-  line-height: 1.3;
 }
 
 .sb-markdown h2,
@@ -1023,13 +981,6 @@
   font-size: 1.25em;
 }
 
-.sb-markdown p,
-.sb-markdown-vditor.vditor-reset p,
-.sb-md-editor .vditor-reset p,
-.sb-md-focus-body .vditor-reset p {
-  margin: 1.5em 0;
-}
-
 .sb-markdown a,
 .sb-markdown-vditor.vditor-reset a,
 .sb-md-editor .vditor-reset a,
@@ -1045,28 +996,6 @@
   text-decoration: underline;
 }
 
-.sb-markdown ul,
-.sb-markdown ol,
-.sb-markdown dl,
-.sb-markdown-vditor.vditor-reset ul,
-.sb-markdown-vditor.vditor-reset ol,
-.sb-markdown-vditor.vditor-reset dl,
-.sb-md-editor .vditor-reset ul,
-.sb-md-editor .vditor-reset ol,
-.sb-md-editor .vditor-reset dl,
-.sb-md-focus-body .vditor-reset ul,
-.sb-md-focus-body .vditor-reset ol,
-.sb-md-focus-body .vditor-reset dl {
-  margin: 1.5em 0 1.5em 3em;
-}
-
-.sb-markdown li,
-.sb-markdown-vditor.vditor-reset li,
-.sb-md-editor .vditor-reset li,
-.sb-md-focus-body .vditor-reset li {
-  margin: 1em 0;
-}
-
 .sb-markdown strong,
 .sb-markdown-vditor.vditor-reset strong,
 .sb-md-editor .vditor-reset strong,
@@ -1079,7 +1008,6 @@
 .sb-md-editor .vditor-reset hr,
 .sb-md-focus-body .vditor-reset hr {
   height: 0;
-  margin: 1.5em 0;
   border: 0;
   border-top: 1px solid #e4e4e4;
   background: transparent;
@@ -1089,24 +1017,10 @@
 .sb-markdown-vditor.vditor-reset blockquote,
 .sb-md-editor .vditor-reset blockquote,
 .sb-md-focus-body .vditor-reset blockquote {
-  margin: 1.5em 0;
-  padding: 0 0 0 1em;
   border-left: 3px solid #e4e4e4;
   background: transparent;
   color: #555;
   font-size: inherit;
-}
-
-.sb-markdown table,
-.sb-markdown-vditor.vditor-reset table,
-.sb-md-editor .vditor-reset table,
-.sb-md-focus-body .vditor-reset table {
-  display: table;
-  width: 100%;
-  max-width: 100%;
-  margin: 1.5em 0;
-  border-collapse: collapse;
-  text-align: left;
 }
 
 .sb-markdown th,
@@ -1117,7 +1031,6 @@
 .sb-md-editor .vditor-reset td,
 .sb-md-focus-body .vditor-reset th,
 .sb-md-focus-body .vditor-reset td {
-  padding: 7px 10px;
   border: 1px solid #e4e4e4;
 }
 
@@ -1134,7 +1047,6 @@
 .sb-markdown-vditor.vditor-reset :not(pre) > code,
 .sb-md-editor .vditor-reset :not(pre) > code,
 .sb-md-focus-body .vditor-reset :not(pre) > code {
-  padding: 0 2px;
   border: 0;
   border-bottom: 1px solid #ddd;
   border-radius: 0;
@@ -1142,32 +1054,6 @@
   color: #20232a;
   font-family: Monaco, Consolas, 'Lucida Console', monospace;
   font-size: 0.8em;
-}
-
-.sb-markdown pre,
-.sb-markdown-vditor.vditor-reset pre,
-.sb-md-editor .vditor-reset pre,
-.sb-md-focus-body .vditor-reset pre {
-  margin: 1.5em 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.sb-markdown pre > code,
-.sb-markdown-vditor.vditor-reset pre > code,
-.sb-md-editor .vditor-reset pre > code,
-.sb-md-focus-body .vditor-reset pre > code {
-  display: block;
-  margin: 0;
-  padding: 0.5em 0.7em;
-  border: 1px solid #ddd;
-  border-radius: 0;
-  background: #f2f2f2;
-  color: #20232a;
-  font-family: Monaco, Consolas, 'Lucida Console', monospace;
-  font-size: 0.8em;
-  line-height: 1.8em;
 }
 
 .sb-markdown img,
@@ -1207,31 +1093,6 @@
   text-align: left !important;
 }
 
-.sb-md-docs.sb-markdown h1,
-.sb-md-docs.sb-markdown-vditor.vditor-reset h1,
-.sb-md-docs .vditor-reset h1 {
-  font-size: 2.125em !important;
-  font-weight: 900 !important;
-}
-
-.sb-md-docs.sb-markdown h2,
-.sb-md-docs.sb-markdown-vditor.vditor-reset h2,
-.sb-md-docs .vditor-reset h2 {
-  font-size: 1.5em !important;
-}
-
-.sb-md-docs.sb-markdown h3,
-.sb-md-docs.sb-markdown-vditor.vditor-reset h3,
-.sb-md-docs .vditor-reset h3 {
-  font-size: 1.375em !important;
-}
-
-.sb-md-docs.sb-markdown h4,
-.sb-md-docs.sb-markdown-vditor.vditor-reset h4,
-.sb-md-docs .vditor-reset h4 {
-  font-size: 1.25em !important;
-}
-
 .sb-md-docs.sb-markdown a,
 .sb-md-docs.sb-markdown-vditor.vditor-reset a,
 .sb-md-docs .vditor-reset a {
@@ -1243,25 +1104,6 @@
 .sb-md-docs.sb-markdown-vditor.vditor-reset a:hover,
 .sb-md-docs .vditor-reset a:hover {
   text-decoration: underline !important;
-}
-
-.sb-md-docs.sb-markdown :not(pre) > code,
-.sb-md-docs.sb-markdown-vditor.vditor-reset :not(pre) > code,
-.sb-md-docs .vditor-reset :not(pre) > code {
-  border: 0 !important;
-  border-bottom: 1px solid #ddd !important;
-  border-radius: 0 !important;
-  background: #f2f2f2 !important;
-  color: #20232a !important;
-}
-
-.sb-md-docs.sb-markdown pre > code,
-.sb-md-docs.sb-markdown-vditor.vditor-reset pre > code,
-.sb-md-docs .vditor-reset pre > code {
-  border: 1px solid #ddd !important;
-  border-radius: 0 !important;
-  background: #f2f2f2 !important;
-  color: #20232a !important;
 }
 
 .sb-md-docs.sb-markdown th,
