@@ -119,52 +119,57 @@
   overflow-x: auto;
 }
 
-/* GitHub style alerts (`> [!WARNING]`), rewritten after rendering. */
-.sb-markdown .callout.callout {
-  --sb-callout: #3575f0;
-  display: block;
-  margin: 0 0 1em;
+/* Vditor's stylesheet is injected at runtime, i.e. after ours, so equal
+   specificity loses. Every override below is therefore scoped to its container.
+   Defaults indent a list by 2em and add a 16px gap inside each item, which reads
+   as half a screen of indent for task lists. */
+.sb-markdown-vditor.vditor-reset ul,
+.sb-markdown-vditor.vditor-reset ol,
+.sb-md-editor .vditor-reset ul,
+.sb-md-editor .vditor-reset ol,
+.sb-md-focus-editor .vditor-reset ul,
+.sb-md-focus-editor .vditor-reset ol {
+  padding-left: 1.4em;
+  margin-top: 0.15em;
+  margin-bottom: 0.7em;
+}
+
+.sb-markdown-vditor.vditor-reset li > p,
+.sb-md-editor .vditor-reset li > p,
+.sb-md-focus-editor .vditor-reset li > p {
+  margin: 0;
+}
+
+.sb-markdown-vditor.vditor-reset ul.vditor-task,
+.sb-md-editor .vditor-reset ul.vditor-task,
+.sb-md-focus-editor .vditor-reset ul.vditor-task {
+  padding-left: 0.2em;
+}
+
+.sb-markdown-vditor.vditor-reset ul.vditor-task input,
+.sb-md-editor .vditor-reset ul.vditor-task input,
+.sb-md-focus-editor .vditor-reset ul.vditor-task input {
+  margin-right: 0.45em;
+  margin-left: 0;
+}
+
+/* GitHub style alerts: Vditor owns the markup (icon + title + body), so only
+   the surface is restyled here. Applies to the editor and the preview alike. */
+.vditor-reset .callout.callout,
+.vditor-ir blockquote.callout,
+.vditor-wysiwyg blockquote.callout {
   padding: 8px 12px 8px 10px;
-  border: 0;
-  border-left: 3px solid var(--sb-callout);
   border-radius: 0 6px 6px 0;
-  background: color-mix(in srgb, var(--sb-callout) 8%, transparent);
-  color: inherit;
+  background: color-mix(in srgb, var(--callout-color, #3575f0) 8%, transparent);
 }
 
-.sb-markdown .callout.callout::before {
-  content: none;
+.vditor-reset .callout.callout::before,
+.vditor-ir blockquote.callout::before,
+.vditor-wysiwyg blockquote.callout::before {
+  border-radius: 6px;
 }
 
-.sb-markdown .callout[data-subtype='TIP'] {
-  --sb-callout: #4c9a2a;
-}
-
-.sb-markdown .callout[data-subtype='IMPORTANT'] {
-  --sb-callout: #8957e5;
-}
-
-.sb-markdown .callout[data-subtype='WARNING'] {
-  --sb-callout: #d97706;
-}
-
-.sb-markdown .callout[data-subtype='CAUTION'] {
-  --sb-callout: #c0392b;
-}
-
-.sb-markdown .callout-info {
-  margin: 0 0 4px;
-}
-
-.sb-markdown .callout-label {
-  color: var(--sb-callout);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.sb-markdown .callout > :last-child {
+.vditor-reset .callout > :last-child {
   margin-bottom: 0;
 }
 

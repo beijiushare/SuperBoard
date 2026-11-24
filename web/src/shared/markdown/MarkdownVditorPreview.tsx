@@ -40,10 +40,6 @@ async function renderHtml(source: string) {
         inlineMath: true,
         mathBlockPreview: true,
         sanitize: true,
-        // Alerts are rewritten from the `[!TYPE]` marker after rendering; the
-        // renderer's own callout output is inconsistent (and sanitising can
-        // strip the subtype), so leave the marker intact instead.
-        callout: false,
       },
     })
   })()
