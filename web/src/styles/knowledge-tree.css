@@ -86,7 +86,7 @@
   flex: none;
   align-items: flex-start;
   gap: 6px;
-  padding: 8px 64px 4px 10px;
+  padding: 10px 64px 6px 12px;
 }
 
 /* Card actions stay out of the way until the card is hovered. */
@@ -286,6 +286,11 @@
   overflow-wrap: anywhere;
 }
 
+.sb-kt-title.is-placeholder {
+  color: var(--sb-text-faint, #a19c90);
+  font-weight: 500;
+}
+
 .sb-kt-quote,
 .sb-kt-question {
   flex: none;
@@ -298,14 +303,6 @@
   font-size: 11.5px;
   line-height: 1.55;
   overflow-wrap: anywhere;
-}
-
-/* Without a title the tools float over the first block, which then needs room
-   on the right. */
-.sb-kt-card.is-headless .sb-kt-quote,
-.sb-kt-card.is-headless .sb-kt-question,
-.sb-kt-card.is-headless .sb-kt-draft {
-  padding-right: 54px;
 }
 
 .sb-kt-quote-source {
@@ -327,8 +324,8 @@
 
 /* The card is already narrow; markdown's own generous padding would leave
    almost no room for text. */
-.sb-kt-body .sb-markdown,
-.sb-kt-body .sb-markdown-vditor {
+.sb-kt-body .sb-markdown.sb-markdown,
+.sb-kt-body .sb-markdown-vditor.vditor-reset {
   padding: 0;
   font-size: 12.5px;
   line-height: 1.65;

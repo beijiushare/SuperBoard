@@ -42,7 +42,12 @@ export interface AISlot {
 export interface AIPreferences {
   active: AISlotId
   slots: Record<AISlotId, AISlot>
+  /** Estimated path tokens at which the history gets compacted. */
+  compactionThreshold: number
 }
+
+/** 85% of a 128k window, rounded down for headroom. */
+export const DEFAULT_COMPACTION_THRESHOLD = 100000
 
 export interface AISlotDefinition {
   id: AISlotId
@@ -131,6 +136,7 @@ export const DEFAULT_PREFERENCES: EditorPreferences = {
       'online-a': { ...AI_SLOT_DEFAULTS['online-a'] },
       'online-b': { ...AI_SLOT_DEFAULTS['online-b'] },
     },
+    compactionThreshold: DEFAULT_COMPACTION_THRESHOLD,
   },
 }
 
@@ -198,7 +204,15 @@ function mergeAI(value: Record<string, unknown>): AIPreferences {
     const active = AI_SLOTS.some((item) => item.id === value.active)
       ? (value.active as AISlotId)
       : defaults.active
-    return { active, slots }
+    return {
+      active,
+      slots,
+      compactionThreshold:
+        typeof value.compactionThreshold === 'number' &&
+        value.compactionThreshold > 0
+          ? Math.round(value.compactionThreshold)
+          : defaults.compactionThreshold,
+    }
   }
 
   // Legacy shape: { provider, baseURL, model }.
@@ -221,7 +235,15 @@ function mergeAI(value: Record<string, unknown>): AIPreferences {
       ? { headers: value.headers }
       : {}),
   }
-  return { active: legacySlot, slots }
+  return {
+    active: legacySlot,
+    slots,
+    compactionThreshold:
+      typeof value.compactionThreshold === 'number' &&
+      value.compactionThreshold > 0
+        ? Math.round(value.compactionThreshold)
+        : defaults.compactionThreshold,
+  }
 }
 
 export function loadPreferences(): EditorPreferences {

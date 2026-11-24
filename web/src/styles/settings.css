@@ -292,6 +292,12 @@
   outline-offset: 0;
 }
 
+.sb-preferences-dialog .sb-text-field-number {
+  width: 120px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .sb-preferences-dialog .sb-settings-badge {
   flex: none;
   padding: 3px 10px;

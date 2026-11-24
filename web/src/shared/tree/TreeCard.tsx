@@ -176,9 +176,7 @@ export function TreeCard({
       data-tree-node-id={node.id}
       className={`sb-kt-card${node.bodyCollapsed ? ' is-collapsed' : ''}${
         draft ? ' is-draft' : ''
-      }${exiting ? ' is-exiting' : ''}${
-        hasTitle || editingTitle ? '' : ' is-headless'
-      }`}
+      }${exiting ? ' is-exiting' : ''}`}
       onPointerDown={(event) => {
         if (event.button === 0) onActivate()
       }}
@@ -290,8 +288,7 @@ export function TreeCard({
         ) : null}
       </div>
 
-      {hasTitle || editingTitle ? (
-        <header className="sb-kt-head">
+      <header className="sb-kt-head">
           {editingTitle ? (
             <input
               ref={titleRef}
@@ -313,7 +310,7 @@ export function TreeCard({
             />
           ) : (
             <span
-              className="sb-kt-title"
+              className={`sb-kt-title${hasTitle ? '' : ' is-placeholder'}`}
               title={t('editor:tree.renameHint')}
               onDoubleClick={(event) => {
                 if (draft) return
@@ -322,12 +319,10 @@ export function TreeCard({
                 setEditingTitle(true)
               }}
             >
-              {node.title}
+              {hasTitle ? node.title : t('editor:tree.untitled')}
             </span>
           )}
-        </header>
-      ) : null}
-
+      </header>
       {node.quote ? (
         <blockquote className="sb-kt-quote">
           {node.quote.title ? (

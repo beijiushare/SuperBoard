@@ -6,6 +6,7 @@ import { aiChat, aiClearAllKeys, aiClearKey, aiKeyStatus, aiSetKey } from '../..
 import {
   AI_SLOTS,
   AI_SLOT_DEFAULTS,
+  DEFAULT_COMPACTION_THRESHOLD,
   aiSlotDefinition,
   parseHeaderLines,
   type AIPreferences,
@@ -196,6 +197,40 @@ export function SettingsAITab({
           {slot.id === 'local' ? (
             <p className="sb-settings-note">{t('settings:ai.localNote')}</p>
           ) : null}
+          <div className="sb-settings-row">
+            <div className="sb-settings-row-text">
+              <span>{t('settings:ai.compactionThreshold')}</span>
+              <small>{t('settings:ai.compactionNote')}</small>
+            </div>
+            <div className="sb-settings-actions">
+              <button
+                type="button"
+                className="sb-button sb-button-small"
+                disabled={
+                  draft.compactionThreshold === DEFAULT_COMPACTION_THRESHOLD
+                }
+                onClick={() =>
+                  onChange({
+                    compactionThreshold: DEFAULT_COMPACTION_THRESHOLD,
+                  })
+                }
+              >
+                {t('settings:ai.compactionReset')}
+              </button>
+              <input
+                className="sb-text-field sb-text-field-number"
+                type="number"
+                min={1000}
+                step={1000}
+                value={draft.compactionThreshold}
+                onChange={(event) => {
+                  const next = Number(event.target.value)
+                  if (!Number.isFinite(next) || next <= 0) return
+                  onChange({ compactionThreshold: Math.round(next) })
+                }}
+              />
+            </div>
+          </div>
           <div className="sb-settings-row sb-settings-row-stack">
             <div className="sb-settings-row-text">
               <span>{t('settings:ai.headers')}</span>
