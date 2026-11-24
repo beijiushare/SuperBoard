@@ -312,11 +312,16 @@
   flex: none;
 }
 
-.sb-kt-quote-wrap.is-collapsed .sb-kt-quote,
-.sb-kt-quote-wrap.is-collapsed .sb-kt-question {
+.sb-kt-quote-wrap.is-collapsed .sb-kt-quote-text {
   display: -webkit-box;
+  max-height: 3.1em;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.sb-kt-quote-wrap.is-collapsed .sb-kt-quote,
+.sb-kt-quote-wrap.is-collapsed .sb-kt-question {
   overflow: hidden;
 }
 
