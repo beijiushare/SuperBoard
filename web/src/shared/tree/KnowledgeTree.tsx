@@ -20,6 +20,7 @@ import {
 import { usePreferences } from '../../canvas/editor/preferences'
 import { TreeCard } from './TreeCard'
 import { TreeCardMenu } from './TreeCardMenu'
+import { TreeSelectionMenu } from './TreeSelectionMenu'
 
 export interface KnowledgeTreeSize {
   width: number
@@ -125,6 +126,12 @@ export function KnowledgeTree({
     nodeId: string
     left: number
     top: number
+  } | null>(null)
+  const [textMenu, setTextMenu] = useState<{
+    nodeId: string
+    left: number
+    top: number
+    text: string
   } | null>(null)
   // Cards fade out before they leave the data, so deleting reads like adding.
   const [exiting, setExiting] = useState<Set<string>>(() => new Set())
@@ -259,6 +266,37 @@ export function KnowledgeTree({
     )
   }
 
+  const quoteOf = (nodeId: string, text: string) => {
+    const node = treeNodeById(data, nodeId)
+    return {
+      text,
+      title:
+        node?.title.trim() || node?.question.trim() || undefined,
+    }
+  }
+
+  /** Explain the excerpt right away: a child card that starts generating. */
+  const explainSelection = (nodeId: string, text: string) => {
+    const { data: next } = addTreeChild(data, nodeId, {
+      quote: quoteOf(nodeId, text),
+      question: t('editor:tree.explainQuestion'),
+      title: t('editor:tree.explainTitle', { text: text.slice(0, 16) }),
+      status: 'done',
+    })
+    window.getSelection()?.removeAllRanges()
+    onChange?.(next)
+  }
+
+  /** Ask about the excerpt: a child draft that keeps it as a quote. */
+  const askSelection = (nodeId: string, text: string) => {
+    const { data: next, node } = addTreeChild(data, nodeId, {
+      quote: quoteOf(nodeId, text),
+    })
+    if (node) seed(node.id, TREE_DRAFT_HEIGHT)
+    window.getSelection()?.removeAllRanges()
+    onChange?.(next)
+  }
+
   return (
     <div
       className="sb-kt"
@@ -305,6 +343,7 @@ export function KnowledgeTree({
             onDelete={(mode) => deleteNode(node.id, mode)}
             onRetry={() => onGenerate?.(node.id)}
             onOpenMenu={(anchor) => setMenu({ nodeId: node.id, ...anchor })}
+            onTextMenu={(payload) => setTextMenu({ nodeId: node.id, ...payload })}
           />
         ))}
         {nodes
@@ -368,6 +407,14 @@ export function KnowledgeTree({
             )
           })}
       </div>
+      {textMenu ? (
+        <TreeSelectionMenu
+          anchor={{ left: textMenu.left, top: textMenu.top }}
+          onExplain={() => explainSelection(textMenu.nodeId, textMenu.text)}
+          onAsk={() => askSelection(textMenu.nodeId, textMenu.text)}
+          onClose={() => setTextMenu(null)}
+        />
+      ) : null}
       {menu && treeNodeById(data, menu.nodeId) ? (
         <TreeCardMenu
           anchor={{ left: menu.left, top: menu.top }}

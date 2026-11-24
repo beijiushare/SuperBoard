@@ -27,6 +27,11 @@ interface TreeCardProps {
   onDelete: (mode: 'branch' | 'promote') => void
   onRetry: () => void
   onOpenMenu: (anchor: { left: number; top: number }) => void
+  onTextMenu: (payload: {
+    left: number
+    top: number
+    text: string
+  }) => void
 }
 
 function CardBody({
@@ -87,6 +92,7 @@ export function TreeCard({
   onDelete,
   onRetry,
   onOpenMenu,
+  onTextMenu,
 }: TreeCardProps) {  const { t } = useTranslation(['editor'])
   const draft = node.status === 'draft'
   const [draftText, setDraftText] = useState('')
@@ -95,6 +101,7 @@ export function TreeCard({
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const titleRef = useRef<HTMLInputElement>(null)
+  const cardRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (!draft) return
@@ -131,7 +138,10 @@ export function TreeCard({
 
   return (
     <article
-      ref={register}
+      ref={(element) => {
+        cardRef.current = element
+        register(element)
+      }}
       data-tree-node-id={node.id}
       className={`sb-kt-card${node.bodyCollapsed ? ' is-collapsed' : ''}${
         draft ? ' is-draft' : ''
@@ -144,6 +154,21 @@ export function TreeCard({
       onContextMenu={(event) => {
         event.preventDefault()
         event.stopPropagation()
+        const selection = window.getSelection()
+        const text =
+          selection && !selection.isCollapsed
+            ? selection.toString().trim()
+            : ''
+        // A right-click on selected text asks what to do with it; everywhere
+        // else it opens the card style menu.
+        if (text && cardRef.current?.contains(selection?.anchorNode ?? null)) {
+          onTextMenu({
+            left: event.clientX,
+            top: event.clientY,
+            text: text.slice(0, 2000),
+          })
+          return
+        }
         onOpenMenu({ left: event.clientX, top: event.clientY })
       }}
       style={{

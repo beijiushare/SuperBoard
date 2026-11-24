@@ -305,6 +305,35 @@
   font-size: 12px;
 }
 
+.sb-kt-quote-menu {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  width: 180px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid #d8d4ca;
+  border-radius: 8px;
+  background: #fffdf8;
+  box-shadow: 0 12px 32px rgb(20 18 10 / 16%);
+}
+
+.sb-kt-quote-menu button {
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: var(--sb-text, #1f1e1c);
+  cursor: pointer;
+  font-size: 12px;
+  text-align: left;
+}
+
+.sb-kt-quote-menu button:hover {
+  background: #f2efe7;
+}
+
 .sb-kt-menu {
   position: fixed;
   z-index: 10000;
