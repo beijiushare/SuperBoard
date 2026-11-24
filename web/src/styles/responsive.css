@@ -1,12 +1,4 @@
 @media (max-width: 860px) {
-  .sb-toolbar {
-    overflow-x: auto;
-  }
-
-  .sb-board-select span {
-    display: none;
-  }
-
   .sb-tree-panel {
     position: absolute;
     z-index: 300;
@@ -34,14 +26,6 @@
       transform 280ms cubic-bezier(0.32, 0.72, 0, 1),
       opacity 200ms ease,
       visibility 0s linear 280ms;
-  }
-
-  .sb-current-board {
-    max-width: 160px;
-  }
-
-  .sb-toolbar-spacer {
-    min-width: 8px;
   }
 
   .sb-modal-backdrop {
