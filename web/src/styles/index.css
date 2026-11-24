@@ -3,6 +3,7 @@
 @import 'vditor/dist/index.css';
 @import './base.css';
 @import './app.css';
+@import './rail.css';
 @import './tree.css';
 @import './blocks.css';
 @import './knowledge-tree.css';
