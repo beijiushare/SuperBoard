@@ -152,25 +152,27 @@ export function CanvasEditorStage({
                   style={{ width: '100%', height: '100%' }}
                 />
               </div>
-              <CanvasEditorOverlay
-                canvas={canvas}
-                viewerRef={viewerRef}
-                selectedIds={selection.selectedIds}
-                onSelect={selection.onSelect}
-                onChange={selection.onChange}
-                onBeforeChange={selection.onBeforeChange}
-                interactive={selection.interactive}
-                selectedEdgeId={selection.selectedEdgeId}
-                onSelectEdge={selection.onSelectEdge}
-                focusedGroupId={selection.focusedGroupId}
-                activeEditingId={selection.activeEditingId}
-                guidesEnabled={selection.guidesEnabled}
-                onToggleBlockEdit={selection.onToggleBlockEdit}
-                onFocusBlockEdit={selection.onFocusBlockEdit}
-                onDeleteBlock={selection.onDeleteBlock}
-                onResetBlockSize={selection.onResetBlockSize}
-                onToggleRatioLock={selection.onToggleRatioLock}
-              />
+              {director.mode ? null : (
+                <CanvasEditorOverlay
+                  canvas={canvas}
+                  viewerRef={viewerRef}
+                  selectedIds={selection.selectedIds}
+                  onSelect={selection.onSelect}
+                  onChange={selection.onChange}
+                  onBeforeChange={selection.onBeforeChange}
+                  interactive={selection.interactive}
+                  selectedEdgeId={selection.selectedEdgeId}
+                  onSelectEdge={selection.onSelectEdge}
+                  focusedGroupId={selection.focusedGroupId}
+                  activeEditingId={selection.activeEditingId}
+                  guidesEnabled={selection.guidesEnabled}
+                  onToggleBlockEdit={selection.onToggleBlockEdit}
+                  onFocusBlockEdit={selection.onFocusBlockEdit}
+                  onDeleteBlock={selection.onDeleteBlock}
+                  onResetBlockSize={selection.onResetBlockSize}
+                  onToggleRatioLock={selection.onToggleRatioLock}
+                />
+              )}
               <CanvasEditorTools
                 canvas={canvas}
                 tool={tools.tool}

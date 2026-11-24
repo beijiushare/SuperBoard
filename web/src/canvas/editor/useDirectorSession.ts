@@ -59,7 +59,9 @@ export function useDirectorSession({
     setPresentation(true)
     setPresentationMenu(null)
     setFrameIndex(index)
-    void viewerRef.current?.viewer?.playDirectorFrame?.(directorFrames[index], true)
+    // Jump straight to the first frame: easing from an unrelated camera makes
+    // the opening look like a swing rather than a cut.
+    void viewerRef.current?.viewer?.playDirectorFrame?.(directorFrames[index], false)
   }
 
   function advancePresentation() {
