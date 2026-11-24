@@ -2,12 +2,6 @@ import { translateServerError } from '../i18n/errors'
 import * as Updates from './bindings/superboard/desktop/services/updateservice'
 import type { Result } from './bindings/superboard/desktop/services/models'
 
-export interface UpdateEnvironment {
-  writable: boolean
-  path?: string
-  reason?: string
-}
-
 export interface UpdateStatus {
   update: boolean
   current: string
@@ -29,30 +23,19 @@ export async function desktopUpdateVersion() {
   }
 }
 
-export async function desktopUpdateEnvironment(): Promise<UpdateEnvironment> {
-  const body = parse<UpdateEnvironment & { error?: string }>(
-    await Updates.CanAutoUpdate(),
-  )
-  if (body.error) throw new Error(translateServerError(body.error))
-  return body
-}
-
 export async function desktopCheckUpdate(): Promise<UpdateStatus> {
   const body = parse<UpdateStatus & { error?: string }>(await Updates.Check())
   if (body.error) throw new Error(translateServerError(body.error))
   return body
 }
 
-export async function desktopInstallUpdate() {
-  const body = parse<{ ready?: boolean; error?: string }>(await Updates.Install())
-  if (body.error) throw new Error(translateServerError(body.error))
-}
-
-export async function desktopRestartUpdate() {
-  const body = parse<{ restarting?: boolean; error?: string }>(
-    await Updates.Restart(),
+/** Open the folder that holds the executable and select it. */
+export async function desktopRevealAppFolder() {
+  const body = parse<{ ok?: boolean; path?: string; error?: string }>(
+    await Updates.RevealAppFolder(),
   )
   if (body.error) throw new Error(translateServerError(body.error))
+  return body.path ?? ''
 }
 
 export async function desktopOpenUpdatePage() {

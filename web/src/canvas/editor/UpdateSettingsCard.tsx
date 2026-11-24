@@ -19,15 +19,13 @@ export function UpdateSettingsCard() {
         <div className="sb-settings-row">
           <div className="sb-settings-row-text">
             <span>{t('settings:update.current', { version })}</span>
-            {update.writable === false ? (
-              <small>{t('settings:update.readonly')}</small>
-            ) : null}
+            <small>{t('settings:update.manualOnly')}</small>
           </div>
           <div className="sb-settings-actions">
             <button
               type="button"
               className="sb-button sb-button-small"
-              disabled={update.phase !== 'idle' || update.writable === false}
+              disabled={update.phase !== 'idle'}
               onClick={update.check}
             >
               {update.phase === 'checking'
@@ -37,17 +35,13 @@ export function UpdateSettingsCard() {
             <button
               type="button"
               className="sb-button sb-button-small sb-button-ghost"
-              onClick={update.openPage}
+              onClick={update.reveal}
             >
-              {t('settings:update.manual')}
+              {t('settings:update.reveal')}
             </button>
           </div>
         </div>
-        {update.phase === 'installing' ? (
-          <p className="sb-settings-note">{t('settings:update.installing')}</p>
-        ) : update.phase === 'restarting' ? (
-          <p className="sb-settings-note">{t('settings:update.restarting')}</p>
-        ) : update.info ? (
+        {update.info ? (
           <div className="sb-settings-update">
             <p className="sb-settings-row-title">
               {t('settings:update.available', {
@@ -63,18 +57,28 @@ export function UpdateSettingsCard() {
             {update.info.notes ? (
               <pre className="sb-settings-update-notes">{update.info.notes}</pre>
             ) : null}
+            <p className="sb-settings-note">{t('settings:update.quitHint')}</p>
             <button
               type="button"
               className="sb-button sb-button-primary sb-button-small"
-              onClick={update.install}
+              onClick={update.openPage}
             >
-              {t('settings:update.install')}
+              {t('settings:update.manual')}
             </button>
           </div>
         ) : update.error ? (
-          <p className="sb-settings-note sb-settings-note-error">
-            {t('settings:update.failed', { message: update.error })}
-          </p>
+          <div className="sb-settings-update">
+            <p className="sb-settings-note sb-settings-note-error">
+              {t('settings:update.failed', { message: update.error })}
+            </p>
+            <button
+              type="button"
+              className="sb-button sb-button-small"
+              onClick={update.openPage}
+            >
+              {t('settings:update.manual')}
+            </button>
+          </div>
         ) : update.checked ? (
           <p className="sb-settings-note">{t('settings:update.latest')}</p>
         ) : null}

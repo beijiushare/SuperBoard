@@ -1,19 +1,16 @@
 import { useEffect, useState } from 'react'
 import {
   desktopCheckUpdate,
-  desktopInstallUpdate,
   desktopOpenUpdatePage,
-  desktopRestartUpdate,
-  desktopUpdateEnvironment,
+  desktopRevealAppFolder,
   desktopUpdateVersion,
   type UpdateStatus,
 } from '../../desktop/update'
 
-export type UpdatePhase = 'idle' | 'checking' | 'installing' | 'restarting'
+export type UpdatePhase = 'idle' | 'checking'
 
 /** Desktop update state for the settings dialog. */
 export function useDesktopUpdate() {
-  const [writable, setWritable] = useState<boolean | null>(null)
   const [phase, setPhase] = useState<UpdatePhase>('idle')
   const [checked, setChecked] = useState(false)
   const [info, setInfo] = useState<UpdateStatus | null>(null)
@@ -22,13 +19,6 @@ export function useDesktopUpdate() {
 
   useEffect(() => {
     let alive = true
-    void desktopUpdateEnvironment()
-      .then((env) => {
-        if (alive) setWritable(env.writable)
-      })
-      .catch(() => {
-        if (alive) setWritable(null)
-      })
     void desktopUpdateVersion()
       .then((value) => {
         if (alive) setVersion(value)
@@ -59,25 +49,17 @@ export function useDesktopUpdate() {
       .finally(() => setPhase('idle'))
   }
 
-  function install() {
-    setPhase('installing')
-    setError('')
-    void desktopInstallUpdate()
-      .then(() => {
-        setPhase('restarting')
-        return desktopRestartUpdate()
-      })
-      .catch((reason: unknown) => {
-        setPhase('idle')
-        setError(message(reason))
-      })
-  }
-
   function openPage() {
     void desktopOpenUpdatePage().catch((reason: unknown) => {
       setError(message(reason))
     })
   }
 
-  return { writable, phase, checked, info, error, version, check, install, openPage }
+  function reveal() {
+    void desktopRevealAppFolder().catch((reason: unknown) => {
+      setError(message(reason))
+    })
+  }
+
+  return { phase, checked, info, error, version, check, openPage, reveal }
 }

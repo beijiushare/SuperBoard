@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sync"
-	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/updater"
@@ -120,43 +121,31 @@ func (s *UpdateService) Check() Result {
 	})
 }
 
-// Install downloads, verifies and stages the release. The UI calls Restart
-// afterwards, once it has received this response and can show a hint.
-func (s *UpdateService) Install() Result {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	app := application.Get()
-	if app == nil {
-		return fail(500, "update.notReady")
+// RevealAppFolder opens the folder that holds the executable and selects it.
+// Auto-install was removed because downloads kept failing; the settings dialog
+// now points the user at the file they need to replace.
+func (s *UpdateService) RevealAppFolder() Result {
+	exe, err := os.Executable()
+	if err != nil {
+		return fail(500, err.Error())
 	}
-	if app.Updater.State() != updater.StateAvailable {
-		return fail(400, "update.noRelease")
+	dir := filepath.Dir(exe)
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("explorer", "/select,", exe)
+	case "darwin":
+		cmd = exec.Command("open", "-R", exe)
+	default:
+		cmd = exec.Command("xdg-open", dir)
 	}
-	if err := app.Updater.DownloadAndInstall(context.Background()); err != nil {
-		return fail(500, "update.installFailed|"+err.Error())
+	if err := cmd.Start(); err != nil {
+		return fail(500, err.Error())
 	}
-	return ok(map[string]any{"ready": true})
+	return ok(map[string]any{"ok": true, "path": dir})
 }
 
-// Restart applies the staged update and relaunches. The short delay lets this
-// binding response reach the webview before the process exits.
-func (s *UpdateService) Restart() Result {
-	app := application.Get()
-	if app == nil {
-		return fail(500, "update.notReady")
-	}
-	if app.Updater.State() != updater.StateReady {
-		return fail(400, "update.noStage")
-	}
-	go func() {
-		time.Sleep(150 * time.Millisecond)
-		_ = app.Updater.Restart(context.Background())
-	}()
-	return ok(map[string]any{"restarting": true})
-}
-
-// OpenDownloadPage opens the GitHub releases page in the system browser, used
-// when the install directory is read-only.
+// OpenDownloadPage opens the GitHub releases page in the system browser.
 func (s *UpdateService) OpenDownloadPage() Result {
 	app := application.Get()
 	if app == nil {

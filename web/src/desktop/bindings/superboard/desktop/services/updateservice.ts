@@ -38,27 +38,19 @@ export function DownloadPage(): $CancellablePromise<string> {
 }
 
 /**
- * Install downloads, verifies and stages the release. The UI calls Restart
- * afterwards, once it has received this response and can show a hint.
- */
-export function Install(): $CancellablePromise<$models.Result> {
-    return $Call.ByID(3807640923);
-}
-
-/**
- * OpenDownloadPage opens the GitHub releases page in the system browser, used
- * when the install directory is read-only.
+ * OpenDownloadPage opens the GitHub releases page in the system browser.
  */
 export function OpenDownloadPage(): $CancellablePromise<$models.Result> {
     return $Call.ByID(900509643);
 }
 
 /**
- * Restart applies the staged update and relaunches. The short delay lets this
- * binding response reach the webview before the process exits.
+ * RevealAppFolder opens the folder that holds the executable and selects it.
+ * Auto-install was removed because downloads kept failing; the settings dialog
+ * now points the user at the file they need to replace.
  */
-export function Restart(): $CancellablePromise<$models.Result> {
-    return $Call.ByID(101556483);
+export function RevealAppFolder(): $CancellablePromise<$models.Result> {
+    return $Call.ByID(502978736);
 }
 
 export function Version(): $CancellablePromise<string> {
