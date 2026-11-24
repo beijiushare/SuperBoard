@@ -298,6 +298,33 @@
   font-variant-numeric: tabular-nums;
 }
 
+.sb-preferences-dialog .sb-icon-button {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--sb-radius-sm);
+  background: transparent;
+  color: var(--sb-text-muted);
+  cursor: pointer;
+  place-items: center;
+  transition:
+    background var(--sb-motion),
+    color var(--sb-motion);
+}
+
+.sb-preferences-dialog .sb-icon-button:hover:not(:disabled) {
+  background: var(--sb-surface-muted);
+  color: var(--sb-text);
+}
+
+.sb-preferences-dialog .sb-icon-button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
 .sb-preferences-dialog .sb-settings-badge {
   flex: none;
   padding: 3px 10px;

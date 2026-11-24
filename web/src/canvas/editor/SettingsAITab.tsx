@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Select } from '../../components/ui/select'
+import { RefreshIcon } from './BlockActionIcons'
 import { desktopMode } from '../../desktop/platform'
 import { aiChat, aiClearAllKeys, aiClearKey, aiKeyStatus, aiSetKey } from '../../desktop/ai'
 import {
@@ -205,7 +206,9 @@ export function SettingsAITab({
             <div className="sb-settings-actions">
               <button
                 type="button"
-                className="sb-button sb-button-small"
+                className="sb-icon-button"
+                title={t('settings:ai.compactionReset')}
+                aria-label={t('settings:ai.compactionReset')}
                 disabled={
                   draft.compactionThreshold === DEFAULT_COMPACTION_THRESHOLD
                 }
@@ -215,7 +218,7 @@ export function SettingsAITab({
                   })
                 }
               >
-                {t('settings:ai.compactionReset')}
+                <RefreshIcon size={14} />
               </button>
               <input
                 className="sb-text-field sb-text-field-number"

@@ -86,7 +86,7 @@
   flex: none;
   align-items: flex-start;
   gap: 6px;
-  padding: 10px 64px 6px 12px;
+  padding: 10px 64px 10px 12px;
 }
 
 /* Card actions stay out of the way until the card is hovered. */
