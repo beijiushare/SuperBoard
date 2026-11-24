@@ -54,7 +54,6 @@ export function MarkdownVditor({
     }
     element.addEventListener('keydown', onKeyDown, true)
     void import('vditor').then(async ({ default: VditorClass }) => {
-      await import('vditor/dist/index.css')
       try {
         await loadMathJax()
       } catch (error) {

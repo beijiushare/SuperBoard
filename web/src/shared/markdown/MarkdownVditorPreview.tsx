@@ -29,7 +29,6 @@ async function renderHtml(source: string) {
   const cached = cachedHtml(source)
   if (cached) return cached
   const promise = (async () => {
-    await import('vditor/dist/index.css')
     const { default: Vditor } = await import('vditor')
     return Vditor.md2html(source, {
       cdn: vditorCdn,

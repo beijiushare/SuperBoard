@@ -1,3 +1,6 @@
+/* Vditor first: its stylesheet must lose to ours at equal specificity, which
+   is what keeps most of markdown.css free of !important overrides. */
+@import 'vditor/dist/index.css';
 @import './base.css';
 @import './app.css';
 @import './tree.css';
