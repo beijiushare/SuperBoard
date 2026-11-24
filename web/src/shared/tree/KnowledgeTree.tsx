@@ -23,6 +23,8 @@ interface KnowledgeTreeProps {
   data: SuperBoardTreeData
   /** Called whenever the cards settle on a new block size. */
   onSize?: (size: KnowledgeTreeSize) => void
+  /** A card was pressed with the primary button; selects the block. */
+  onActivate?: () => void
 }
 
 /**
@@ -98,7 +100,7 @@ function CardBody({ node }: { node: SuperBoardTreeNode }) {
   return <MarkdownVditorPreview source={node.answer} />
 }
 
-export function KnowledgeTree({ data, onSize }: KnowledgeTreeProps) {
+export function KnowledgeTree({ data, onSize, onActivate }: KnowledgeTreeProps) {
   const { heights, register } = useCardHeights()
   const blockDefaults = usePreferences().block
   const layout = layoutTree(data, heights)
@@ -153,6 +155,9 @@ export function KnowledgeTree({ data, onSize }: KnowledgeTreeProps) {
               className={`sb-kt-card${node.bodyCollapsed ? ' is-collapsed' : ''}${
                 node.status === 'draft' ? ' is-draft' : ''
               }`}
+              onPointerDown={(event) => {
+                if (event.button === 0) onActivate?.()
+              }}
               style={{
                 left: position.x,
                 top: position.y,

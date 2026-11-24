@@ -17,6 +17,29 @@ interface UseCanvasViewportGesturesOptions {
   canvas: CanvasDocument | null
 }
 
+function isScroller(element: HTMLElement) {
+  if (element.scrollHeight <= element.clientHeight + 1) return false
+  const overflowY = getComputedStyle(element).overflowY
+  return overflowY === 'auto' || overflowY === 'scroll'
+}
+
+/**
+ * The innermost scrollable box under the pointer. A tree card can contain many
+ * scrollable cards, so walking up from the pointer is the only correct lookup;
+ * searching the whole block would always hit the first overflowing one.
+ */
+function scrollableTarget(target: HTMLElement, host: HTMLElement) {
+  let element: HTMLElement | null = target
+  while (element) {
+    if (isScroller(element)) return element
+    if (element === host) break
+    element = element.parentElement
+  }
+  // The editor overlay scrolls internally, so the scroller can also be a child.
+  const candidates = [host, ...host.querySelectorAll<HTMLElement>('*')]
+  return candidates.find((candidate) => candidate !== host && isScroller(candidate)) ?? null
+}
+
 /** Wheel zoom/scroll and middle/right-button pan for the canvas stage. */
 export function useCanvasViewportGestures({
   stageRef,
@@ -41,12 +64,7 @@ export function useCanvasViewportGestures({
             ? document.getElementById(hitbox.dataset.nodeId)
             : null)
         if (host) {
-          const candidates = [host, ...host.querySelectorAll<HTMLElement>('*')]
-          const scroller = candidates.find((element) => {
-            if (element.scrollHeight <= element.clientHeight + 1) return false
-            const overflowY = getComputedStyle(element).overflowY
-            return overflowY === 'auto' || overflowY === 'scroll'
-          })
+          const scroller = scrollableTarget(target, host)
           if (scroller) {
             event.preventDefault()
             event.stopPropagation()

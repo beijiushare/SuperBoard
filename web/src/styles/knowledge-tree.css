@@ -44,6 +44,7 @@
   box-shadow: 0 1px 2px rgb(31 30 28 / 6%);
   font-size: 13px;
   line-height: 1.6;
+  user-select: text;
 }
 
 .sb-kt-head {

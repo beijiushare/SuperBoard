@@ -372,7 +372,8 @@ export function CanvasEditorOverlay({
             key={`block-hit-${node.id}`}
             data-node-id={node.id}
             className={`sb-editor-hitbox sb-editor-block-hitbox${
-              selectedIds.includes(node.id) && hasIframeContent(node)
+              isAutoSizedBlock(node) ||
+              (selectedIds.includes(node.id) && hasIframeContent(node))
                 ? ' is-interactive'
                 : ''
             }`}
@@ -419,7 +420,9 @@ export function CanvasEditorOverlay({
         <div
           key={node.id}
           className={`sb-editor-selection${
-            hasIframeContent(node) || activeEditingId === node.id
+            hasIframeContent(node) ||
+            isAutoSizedBlock(node) ||
+            activeEditingId === node.id
               ? ' is-interactive'
               : ''
           }`}
@@ -430,7 +433,7 @@ export function CanvasEditorOverlay({
         >
           {selectionBoxNodes.length === 1 ? (
             <>
-              {hasIframeContent(node)
+              {hasIframeContent(node) || isAutoSizedBlock(node)
                 ? SELECTION_SIDES.map((side) => (
                     <span
                       key={`drag-${side}`}

@@ -174,7 +174,11 @@ export function TextSlot({
         />
       </Suspense>
     ) : ext?.kind === 'tree' && ext.tree ? (
-      <KnowledgeTree data={ext.tree} onSize={onTreeSize} />
+      <KnowledgeTree
+        data={ext.tree}
+        onSize={onTreeSize}
+        onActivate={() => onSelect?.(node.id)}
+      />
     ) : (
       <div
         className="sb-plain-text"
