@@ -40,6 +40,16 @@ export interface CanvasViewerHandle {
     playDirectorFrame?: (frame: CanvasFrame, animate?: boolean) => Promise<void>
     restoreDirectorCamera?: () => void
     captureDirectorCamera?: () => void
+    getDirectorCamera?: () => {
+      offsetX: number
+      offsetY: number
+      scale: number
+    }
+    setDirectorCamera?: (camera: {
+      offsetX: number
+      offsetY: number
+      scale: number
+    }) => void
   }
 }
 

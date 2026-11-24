@@ -16,14 +16,6 @@ type Controller = {
   onRefresh: { subscribe: (callback: () => void) => () => void }
 }
 
-type DirectorOptions = {
-  canvas?: {
-    'x-superboard'?: {
-      director?: { frames?: CanvasFrame[] }
-    }
-  }
-}
-
 export class DirectorLayer extends BaseModule {
   private readonly dm: DataManager
   private readonly controller: Controller
@@ -58,6 +50,8 @@ export class DirectorLayer extends BaseModule {
       playDirectorFrame: this.playFrame,
       restoreDirectorCamera: this.restoreCamera,
       captureDirectorCamera: this.captureCamera,
+      getDirectorCamera: this.getCamera,
+      setDirectorCamera: this.setCamera,
     })
     this.unsubscribe = this.controller.onRefresh.subscribe(this.draw)
     this.onStart(this.start)
@@ -91,26 +85,9 @@ export class DirectorLayer extends BaseModule {
     this.resize()
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     if (!this.visible) return
-    const { offsetX, offsetY, scale } = this.dm.data
-    const frames = (this.options as DirectorOptions).canvas?.['x-superboard']?.director?.frames ?? []
-    this.ctx.save()
-    this.ctx.translate(offsetX, offsetY)
-    this.ctx.scale(scale, scale)
-    for (const frame of frames) {
-      this.ctx.fillStyle = 'rgba(47, 128, 237, 0.04)'
-      this.ctx.strokeStyle = '#2f80ed'
-      this.ctx.lineWidth = 2 / scale
-      this.ctx.fillRect(frame.x, frame.y, frame.width, frame.height)
-      this.ctx.strokeRect(frame.x, frame.y, frame.width, frame.height)
-      this.ctx.fillStyle = '#2f80ed'
-      this.ctx.font = `${12 / scale}px sans-serif`
-      this.ctx.fillText(
-        `${frame.order}:${frame.name || i18n.t('editor:director.frameCompact', { order: frame.order })}`,
-        frame.x,
-        frame.y - 6 / scale,
-      )
-    }
-    this.ctx.restore()
+    // Frames are drawn by the DOM overlay (dashed border, handles, label).
+    // Painting them here as well produced a second solid outline behind every
+    // frame, which read as a stray line.
   }
 
   private readonly playFrame = (frame: CanvasFrame, animate = true) => {
@@ -169,6 +146,25 @@ export class DirectorLayer extends BaseModule {
       offsetY: this.dm.data.offsetY,
       scale: this.dm.data.scale,
     }
+  }
+
+  private readonly getCamera = () => ({
+    offsetX: this.dm.data.offsetX,
+    offsetY: this.dm.data.offsetY,
+    scale: this.dm.data.scale,
+  })
+
+  private readonly setCamera = (camera: {
+    offsetX: number
+    offsetY: number
+    scale: number
+  }) => {
+    cancelAnimationFrame(this.animation)
+    this.dm.data.offsetX = camera.offsetX
+    this.dm.data.offsetY = camera.offsetY
+    this.dm.data.scale = camera.scale
+    this.controller.refresh()
+    this.draw()
   }
 
   private readonly restoreCamera = () => {

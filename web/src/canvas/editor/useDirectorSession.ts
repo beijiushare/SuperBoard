@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type RefObject } from 'react'
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import type { CanvasDocument, CanvasFrame } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 
@@ -53,9 +53,28 @@ export function useDirectorSession({
     viewerRef.current?.viewer?.refresh?.()
   }
 
+  const savedCamera = useRef<{
+    offsetX: number
+    offsetY: number
+    scale: number
+  } | null>(null)
+
+  function restoreCamera() {
+    const viewer = viewerRef.current?.viewer
+    if (savedCamera.current) {
+      viewer?.setDirectorCamera?.(savedCamera.current)
+      return
+    }
+    viewer?.restoreDirectorCamera?.()
+  }
+
   function startPresentation(startIndex = 0) {
     if (directorFrames.length === 0) return
     const index = Math.max(0, Math.min(startIndex, directorFrames.length - 1))
+    // Take the snapshot here as well: entering the mode and starting playback
+    // can happen in the same tick.
+    savedCamera.current =
+      viewerRef.current?.viewer?.getDirectorCamera?.() ?? savedCamera.current
     setPresentation(true)
     setPresentationMenu(null)
     setFrameIndex(index)
@@ -69,7 +88,7 @@ export function useDirectorSession({
     const next = frameIndex + 1
     if (next >= directorFrames.length) {
       setPresentation(false)
-      viewerRef.current?.viewer?.restoreDirectorCamera?.()
+      restoreCamera()
       if (directorMode) viewerRef.current?.viewer?.setDirectorVisible?.(true)
       return
     }
@@ -80,7 +99,7 @@ export function useDirectorSession({
   function exitPresentation() {
     setPresentation(false)
     setPresentationMenu(null)
-    viewerRef.current?.viewer?.restoreDirectorCamera?.()
+    restoreCamera()
     if (directorMode) viewerRef.current?.viewer?.setDirectorVisible?.(true)
   }
 
@@ -92,15 +111,22 @@ export function useDirectorSession({
       setSelectedFrameId(null)
       setFrameControllerOpen(false)
       viewerRef.current?.viewer?.setDirectorVisible?.(false)
-      viewerRef.current?.viewer?.restoreDirectorCamera?.()
+      restoreCamera()
+      savedCamera.current = null
       return
     }
     setDirectorMode(true)
     // Snapshot the editing camera when director mode opens, so playback always
     // returns here instead of to whatever frame was last previewed.
-    requestAnimationFrame(() =>
-      viewerRef.current?.viewer?.captureDirectorCamera?.(),
-    )
+    savedCamera.current =
+      viewerRef.current?.viewer?.getDirectorCamera?.() ?? null
+    requestAnimationFrame(() => {
+      if (!savedCamera.current) {
+        savedCamera.current =
+          viewerRef.current?.viewer?.getDirectorCamera?.() ?? null
+      }
+      viewerRef.current?.viewer?.captureDirectorCamera?.()
+    })
   }
 
   return {
