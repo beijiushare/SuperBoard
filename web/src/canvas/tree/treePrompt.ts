@@ -44,9 +44,40 @@ function questionWithQuote(node: SuperBoardTreeNode): string {
   return `${quoted}\n\n${node.question}`
 }
 
+const COMPACTION_PROMPT = [
+  '你在为一条思考路径写「前情提要」。',
+  '把用户提供的问题与回答压缩成一段背景说明，供后续提问使用。',
+  '只保留：已经确认的结论、关键事实与数据、仍然悬而未决的问题。',
+  '不要复述过程，不要评价，不要提问。',
+  '输出不超过 300 字，纯文本段落。',
+].join('\n')
+
+/** Messages used to summarise everything above a card. */
+export function buildCompactionMessages(
+  data: SuperBoardTreeData,
+  nodeId: string,
+): AIChatMessage[] {
+  const path = treePath(data, nodeId)
+  if (path.length < 2) return []
+  const messages: AIChatMessage[] = [
+    { role: 'system', content: COMPACTION_PROMPT },
+  ]
+  for (const ancestor of path.slice(0, -1)) {
+    if (ancestor.question.trim()) {
+      messages.push({ role: 'user', content: questionWithQuote(ancestor) })
+    }
+    if (ancestor.answer.trim()) {
+      messages.push({ role: 'assistant', content: ancestor.answer })
+    }
+  }
+  messages.push({ role: 'user', content: '请把以上对话压缩成前情提要。' })
+  return messages
+}
+
 /**
  * Context is the root -> node path only. Sibling branches never enter the
- * prompt, so exploring two directions does not pollute either answer.
+ * prompt. Once a card carries a compaction, everything it covers is replaced by
+ * that summary.
  */
 export function buildTreeMessages(
   data: SuperBoardTreeData,
@@ -57,17 +88,29 @@ export function buildTreeMessages(
   const current = path[path.length - 1]
   if (!current.question.trim()) return []
 
-  const messages: AIChatMessage[] = [{ role: 'system', content: SYSTEM_PROMPT }]
-  for (const ancestor of path.slice(0, -1)) {
-    if (ancestor.question.trim()) {
-      messages.push({ role: 'user', content: questionWithQuote(ancestor) })
-    }
-    if (ancestor.answer.trim()) {
-      messages.push({ role: 'assistant', content: ancestor.answer })
-    }
+  let startIndex = 0
+  let summary = ''
+  for (let index = path.length - 1; index >= 0; index -= 1) {
+    const compaction = path[index].compaction
+    if (!compaction) continue
+    summary = compaction.text.trim()
+    const covered = path.findIndex((item) => item.id === compaction.coversUpTo)
+    startIndex = covered >= 0 ? covered + 1 : index
+    break
   }
 
-  messages.push({ role: 'user', content: questionWithQuote(current) })
+  const messages: AIChatMessage[] = [{ role: 'system', content: SYSTEM_PROMPT }]
+  if (summary) {
+    messages.push({ role: 'user', content: `前情提要：\n${summary}` })
+  }
+  for (const node of path.slice(startIndex)) {
+    if (node.question.trim()) {
+      messages.push({ role: 'user', content: questionWithQuote(node) })
+    }
+    if (node.answer.trim()) {
+      messages.push({ role: 'assistant', content: node.answer })
+    }
+  }
   return messages
 }
 

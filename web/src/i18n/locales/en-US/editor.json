@@ -50,6 +50,7 @@
   "tree.explainTitle": "Explain: {{text}}",
   "tree.contextNone": "First question: only this one is sent",
   "tree.contextTokens": "~{{tokens}} tokens",
+  "tree.compaction": "Context summary",
   "tree.collapseQuote": "Collapse quote",
   "tree.expandQuote": "Expand quote",
   "tree.questionPlaceholder": "Ask a question, Enter to submit",

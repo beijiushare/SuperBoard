@@ -24,6 +24,7 @@ import {
   type SuperBoardTreeData,
 } from '../web/src/canvas/model'
 import {
+  buildCompactionMessages,
   buildTreeMessages,
   estimateTokens,
 } from '../web/src/canvas/tree/treePrompt'
@@ -318,6 +319,23 @@ assert.equal(tallLayout.positions.c.y, 150)
 assert.equal(
   tallLayout.positions.r.y + 200,
   tallLayout.positions.c.y + 50,
+)
+
+// A compaction on a card replaces everything it covers with one summary.
+const compacted = updateTreeNode(asked, 'a1', {
+  compaction: { text: '前情摘要文本', coversUpTo: 'a', createdAt: at },
+})
+const compactedMessages = buildTreeMessages(compacted, 'a1')
+assert.equal(compactedMessages[1].role, 'user')
+assert.ok(compactedMessages[1].content.startsWith('前情提要：'))
+assert.equal(compactedMessages.length, 3)
+assert.equal(compactedMessages.at(-1)?.content, 'why')
+
+// The summarisation request carries the ancestors, not the current question.
+const compactionMessages = buildCompactionMessages(asked, 'a1')
+assert.ok(compactionMessages.length >= 4)
+assert.ok(
+  compactionMessages.at(-1)?.content.includes('前情提要'),
 )
 
 console.log('canvas model tests passed')

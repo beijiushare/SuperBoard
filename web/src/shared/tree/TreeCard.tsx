@@ -393,6 +393,16 @@ export function TreeCard({
         </div>
       ) : (
         <div className="sb-kt-body">
+          {node.compaction ? (
+            <div className="sb-kt-compaction">
+              <span className="sb-kt-compaction-label">
+                {t('editor:tree.compaction')}
+              </span>
+              <span className="sb-kt-compaction-text">
+                {node.compaction.text}
+              </span>
+            </div>
+          ) : null}
           {node.quote ? (
             <TreeQuote
               text={node.quote.text}

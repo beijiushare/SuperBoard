@@ -229,11 +229,42 @@
   color: var(--sb-text, #1f1e1c);
 }
 
-.sb-kt-draft {
-  padding: 0 10px 8px;
+/* Compaction summary: the part of the path replaced by a summary. Purple marks
+   it as derived content, not something the user wrote. */
+.sb-kt-compaction {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  border: 1px solid #cbb8e8;
+  border-radius: 6px;
+  background: #f7f2ff;
+  color: #5b4a75;
+  font-size: 11.5px;
+  line-height: 1.55;
 }
 
-.sb-kt-draft textarea {
+.sb-kt-compaction-label {
+  color: #7c5cae;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sb-kt-compaction-text {
+  display: -webkit-box;
+  max-height: 4.65em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow-wrap: anywhere;
+}
+
+.sb-kt-draft {
+  padding: 0 10px 8px;
+}.sb-kt-draft textarea {
   width: 100%;
   min-height: 48px;
   padding: 0;

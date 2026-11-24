@@ -22,7 +22,7 @@ import {
 } from '../model'
 import { CanvasEditorStage } from './CanvasEditorStage'
 import { aiChat } from '../../desktop/ai'
-import { buildTreeMessages, splitAnswerTitle } from '../tree/treePrompt'
+import { buildTreeMessages, buildCompactionMessages, estimateTokens, splitAnswerTitle } from '../tree/treePrompt'
 import { activeAISettings, getPreferences } from './preferences'
 import {
   type CanvasMenuState,
@@ -385,11 +385,35 @@ export function CanvasEditorApp() {
         if (!messages.length) throw new Error('empty prompt')
         const slug =
           canvasRef.current?.['x-superboard']?.meta.slug ?? 'board'
-        // One session per tree block: OpenCode Zen uses it to pin routing and
-        // prompt caching to a single conversation.
+
+        // Long paths are summarised first: the summary replaces everything down
+        // to the parent, so the next request stays inside the context window.
+        let workingTree = tree
+        const node = tree.nodes.find((item) => item.id === nodeId)
+        if (
+          node?.parentId &&
+          !node.compaction &&
+          estimateTokens(messages) > preferences.ai.compactionThreshold
+        ) {
+          const summary = await aiChat(
+            { ...settings, session: `${slug}:${blockId}` },
+            buildCompactionMessages(tree, nodeId),
+          )
+          if (summary.trim()) {
+            workingTree = updateTreeNode(tree, nodeId, {
+              compaction: {
+                text: summary.trim(),
+                coversUpTo: node.parentId,
+                createdAt: new Date().toISOString(),
+              },
+            })
+            patchTree(blockId, () => workingTree)
+          }
+        }
+
         const content = await aiChat(
           { ...settings, session: `${slug}:${blockId}` },
-          messages,
+          buildTreeMessages(workingTree, nodeId),
         )
         const { title, body } = splitAnswerTitle(content)
         patchTree(blockId, (current) =>

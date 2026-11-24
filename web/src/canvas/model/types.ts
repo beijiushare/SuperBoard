@@ -193,6 +193,13 @@ export interface SuperBoardTreeNode {
   quoteCollapsed?: boolean
   /** Fold the question block to two lines. */
   questionCollapsed?: boolean
+  /** Summary of the path above this card, produced when the context got long. */
+  compaction?: {
+    text: string
+    /** Deepest ancestor covered by the summary. */
+    coversUpTo: string
+    createdAt: string
+  }
   /** Per-card colours; absent means follow the global block defaults. */
   style?: { background?: string; border?: string }
 }

@@ -50,6 +50,7 @@
   "tree.explainTitle": "解释：{{text}}",
   "tree.contextNone": "首次提问，只发送这条",
   "tree.contextTokens": "约 {{tokens}} tokens",
+  "tree.compaction": "前情摘要",
   "tree.collapseQuote": "折叠引用",
   "tree.expandQuote": "展开引用",
   "tree.questionPlaceholder": "输入问题，回车提交",
