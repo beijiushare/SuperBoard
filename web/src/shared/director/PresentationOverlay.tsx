@@ -5,6 +5,7 @@ interface PresentationOverlayProps {
   menu: { x: number; y: number } | null
   onMenu: (menu: { x: number; y: number }) => void
   onAdvance: () => void
+  onPrevious: () => void
   onExit: () => void
 }
 
@@ -12,15 +13,21 @@ export function PresentationOverlay({
   menu,
   onMenu,
   onAdvance,
+  onPrevious,
   onExit,
 }: PresentationOverlayProps) {
   const { t } = useTranslation(['editor'])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === ' ' || event.key === 'Spacebar') {
+      if (event.key === ' ' || event.key === 'Spacebar' || event.key === 'ArrowRight') {
         event.preventDefault()
         onAdvance()
+        return
+      }
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault()
+        onPrevious()
         return
       }
       if (event.key === 'Escape') {
@@ -30,7 +37,7 @@ export function PresentationOverlay({
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [onAdvance, onExit])
+  }, [onAdvance, onPrevious, onExit])
 
   return (
     <div

@@ -199,6 +199,7 @@ export function CanvasEditorApp() {
     updateDirectorFrames,
     startPresentation,
     advancePresentation,
+    previousPresentation,
     exitPresentation,
     toggleDirector,
     resetDirectorSession,
@@ -799,6 +800,7 @@ export function CanvasEditorApp() {
           menu={presentationMenu}
           onMenu={setPresentationMenu}
           onAdvance={advancePresentation}
+          onPrevious={previousPresentation}
           onExit={exitPresentation}
         />
       ) : null}

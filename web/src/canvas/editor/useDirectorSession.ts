@@ -102,6 +102,14 @@ export function useDirectorSession({
     void viewerRef.current?.viewer?.playDirectorFrame?.(directorFrames[next], true)
   }
 
+  function previousPresentation() {
+    if (!presentation) return
+    const previous = Math.max(0, frameIndex - 1)
+    if (previous === frameIndex) return
+    setFrameIndex(previous)
+    void viewerRef.current?.viewer?.playDirectorFrame?.(directorFrames[previous], true)
+  }
+
   function exitPresentation() {
     setPresentation(false)
     setPresentationMenu(null)
@@ -148,6 +156,7 @@ export function useDirectorSession({
     updateDirectorFrames,
     startPresentation,
     advancePresentation,
+    previousPresentation,
     exitPresentation,
     toggleDirector,
     resetDirectorSession,
