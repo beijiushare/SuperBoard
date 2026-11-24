@@ -54,18 +54,20 @@ export function useDirectorSession({
   }
 
   const savedCamera = useRef<{
-    offsetX: number
-    offsetY: number
+    x: number
+    y: number
     scale: number
   } | null>(null)
 
   function restoreCamera() {
     const viewer = viewerRef.current?.viewer
-    if (savedCamera.current) {
-      viewer?.setDirectorCamera?.(savedCamera.current)
-      return
-    }
-    viewer?.restoreDirectorCamera?.()
+    if (!savedCamera.current) return
+    const camera = savedCamera.current
+    // Restore after the rails come back: the container is narrower then, and the
+    // camera is stored as a world point so the size change cannot shift it.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => viewer?.setDirectorCamera?.(camera))
+    })
   }
 
   function startPresentation(startIndex = 0) {

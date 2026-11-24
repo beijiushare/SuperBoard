@@ -41,15 +41,11 @@ export interface CanvasViewerHandle {
     restoreDirectorCamera?: () => void
     captureDirectorCamera?: () => void
     getDirectorCamera?: () => {
-      offsetX: number
-      offsetY: number
+      x: number
+      y: number
       scale: number
     }
-    setDirectorCamera?: (camera: {
-      offsetX: number
-      offsetY: number
-      scale: number
-    }) => void
+    setDirectorCamera?: (camera: { x: number; y: number; scale: number }) => void
   }
 }
 

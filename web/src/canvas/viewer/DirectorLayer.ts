@@ -148,21 +148,24 @@ export class DirectorLayer extends BaseModule {
     }
   }
 
-  private readonly getCamera = () => ({
-    offsetX: this.dm.data.offsetX,
-    offsetY: this.dm.data.offsetY,
-    scale: this.dm.data.scale,
-  })
+  // The camera is stored as the world point under the container centre, not as
+  // raw pixel offsets: the container changes width when the rails hide during
+  // presentation, and raw offsets would then land the board off-centre.
+  private readonly getCamera = () => {
+    const { container, offsetX, offsetY, scale } = this.dm.data
+    return {
+      x: (container.clientWidth / 2 - offsetX) / scale,
+      y: (container.clientHeight / 2 - offsetY) / scale,
+      scale,
+    }
+  }
 
-  private readonly setCamera = (camera: {
-    offsetX: number
-    offsetY: number
-    scale: number
-  }) => {
+  private readonly setCamera = (camera: { x: number; y: number; scale: number }) => {
     cancelAnimationFrame(this.animation)
-    this.dm.data.offsetX = camera.offsetX
-    this.dm.data.offsetY = camera.offsetY
+    const { container } = this.dm.data
     this.dm.data.scale = camera.scale
+    this.dm.data.offsetX = container.clientWidth / 2 - camera.x * camera.scale
+    this.dm.data.offsetY = container.clientHeight / 2 - camera.y * camera.scale
     this.controller.refresh()
     this.draw()
   }
