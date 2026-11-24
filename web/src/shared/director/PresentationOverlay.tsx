@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface PresentationOverlayProps {
@@ -7,8 +8,30 @@ interface PresentationOverlayProps {
   onExit: () => void
 }
 
-export function PresentationOverlay({ menu, onMenu, onAdvance, onExit }: PresentationOverlayProps) {
+export function PresentationOverlay({
+  menu,
+  onMenu,
+  onAdvance,
+  onExit,
+}: PresentationOverlayProps) {
   const { t } = useTranslation(['editor'])
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === ' ' || event.key === 'Spacebar') {
+        event.preventDefault()
+        onAdvance()
+        return
+      }
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onExit()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [onAdvance, onExit])
+
   return (
     <div
       className="sb-presentation-overlay"

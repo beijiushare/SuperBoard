@@ -63,20 +63,24 @@ export function useDirectorSession({
     const viewer = viewerRef.current?.viewer
     if (!savedCamera.current) return
     const camera = savedCamera.current
-    // Restore after the rails come back: the container is narrower then, and the
-    // camera is stored as a world point so the size change cannot shift it.
+    // Restore a few times: the rail comes back in the same commit, and the
+    // viewer may re-fit the canvas on the resulting resize afterwards.
+    const apply = () => viewer?.setDirectorCamera?.(camera)
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => viewer?.setDirectorCamera?.(camera))
+      requestAnimationFrame(apply)
     })
+    window.setTimeout(apply, 120)
+    window.setTimeout(apply, 400)
   }
 
   function startPresentation(startIndex = 0) {
     if (directorFrames.length === 0) return
     const index = Math.max(0, Math.min(startIndex, directorFrames.length - 1))
-    // Take the snapshot here as well: entering the mode and starting playback
-    // can happen in the same tick.
-    savedCamera.current =
-      viewerRef.current?.viewer?.getDirectorCamera?.() ?? savedCamera.current
+    // Keep the very first snapshot: previewing a single frame before starting
+    // the show must not overwrite the editing camera with that frame's view.
+    if (!savedCamera.current) {
+      savedCamera.current = viewerRef.current?.viewer?.getDirectorCamera?.() ?? null
+    }
     setPresentation(true)
     setPresentationMenu(null)
     setFrameIndex(index)
