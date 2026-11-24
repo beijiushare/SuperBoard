@@ -1603,6 +1603,16 @@
   background: #fff !important;
 }
 
+/* Editing must look like the rendered block: same size and inset. Vditor's
+   editor defaults (16px, its own padding) otherwise differ from the preview. */
+.sb-md-editor .vditor-ir pre.vditor-reset,
+.sb-md-focus-editor .vditor-ir pre.vditor-reset {
+  padding: 18px 20px;
+  color: inherit;
+  font-family: inherit;
+  font-size: 14px;
+}
+
 .sb-md-editing-hidden {
   display: none !important;
 }
