@@ -36,6 +36,13 @@ export function ClearAIKey(provider: string): $CancellablePromise<$models.Result
 }
 
 /**
+ * ClearAllAIKeys removes every SuperBoard credential, for a clean handover.
+ */
+export function ClearAllAIKeys(): $CancellablePromise<$models.Result> {
+    return $Call.ByID(1406437);
+}
+
+/**
  * SetAIKey stores a provider key in the OS credential store.
  */
 export function SetAIKey(provider: string, key: string): $CancellablePromise<$models.Result> {

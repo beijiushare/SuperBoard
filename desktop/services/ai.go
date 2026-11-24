@@ -93,6 +93,14 @@ func (s *AIService) ClearAIKey(provider string) Result {
 	return ok(map[string]any{"ok": true})
 }
 
+// ClearAllAIKeys removes every SuperBoard credential, for a clean handover.
+func (s *AIService) ClearAllAIKeys() Result {
+	if err := keyring.DeleteAll(aiKeyringService); err != nil {
+		return fail(500, err.Error())
+	}
+	return ok(map[string]any{"ok": true})
+}
+
 // chatEndpoint accepts a bare host, a /v1 base URL, or the full endpoint.
 func chatEndpoint(baseURL string) string {
 	base := strings.TrimSpace(baseURL)

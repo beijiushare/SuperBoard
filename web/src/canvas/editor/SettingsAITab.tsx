@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { desktopMode } from '../../desktop/platform'
-import { aiChat, aiClearKey, aiKeyStatus, aiSetKey } from '../../desktop/ai'
+import { aiChat, aiClearAllKeys, aiClearKey, aiKeyStatus, aiSetKey } from '../../desktop/ai'
 import {
   AI_PROVIDERS,
   aiProviderPreset,
@@ -23,6 +23,7 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
   })
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
+  const [confirmClearAll, setConfirmClearAll] = useState(false)
 
   useEffect(() => {
     if (!desktop) return
@@ -69,6 +70,21 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
     try {
       await aiClearKey(draft.provider)
       setStatus(await aiKeyStatus(draft.provider))
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : String(error))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const clearAll = async () => {
+    setBusy(true)
+    setMessage('')
+    try {
+      await aiClearAllKeys()
+      setStatus(await aiKeyStatus(draft.provider))
+      setConfirmClearAll(false)
+      setMessage(t('settings:ai.clearedAll'))
     } catch (error) {
       setMessage(error instanceof Error ? error.message : String(error))
     } finally {
@@ -219,6 +235,47 @@ export function SettingsAITab({ draft, onChange }: SettingsAITabProps) {
           {message ? <p className="sb-settings-note">{message}</p> : null}
         </div>
       </section>
+
+      {desktop ? (
+        <section className="sb-settings-card">
+          <header className="sb-settings-card-head">
+            <div>
+              <h3>{t('settings:ai.clearAllTitle')}</h3>
+              <p>{t('settings:ai.clearAllNote')}</p>
+            </div>
+          </header>
+          <div className="sb-settings-rows">
+            {confirmClearAll ? (
+              <div className="canvas-editor-dialog-actions">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setConfirmClearAll(false)}
+                >
+                  {t('settings:ai.clearAllCancel')}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void clearAll()}
+                >
+                  {t('settings:ai.clearAllConfirm')}
+                </button>
+              </div>
+            ) : (
+              <div className="canvas-editor-dialog-actions">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setConfirmClearAll(true)}
+                >
+                  {t('settings:ai.clearAll')}
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+      ) : null}
     </>
   )
 }

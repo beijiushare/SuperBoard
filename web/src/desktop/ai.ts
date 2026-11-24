@@ -50,6 +50,10 @@ export async function aiClearKey(provider: string) {
   throwIfError(parse(await AI.ClearAIKey(provider)))
 }
 
+export async function aiClearAllKeys() {
+  throwIfError(parse(await AI.ClearAllAIKeys()))
+}
+
 export async function aiChat(
   settings: AIProviderSettings,
   messages: AIChatMessage[],
