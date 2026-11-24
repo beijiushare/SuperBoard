@@ -3,6 +3,7 @@ import {
   TREE_BLOCK_PADDING,
   TREE_CARD_MAX_HEIGHT,
   TREE_CARD_WIDTH,
+  colorWithOpacity,
   layoutTree,
   treeBlockSize,
   treeEdges,
@@ -10,6 +11,7 @@ import {
   type SuperBoardTreeData,
   type SuperBoardTreeNode,
 } from '../../canvas/model'
+import { usePreferences } from '../../canvas/editor/preferences'
 import { MarkdownVditorPreview } from '../markdown/MarkdownVditorPreview'
 
 export interface KnowledgeTreeSize {
@@ -98,6 +100,7 @@ function CardBody({ node }: { node: SuperBoardTreeNode }) {
 
 export function KnowledgeTree({ data, onSize }: KnowledgeTreeProps) {
   const { heights, register } = useCardHeights()
+  const blockDefaults = usePreferences().block
   const layout = layoutTree(data, heights)
   const edges = treeEdges(data, layout.positions, heights)
   const size = treeBlockSize(layout)
@@ -155,12 +158,18 @@ export function KnowledgeTree({ data, onSize }: KnowledgeTreeProps) {
                 top: position.y,
                 width: TREE_CARD_WIDTH,
                 maxHeight: TREE_CARD_MAX_HEIGHT,
-                ...(node.style?.background
-                  ? { background: node.style.background }
-                  : {}),
-                ...(node.style?.border
-                  ? { borderColor: node.style.border }
-                  : {}),
+                // Cards follow the shared block defaults unless they carry an
+                // explicit colour, exactly like a normal block surface.
+                background: colorWithOpacity(
+                  node.style?.background ?? blockDefaults.backgroundColor,
+                  blockDefaults.backgroundOpacity,
+                ),
+                borderColor: colorWithOpacity(
+                  node.style?.border ?? blockDefaults.borderColor,
+                  blockDefaults.borderOpacity,
+                ),
+                borderWidth: `${blockDefaults.borderWidth}px`,
+                borderStyle: blockDefaults.borderStyle,
               }}
             >
               <header className="sb-kt-head">

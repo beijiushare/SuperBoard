@@ -36,7 +36,9 @@
   min-height: 56px;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid #1f1e1c;
+  /* Colour, border width and border style come from the shared block
+     defaults via inline style; these are only fallbacks. */
+  border: 1px solid #b8b5aa;
   border-radius: 10px;
   background: #ffffff;
   box-shadow: 0 1px 2px rgb(31 30 28 / 6%);
