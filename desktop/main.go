@@ -60,6 +60,7 @@ func main() {
 	workspace := services.NewWorkspaceService()
 	exporter := services.NewExportService(workspace)
 	updates := services.NewUpdateService(appVersion)
+	ai := services.NewAIService()
 
 	// Opt-in WebView2 debugging for local UI verification.
 	browserArgs := []string{}
@@ -94,6 +95,7 @@ func main() {
 			application.NewService(workspace),
 			application.NewService(exporter),
 			application.NewService(updates),
+			application.NewService(ai),
 		},
 		Assets: application.AssetOptions{
 			Handler: services.NewAssetHandler(
