@@ -8,6 +8,7 @@ import {
 } from '../../canvas/model'
 import type { BlockStyleDefaults } from '../../canvas/editor/preferences'
 import { MarkdownVditorPreview } from '../markdown/MarkdownVditorPreview'
+import { TreeQuote } from './TreeQuote'
 
 export interface TreeContextPreview {
   /** Ancestor titles, root first. */
@@ -323,15 +324,6 @@ export function TreeCard({
             </span>
           )}
       </header>
-      {node.quote ? (
-        <blockquote className="sb-kt-quote">
-          {node.quote.title ? (
-            <span className="sb-kt-quote-source">{node.quote.title}</span>
-          ) : null}
-          {node.quote.text}
-        </blockquote>
-      ) : null}
-
       {confirmingDelete ? (
         <div className="sb-kt-confirm">
           <span>{t('editor:tree.deleteAsk')}</span>
@@ -396,14 +388,19 @@ export function TreeCard({
           <ContextPreview context={contextFor?.(draftText)} />
         </div>
       ) : (
-        <>
-          {node.question ? (
-            <blockquote className="sb-kt-question">{node.question}</blockquote>
+        <div className="sb-kt-body">
+          {node.quote ? (
+            <TreeQuote
+              text={node.quote.text}
+              source={node.quote.title}
+              tone="quote"
+            />
           ) : null}
-          <div className="sb-kt-body">
-            <CardBody node={node} onRetry={onRetry} />
-          </div>
-        </>
+          {node.question ? (
+            <TreeQuote text={node.question} tone="question" />
+          ) : null}
+          <CardBody node={node} onRetry={onRetry} />
+        </div>
       )}
     </article>
   )
