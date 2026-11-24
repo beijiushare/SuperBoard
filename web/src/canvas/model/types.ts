@@ -85,6 +85,7 @@ export type SuperBoardNodeKind =
   | 'pele'
   | 'schedule'
   | 'media'
+  | 'tree'
   | 'shape'
   | 'drawing'
   | 'group'
@@ -159,6 +160,44 @@ export interface SuperBoardStroke {
   points: Array<[number, number, number?]>
 }
 
+/** A knowledge-tree card lifecycle. */
+export type SuperBoardTreeNodeStatus = 'draft' | 'generating' | 'done' | 'error'
+
+/** Text borrowed from a card, used when asking a follow-up question. */
+export interface SuperBoardTreeQuote {
+  text: string
+  /** Source card id inside this tree, when the excerpt came from one. */
+  nodeId?: string
+  /** Source card title, shown next to the excerpt. */
+  title?: string
+}
+
+export interface SuperBoardTreeNode {
+  id: string
+  parentId: string | null
+  title: string
+  /** The question the user asked, rendered as a quote. */
+  question: string
+  /** Answer body, Markdown. */
+  answer: string
+  quote?: SuperBoardTreeQuote
+  status: SuperBoardTreeNodeStatus
+  createdAt: string
+  /** Hide descendants while keeping this card. */
+  branchCollapsed?: boolean
+  /** Keep the title, the quote and the first lines of the answer. */
+  bodyCollapsed?: boolean
+  /** Per-card colours; absent means follow the global block defaults. */
+  style?: { background?: string; border?: string }
+}
+
+export interface SuperBoardTreeData {
+  version: 1
+  rootId: string
+  /** Array order is sibling order. */
+  nodes: SuperBoardTreeNode[]
+}
+
 export interface SuperBoardNodeExtension {
   kind: SuperBoardNodeKind
   rotation?: number
@@ -177,6 +216,7 @@ export interface SuperBoardNodeExtension {
   groupId?: string
   diagram?: string
   scheduleEvents?: SuperBoardScheduleEvent[]
+  tree?: SuperBoardTreeData
   [key: string]: unknown
 }
 

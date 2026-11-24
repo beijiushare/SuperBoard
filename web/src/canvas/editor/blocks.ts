@@ -1,10 +1,10 @@
 import type { CanvasNode } from '../model'
 import { DEFAULT_PREFERENCES } from './preferences'
 
-export const BLOCK_KINDS = ['text', 'markdown', 'pele', 'schedule', 'media'] as const
+export const BLOCK_KINDS = ['text', 'markdown', 'pele', 'schedule', 'media', 'tree'] as const
 
 export type BlockKind = (typeof BLOCK_KINDS)[number]
-export type BlockEditor = 'text' | 'markdown' | 'pele' | 'schedule' | 'media'
+export type BlockEditor = 'text' | 'markdown' | 'pele' | 'schedule' | 'media' | 'tree'
 
 export const DEFAULT_BLOCK_SIZES = {
   text: { width: 240, height: 36 },
@@ -12,6 +12,7 @@ export const DEFAULT_BLOCK_SIZES = {
   pele: { width: 580, height: 380 },
   schedule: { width: 900, height: 600 },
   media: { width: 480, height: 320 },
+  tree: { width: 420, height: 320 },
 } as const
 
 export const SHAPE_DEFAULT_SIZE = { width: 160, height: 160 } as const
@@ -72,6 +73,16 @@ export const BLOCK_DEFINITIONS: Record<BlockKind, BlockDefinition> = {
     ratioLockable: true,
     scalable: true,
     editor: 'media',
+    focusable: false,
+  },
+  tree: {
+    kind: 'tree',
+    defaultSize: DEFAULT_BLOCK_SIZES.tree,
+    // The block is sized by its cards, so there is no ratio to lock or unlock.
+    ratioLocked: true,
+    ratioLockable: false,
+    scalable: false,
+    editor: 'tree',
     focusable: false,
   },
 }

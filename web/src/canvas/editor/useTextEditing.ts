@@ -42,7 +42,8 @@ interface UseTextEditingOptions {
 
 function editKindOf(node: CanvasNode): Editing['kind'] | null {
   const editor = blockEditor(node)
-  if (!editor || editor === 'schedule') return null
+  // Schedule and tree blocks own their content; they have no text overlay.
+  if (!editor || editor === 'schedule' || editor === 'tree') return null
   return editor
 }
 
