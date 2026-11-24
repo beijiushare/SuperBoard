@@ -8,6 +8,7 @@ import {
 } from '../../canvas/model'
 import type { BlockStyleDefaults } from '../../canvas/editor/preferences'
 import { MarkdownVditorPreview } from '../markdown/MarkdownVditorPreview'
+import { nodeHeightSignature } from './measureCache'
 import { TreeQuote } from './TreeQuote'
 
 export interface TreeContextPreview {
@@ -39,6 +40,7 @@ interface TreeCardProps {
     top: number
     text: string
   }) => void
+  onToggleQuote: (kind: 'quote' | 'question') => void
   /** What would be sent if this card asked the given question. */
   contextFor?: (question: string) => TreeContextPreview
 }
@@ -121,6 +123,7 @@ export function TreeCard({
   onRetry,
   onOpenMenu,
   onTextMenu,
+  onToggleQuote,
   contextFor,
 }: TreeCardProps) {
   const { t } = useTranslation(['editor'])
@@ -175,6 +178,7 @@ export function TreeCard({
         register(element)
       }}
       data-tree-node-id={node.id}
+      data-tree-node-signature={nodeHeightSignature(node)}
       className={`sb-kt-card${node.bodyCollapsed ? ' is-collapsed' : ''}${
         draft ? ' is-draft' : ''
       }${exiting ? ' is-exiting' : ''}`}
@@ -394,10 +398,17 @@ export function TreeCard({
               text={node.quote.text}
               source={node.quote.title}
               tone="quote"
+              collapsed={node.quoteCollapsed === true}
+              onToggle={() => onToggleQuote('quote')}
             />
           ) : null}
           {node.question ? (
-            <TreeQuote text={node.question} tone="question" />
+            <TreeQuote
+              text={node.question}
+              tone="question"
+              collapsed={node.questionCollapsed === true}
+              onToggle={() => onToggleQuote('question')}
+            />
           ) : null}
           <CardBody node={node} onRetry={onRetry} />
         </div>

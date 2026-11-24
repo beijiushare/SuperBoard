@@ -189,6 +189,10 @@ export interface SuperBoardTreeNode {
   branchCollapsed?: boolean
   /** Keep the title, the quote and the first lines of the answer. */
   bodyCollapsed?: boolean
+  /** Fold the borrowed excerpt to two lines. */
+  quoteCollapsed?: boolean
+  /** Fold the question block to two lines. */
+  questionCollapsed?: boolean
   /** Per-card colours; absent means follow the global block defaults. */
   style?: { background?: string; border?: string }
 }

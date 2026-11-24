@@ -123,11 +123,21 @@ export function MarkdownVditorPreview({
     )
   }
 
+  // Reserve an approximate height while the HTML is being produced; an empty
+  // host would collapse the card and then grow once rendering finishes.
+  const placeholderHeight = Math.min(
+    420,
+    Math.max(24, Math.ceil(source.length / 24) * 20),
+  )
+
   return (
     <div
       ref={hostRef}
       className={`sb-markdown-vditor sb-md-docs ${className}`.trim()}
-      style={{ visibility: ready ? 'visible' : 'hidden' }}
+      style={{
+        visibility: ready ? 'visible' : 'hidden',
+        minHeight: ready ? undefined : placeholderHeight,
+      }}
     />
   )
 }

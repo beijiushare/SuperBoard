@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface TreeQuoteProps {
@@ -7,15 +6,23 @@ interface TreeQuoteProps {
   source?: string
   /** `question` is what the user asked; `quote` is a borrowed excerpt. */
   tone: 'quote' | 'question'
+  collapsed: boolean
+  onToggle: () => void
 }
 
 /**
  * Quote blocks scroll with the answer, and can be folded to two lines so a long
- * question does not push the answer out of the card.
+ * question does not push the answer out of the card. The folded state lives on
+ * the node, so it survives a reload.
  */
-export function TreeQuote({ text, source, tone }: TreeQuoteProps) {
+export function TreeQuote({
+  text,
+  source,
+  tone,
+  collapsed,
+  onToggle,
+}: TreeQuoteProps) {
   const { t } = useTranslation(['editor'])
-  const [collapsed, setCollapsed] = useState(false)
 
   return (
     <div
@@ -37,7 +44,7 @@ export function TreeQuote({ text, source, tone }: TreeQuoteProps) {
         onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => {
           event.stopPropagation()
-          setCollapsed((current) => !current)
+          onToggle()
         }}
       >
         {collapsed ? '+' : '−'}

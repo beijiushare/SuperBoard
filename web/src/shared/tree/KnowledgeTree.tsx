@@ -20,6 +20,7 @@ import {
 } from '../../canvas/model'
 import { usePreferences } from '../../canvas/editor/preferences'
 import { buildTreeMessages, estimateTokens } from '../../canvas/tree/treePrompt'
+import { cachedCardHeight, nodeHeightSignature, rememberCardHeight } from './measureCache'
 import { TreeCard } from './TreeCard'
 import { TreeCardMenu } from './TreeCardMenu'
 import { TreeSelectionMenu } from './TreeSelectionMenu'
@@ -64,7 +65,11 @@ function useCardHeights() {
         if (!id) continue
         const box = entry.borderBoxSize?.[0]
         const height = box ? box.blockSize : element.offsetHeight
-        if (height > 0) measured[id] = Math.ceil(height)
+        if (height > 0) {
+          measured[id] = Math.ceil(height)
+          const signature = element.dataset.treeNodeSignature
+          if (signature) rememberCardHeight(signature, Math.ceil(height))
+        }
       }
       if (!Object.keys(measured).length) return
       setHeights((current) => {
@@ -163,6 +168,15 @@ export function KnowledgeTree({
   )
 
   const nodes = visibleTreeNodes(data)
+
+  // Seed from the last measurement so a reload does not start from the default
+  // card height and re-flow when Markdown finishes rendering.
+  useEffect(() => {
+    for (const item of nodes) {
+      const cached = cachedCardHeight(nodeHeightSignature(item))
+      if (cached) seed(item.id, cached)
+    }
+  }, [data])
   const childrenOf = (id: string) => data.nodes.some((item) => item.parentId === id)
 
   /** Hover state keeps the expand button reachable when the pointer moves onto it. */
@@ -244,6 +258,20 @@ export function KnowledgeTree({
     const node = treeNodeById(data, id)
     if (!node) return
     onChange?.(updateTreeNode(data, id, { bodyCollapsed: !node.bodyCollapsed }))
+  }
+
+  const toggleQuote = (id: string, kind: 'quote' | 'question') => {
+    const node = treeNodeById(data, id)
+    if (!node) return
+    onChange?.(
+      updateTreeNode(
+        data,
+        id,
+        kind === 'quote'
+          ? { quoteCollapsed: node.quoteCollapsed !== true }
+          : { questionCollapsed: node.questionCollapsed !== true },
+      ),
+    )
   }
 
   const removeTimers = useRef<number[]>([])
@@ -367,6 +395,7 @@ export function KnowledgeTree({
             onRetry={() => onGenerate?.(node.id)}
             onOpenMenu={(anchor) => setMenu({ nodeId: node.id, ...anchor })}
             onTextMenu={(payload) => setTextMenu({ nodeId: node.id, ...payload })}
+            onToggleQuote={(kind) => toggleQuote(node.id, kind)}
             contextFor={(question) => contextFor(node.id, question)}
           />
         ))}
