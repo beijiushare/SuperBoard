@@ -48,6 +48,8 @@
   "tree.askQuote": "Ask about this",
   "tree.explainQuestion": "Explain this passage",
   "tree.explainTitle": "Explain: {{text}}",
+  "tree.contextNone": "First question: only this one is sent",
+  "tree.contextTokens": "~{{tokens}} tokens",
   "tree.questionPlaceholder": "Ask a question, Enter to submit",
   "export.html": "Export HTML",
   "common.comingSoon": "Coming soon",

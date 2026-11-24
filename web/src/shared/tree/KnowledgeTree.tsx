@@ -13,11 +13,13 @@ import {
   treeDescendantIds,
   treeEdges,
   treeNodeById,
+  treePath,
   updateTreeNode,
   visibleTreeNodes,
   type SuperBoardTreeData,
 } from '../../canvas/model'
 import { usePreferences } from '../../canvas/editor/preferences'
+import { buildTreeMessages, estimateTokens } from '../../canvas/tree/treePrompt'
 import { TreeCard } from './TreeCard'
 import { TreeCardMenu } from './TreeCardMenu'
 import { TreeSelectionMenu } from './TreeSelectionMenu'
@@ -173,6 +175,30 @@ export function KnowledgeTree({
     hoverTimer.current = window.setTimeout(() => setHoveredId(null), 140)
   }
 
+  /** What the request would carry if this card asked the typed question. */
+  const contextFor = (nodeId: string, question: string) => {
+    const path = treePath(data, nodeId)
+    const titles = path
+      .slice(0, -1)
+      .map(
+        (item) =>
+          item.title.trim() ||
+          item.question.trim() ||
+          t('editor:tree.untitled'),
+      )
+    if (!question.trim()) return { path: titles, tokens: 0 }
+    const preview: SuperBoardTreeData = {
+      ...data,
+      nodes: data.nodes.map((item) =>
+        item.id === nodeId ? { ...item, question } : item,
+      ),
+    }
+    return {
+      path: titles,
+      tokens: estimateTokens(buildTreeMessages(preview, nodeId)),
+    }
+  }
+
   const addChild = (parentId: string) => {
     const { data: next, node } = addTreeChild(data, parentId)
     if (node) seed(node.id, TREE_DRAFT_HEIGHT)
@@ -266,8 +292,7 @@ export function KnowledgeTree({
     )
   }
 
-  const quoteOf = (nodeId: string, text: string) => {
-    const node = treeNodeById(data, nodeId)
+  const quoteOf = (nodeId: string, text: string) => {    const node = treeNodeById(data, nodeId)
     return {
       text,
       title:
@@ -344,6 +369,7 @@ export function KnowledgeTree({
             onRetry={() => onGenerate?.(node.id)}
             onOpenMenu={(anchor) => setMenu({ nodeId: node.id, ...anchor })}
             onTextMenu={(payload) => setTextMenu({ nodeId: node.id, ...payload })}
+            contextFor={(question) => contextFor(node.id, question)}
           />
         ))}
         {nodes

@@ -48,6 +48,8 @@
   "tree.askQuote": "据此提问",
   "tree.explainQuestion": "解释这段话",
   "tree.explainTitle": "解释：{{text}}",
+  "tree.contextNone": "首次提问，只发送这条",
+  "tree.contextTokens": "约 {{tokens}} tokens",
   "tree.questionPlaceholder": "输入问题，回车提交",
   "export.html": "导出 HTML",
   "common.comingSoon": "功能开发中",

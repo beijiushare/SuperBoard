@@ -9,6 +9,12 @@ import {
 import type { BlockStyleDefaults } from '../../canvas/editor/preferences'
 import { MarkdownVditorPreview } from '../markdown/MarkdownVditorPreview'
 
+export interface TreeContextPreview {
+  /** Ancestor titles, root first. */
+  path: string[]
+  tokens: number
+}
+
 interface TreeCardProps {
   node: SuperBoardTreeNode
   hasChildren: boolean
@@ -32,6 +38,8 @@ interface TreeCardProps {
     top: number
     text: string
   }) => void
+  /** What would be sent if this card asked the given question. */
+  contextFor?: (question: string) => TreeContextPreview
 }
 
 function CardBody({
@@ -73,8 +81,26 @@ function CardBody({
   return <MarkdownVditorPreview source={node.answer} />
 }
 
-/** A single card: title, optional quote, question and the answer body. */
-export function TreeCard({
+function ContextPreview({ context }: { context?: TreeContextPreview }) {
+  const { t } = useTranslation(['editor'])
+  if (!context) return null
+  const line =
+    context.path.length > 0
+      ? context.path.join(' → ')
+      : t('editor:tree.contextNone')
+  return (
+    <div className="sb-kt-context" title={line}>
+      <span className="sb-kt-context-path">{line}</span>
+      {context.tokens > 0 ? (
+        <span className="sb-kt-context-tokens">
+          {t('editor:tree.contextTokens', { tokens: context.tokens })}
+        </span>
+      ) : null}
+    </div>
+  )
+}
+
+/** A single card: title, optional quote, question and the answer body. */export function TreeCard({
   node,
   hasChildren,
   canDelete,
@@ -93,6 +119,7 @@ export function TreeCard({
   onRetry,
   onOpenMenu,
   onTextMenu,
+  contextFor,
 }: TreeCardProps) {  const { t } = useTranslation(['editor'])
   const draft = node.status === 'draft'
   const [draftText, setDraftText] = useState('')
@@ -361,6 +388,7 @@ export function TreeCard({
               }
             }}
           />
+          <ContextPreview context={contextFor?.(draftText)} />
         </div>
       ) : (
         <>
