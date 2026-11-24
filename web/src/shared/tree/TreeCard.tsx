@@ -182,7 +182,7 @@ export function TreeCard({
       data-tree-node-signature={nodeHeightSignature(node)}
       className={`sb-kt-card${node.bodyCollapsed ? ' is-collapsed' : ''}${
         draft ? ' is-draft' : ''
-      }${exiting ? ' is-exiting' : ''}`}
+      }${isSummary ? ' is-summary' : ''}${exiting ? ' is-exiting' : ''}`}
       onPointerDown={(event) => {
         if (event.button === 0) onActivate()
       }}
@@ -222,7 +222,8 @@ export function TreeCard({
           defaults.backgroundOpacity,
         ),
         borderColor: colorWithOpacity(
-          node.style?.border ?? defaults.borderColor,
+          node.style?.border ??
+            (isSummary ? '#a78bfa' : defaults.borderColor),
           defaults.borderOpacity,
         ),
         borderWidth: `${defaults.borderWidth}px`,

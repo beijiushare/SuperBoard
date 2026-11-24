@@ -424,6 +424,15 @@
   border-style: dashed;
 }
 
+/* Summary cards share the card styling but are marked purple. */
+.sb-kt-card.is-summary .sb-kt-title {
+  color: #7c5cae;
+}
+
+.sb-kt-card.is-summary .sb-kt-body {
+  color: #4b3f5e;
+}
+
 .sb-kt-card-empty {
   color: var(--sb-text-faint, #a19c90);
   font-size: 12px;
