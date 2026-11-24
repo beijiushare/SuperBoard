@@ -23,6 +23,7 @@ import {
 import { CanvasEditorStage } from './CanvasEditorStage'
 import { aiChat } from '../../desktop/ai'
 import { buildTreeMessages, buildCompactionMessages, estimateTokens, splitAnswerTitle } from '../tree/treePrompt'
+import { newTreeNodeId } from '../model'
 import { activeAISettings, getPreferences } from './preferences'
 import {
   type CanvasMenuState,
@@ -390,9 +391,12 @@ export function CanvasEditorApp() {
         // to the parent, so the next request stays inside the context window.
         let workingTree = tree
         const node = tree.nodes.find((item) => item.id === nodeId)
+        const hasSummary = tree.nodes.some(
+          (item) => item.parentId === nodeId && item.role === 'summary',
+        )
         if (
           node?.parentId &&
-          !node.compaction &&
+          !hasSummary &&
           estimateTokens(messages) > preferences.ai.compactionThreshold
         ) {
           const summary = await aiChat(
@@ -400,13 +404,24 @@ export function CanvasEditorApp() {
             buildCompactionMessages(tree, nodeId),
           )
           if (summary.trim()) {
-            workingTree = updateTreeNode(tree, nodeId, {
-              compaction: {
-                text: summary.trim(),
-                coversUpTo: node.parentId,
-                createdAt: new Date().toISOString(),
-              },
-            })
+            // The summary is a real card: it participates in layout and edges,
+            // but carries no question and cannot be deleted.
+            workingTree = {
+              ...tree,
+              nodes: [
+                ...tree.nodes,
+                {
+                  id: newTreeNodeId(),
+                  parentId: nodeId,
+                  title: '',
+                  question: '',
+                  answer: summary.trim(),
+                  status: 'done',
+                  createdAt: new Date().toISOString(),
+                  role: 'summary',
+                },
+              ],
+            }
             patchTree(blockId, () => workingTree)
           }
         }

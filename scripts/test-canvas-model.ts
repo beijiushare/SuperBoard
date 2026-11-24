@@ -322,10 +322,19 @@ assert.equal(
 )
 
 // A compaction on a card replaces everything it covers with one summary.
-const compacted = updateTreeNode(asked, 'a1', {
-  compaction: { text: '前情摘要文本', coversUpTo: 'a', createdAt: at },
+// A summary card replaces everything above the node it hangs from.
+const withSummary = updateTreeNode(asked, 'a1', {})
+withSummary.nodes.push({
+  id: 'sum-1',
+  parentId: 'a',
+  title: '',
+  question: '',
+  answer: '前情摘要文本',
+  status: 'done',
+  createdAt: at,
+  role: 'summary',
 })
-const compactedMessages = buildTreeMessages(compacted, 'a1')
+const compactedMessages = buildTreeMessages(withSummary, 'a1')
 assert.equal(compactedMessages[1].role, 'user')
 assert.ok(compactedMessages[1].content.startsWith('前情提要：'))
 assert.equal(compactedMessages.length, 3)

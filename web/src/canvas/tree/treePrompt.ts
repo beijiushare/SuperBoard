@@ -91,11 +91,13 @@ export function buildTreeMessages(
   let startIndex = 0
   let summary = ''
   for (let index = path.length - 1; index >= 0; index -= 1) {
-    const compaction = path[index].compaction
-    if (!compaction) continue
-    summary = compaction.text.trim()
-    const covered = path.findIndex((item) => item.id === compaction.coversUpTo)
-    startIndex = covered >= 0 ? covered + 1 : index
+    const summaryNode = data.nodes.find(
+      (item) =>
+        item.parentId === path[index].id && item.role === 'summary',
+    )
+    if (!summaryNode) continue
+    summary = summaryNode.answer.trim()
+    startIndex = index + 1
     break
   }
 
@@ -104,6 +106,7 @@ export function buildTreeMessages(
     messages.push({ role: 'user', content: `前情提要：\n${summary}` })
   }
   for (const node of path.slice(startIndex)) {
+    if (node.role === 'summary') continue
     if (node.question.trim()) {
       messages.push({ role: 'user', content: questionWithQuote(node) })
     }

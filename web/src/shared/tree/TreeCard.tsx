@@ -170,6 +170,7 @@ export function TreeCard({
   }
 
   const hasTitle = node.title.trim().length > 0
+  const isSummary = node.role === 'summary'
 
   return (
     <article
@@ -228,7 +229,8 @@ export function TreeCard({
         borderStyle: defaults.borderStyle,
       }}
     >
-      <div className="sb-kt-tools">
+      {isSummary ? null : (
+        <div className="sb-kt-tools">
         {node.answer.trim() ? (
           <button
             type="button"
@@ -291,7 +293,8 @@ export function TreeCard({
             ×
           </button>
         ) : null}
-      </div>
+        </div>
+      )}
 
       <header className="sb-kt-head">
           {editingTitle ? (
@@ -324,7 +327,7 @@ export function TreeCard({
                 setEditingTitle(true)
               }}
             >
-              {hasTitle ? node.title : t('editor:tree.untitled')}
+              {hasTitle ? node.title : isSummary ? t('editor:tree.compaction') : t('editor:tree.untitled')}
             </span>
           )}
       </header>
@@ -393,16 +396,6 @@ export function TreeCard({
         </div>
       ) : (
         <div className="sb-kt-body">
-          {node.compaction ? (
-            <div className="sb-kt-compaction">
-              <span className="sb-kt-compaction-label">
-                {t('editor:tree.compaction')}
-              </span>
-              <span className="sb-kt-compaction-text">
-                {node.compaction.text}
-              </span>
-            </div>
-          ) : null}
           {node.quote ? (
             <TreeQuote
               text={node.quote.text}
