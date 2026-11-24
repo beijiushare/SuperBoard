@@ -18,14 +18,31 @@ const MARKER = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*)$/i
  */
 function decorateCallouts(host: HTMLElement) {
   host.querySelectorAll<HTMLElement>('blockquote').forEach((quote) => {
-    if (quote.classList.contains('callout')) return
     const first = quote.querySelector<HTMLElement>('p')
     const text = first?.textContent?.trim() ?? ''
     const match = text.match(MARKER)
-    if (!match || !first) return
-    const type = match[1].toUpperCase() as CalloutType
+    let type = (quote.dataset.subtype || '').toUpperCase() as CalloutType
+    if (!CALLOUT_TYPES.includes(type)) {
+      type = match ? (match[1].toUpperCase() as CalloutType) : ('' as CalloutType)
+    }
+    // The renderer already treated this as an alert but lost the subtype.
+    if (!CALLOUT_TYPES.includes(type) && quote.classList.contains('callout')) {
+      type = 'NOTE'
+    }
+    // Not an alert: a plain quote must stay untouched.
+    if (!CALLOUT_TYPES.includes(type)) return
+
     quote.classList.add('callout')
     quote.dataset.subtype = type
+
+    // The renderer may have produced its own info row (with an emoji) and left
+    // the marker text behind; drop both and use one consistent label.
+    quote.querySelectorAll('.callout-info').forEach((node) => node.remove())
+    if (match && first) {
+      const rest = match[2].trim()
+      if (rest) first.textContent = rest
+      else first.remove()
+    }
 
     const info = document.createElement('div')
     info.className = 'callout-info'
@@ -34,10 +51,6 @@ function decorateCallouts(host: HTMLElement) {
     label.textContent = CALLOUT_LABELS[type]
     info.append(label)
     quote.prepend(info)
-
-    const rest = match[2].trim()
-    if (rest) first.textContent = rest
-    else first.remove()
   })
 }
 

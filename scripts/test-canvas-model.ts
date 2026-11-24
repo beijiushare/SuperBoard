@@ -303,4 +303,21 @@ assert.equal(
   '引用自「root」中的一段：\n> ancestor snippet\n\n解释这段话',
 )
 
+// A short single child is centred on a tall parent, so its line stays straight.
+const tall: SuperBoardTreeData = {
+  version: 1,
+  rootId: 'r',
+  nodes: [
+    { id: 'r', parentId: null, title: 'r', question: 'q', answer: 'a', status: 'done', createdAt: at },
+    { id: 'c', parentId: 'r', title: 'c', question: 'q', answer: 'a', status: 'done', createdAt: at },
+  ],
+}
+const tallLayout = layoutTree(tall, { r: 400, c: 100 })
+assert.equal(tallLayout.positions.r.y, 0)
+assert.equal(tallLayout.positions.c.y, 150)
+assert.equal(
+  tallLayout.positions.r.y + 200,
+  tallLayout.positions.c.y + 50,
+)
+
 console.log('canvas model tests passed')

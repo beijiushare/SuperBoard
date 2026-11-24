@@ -174,7 +174,14 @@ export function layoutTree(
     const children = treeChildren(data, node.id).filter((child) =>
       visibleIds.has(child.id),
     )
-    let cursor = top
+    const childrenTotal = children.reduce(
+      (total, child, index) =>
+        total + subtreeHeight(child) + (index > 0 ? TREE_ROW_GAP : 0),
+      0,
+    )
+    // Children are centred on the parent's span: a single short child then sits
+    // opposite the parent's centre, so its branch line stays straight.
+    let cursor = top + (span - childrenTotal) / 2
     for (const child of children) {
       place(child, x + TREE_CARD_WIDTH + TREE_COLUMN_GAP, cursor)
       cursor += subtreeHeight(child) + TREE_ROW_GAP
