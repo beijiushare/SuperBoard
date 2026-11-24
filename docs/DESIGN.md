@@ -165,3 +165,14 @@
 - 弹窗必须使用 `.sb-modal-backdrop` 或 `.canvas-editor-dialog-backdrop`；画布手势（框选、平移、右键、点空白清空选择）统一用 `isCanvasChromeTarget()` / `CANVAS_CHROME_SELECTOR` 排除（其中包含上面两个弹窗类），否则点击 UI 会穿透到白板。
 - 日程（FullCalendar v7）使用哈希类名，不能用 `.fc` 选择器；外框通过 `[data-color-scheme]`、`[role="table"]` 去除。
 - 详细排查过程见 `memory/superboard-refactor.md` 的「踩坑记录」。
+
+## 样式组织
+
+- **类名前缀 = 组件**：`sb-kt-` 只给知识树，`sb-md-` 只给 Markdown 渲染，`sb-style-` 只给样式面板，`sb-rail-` 只给左侧栏。新增样式必须沿用归属前缀。
+- **新组件不进 `app.css`**：组件自带同名的 `xxx.css`（或 CSS Module），文件头注释写清归属，例如 `/* Frame controller: DirectorFrameController. */`。`rail.css`、`director.css`、`color-picker.css` 是第一批拆分出来的文件。
+- **废弃样式必须标注**：不确定是否还在用的规则写 `/* DEPRECATED YYYY-MM: 原因，可删除 */`，不要静默留着。
+- **不覆盖第三方内部结构**：Vditor / FullCalendar 的内部类只在必要处覆盖，集中在一段并注明原因；能用配置关掉的（行号、标题锚点）优先用配置。
+- **不做无主的全局排版**：字号、间距、颜色的全局规则必须限定容器（如 `.sb-kt-body`、`.sb-md-editor`）。历史上 `/* FullCalendar documentation text style */` 就是无作用域地套到所有 Markdown，导致列表缩进和行距失控，已删除。
+- **加载顺序**：Vditor 的 CSS 在 `styles/index.css` 第一行静态引入，保证我们的同权重规则后出现、后胜出；不要再用动态 `import('vditor/dist/index.css')`。
+- 提交前运行 `npm run audit:css`，未引用类数量只允许下降；新出现的未引用项要么删掉，要么在脚本输出里说明是运行时生成。
+- 单文件超过 800 行视为需要拆分或审查的信号。
