@@ -6,6 +6,7 @@ import {
   layoutTree,
   removeTreeNode,
   treeBlockSize,
+  treeDescendantIds,
   treeEdges,
   treeNodeById,
   updateTreeNode,
@@ -20,6 +21,9 @@ export interface KnowledgeTreeSize {
   width: number
   height: number
 }
+
+/** Matches the card exit transition in knowledge-tree.css. */
+const TREE_EXIT_MS = 170
 
 interface KnowledgeTreeProps {
   data: SuperBoardTreeData
@@ -117,6 +121,10 @@ export function KnowledgeTree({
     left: number
     top: number
   } | null>(null)
+  // Cards fade out before they leave the data, so deleting reads like adding.
+  const [exiting, setExiting] = useState<Set<string>>(() => new Set())
+  const dataRef = useRef(data)
+  dataRef.current = data
 
   useEffect(() => {
     const previous = lastSize.current
@@ -165,7 +173,7 @@ export function KnowledgeTree({
     const node = treeNodeById(data, id)
     // The root card is the tree's starting point and never disappears.
     if (!node || node.id === data.rootId) return
-    onChange?.(removeTreeNode(data, id, 'branch'))
+    removeWithAnimation(id, 'branch')
   }
 
   const toggleBranch = (id: string) => {
@@ -179,13 +187,50 @@ export function KnowledgeTree({
   }
 
   const deleteNode = (id: string, mode: 'branch' | 'promote') => {
-    onChange?.(removeTreeNode(data, id, mode))
+    removeWithAnimation(id, mode)
   }
 
   const toggleBody = (id: string) => {
     const node = treeNodeById(data, id)
     if (!node) return
     onChange?.(updateTreeNode(data, id, { bodyCollapsed: !node.bodyCollapsed }))
+  }
+
+  const removeTimers = useRef<number[]>([])
+
+  useEffect(
+    () => () => {
+      removeTimers.current.forEach((timer) => window.clearTimeout(timer))
+    },
+    [],
+  )
+
+  /** Fade the card out first, then drop it from the data. */
+  function removeWithAnimation(id: string, mode: 'branch' | 'promote') {
+    const current = dataRef.current
+    // A whole branch leaves together, otherwise children blink out of existence
+    // while their parent is still fading.
+    const leaving =
+      mode === 'branch'
+        ? new Set([id, ...treeDescendantIds(current, id)])
+        : new Set([id])
+    setExiting((previous) => {
+      const next = new Set(previous)
+      leaving.forEach((item) => next.add(item))
+      return next
+    })
+    const timer = window.setTimeout(() => {
+      removeTimers.current = removeTimers.current.filter((item) => item !== timer)
+      setExiting((previous) => {
+        const next = new Set(previous)
+        leaving.forEach((item) => next.delete(item))
+        return next
+      })
+      const latest = dataRef.current
+      if (!treeNodeById(latest, id)) return
+      onChange?.(removeTreeNode(latest, id, mode))
+    }, TREE_EXIT_MS)
+    removeTimers.current.push(timer)
   }
 
   const setCardStyle = (id: string, patch: { background?: string; border?: string }) => {
@@ -228,6 +273,7 @@ export function KnowledgeTree({
             node={node}
             hasChildren={data.nodes.some((item) => item.parentId === node.id)}
             canDelete={node.id !== data.rootId}
+            exiting={exiting.has(node.id)}
             position={layout.positions[node.id] ?? { x: 0, y: 0 }}
             defaults={blockDefaults}
             register={register(node.id)}

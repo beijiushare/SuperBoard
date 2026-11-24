@@ -13,6 +13,7 @@ interface TreeCardProps {
   node: SuperBoardTreeNode
   hasChildren: boolean
   canDelete: boolean
+  exiting: boolean
   position: { x: number; y: number }
   defaults: BlockStyleDefaults
   register: (element: HTMLElement | null) => void
@@ -72,6 +73,7 @@ export function TreeCard({
   node,
   hasChildren,
   canDelete,
+  exiting,
   position,
   defaults,
   register,
@@ -133,7 +135,7 @@ export function TreeCard({
       data-tree-node-id={node.id}
       className={`sb-kt-card${node.bodyCollapsed ? ' is-collapsed' : ''}${
         draft ? ' is-draft' : ''
-      }`}
+      }${exiting ? ' is-exiting' : ''}`}
       onPointerDown={(event) => {
         if (event.button === 0) onActivate()
       }}
