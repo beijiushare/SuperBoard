@@ -362,7 +362,7 @@ export function CanvasEditorApp() {
   )
 
   const runTreeAnswer = useCallback(
-    async (blockId: string, nodeId: string) => {
+    async (blockId: string, nodeId: string, snapshot?: SuperBoardTreeData) => {
       const preferences = getPreferences()
       const preset = aiProviderPreset(preferences.ai.provider)
       patchTree(blockId, (tree) =>
@@ -372,9 +372,13 @@ export function CanvasEditorApp() {
         }),
       )
       try {
-        const tree = canvasRef.current?.nodes.find(
-          (item) => item.id === blockId,
-        )?.['x-superboard']?.tree
+        // A submit passes the tree it just produced: the ref may not have
+        // caught up yet, and reading a stale tree would drop the question.
+        const tree =
+          snapshot ??
+          canvasRef.current?.nodes.find((item) => item.id === blockId)?.[
+            'x-superboard'
+          ]?.tree
         if (!tree) return
         const messages = buildTreeMessages(tree, nodeId)
         if (!messages.length) throw new Error('empty prompt')
@@ -432,7 +436,7 @@ export function CanvasEditorApp() {
       markDirty()
       if (!previousTree) return
       for (const nodeId of questionsToAnswer(previousTree, tree)) {
-        void runTreeAnswer(id, nodeId)
+        void runTreeAnswer(id, nodeId, tree)
       }
     },
     [
