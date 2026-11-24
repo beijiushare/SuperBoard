@@ -51,6 +51,7 @@ interface CanvasViewerProps {
     id: string,
     events: SuperBoardScheduleEvent[],
   ) => void
+  onTreeSize?: (id: string, size: { width: number; height: number }) => void
 }
 
 export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
@@ -61,11 +62,14 @@ export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
     style,
     onNodeSelect,
     onScheduleEventsChange,
+    onTreeSize,
   }, ref) {
     const onNodeSelectRef = useRef(onNodeSelect)
     const onScheduleEventsChangeRef = useRef(onScheduleEventsChange)
+    const onTreeSizeRef = useRef(onTreeSize)
     onNodeSelectRef.current = onNodeSelect
     onScheduleEventsChangeRef.current = onScheduleEventsChange
+    onTreeSizeRef.current = onTreeSize
 
     const options = useMemo(
       () => ({
@@ -87,6 +91,7 @@ export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
           onScheduleEventsChange={(events) =>
             onScheduleEventsChangeRef.current?.(node.id, events)
           }
+          onTreeSize={(size) => onTreeSizeRef.current?.(node.id, size)}
         />
       ),
       [],

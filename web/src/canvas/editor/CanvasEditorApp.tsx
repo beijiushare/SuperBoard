@@ -226,6 +226,7 @@ export function CanvasEditorApp() {
     openPeleEditor,
     insertPele,
     insertScheduleBlock,
+    insertTreeBlock,
     insertMedia,
     insertLocalFile,
     pickLocalFilesFromDialog,
@@ -317,6 +318,33 @@ export function CanvasEditorApp() {
       markDirty()
     },
     [canvas],
+  )
+
+  const updateTreeSize = useCallback(
+    (id: string, size: { width: number; height: number }) => {
+      setCanvas((current) => {
+        if (!current) return current
+        const node = current.nodes.find((item) => item.id === id)
+        if (!node) return current
+        // The tree block is sized by its cards: this is derived state, so it
+        // must not enter history or mark the document dirty.
+        if (
+          Math.abs(node.width - size.width) < 1 &&
+          Math.abs(node.height - size.height) < 1
+        ) {
+          return current
+        }
+        return {
+          ...current,
+          nodes: current.nodes.map((item) =>
+            item.id === id
+              ? { ...item, width: size.width, height: size.height }
+              : item,
+          ),
+        }
+      })
+    },
+    [setCanvas],
   )
 
   useEffect(() => {
@@ -547,6 +575,7 @@ export function CanvasEditorApp() {
           onDoubleClick={openQuickMenu}
           onNodeSelect={handleNodeSelect}
           onScheduleEventsChange={updateScheduleEvents}
+          onTreeSize={updateTreeSize}
           selection={{
             selectedIds,
             onSelect: setSelectedIds,
@@ -624,6 +653,7 @@ export function CanvasEditorApp() {
             onInsertPele: () => openPeleDialog(),
             onInsertSchedule: () => insertScheduleBlock(),
             onInsertMedia: () => openMediaDialog(),
+            onInsertTree: () => insertTreeBlock(),
           }}
         />
       </EditorWorkspace>

@@ -114,6 +114,14 @@ function resolveHeights(
   heights: Record<string, number>,
   node: SuperBoardTreeNode,
 ) {
+  return resolveCardHeight(heights, node)
+}
+
+/** Card height for layout: measured when available, clamped to the max. */
+export function resolveCardHeight(
+  heights: Record<string, number>,
+  node: SuperBoardTreeNode,
+) {
   const measured = heights[node.id]
   return measured && Number.isFinite(measured) && measured > 0
     ? Math.min(measured, TREE_CARD_MAX_HEIGHT)
@@ -187,6 +195,57 @@ export function treeBlockSize(layout: TreeLayout) {
     width: Math.round(layout.width + TREE_BLOCK_PADDING * 2),
     height: Math.round(layout.height + TREE_BLOCK_PADDING * 2),
   }
+}
+
+export interface TreeEdge {
+  id: string
+  parentId: string
+  childId: string
+  path: string
+  /** Arrow head, drawn as a filled triangle. */
+  arrow: string
+}
+
+const TREE_ARROW_LENGTH = 7
+const TREE_ARROW_HALF = 4
+
+/**
+ * Edges are derived from parent/child relations, never stored. Layout positions
+ * are card top-left corners, so the anchor is right/left middle of each card.
+ */
+export function treeEdges(
+  data: SuperBoardTreeData,
+  positions: Record<string, { x: number; y: number }>,
+  heights: Record<string, number> = {},
+): TreeEdge[] {
+  const edges: TreeEdge[] = []
+  const visible = new Set(visibleTreeNodes(data).map((node) => node.id))
+  for (const node of data.nodes) {
+    if (!node.parentId || !visible.has(node.id)) continue
+    const parent = treeNodeById(data, node.parentId)
+    const from = positions[parent?.id ?? '']
+    const to = positions[node.id]
+    if (!parent || !from || !to || !visible.has(parent.id)) continue
+    const start = {
+      x: from.x + TREE_CARD_WIDTH,
+      y: from.y + resolveCardHeight(heights, parent) / 2,
+    }
+    const end = {
+      x: to.x,
+      y: to.y + resolveCardHeight(heights, node) / 2,
+    }
+    const bend = Math.max(36, (end.x - start.x) * 0.45)
+    const tipX = end.x
+    const lineX = tipX - TREE_ARROW_LENGTH
+    edges.push({
+      id: `${parent.id}->${node.id}`,
+      parentId: parent.id,
+      childId: node.id,
+      path: `M ${start.x} ${start.y} C ${start.x + bend} ${start.y} ${lineX - bend} ${end.y} ${lineX} ${end.y}`,
+      arrow: `M ${tipX} ${end.y} L ${tipX - TREE_ARROW_LENGTH} ${end.y - TREE_ARROW_HALF} L ${tipX - TREE_ARROW_LENGTH} ${end.y + TREE_ARROW_HALF} Z`,
+    })
+  }
+  return edges
 }
 
 let treeIdSeed = 0

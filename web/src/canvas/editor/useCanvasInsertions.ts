@@ -1,6 +1,7 @@
 import type { RefObject } from 'react'
 import i18n from '../../i18n'
 import type { CanvasDocument, CanvasNode } from '../model'
+import { emptyTreeData, newTreeNodeId } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 import type { BoardScope } from '../../shared/board/types'
 import { DEFAULT_BLOCK_SIZES } from './blocks'
@@ -306,12 +307,42 @@ export function useCanvasInsertions({
     setTool('select')
   }
 
+  function insertTreeBlock(point?: { x: number; y: number }) {
+    if (!canvas) return
+    const id = nextFreeId(new Set(canvas.nodes.map((node) => node.id)), 'tree')
+    const size = defaultBlockSize('tree')
+    const position = point
+      ? {
+          x: Math.round(point.x - size.width / 2),
+          y: Math.round(point.y - size.height / 2),
+        }
+      : viewportCenter(viewerRef, size.width, size.height)
+    const tree = emptyTreeData(newTreeNodeId(), new Date().toISOString())
+    const node: CanvasNode = {
+      id,
+      type: 'text',
+      x: position.x,
+      y: position.y,
+      width: size.width,
+      height: size.height,
+      text: '',
+      'x-superboard': {
+        kind: 'tree',
+        tree,
+      },
+    }
+    recordHistory()
+    applyDocument({ ...canvas, nodes: [...canvas.nodes, node] }, [id])
+    setTool('select')
+  }
+
   return {
     insertTextBlock,
     openPeleDialog,
     openPeleEditor,
     insertPele,
     insertScheduleBlock,
+    insertTreeBlock,
     insertMedia: media.insertMedia,
     insertLocalFile: media.insertLocalFile,
     pickLocalFilesFromDialog: media.pickLocalFilesFromDialog,

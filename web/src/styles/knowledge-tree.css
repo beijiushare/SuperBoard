@@ -1,0 +1,173 @@
+/* Knowledge tree block (`kind: 'tree'`).
+   Prefix is `.sb-kt-`: `.sb-tree-*` belongs to the file sidebar. */
+
+.sb-kt {
+  position: relative;
+  box-sizing: border-box;
+  color: var(--sb-text, #1f1e1c);
+}
+
+.sb-kt-stage {
+  position: relative;
+}
+
+.sb-kt-edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.sb-kt-edge path:first-child {
+  stroke: #c9c4b8;
+  stroke-width: 1.5;
+}
+
+.sb-kt-edge path:last-child {
+  fill: #c9c4b8;
+  stroke: none;
+}
+
+.sb-kt-card {
+  position: absolute;
+  display: flex;
+  box-sizing: border-box;
+  min-height: 56px;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #1f1e1c;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(31 30 28 / 6%);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.sb-kt-head {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px 6px;
+}
+
+.sb-kt-title {
+  flex: 1;
+  min-width: 0;
+  color: var(--sb-text, #1f1e1c);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.sb-kt-quote,
+.sb-kt-question {
+  flex: none;
+  margin: 0 12px 8px;
+  padding: 6px 10px;
+  border-left: 2px solid #d8d4c9;
+  border-radius: 0 6px 6px 0;
+  background: #f7f5f0;
+  color: var(--sb-text-secondary, #6f6b60);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.sb-kt-quote-source {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--sb-text-faint, #a19c90);
+  font-size: 11px;
+}
+
+.sb-kt-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0 12px 10px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* Collapsed body keeps the title, the quote and the first three lines. */
+.sb-kt-card.is-collapsed .sb-kt-body {
+  flex: none;
+  max-height: calc(1.6em * 3 + 10px);
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, #000 60%, transparent 100%);
+}
+
+.sb-kt-card.is-draft {
+  border-style: dashed;
+}
+
+.sb-kt-card-empty {
+  color: var(--sb-text-faint, #a19c90);
+  font-size: 12px;
+}
+
+/* Card Markdown: headings never out-rank the card title. */
+.sb-kt-body .sb-markdown h1,
+.sb-kt-body .sb-markdown h2,
+.sb-kt-body .sb-markdown h3 {
+  margin: 0.6em 0 0.4em;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.sb-kt-body .sb-markdown p {
+  margin: 0 0 0.6em;
+}
+
+.sb-kt-body .sb-markdown ul,
+.sb-kt-body .sb-markdown ol {
+  margin: 0 0 0.6em;
+  padding-left: 1.2em;
+}
+
+.sb-kt-body .sb-markdown table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.sb-kt-body .sb-markdown th,
+.sb-kt-body .sb-markdown td {
+  padding: 4px 8px;
+  border: 1px solid var(--sb-border-subtle, #eeeae1);
+  text-align: left;
+}
+
+.sb-kt-body .sb-markdown thead {
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+}
+
+.sb-kt-body .sb-markdown pre {
+  margin: 0 0 0.6em;
+  overflow-x: auto;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.sb-kt-body .sb-markdown code {
+  font-size: 12px;
+}
+
+.sb-kt-body .sb-markdown img {
+  max-width: 100%;
+}
+
+/* GitHub-style callouts (`> [!WARNING]`), enabled in the preview options. */
+.sb-kt-body .vditor-callout {
+  margin: 0 0 0.6em;
+  border-radius: 6px;
+  font-size: 12px;
+}

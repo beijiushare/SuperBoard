@@ -80,6 +80,7 @@ interface StagePalette {
   onInsertPele: () => void
   onInsertSchedule: () => void
   onInsertMedia: () => void
+  onInsertTree: () => void
 }
 
 interface CanvasEditorStageProps {
@@ -94,6 +95,7 @@ interface CanvasEditorStageProps {
     id: string,
     events: SuperBoardScheduleEvent[],
   ) => void
+  onTreeSize?: (id: string, size: { width: number; height: number }) => void
   selection: StageSelection
   tools: StageTools
   markdown: StageMarkdown
@@ -112,6 +114,7 @@ export function CanvasEditorStage({
   onDoubleClick,
   onNodeSelect,
   onScheduleEventsChange,
+  onTreeSize,
   selection,
   tools,
   markdown,
@@ -138,6 +141,7 @@ export function CanvasEditorStage({
                   canvas={canvas}
                   onNodeSelect={onNodeSelect}
                   onScheduleEventsChange={onScheduleEventsChange}
+                  onTreeSize={onTreeSize}
                   style={{ width: '100%', height: '100%' }}
                 />
               </div>
@@ -220,6 +224,7 @@ export function CanvasEditorStage({
                   onInsertPele={palette.onInsertPele}
                   onInsertSchedule={palette.onInsertSchedule}
                   onInsertMedia={palette.onInsertMedia}
+                  onInsertTree={palette.onInsertTree}
                 />
               ) : null}
             </>

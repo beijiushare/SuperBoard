@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { DEFAULT_PREFERENCES } from '../editor/preferences'
 import type { Hook, JSONCanvasFileNode, JSONCanvasLinkNode, JSONCanvasTextNode } from '../../vendor/json-canvas-viewer/src/index.ts'
 import { MarkdownVditorPreview } from '../../shared/markdown/MarkdownVditorPreview'
+import { KnowledgeTree } from '../../shared/tree/KnowledgeTree'
 import {
   colorWithOpacity,
   resolveNodeStyle,
@@ -140,11 +141,13 @@ export function TextSlot({
   onActive,
   onSelect,
   onScheduleEventsChange,
+  onTreeSize,
 }: {
   node: JSONCanvasTextNode
   onActive?: Hook
   onSelect?: (id: string) => void
   onScheduleEventsChange?: (events: SuperBoardScheduleEvent[]) => void
+  onTreeSize?: (size: { width: number; height: number }) => void
 }) {
   const { t } = useTranslation(['common'])
   useNodeSelection(node.id, onActive, onSelect)
@@ -170,6 +173,8 @@ export function TextSlot({
           onEventsChange={onScheduleEventsChange}
         />
       </Suspense>
+    ) : ext?.kind === 'tree' && ext.tree ? (
+      <KnowledgeTree data={ext.tree} onSize={onTreeSize} />
     ) : (
       <div
         className="sb-plain-text"
@@ -188,7 +193,11 @@ export function TextSlot({
   return (
     <BlockSurface
       node={node}
-      plain={(!ext?.kind || ext.kind === 'text') && !hasTextSurface}
+      plain={
+        ext?.kind === 'tree'
+          ? true
+          : (!ext?.kind || ext.kind === 'text') && !hasTextSurface
+      }
     >
       {content}
     </BlockSurface>

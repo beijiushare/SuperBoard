@@ -13,6 +13,7 @@ import {
   treeBlockSize,
   treeDescendantIds,
   treeNodeById,
+  treeEdges,
   treeOutline,
   treePath,
   updateTreeNode,
@@ -214,6 +215,18 @@ assert.equal(treeOutline(tree), [
   '    - a1',
   '  - b',
 ].join('\n'))
+
+// Edges are derived, horizontal, and end with an arrow head.
+const edges = treeEdges(tree, layout.positions, { r: 100, a: 100, a1: 100, b: 100 })
+assert.equal(edges.length, 3)
+const rootToA = edges.find((edge) => edge.childId === 'a')!
+assert.equal(rootToA.parentId, 'r')
+assert.equal(
+  rootToA.path,
+  `M ${TREE_CARD_WIDTH} 112 C ${TREE_CARD_WIDTH + 36} 112 373 50 409 50`,
+)
+assert.equal(rootToA.arrow, 'M 416 50 L 409 46 L 409 54 Z')
+assert.equal(treeEdges(collapsed, layout.positions).length, 2)
 
 // Tree data survives a document round trip untouched.
 const withTree = parseCanvas(

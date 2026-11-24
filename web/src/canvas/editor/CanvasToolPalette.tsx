@@ -119,6 +119,7 @@ interface CanvasToolPaletteProps {
   onInsertPele: () => void
   onInsertSchedule: () => void
   onInsertMedia: () => void
+  onInsertTree: () => void
 }
 
 export function CanvasToolPalette({
@@ -128,6 +129,7 @@ export function CanvasToolPalette({
   onInsertPele,
   onInsertSchedule,
   onInsertMedia,
+  onInsertTree,
 }: CanvasToolPaletteProps) {
   const { t } = useTranslation(['editor', 'common'])
   const { rootRef, position, handleProps } = useFloatingPanel()
@@ -323,6 +325,16 @@ export function CanvasToolPalette({
                 }}
               >
                 {t('editor:insert.schedule')}
+              </button>
+              <button
+                type="button"
+                className="canvas-tool-flyout-item"
+                onClick={() => {
+                  setFlyout(null)
+                  onInsertTree()
+                }}
+              >
+                {t('editor:insert.tree')}
               </button>
               <button
                 type="button"
