@@ -1,4 +1,26 @@
 
+/*
+ * app.css — editor shell and chrome.
+ *
+ * This file is ordered by region; the ranges below are the current layout and
+ * are meant to be split into one file per region next:
+ *
+ *   ~1     app shell + left rail (sb-app, sb-rail-*)
+ *   ~121   director mode (sb-director-*)
+ *   ~241   frames + presentation (sb-frame-*, sb-presentation-*)
+ *   ~361   shared buttons (sb-button-*)
+ *   ~481   tool palette (canvas-tool-*)
+ *   ~601   style panel (sb-style-*)
+ *   ~841   dialogs + preferences (canvas-editor-dialog-*, sb-preferences-*, sb-settings-*)
+ *   ~1081  selection chrome + block actions (sb-editor-*, sb-block-*)
+ *   ~1321  Markdown editor overlay (sb-md-editor)
+ *   ~1441  editor overlay + viewer tweaks
+ *   ~1681  colour picker (sb-color-*)
+ *
+ * Rule: no new component styles here. New components get their own file (or
+ * CSS module) named after the component.
+ */
+
 .sb-app {
   display: flex;
   height: 100dvh;
