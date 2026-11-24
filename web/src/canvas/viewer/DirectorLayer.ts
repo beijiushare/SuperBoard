@@ -57,6 +57,7 @@ export class DirectorLayer extends BaseModule {
       setDirectorVisible: this.setVisible,
       playDirectorFrame: this.playFrame,
       restoreDirectorCamera: this.restoreCamera,
+      captureDirectorCamera: this.captureCamera,
     })
     this.unsubscribe = this.controller.onRefresh.subscribe(this.draw)
     this.onStart(this.start)
@@ -160,6 +161,14 @@ export class DirectorLayer extends BaseModule {
       }
       this.animation = requestAnimationFrame(tick)
     })
+  }
+
+  private readonly captureCamera = () => {
+    this.cameraBeforePlayback = {
+      offsetX: this.dm.data.offsetX,
+      offsetY: this.dm.data.offsetY,
+      scale: this.dm.data.scale,
+    }
   }
 
   private readonly restoreCamera = () => {

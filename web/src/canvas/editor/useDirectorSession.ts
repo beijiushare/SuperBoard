@@ -96,6 +96,11 @@ export function useDirectorSession({
       return
     }
     setDirectorMode(true)
+    // Snapshot the editing camera when director mode opens, so playback always
+    // returns here instead of to whatever frame was last previewed.
+    requestAnimationFrame(() =>
+      viewerRef.current?.viewer?.captureDirectorCamera?.(),
+    )
   }
 
   return {

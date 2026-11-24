@@ -39,6 +39,7 @@ export interface CanvasViewerHandle {
     setDirectorVisible?: (visible: boolean) => void
     playDirectorFrame?: (frame: CanvasFrame, animate?: boolean) => Promise<void>
     restoreDirectorCamera?: () => void
+    captureDirectorCamera?: () => void
   }
 }
 
