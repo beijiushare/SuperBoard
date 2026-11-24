@@ -22,7 +22,7 @@ import {
 } from '../model'
 import { CanvasEditorStage } from './CanvasEditorStage'
 import { aiChat } from '../../desktop/ai'
-import { buildTreeMessages } from '../tree/treePrompt'
+import { buildTreeMessages, splitAnswerTitle } from '../tree/treePrompt'
 import { activeAISettings, getPreferences } from './preferences'
 import {
   type CanvasMenuState,
@@ -390,10 +390,12 @@ export function CanvasEditorApp() {
           { ...settings, session: `${slug}:${blockId}` },
           messages,
         )
+        const { title, body } = splitAnswerTitle(content)
         patchTree(blockId, (current) =>
           updateTreeNode(current, nodeId, {
             status: 'done',
-            answer: content.trim(),
+            answer: body,
+            ...(title ? { title } : {}),
             error: undefined,
           }),
         )

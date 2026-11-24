@@ -100,7 +100,8 @@ function ContextPreview({ context }: { context?: TreeContextPreview }) {
   )
 }
 
-/** A single card: title, optional quote, question and the answer body. */export function TreeCard({
+/** A single card: title, optional quote, question and the answer body. */
+export function TreeCard({
   node,
   hasChildren,
   canDelete,
@@ -120,7 +121,8 @@ function ContextPreview({ context }: { context?: TreeContextPreview }) {
   onOpenMenu,
   onTextMenu,
   contextFor,
-}: TreeCardProps) {  const { t } = useTranslation(['editor'])
+}: TreeCardProps) {
+  const { t } = useTranslation(['editor'])
   const draft = node.status === 'draft'
   const [draftText, setDraftText] = useState('')
   const [editingTitle, setEditingTitle] = useState(false)
@@ -163,6 +165,8 @@ function ContextPreview({ context }: { context?: TreeContextPreview }) {
     setConfirmingDelete(true)
   }
 
+  const hasTitle = node.title.trim().length > 0
+
   return (
     <article
       ref={(element) => {
@@ -172,7 +176,9 @@ function ContextPreview({ context }: { context?: TreeContextPreview }) {
       data-tree-node-id={node.id}
       className={`sb-kt-card${node.bodyCollapsed ? ' is-collapsed' : ''}${
         draft ? ' is-draft' : ''
-      }${exiting ? ' is-exiting' : ''}`}
+      }${exiting ? ' is-exiting' : ''}${
+        hasTitle || editingTitle ? '' : ' is-headless'
+      }`}
       onPointerDown={(event) => {
         if (event.button === 0) onActivate()
       }}
@@ -219,107 +225,109 @@ function ContextPreview({ context }: { context?: TreeContextPreview }) {
         borderStyle: defaults.borderStyle,
       }}
     >
-      <header className="sb-kt-head">
-        {editingTitle ? (
-          <input
-            ref={titleRef}
-            className="sb-kt-title-input"
-            value={titleDraft}
-            onPointerDown={(event) => event.stopPropagation()}
-            onChange={(event) => setTitleDraft(event.target.value)}
-            onBlur={commitTitle}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault()
-                commitTitle()
-              }
-              if (event.key === 'Escape') {
-                event.preventDefault()
-                setEditingTitle(false)
-              }
-            }}
-          />
-        ) : (
-          <span
-            className="sb-kt-title"
-            title={t('editor:tree.renameHint')}
-            onDoubleClick={(event) => {
-              if (draft) return
-              event.stopPropagation()
-              setTitleDraft(node.title || node.question.trim())
-              setEditingTitle(true)
-            }}
-          >
-            {node.title.trim() || node.question.trim() || t('editor:tree.untitled')}
-          </span>
-        )}
-        <div className="sb-kt-tools">
-          {node.answer.trim() ? (
-            <button
-              type="button"
-              className="sb-kt-tool"
-              aria-label={
-                node.bodyCollapsed
-                  ? t('editor:tree.expandBody')
-                  : t('editor:tree.collapseBody')
-              }
-              title={
-                node.bodyCollapsed
-                  ? t('editor:tree.expandBody')
-                  : t('editor:tree.collapseBody')
-              }
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={(event) => {
-                event.stopPropagation()
-                onToggleBody()
-              }}
-            >
-              <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
-                <path
-                  d={
-                    node.bodyCollapsed
-                      ? 'M3.5 6 8 10.5 12.5 6'
-                      : 'M3.5 10 8 5.5 12.5 10'
-                  }
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          ) : null}
+      <div className="sb-kt-tools">
+        {node.answer.trim() ? (
           <button
             type="button"
             className="sb-kt-tool"
-            aria-label={t('editor:tree.addChild')}
-            title={t('editor:tree.addChild')}
+            aria-label={
+              node.bodyCollapsed
+                ? t('editor:tree.expandBody')
+                : t('editor:tree.collapseBody')
+            }
+            title={
+              node.bodyCollapsed
+                ? t('editor:tree.expandBody')
+                : t('editor:tree.collapseBody')
+            }
             onPointerDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation()
-              onAddChild()
+              onToggleBody()
             }}
           >
-            ＋
+            <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
+              <path
+                d={
+                  node.bodyCollapsed ? 'M3.5 6 8 10.5 12.5 6' : 'M3.5 10 8 5.5 12.5 10'
+                }
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
-          {canDelete ? (
-            <button
-              type="button"
-              className="sb-kt-tool sb-kt-tool-delete"
-              aria-label={t('editor:tree.delete')}
-              title={t('editor:tree.delete')}
+        ) : null}
+        <button
+          type="button"
+          className="sb-kt-tool"
+          aria-label={t('editor:tree.addChild')}
+          title={t('editor:tree.addChild')}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation()
+            onAddChild()
+          }}
+        >
+          ＋
+        </button>
+        {canDelete ? (
+          <button
+            type="button"
+            className="sb-kt-tool sb-kt-tool-delete"
+            aria-label={t('editor:tree.delete')}
+            title={t('editor:tree.delete')}
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation()
+              requestDelete()
+            }}
+          >
+            ×
+          </button>
+        ) : null}
+      </div>
+
+      {hasTitle || editingTitle ? (
+        <header className="sb-kt-head">
+          {editingTitle ? (
+            <input
+              ref={titleRef}
+              className="sb-kt-title-input"
+              value={titleDraft}
               onPointerDown={(event) => event.stopPropagation()}
-              onClick={(event) => {
+              onChange={(event) => setTitleDraft(event.target.value)}
+              onBlur={commitTitle}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  commitTitle()
+                }
+                if (event.key === 'Escape') {
+                  event.preventDefault()
+                  setEditingTitle(false)
+                }
+              }}
+            />
+          ) : (
+            <span
+              className="sb-kt-title"
+              title={t('editor:tree.renameHint')}
+              onDoubleClick={(event) => {
+                if (draft) return
                 event.stopPropagation()
-                requestDelete()
+                setTitleDraft(node.title)
+                setEditingTitle(true)
               }}
             >
-              ×
-            </button>
-          ) : null}
-        </div>
-      </header>
+              {node.title}
+            </span>
+          )}
+        </header>
+      ) : null}
+
       {node.quote ? (
         <blockquote className="sb-kt-quote">
           {node.quote.title ? (
@@ -328,6 +336,7 @@ function ContextPreview({ context }: { context?: TreeContextPreview }) {
           {node.quote.text}
         </blockquote>
       ) : null}
+
       {confirmingDelete ? (
         <div className="sb-kt-confirm">
           <span>{t('editor:tree.deleteAsk')}</span>
@@ -367,6 +376,7 @@ function ContextPreview({ context }: { context?: TreeContextPreview }) {
           </div>
         </div>
       ) : null}
+
       {draft ? (
         <div className="sb-kt-draft">
           <textarea

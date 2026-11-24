@@ -214,7 +214,6 @@ export function KnowledgeTree({
     onChange?.(
       updateTreeNode(data, id, {
         question,
-        title: question.slice(0, 20),
         status: 'done',
       }),
     )
@@ -305,7 +304,6 @@ export function KnowledgeTree({
     const { data: next } = addTreeChild(data, nodeId, {
       quote: quoteOf(nodeId, text),
       question: t('editor:tree.explainQuestion'),
-      title: t('editor:tree.explainTitle', { text: text.slice(0, 16) }),
       status: 'done',
     })
     window.getSelection()?.removeAllRanges()

@@ -8,12 +8,28 @@ import type { AIChatMessage } from '../../desktop/ai'
 const SYSTEM_PROMPT = [
   '你是知识树里的回答生成器。',
   '规则：',
-  '1. 只输出 GFM Markdown，不要输出 HTML，也不要用代码块包裹整段回答；',
-  '2. 需要对比、权衡或列参数时用表格；',
-  '3. 关键结论、风险、待验证的点用引用块（可用 > [!NOTE] / [!WARNING]）标出；',
-  '4. 不要重复用户的问题，直接从答案开始；',
-  '5. 篇幅克制：先给结论，再按需展开，不要写客套话。',
+  '1. 第一行输出 `# 标题`，用不超过 14 个字概括这次回答的结论；标题之后空一行再写正文；',
+  '2. 只输出 GFM Markdown，不要输出 HTML，也不要用代码块包裹整段回答；',
+  '3. 需要对比、权衡或列参数时用表格；',
+  '4. 关键结论、风险、待验证的点用引用块（可用 > [!NOTE] / > [!WARNING]）标出；',
+  '5. 不要重复用户的问题，直接从答案开始；',
+  '6. 如果用户引用了片段，只解释或回答该片段，不要扩展到整段原文；',
+  '7. 篇幅克制：先给结论，再按需展开，不要写客套话。',
 ].join('\n')
+
+/**
+ * The first `# heading` becomes the card title, so the card shows a short
+ * summary instead of repeating the question it already displays underneath.
+ */
+export function splitAnswerTitle(content: string) {
+  const text = content.replace(/^\s+/, '')
+  const match = text.match(/^#\s+(.+?)\s*(?:\r?\n|$)/)
+  if (!match) return { title: '', body: text.trim() }
+  return {
+    title: match[1].trim().slice(0, 40),
+    body: text.slice(match[0].length).replace(/^\s+/, '').trim(),
+  }
+}
 
 /**
  * A quoted excerpt belongs to the question it was asked with. Dropping it from
@@ -24,7 +40,7 @@ function questionWithQuote(node: SuperBoardTreeNode): string {
   const text = node.quote?.text.trim()
   if (!text) return node.question
   const source = node.quote?.title?.trim()
-  const quoted = source ? `引用自「${source}」：\n> ${text}` : `引用：\n> ${text}`
+  const quoted = source ? `引用自「${source}」中的一段：\n> ${text}` : `引用：\n> ${text}`
   return `${quoted}\n\n${node.question}`
 }
 

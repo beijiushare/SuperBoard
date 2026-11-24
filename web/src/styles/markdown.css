@@ -139,6 +139,62 @@
   text-align: left;
 }
 
+/* Tables scroll inside their own box rather than widening the container. */
+.sb-table-scroll {
+  max-width: 100%;
+  margin: 0 0 1em;
+  overflow-x: auto;
+}
+
+/* GitHub style alerts (`> [!WARNING]`), rewritten after rendering. */
+.sb-markdown .callout.callout {
+  --sb-callout: #3575f0;
+  display: block;
+  margin: 0 0 1em;
+  padding: 8px 12px 8px 10px;
+  border: 0;
+  border-left: 3px solid var(--sb-callout);
+  border-radius: 0 6px 6px 0;
+  background: color-mix(in srgb, var(--sb-callout) 8%, transparent);
+  color: inherit;
+}
+
+.sb-markdown .callout.callout::before {
+  content: none;
+}
+
+.sb-markdown .callout[data-subtype='TIP'] {
+  --sb-callout: #4c9a2a;
+}
+
+.sb-markdown .callout[data-subtype='IMPORTANT'] {
+  --sb-callout: #8957e5;
+}
+
+.sb-markdown .callout[data-subtype='WARNING'] {
+  --sb-callout: #d97706;
+}
+
+.sb-markdown .callout[data-subtype='CAUTION'] {
+  --sb-callout: #c0392b;
+}
+
+.sb-markdown .callout-info {
+  margin: 0 0 4px;
+}
+
+.sb-markdown .callout-label {
+  color: var(--sb-callout);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sb-markdown .callout > :last-child {
+  margin-bottom: 0;
+}
+
 .sb-markdown th {
   background: var(--tl-color-low, #f1efe8);
   font-weight: 700;

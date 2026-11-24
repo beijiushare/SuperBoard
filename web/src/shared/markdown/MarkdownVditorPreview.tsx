@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { loadMathJax } from './mathjax'
+import { enhancePreview } from './previewEnhance'
 import { vditorCdn } from './vditorAssets'
 import { getAppLanguage } from '../../i18n'
 
@@ -87,6 +88,7 @@ export function MarkdownVditorPreview({
         if (cancelled) return
         host.innerHTML = html
         host.classList.add('vditor-reset', 'sb-markdown')
+        enhancePreview(host)
         Vditor.highlightRender(
           { enable: true, style: 'github' },
           host,
