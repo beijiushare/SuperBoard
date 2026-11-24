@@ -37,6 +37,8 @@ type aiChatRequest struct {
 	Model       string          `json:"model"`
 	Messages    []aiChatMessage `json:"messages"`
 	Temperature *float64        `json:"temperature,omitempty"`
+	// Keyless providers (Ollama, LM Studio) run on the local machine.
+	Keyless bool `json:"keyless,omitempty"`
 }
 
 func maskKey(key string) string {
@@ -121,9 +123,13 @@ func (s *AIService) AIChat(requestJSON string) Result {
 	if strings.TrimSpace(request.Model) == "" {
 		return fail(400, "missing model")
 	}
-	key, err := keyring.Get(aiKeyringService, aiProviderID(request.Provider))
-	if err != nil {
-		return fail(401, "missing key")
+	key := ""
+	if !request.Keyless {
+		stored, err := keyring.Get(aiKeyringService, aiProviderID(request.Provider))
+		if err != nil {
+			return fail(401, "missing key")
+		}
+		key = stored
 	}
 
 	temperature := request.Temperature
@@ -149,7 +155,9 @@ func (s *AIService) AIChat(requestJSON string) Result {
 		return fail(400, err.Error())
 	}
 	httpRequest.Header.Set("Content-Type", "application/json")
-	httpRequest.Header.Set("Authorization", "Bearer "+key)
+	if key != "" {
+		httpRequest.Header.Set("Authorization", "Bearer "+key)
+	}
 
 	response, err := s.client.Do(httpRequest)
 	if err != nil {

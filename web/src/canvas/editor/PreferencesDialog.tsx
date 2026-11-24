@@ -9,6 +9,7 @@ import {
 } from './preferences'
 import { usePreferencesWorkspace } from './usePreferencesWorkspace'
 import { SettingsAboutTab } from './SettingsAboutTab'
+import { SettingsAITab } from './SettingsAITab'
 import { SettingsDefaultsTab } from './SettingsDefaultsTab'
 import { SettingsGeneralTab } from './SettingsGeneralTab'
 import { SettingsHelpTab } from './SettingsHelpTab'
@@ -23,7 +24,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
     structuredClone(getPreferences()),
   )
   const [confirmReset, setConfirmReset] = useState(false)
-  const [tab, setTab] = useState<'about' | 'general' | 'defaults' | 'help'>(
+  const [tab, setTab] = useState<'about' | 'general' | 'defaults' | 'ai' | 'help'>(
     'general',
   )
   const workspace = usePreferencesWorkspace()
@@ -83,6 +84,7 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
               [
                 ['general', 'settings:tabs.general'],
                 ['defaults', 'settings:tabs.defaults'],
+                ['ai', 'settings:tabs.ai'],
                 ['help', 'settings:tabs.help'],
                 ['about', 'settings:tabs.about'],
               ] as const
@@ -135,6 +137,17 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
               />
             ) : null}
             {tab === 'help' ? <SettingsHelpTab /> : null}
+            {tab === 'ai' ? (
+              <SettingsAITab
+                draft={draft.ai}
+                onChange={(patch) =>
+                  setDraft((current) => ({
+                    ...current,
+                    ai: { ...current.ai, ...patch },
+                  }))
+                }
+              />
+            ) : null}
             {tab === 'about' ? <SettingsAboutTab /> : null}
           </div>
         </div>

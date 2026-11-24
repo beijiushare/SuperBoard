@@ -27,6 +27,57 @@ export interface EditorPreferences {
   shapeCornerRadius: number
   /** Open the most recent workspace on launch instead of showing the picker. */
   autoOpenRecentWorkspace: boolean
+  ai: AIPreferences
+}
+
+export interface AIPreferences {
+  /** Credential-store namespace; also selects the provider preset. */
+  provider: string
+  baseURL: string
+  model: string
+}
+
+export interface AIProviderPreset {
+  id: string
+  labelKey: string
+  baseURL: string
+  model: string
+  keyless: boolean
+}
+
+export const AI_PROVIDERS: AIProviderPreset[] = [
+  {
+    id: 'openai',
+    labelKey: 'settings:ai.providers.openai',
+    baseURL: 'https://api.openai.com/v1',
+    model: 'gpt-4o-mini',
+    keyless: false,
+  },
+  {
+    id: 'compatible',
+    labelKey: 'settings:ai.providers.compatible',
+    baseURL: 'https://api.deepseek.com/v1',
+    model: 'deepseek-chat',
+    keyless: false,
+  },
+  {
+    id: 'ollama',
+    labelKey: 'settings:ai.providers.ollama',
+    baseURL: 'http://127.0.0.1:11434/v1',
+    model: 'llama3.2',
+    keyless: true,
+  },
+  {
+    id: 'lmstudio',
+    labelKey: 'settings:ai.providers.lmstudio',
+    baseURL: 'http://127.0.0.1:1234/v1',
+    model: 'local-model',
+    keyless: true,
+  },
+]
+
+export function aiProviderPreset(id: string) {
+  return AI_PROVIDERS.find((item) => item.id === id) ?? AI_PROVIDERS[0]
 }
 
 export function fontOptions(t: (key: string) => string) {
@@ -59,6 +110,11 @@ export const DEFAULT_PREFERENCES: EditorPreferences = {
   },
   shapeCornerRadius: 0,
   autoOpenRecentWorkspace: true,
+  ai: {
+    provider: 'openai',
+    baseURL: 'https://api.openai.com/v1',
+    model: 'gpt-4o-mini',
+  },
 }
 
 let cached = loadPreferences()
@@ -72,6 +128,7 @@ function mergePreferences(value: unknown): EditorPreferences {
   if (!isRecord(value)) return DEFAULT_PREFERENCES
   const block = isRecord(value.block) ? value.block : {}
   const text = isRecord(value.text) ? value.text : {}
+  const ai = isRecord(value.ai) ? value.ai : {}
   return {
     block: {
       ...DEFAULT_PREFERENCES.block,
@@ -89,6 +146,18 @@ function mergePreferences(value: unknown): EditorPreferences {
       typeof value.autoOpenRecentWorkspace === 'boolean'
         ? value.autoOpenRecentWorkspace
         : DEFAULT_PREFERENCES.autoOpenRecentWorkspace,
+    ai: {
+      provider:
+        typeof ai.provider === 'string'
+          ? ai.provider
+          : DEFAULT_PREFERENCES.ai.provider,
+      baseURL:
+        typeof ai.baseURL === 'string'
+          ? ai.baseURL
+          : DEFAULT_PREFERENCES.ai.baseURL,
+      model:
+        typeof ai.model === 'string' ? ai.model : DEFAULT_PREFERENCES.ai.model,
+    },
   } as EditorPreferences
 }
 
