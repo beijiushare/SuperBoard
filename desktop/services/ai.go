@@ -165,6 +165,9 @@ func (s *AIService) AIChat(requestJSON string) Result {
 		return fail(400, err.Error())
 	}
 	httpRequest.Header.Set("Content-Type", "application/json")
+	// Gateways ask for a distinct client identity rather than a generic
+	// HTTP-library user agent.
+	httpRequest.Header.Set("User-Agent", "SuperBoard")
 	if key != "" {
 		httpRequest.Header.Set("Authorization", "Bearer "+key)
 	}

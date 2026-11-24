@@ -12,6 +12,8 @@ export interface AIRequestSettings {
   keyless: boolean
   /** Extra headers some gateways require. */
   headers?: Record<string, string>
+  /** Stable id for the conversation this request belongs to. */
+  session?: string
 }
 
 export interface AIChatMessage {
@@ -51,7 +53,9 @@ function resolveHeaders(settings: AIRequestSettings) {
     const hasSession = Object.keys(headers).some(
       (name) => name.toLowerCase() === 'x-opencode-session',
     )
-    if (!hasSession) headers['x-opencode-session'] = aiSessionId
+    if (!hasSession) {
+      headers['x-opencode-session'] = settings.session?.trim() || aiSessionId
+    }
   }
   return headers
 }

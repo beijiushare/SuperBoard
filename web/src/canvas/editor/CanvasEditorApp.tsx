@@ -382,7 +382,14 @@ export function CanvasEditorApp() {
         if (!tree) return
         const messages = buildTreeMessages(tree, nodeId)
         if (!messages.length) throw new Error('empty prompt')
-        const content = await aiChat(settings, messages)
+        const slug =
+          canvasRef.current?.['x-superboard']?.meta.slug ?? 'board'
+        // One session per tree block: OpenCode Zen uses it to pin routing and
+        // prompt caching to a single conversation.
+        const content = await aiChat(
+          { ...settings, session: `${slug}:${blockId}` },
+          messages,
+        )
         patchTree(blockId, (current) =>
           updateTreeNode(current, nodeId, {
             status: 'done',
