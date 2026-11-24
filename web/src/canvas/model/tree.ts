@@ -340,3 +340,22 @@ export function treeOutline(data: SuperBoardTreeData): string {
   if (root) walk(root, 0)
   return lines.join('\n')
 }
+
+/**
+ * Cards that were just given a question and still need an answer. Comparing the
+ * previous and next tree keeps generation out of the render path: adding a
+ * child or collapsing a branch never triggers a request.
+ */
+export function questionsToAnswer(
+  previous: SuperBoardTreeData,
+  next: SuperBoardTreeData,
+): string[] {
+  const before = new Map(previous.nodes.map((node) => [node.id, node]))
+  return next.nodes
+    .filter((node) => {
+      if (node.status !== 'done') return false
+      if (!node.question.trim() || node.answer.trim()) return false
+      return before.get(node.id)?.question !== node.question
+    })
+    .map((node) => node.id)
+}

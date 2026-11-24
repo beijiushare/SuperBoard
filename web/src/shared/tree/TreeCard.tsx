@@ -19,9 +19,34 @@ interface TreeCardProps {
   onSubmitQuestion: (text: string) => void
   onCancelDraft: () => void
   onToggleBranch: () => void
+  /** Ask again after a failure. */
+  onRetry: () => void
 }
 
-function CardBody({ node }: { node: SuperBoardTreeNode }) {
+function CardBody({
+  node,
+  onRetry,
+}: {
+  node: SuperBoardTreeNode
+  onRetry: () => void
+}) {
+  if (node.status === 'error') {
+    return (
+      <div className="sb-kt-card-error">
+        <span>{node.error || '生成失败'}</span>
+        <button
+          type="button"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation()
+            onRetry()
+          }}
+        >
+          重试
+        </button>
+      </div>
+    )
+  }
   if (node.status === 'draft' || !node.answer.trim()) {
     return (
       <div className="sb-kt-card-empty">
@@ -29,9 +54,7 @@ function CardBody({ node }: { node: SuperBoardTreeNode }) {
           ? '等待提问'
           : node.status === 'generating'
             ? '生成中…'
-            : node.status === 'error'
-              ? '生成失败'
-              : '暂无回答'}
+            : '暂无回答'}
       </div>
     )
   }
@@ -50,6 +73,7 @@ export function TreeCard({
   onSubmitQuestion,
   onCancelDraft,
   onToggleBranch,
+  onRetry,
 }: TreeCardProps) {
   const draft = node.status === 'draft'
   const [draftText, setDraftText] = useState('')
@@ -169,7 +193,7 @@ export function TreeCard({
             <blockquote className="sb-kt-question">{node.question}</blockquote>
           ) : null}
           <div className="sb-kt-body">
-            <CardBody node={node} />
+            <CardBody node={node} onRetry={onRetry} />
           </div>
         </>
       )}

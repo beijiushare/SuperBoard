@@ -98,6 +98,7 @@ interface CanvasEditorStageProps {
   ) => void
   onTreeSize?: (id: string, size: { width: number; height: number }) => void
   onTreeChange?: (id: string, data: SuperBoardTreeData) => void
+  onTreeGenerate?: (id: string, nodeId: string) => void
   selection: StageSelection
   tools: StageTools
   markdown: StageMarkdown
@@ -118,6 +119,7 @@ export function CanvasEditorStage({
   onScheduleEventsChange,
   onTreeSize,
   onTreeChange,
+  onTreeGenerate,
   selection,
   tools,
   markdown,
@@ -146,6 +148,7 @@ export function CanvasEditorStage({
                   onScheduleEventsChange={onScheduleEventsChange}
                   onTreeSize={onTreeSize}
                   onTreeChange={onTreeChange}
+                  onTreeGenerate={onTreeGenerate}
                   style={{ width: '100%', height: '100%' }}
                 />
               </div>

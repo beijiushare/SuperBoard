@@ -183,6 +183,8 @@ export interface SuperBoardTreeNode {
   quote?: SuperBoardTreeQuote
   status: SuperBoardTreeNodeStatus
   createdAt: string
+  /** Last generation error, cleared when a retry starts. */
+  error?: string
   /** Hide descendants while keeping this card. */
   branchCollapsed?: boolean
   /** Keep the title, the quote and the first lines of the answer. */

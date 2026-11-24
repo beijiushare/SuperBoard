@@ -27,6 +27,8 @@ interface KnowledgeTreeProps {
   onChange?: (next: SuperBoardTreeData) => void
   /** A card was pressed with the primary button; selects the block. */
   onActivate?: () => void
+  /** Ask again for one card, e.g. after a failed request. */
+  onGenerate?: (nodeId: string) => void
 }
 
 /**
@@ -90,6 +92,7 @@ export function KnowledgeTree({
   onSize,
   onChange,
   onActivate,
+  onGenerate,
 }: KnowledgeTreeProps) {
   const { heights, register } = useCardHeights()
   const blockDefaults = usePreferences().block
@@ -181,6 +184,7 @@ export function KnowledgeTree({
             onSubmitQuestion={(text) => submitQuestion(node.id, text)}
             onCancelDraft={() => cancelDraft(node.id)}
             onToggleBranch={() => toggleBranch(node.id)}
+            onRetry={() => onGenerate?.(node.id)}
           />
         ))}
       </div>

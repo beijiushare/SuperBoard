@@ -8,6 +8,7 @@ import {
   addTreeChild,
   layoutTree,
   parseCanvas,
+  questionsToAnswer,
   removeTreeNode,
   serializeCanvas,
   treeBlockSize,
@@ -22,6 +23,10 @@ import {
   type CanvasDocument,
   type SuperBoardTreeData,
 } from '../web/src/canvas/model'
+import {
+  buildTreeMessages,
+  estimateTokens,
+} from '../web/src/canvas/tree/treePrompt'
 
 const sample: CanvasDocument = {
   nodes: [
@@ -248,5 +253,41 @@ const withTree = parseCanvas(
 )
 assert.equal(withTree.nodes[0]['x-superboard']?.tree?.rootId, 'r')
 assert.equal(withTree.nodes[0]['x-superboard']?.tree?.nodes.length, 4)
+
+// A submitted question is the only thing that starts a request.
+const asked = updateTreeNode(tree, 'a1', {
+  question: 'why',
+  answer: '',
+  status: 'done',
+})
+assert.deepEqual(questionsToAnswer(tree, asked), ['a1'])
+assert.deepEqual(questionsToAnswer(asked, asked), [])
+assert.deepEqual(
+  questionsToAnswer(tree, updateTreeNode(tree, 'a', { branchCollapsed: true })),
+  [],
+)
+
+// The prompt only carries the root -> node path, with alternation.
+const messages = buildTreeMessages(asked, 'a1')
+assert.equal(messages[0].role, 'system')
+assert.deepEqual(
+  messages.slice(1).map((message) => message.role),
+  ['user', 'assistant', 'user', 'assistant', 'user'],
+)
+assert.equal(messages.at(-1)?.content, 'why')
+assert.equal(
+  messages.some((message) => message.content.includes('root')),
+  false,
+)
+assert.ok(estimateTokens(messages) > 0)
+
+// Quoted text is prepended to the final user message.
+const quoted = updateTreeNode(asked, 'a1', {
+  quote: { text: 'a snippet', title: 'root' },
+})
+assert.equal(
+  buildTreeMessages(quoted, 'a1').at(-1)?.content,
+  '引用自「root」：\n> a snippet\n\nwhy',
+)
 
 console.log('canvas model tests passed')

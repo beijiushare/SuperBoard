@@ -182,6 +182,28 @@
   font-size: 12px;
 }
 
+.sb-kt-card-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--sb-danger, #b4483c);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.sb-kt-card-error button {
+  flex: none;
+  padding: 0 6px;
+  border: 1px solid currentcolor;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 18px;
+}
+
 /* Card Markdown: headings never out-rank the card title. */
 .sb-kt-body .sb-markdown h1,
 .sb-kt-body .sb-markdown h2,

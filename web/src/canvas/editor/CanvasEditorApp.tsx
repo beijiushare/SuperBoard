@@ -16,7 +16,14 @@ import type {
   SuperBoardScheduleEvent,
   SuperBoardTreeData,
 } from '../model'
+import {
+  questionsToAnswer,
+  updateTreeNode,
+} from '../model'
 import { CanvasEditorStage } from './CanvasEditorStage'
+import { aiChat } from '../../desktop/ai'
+import { buildTreeMessages } from '../tree/treePrompt'
+import { aiProviderPreset, getPreferences } from './preferences'
 import {
   type CanvasMenuState,
   type DataManagerLike,
@@ -321,11 +328,89 @@ export function CanvasEditorApp() {
     [canvas],
   )
 
+  /** Silently patch one tree block: used for derived state such as answers. */
+  const patchTree = useCallback(
+    (
+      id: string,
+      updater: (tree: SuperBoardTreeData) => SuperBoardTreeData,
+    ) => {
+      setCanvas((current) => {
+        if (!current) return current
+        const node = current.nodes.find((item) => item.id === id)
+        const tree = node?.['x-superboard']?.tree
+        if (!node || !tree) return current
+        const nextTree = updater(tree)
+        if (nextTree === tree) return current
+        return {
+          ...current,
+          nodes: current.nodes.map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  'x-superboard': {
+                    ...ensureExtension(item),
+                    kind: 'tree',
+                    tree: nextTree,
+                  },
+                }
+              : item,
+          ),
+        }
+      })
+    },
+    [ensureExtension, setCanvas],
+  )
+
+  const runTreeAnswer = useCallback(
+    async (blockId: string, nodeId: string) => {
+      const preferences = getPreferences()
+      const preset = aiProviderPreset(preferences.ai.provider)
+      patchTree(blockId, (tree) =>
+        updateTreeNode(tree, nodeId, {
+          status: 'generating',
+          error: undefined,
+        }),
+      )
+      try {
+        const tree = canvasRef.current?.nodes.find(
+          (item) => item.id === blockId,
+        )?.['x-superboard']?.tree
+        if (!tree) return
+        const messages = buildTreeMessages(tree, nodeId)
+        if (!messages.length) throw new Error('empty prompt')
+        const content = await aiChat(
+          {
+            provider: preferences.ai.provider,
+            baseURL: preferences.ai.baseURL,
+            model: preferences.ai.model,
+            keyless: preset.keyless,
+          },
+          messages,
+        )
+        patchTree(blockId, (current) =>
+          updateTreeNode(current, nodeId, {
+            status: 'done',
+            answer: content.trim(),
+            error: undefined,
+          }),
+        )
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        patchTree(blockId, (current) =>
+          updateTreeNode(current, nodeId, { status: 'error', error: message }),
+        )
+      }
+      markDirty()
+    },
+    [markDirty, patchTree],
+  )
+
   const updateTreeChange = useCallback(
     (id: string, tree: SuperBoardTreeData) => {
       const document = canvasRef.current
       const node = document?.nodes.find((item) => item.id === id)
       if (!document || !node) return
+      const previousTree = node['x-superboard']?.tree
       recordHistory()
       captureViewport()
       const next: CanvasDocument = {
@@ -345,8 +430,19 @@ export function CanvasEditorApp() {
       }
       setCanvas(next)
       markDirty()
+      if (!previousTree) return
+      for (const nodeId of questionsToAnswer(previousTree, tree)) {
+        void runTreeAnswer(id, nodeId)
+      }
     },
-    [canvas],
+    [
+      captureViewport,
+      ensureExtension,
+      markDirty,
+      recordHistory,
+      runTreeAnswer,
+      setCanvas,
+    ],
   )
 
   const updateTreeSize = useCallback(
@@ -606,6 +702,7 @@ export function CanvasEditorApp() {
           onScheduleEventsChange={updateScheduleEvents}
           onTreeSize={updateTreeSize}
           onTreeChange={updateTreeChange}
+          onTreeGenerate={runTreeAnswer}
           selection={{
             selectedIds,
             onSelect: setSelectedIds,
