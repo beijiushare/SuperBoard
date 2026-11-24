@@ -392,12 +392,8 @@
   background: #f1eee5;
 }
 
-.sb-app-editor.is-director-mode .tlui-layout__bottom,
 .sb-app-editor.is-presenting .sb-rail,
-.sb-app-editor.is-presenting .sb-tree-panel,
-.sb-app-editor.is-presenting .tlui-layout__top,
-.sb-app-editor.is-presenting .tlui-layout__bottom,
-.sb-app-editor.is-presenting .tlui-style-panel {
+.sb-app-editor.is-presenting .sb-tree-panel {
   display: none;
 }
 
@@ -1838,15 +1834,6 @@
   height: 100%;
   background-color: var(--sb-canvas-bg);
   pointer-events: none;
-}
-
-.sb-canvas .tl-background__wrapper {
-  pointer-events: none;
-}
-
-.sb-canvas .tl-grid,
-.sb-viewer .tl-grid {
-  display: none;
 }
 
 .sb-canvas .JCV-overlays,
