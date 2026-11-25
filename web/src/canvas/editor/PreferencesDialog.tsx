@@ -112,6 +112,13 @@ export function PreferencesDialog({ onClose }: PreferencesDialogProps) {
                     autoOpenRecentWorkspace: checked,
                   }))
                 }
+                history={draft.history}
+                onHistoryChange={(patch) =>
+                  setDraft((current) => ({
+                    ...current,
+                    history: { ...current.history, ...patch },
+                  }))
+                }
                 workspace={workspace}
               />
             ) : null}

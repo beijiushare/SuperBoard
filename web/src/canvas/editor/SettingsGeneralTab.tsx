@@ -4,16 +4,22 @@ import { Switch } from '../../components/ui/switch'
 import { getAppLanguage, SUPPORTED_LANGUAGES } from '../../i18n'
 import { changeAppLanguage, canOpenWorkspace } from './workspacePlatform'
 import type { usePreferencesWorkspace } from './usePreferencesWorkspace'
+import type { HistoryPreferences } from './preferences'
+import { SettingsHistoryCard } from './SettingsHistoryCard'
 
 interface SettingsGeneralTabProps {
   autoOpen: boolean
   onAutoOpenChange: (value: boolean) => void
+  history: HistoryPreferences
+  onHistoryChange: (patch: Partial<HistoryPreferences>) => void
   workspace: ReturnType<typeof usePreferencesWorkspace>
 }
 
 export function SettingsGeneralTab({
   autoOpen,
   onAutoOpenChange,
+  history,
+  onHistoryChange,
   workspace,
 }: SettingsGeneralTabProps) {
   const { t } = useTranslation(['settings', 'common'])
@@ -131,6 +137,8 @@ export function SettingsGeneralTab({
           </p>
         </div>
       </section>
+
+      <SettingsHistoryCard history={history} onChange={onHistoryChange} />
 
       <section className="sb-settings-card">
         <div className="sb-settings-rows">
