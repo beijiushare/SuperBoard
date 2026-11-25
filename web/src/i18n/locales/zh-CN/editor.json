@@ -85,6 +85,8 @@
   "context.delete": "删除…",
   "context.history": "历史版本…",
   "history.title": "历史版本",
+  "history.today": "今天",
+  "history.yesterday": "昨天",
   "history.loading": "正在读取历史版本…",
   "history.empty": "还没有历史版本。修改并保存白板后会按设置的间隔开始记录。",
   "history.previewLoading": "正在载入预览…",

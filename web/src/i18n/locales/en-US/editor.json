@@ -85,6 +85,8 @@
   "context.delete": "Delete…",
   "context.history": "History…",
   "history.title": "History",
+  "history.today": "Today",
+  "history.yesterday": "Yesterday",
   "history.loading": "Loading history versions…",
   "history.empty": "No history versions yet. Snapshots start after the board is edited and saved.",
   "history.previewLoading": "Loading preview…",

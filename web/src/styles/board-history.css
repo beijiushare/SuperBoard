@@ -1,93 +1,167 @@
-/* Board history dialog: BoardHistoryDialog. */
+/* Board history screen: BoardHistoryDialog. */
 
-.sb-history-dialog {
+.sb-history-screen {
+  position: fixed;
+  z-index: 9600;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  width: min(980px, calc(100vw - 56px));
-  height: min(680px, calc(100dvh - 56px));
-  max-height: calc(100dvh - 56px);
-  padding: 0;
-  overflow: hidden;
+  background: #f6f5f1;
+  color: #1f1e1c;
 }
 
-.sb-history-head {
+.sb-history-topbar {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  height: 56px;
+  flex: none;
+  align-items: center;
   gap: 12px;
-  padding: 16px 18px 12px;
-  border-bottom: 1px solid #ece9e1;
+  padding: 0 14px;
+  border-bottom: 1px solid #e6e2d8;
+  background: #fffdf8;
 }
 
-.sb-history-head h2 {
-  margin: 0;
+.sb-history-back {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #3f3c35;
   font-size: 16px;
+  cursor: pointer;
 }
 
-.sb-history-head p {
-  margin: 4px 0 0;
+.sb-history-back:hover:not(:disabled) {
+  background: #f1eee5;
+}
+
+.sb-history-back:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.sb-history-heading {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.sb-history-heading h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.sb-history-heading span {
+  overflow: hidden;
   color: #8b877d;
   font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.sb-history-body {
-  flex: 1;
-  min-height: 0;
+.sb-history-top-actions {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+
+.sb-history-main {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: 300px minmax(0, 1fr);
 }
 
 .sb-history-list {
   overflow: auto;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  border-right: 1px solid #ece9e1;
+  padding: 10px 8px 24px;
+  border-right: 1px solid #e6e2d8;
+  background: #fbfaf6;
+}
+
+.sb-history-group + .sb-history-group {
+  margin-top: 10px;
+}
+
+.sb-history-date {
+  margin: 0;
+  padding: 6px 10px;
+  color: #8b877d;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .sb-history-entry {
   display: flex;
+  width: 100%;
+  align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: 10px;
+  padding: 9px 10px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   background: transparent;
   color: #3f3c35;
   font: inherit;
-  font-size: 12.5px;
+  font-size: 13px;
   text-align: left;
   cursor: pointer;
 }
 
 .sb-history-entry:hover {
-  background: #f6f4ee;
+  background: #f3f0e8;
 }
 
 .sb-history-entry.is-selected {
-  background: #f1eee6;
+  background: #ece8dd;
+  color: #1f1e1c;
+  font-weight: 600;
 }
 
-.sb-history-entry-size {
+.sb-history-time {
+  font-variant-numeric: tabular-nums;
+}
+
+.sb-history-size {
   color: #8b877d;
+  font-size: 11px;
+  font-weight: 400;
 }
 
 .sb-history-preview {
   position: relative;
   min-width: 0;
-  overflow: hidden;
   background: #faf9f5;
+}
+
+.sb-history-preview-badge {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  left: 16px;
+  padding: 4px 9px;
+  border: 1px solid #e6e2d8;
+  border-radius: 999px;
+  background: rgb(255 253 248 / 92%);
+  color: #6f6d66;
+  font-size: 11px;
+  backdrop-filter: blur(6px);
 }
 
 .sb-history-empty {
   margin: 0;
-  padding: 16px;
+  padding: 16px 12px;
   color: #8b877d;
   font-size: 12px;
 }
 
-.sb-history-preview > .sb-history-empty {
+.sb-history-empty.is-centred {
   position: absolute;
   inset: 0;
   display: flex;
@@ -95,20 +169,17 @@
   justify-content: center;
 }
 
-.sb-history-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 18px;
-  border-top: 1px solid #ece9e1;
+.sb-history-error {
+  margin: 0;
+  padding: 8px 16px;
+  border-top: 1px solid #f0d3d0;
+  background: #fdf3f2;
+  color: #a33;
+  font-size: 12px;
 }
 
-.sb-history-actions-right {
-  display: flex;
-  gap: 8px;
-}
-
-.sb-history-dialog .sb-dialog-error {
-  margin: 0 18px 8px;
+@media (max-width: 900px) {
+  .sb-history-main {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
 }

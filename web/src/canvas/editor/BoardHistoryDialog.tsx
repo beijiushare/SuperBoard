@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { getAppLanguage } from '../../i18n'
+import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { CanvasDocument } from '../model'
 import type { CanvasListItem } from './appUtils'
-import { CanvasViewer } from '../viewer/CanvasViewer'
+import {
+  CanvasViewer,
+  type CanvasViewerHandle,
+} from '../viewer/CanvasViewer'
 import {
   clearBoardHistory,
   getBoardHistoryEntry,
@@ -33,9 +38,66 @@ function formatTime(value: string) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
   return new Intl.DateTimeFormat(getAppLanguage(), {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(date)
+}
+
+function formatDate(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat(getAppLanguage(), {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date)
+}
+
+function dateKey(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (input: number) => String(input).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+function fitPreview(
+  handle: CanvasViewerHandle | null,
+  canvas: CanvasDocument,
+) {
+  const viewer = handle?.viewer as
+    | {
+        container?: { get: (key: unknown) => unknown }
+        refresh?: () => void
+      }
+    | undefined
+  if (!viewer?.container) return
+  const dm = viewer.container.get(internal.DataManager as never) as {
+    data: {
+      container: HTMLDivElement
+      offsetX: number
+      offsetY: number
+      scale: number
+    }
+  }
+  const nodes = canvas.nodes
+  if (!nodes.length) return
+  const minX = Math.min(...nodes.map((node) => node.x))
+  const minY = Math.min(...nodes.map((node) => node.y))
+  const maxX = Math.max(...nodes.map((node) => node.x + node.width))
+  const maxY = Math.max(...nodes.map((node) => node.y + node.height))
+  const width = Math.max(1, dm.data.container.clientWidth)
+  const height = Math.max(1, dm.data.container.clientHeight)
+  const boardWidth = Math.max(1, maxX - minX)
+  const boardHeight = Math.max(1, maxY - minY)
+  const scale = Math.min(
+    1,
+    Math.max(0.05, (width - 96) / boardWidth),
+    Math.max(0.05, (height - 96) / boardHeight),
+  )
+  dm.data.scale = scale
+  dm.data.offsetX = (width - boardWidth * scale) / 2 - minX * scale
+  dm.data.offsetY = (height - boardHeight * scale) / 2 - minY * scale
+  viewer.refresh?.()
 }
 
 export function BoardHistoryDialog({
@@ -55,6 +117,7 @@ export function BoardHistoryDialog({
     null,
   )
   const [confirmClear, setConfirmClear] = useState(false)
+  const previewRef = useRef<CanvasViewerHandle>(null)
 
   const refresh = () => {
     setLoading(true)
@@ -104,6 +167,18 @@ export function BoardHistoryDialog({
   }, [selectedId, board.slug, board.scope])
 
   useEffect(() => {
+    if (!preview) return
+    let frame = 0
+    const fit = () => fitPreview(previewRef.current, preview)
+    frame = requestAnimationFrame(() => requestAnimationFrame(fit))
+    window.addEventListener('resize', fit)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', fit)
+    }
+  }, [preview])
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
       if (confirmClear) setConfirmClear(false)
@@ -113,6 +188,27 @@ export function BoardHistoryDialog({
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [confirmClear, confirmRestore, onClose])
+
+  const groups = useMemo(() => {
+    const result: Array<{ key: string; label: string; entries: BoardHistoryEntry[] }> = []
+    const today = dateKey(new Date().toISOString())
+    const yesterday = dateKey(
+      new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    )
+    for (const entry of entries) {
+      const key = dateKey(entry.createdAt)
+      const label =
+        key === today
+          ? t('editor:history.today')
+          : key === yesterday
+            ? t('editor:history.yesterday')
+            : formatDate(entry.createdAt)
+      const group = result.find((item) => item.key === key)
+      if (group) group.entries.push(entry)
+      else result.push({ key, label, entries: [entry] })
+    }
+    return result
+  }, [entries, t])
 
   function restore(entry: BoardHistoryEntry) {
     setBusy(true)
@@ -154,115 +250,101 @@ export function BoardHistoryDialog({
 
   const selected = entries.find((entry) => entry.id === selectedId) ?? null
 
-  return (
+  return createPortal(
     <>
-      <div
-        className="canvas-editor-dialog-backdrop"
-        role="presentation"
-        onClick={() => !busy && onClose()}
-      >
-        <div
-          className="canvas-editor-dialog sb-history-dialog"
-          role="dialog"
-          aria-modal="true"
-          aria-label={t('editor:history.title')}
-          onClick={(event) => event.stopPropagation()}
-        >
-          <header className="sb-history-head">
-            <div>
-              <h2>{t('editor:history.title')}</h2>
-              <p>{board.title}</p>
-            </div>
-            <button
-              type="button"
-              className="sb-icon-button"
-              aria-label={t('common:actions.close')}
-              title={t('common:actions.close')}
-              onClick={onClose}
-              disabled={busy}
-            >
-              ×
-            </button>
-          </header>
-
-          <div className="sb-history-body">
-            <div className="sb-history-list" role="listbox">
-              {loading ? (
-                <p className="sb-history-empty">{t('editor:history.loading')}</p>
-              ) : entries.length === 0 ? (
-                <p className="sb-history-empty">{t('editor:history.empty')}</p>
-              ) : (
-                entries.map((entry) => (
-                  <button
-                    key={entry.id}
-                    type="button"
-                    role="option"
-                    aria-selected={entry.id === selectedId}
-                    className={`sb-history-entry${
-                      entry.id === selectedId ? ' is-selected' : ''
-                    }`}
-                    onClick={() => setSelectedId(entry.id)}
-                  >
-                    <span className="sb-history-entry-time">
-                      {formatTime(entry.createdAt)}
-                    </span>
-                    <span className="sb-history-entry-size">
-                      {formatSize(entry.size)}
-                    </span>
-                  </button>
-                ))
-              )}
-            </div>
-
-            <div className="sb-history-preview">
-              {preview ? (
-                <CanvasViewer
-                  canvas={preview}
-                  style={{ width: '100%', height: '100%' }}
-                />
-              ) : (
-                <p className="sb-history-empty">
-                  {selected
-                    ? t('editor:history.previewLoading')
-                    : t('editor:history.previewEmpty')}
-                </p>
-              )}
-            </div>
+      <div className="sb-history-screen" role="dialog" aria-modal="true">
+        <header className="sb-history-topbar">
+          <button
+            type="button"
+            className="sb-history-back"
+            aria-label={t('common:actions.close')}
+            title={t('common:actions.close')}
+            onClick={onClose}
+            disabled={busy}
+          >
+            ←
+          </button>
+          <div className="sb-history-heading">
+            <h2>{t('editor:history.title')}</h2>
+            <span>{board.title}</span>
           </div>
-
-          {error ? <p className="sb-dialog-error">{error}</p> : null}
-
-          <footer className="sb-history-actions">
+          <div className="sb-history-top-actions">
             <button
               type="button"
-              className="sb-button sb-button-small sb-button-danger"
+              className="sb-button sb-button-small"
               disabled={busy || entries.length === 0}
               onClick={() => setConfirmClear(true)}
             >
               {t('editor:history.clearBoard')}
             </button>
-            <div className="sb-history-actions-right">
-              <button
-                type="button"
-                className="sb-button"
-                onClick={onClose}
-                disabled={busy}
-              >
-                {t('common:actions.close')}
-              </button>
-              <button
-                type="button"
-                className="sb-button sb-button-primary"
-                disabled={busy || !selected}
-                onClick={() => selected && setConfirmRestore(selected)}
-              >
-                {busy
-                  ? t('editor:history.restoring')
-                  : t('editor:history.restore')}
-              </button>
-            </div>
-          </footer>
+            <button
+              type="button"
+              className="sb-button sb-button-primary"
+              disabled={busy || !selected}
+              onClick={() => selected && setConfirmRestore(selected)}
+            >
+              {busy
+                ? t('editor:history.restoring')
+                : t('editor:history.restore')}
+            </button>
+          </div>
+        </header>
+
+        <div className="sb-history-main">
+          <aside className="sb-history-list" aria-label={t('editor:history.title')}>
+            {loading ? (
+              <p className="sb-history-empty">{t('editor:history.loading')}</p>
+            ) : entries.length === 0 ? (
+              <p className="sb-history-empty">{t('editor:history.empty')}</p>
+            ) : (
+              groups.map((group) => (
+                <section key={group.key} className="sb-history-group">
+                  <p className="sb-history-date">{group.label}</p>
+                  {group.entries.map((entry) => (
+                    <button
+                      key={entry.id}
+                      type="button"
+                      className={`sb-history-entry${
+                        entry.id === selectedId ? ' is-selected' : ''
+                      }`}
+                      onClick={() => setSelectedId(entry.id)}
+                    >
+                      <span className="sb-history-time">
+                        {formatTime(entry.createdAt)}
+                      </span>
+                      <span className="sb-history-size">
+                        {formatSize(entry.size)}
+                      </span>
+                    </button>
+                  ))}
+                </section>
+              ))
+            )}
+          </aside>
+
+          <div className="sb-history-preview">
+            {preview ? (
+              <>
+                <span className="sb-history-preview-badge">
+                  {selected ? formatTime(selected.createdAt) : ''}
+                </span>
+                <CanvasViewer
+                  ref={previewRef}
+                  canvas={preview}
+                  style={{ width: '100%', height: '100%' }}
+                />
+              </>
+            ) : (
+              <p className="sb-history-empty is-centred">
+                {selected
+                  ? t('editor:history.previewLoading')
+                  : t('editor:history.previewEmpty')}
+              </p>
+            )}
+          </div>
         </div>
+
+        {error ? <p className="sb-history-error">{error}</p> : null}
       </div>
 
       {confirmRestore ? (
@@ -281,7 +363,9 @@ export function BoardHistoryDialog({
             <h2>{t('editor:history.restoreConfirmTitle')}</h2>
             <p>
               {t('editor:history.restoreConfirmBody', {
-                time: formatTime(confirmRestore.createdAt),
+                time: `${formatDate(confirmRestore.createdAt)} ${formatTime(
+                  confirmRestore.createdAt,
+                )}`,
               })}
             </p>
             <div className="canvas-editor-dialog-actions">
@@ -340,6 +424,7 @@ export function BoardHistoryDialog({
           </div>
         </div>
       ) : null}
-    </>
+    </>,
+    document.body,
   )
 }
