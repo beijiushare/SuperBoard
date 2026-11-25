@@ -118,10 +118,10 @@ func TestWorkspaceConflictsAndPaths(t *testing.T) {
 	if err := os.WriteFile(path, changed, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if result := service.WriteBoard("board", "public", read.Body, false); result.Status != 409 {
+	if result := service.WriteBoard("board", "public", read.Body, false, 0, 0); result.Status != 409 {
 		t.Fatalf("expected conflict, got %d %s", result.Status, result.Body)
 	}
-	if result := service.WriteBoard("board", "public", read.Body, true); result.Status != 200 {
+	if result := service.WriteBoard("board", "public", read.Body, true, 0, 0); result.Status != 200 {
 		t.Fatalf("forced write failed: %s", result.Body)
 	}
 

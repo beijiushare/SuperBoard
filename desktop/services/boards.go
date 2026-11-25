@@ -177,7 +177,14 @@ func (s *WorkspaceService) writeBoard(scope string, folder string, slug string, 
 	return nil
 }
 
-func (s *WorkspaceService) WriteBoard(slug string, scope string, data string, force bool) Result {
+func (s *WorkspaceService) WriteBoard(
+	slug string,
+	scope string,
+	data string,
+	force bool,
+	historyInterval int,
+	historyLimit int,
+) Result {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	dir, file, err := s.boardLocation(scope, slug)
@@ -214,6 +221,7 @@ func (s *WorkspaceService) WriteBoard(slug string, scope string, data string, fo
 	if err := s.writeBoard(scope, folder, slug, string(next)); err != nil {
 		return fail(500, err.Error())
 	}
+	s.maybeSnapshot(scope, slug, string(next), historyInterval, historyLimit)
 	return canvasOK(doc, meta, folder, scope)
 }
 
@@ -323,6 +331,9 @@ func (s *WorkspaceService) UpdateBoard(slug string, scope string, title string, 
 	if err := s.writeBoard(scope, nextFolder, nextSlug, string(next)); err != nil {
 		return fail(500, err.Error())
 	}
+	if nextSlug != slug {
+		s.moveSlugHistory(scope, slug, nextSlug)
+	}
 	if nextSlug != slug || nextFolder != currentFolder {
 		_ = os.Remove(file)
 		delete(s.versions, scope+"/"+slug)
@@ -348,6 +359,7 @@ func (s *WorkspaceService) DeleteBoard(slug string, scope string) Result {
 	if err := os.Remove(file); err != nil {
 		return fail(500, err.Error())
 	}
+	s.removeSlugHistory(scope, slug)
 	delete(s.versions, scope+"/"+slug)
 	return simpleOK()
 }

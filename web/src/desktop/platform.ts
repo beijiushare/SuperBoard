@@ -248,6 +248,46 @@ async function handleCanvases(url: URL, init?: RequestInit) {
       ),
     )
   }
+  const historyMatch = url.pathname.match(
+    /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history$/,
+  )
+  if (historyMatch) {
+    const historySlug = historyMatch[1]
+    const historyScope =
+      url.searchParams.get('scope') === 'private' ? 'private' : 'public'
+    if (method === 'GET') {
+      return guarded(() =>
+        Workspace.ListBoardHistory(historySlug, historyScope),
+      )
+    }
+    if (method === 'DELETE') {
+      return guarded(() =>
+        Workspace.ClearBoardHistory(historySlug, historyScope),
+      )
+    }
+    return notFound()
+  }
+  const restoreMatch = url.pathname.match(
+    /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history\/([0-9]{13}-[a-f0-9]{10})\/restore$/,
+  )
+  if (restoreMatch) {
+    if (method !== 'POST') return notFound()
+    const restoreSlug = restoreMatch[1]
+    const entryId = restoreMatch[2]
+    const restoreScope =
+      url.searchParams.get('scope') === 'private' ? 'private' : 'public'
+    const historyLimit = Number(
+      url.searchParams.get('historyLimit') ?? '50',
+    )
+    return guarded(() =>
+      Workspace.RestoreBoardHistory(
+        restoreSlug,
+        entryId,
+        restoreScope,
+        Number.isFinite(historyLimit) ? historyLimit : 50,
+      ),
+    )
+  }
   const match = url.pathname.match(/^\/__canvases\/([a-z0-9][a-z0-9-]*)$/)
   if (!match) return notFound()
   const slug = match[1]
@@ -258,8 +298,17 @@ async function handleCanvases(url: URL, init?: RequestInit) {
   if (method === 'PUT') {
     const force =
       new Headers(init?.headers).get('x-superboard-force') === '1'
+    const interval = Number(url.searchParams.get('historyInterval') ?? '0')
+    const limit = Number(url.searchParams.get('historyLimit') ?? '0')
     return guarded(() =>
-      Workspace.WriteBoard(slug, scope, String(init?.body ?? ''), force),
+      Workspace.WriteBoard(
+        slug,
+        scope,
+        String(init?.body ?? ''),
+        force,
+        Number.isFinite(interval) ? interval : 0,
+        Number.isFinite(limit) ? limit : 0,
+      ),
     )
   }
   if (method === 'PATCH') {
@@ -285,7 +334,6 @@ async function handleCanvases(url: URL, init?: RequestInit) {
   }
   return notFound()
 }
-
 async function handleFolders(url: URL, init?: RequestInit) {
   const method = init?.method ?? 'GET'
   if (url.pathname === '/__folders' && method === 'GET') {
@@ -332,6 +380,14 @@ async function handleFolders(url: URL, init?: RequestInit) {
   return notFound()
 }
 
+async function handleHistory(url: URL, init?: RequestInit) {
+  const method = init?.method ?? 'GET'
+  if (url.pathname !== '/__history') return notFound()
+  if (method === 'GET') return guarded(() => Workspace.HistoryStats())
+  if (method === 'DELETE') return guarded(() => Workspace.ClearAllHistory())
+  return notFound()
+}
+
 export async function desktopRequest(
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -345,6 +401,7 @@ export async function desktopRequest(
   const url = new URL(rawUrl, window.location.href)
   if (url.pathname.startsWith('/__canvases')) return handleCanvases(url, init)
   if (url.pathname.startsWith('/__folders')) return handleFolders(url, init)
+  if (url.pathname.startsWith('/__history')) return handleHistory(url, init)
   return notFound()
 }
 

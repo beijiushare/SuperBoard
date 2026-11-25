@@ -28,7 +28,18 @@ export interface EditorPreferences {
   /** Open the most recent workspace on launch instead of showing the picker. */
   autoOpenRecentWorkspace: boolean
   ai: AIPreferences
+  history: HistoryPreferences
 }
+
+export interface HistoryPreferences {
+  /** Minutes between snapshots. 0 disables history. */
+  intervalMinutes: number
+  /** Snapshots kept per board. */
+  limit: number
+}
+
+export const HISTORY_MAX_LIMIT = 1000
+
 
 export type AISlotId = 'local' | 'online-a' | 'online-b'
 
@@ -129,6 +140,10 @@ export const DEFAULT_PREFERENCES: EditorPreferences = {
   },
   shapeCornerRadius: 0,
   autoOpenRecentWorkspace: true,
+  history: {
+    intervalMinutes: 5,
+    limit: 50,
+  },
   ai: {
     active: 'online-a',
     slots: {
@@ -169,8 +184,36 @@ function mergePreferences(value: unknown): EditorPreferences {
       typeof value.autoOpenRecentWorkspace === 'boolean'
         ? value.autoOpenRecentWorkspace
         : DEFAULT_PREFERENCES.autoOpenRecentWorkspace,
+    history: mergeHistory(isRecord(value.history) ? value.history : {}),
     ai: mergeAI(ai),
   } as EditorPreferences
+}
+
+function mergeHistory(value: Record<string, unknown>): HistoryPreferences {
+  const defaults = DEFAULT_PREFERENCES.history
+  const interval =
+    typeof value.intervalMinutes === 'number' &&
+    Number.isFinite(value.intervalMinutes) &&
+    value.intervalMinutes >= 0
+      ? Math.min(24 * 60, Math.round(value.intervalMinutes))
+      : defaults.intervalMinutes
+  const limit =
+    typeof value.limit === 'number' &&
+    Number.isFinite(value.limit) &&
+    value.limit > 0
+      ? Math.min(HISTORY_MAX_LIMIT, Math.round(value.limit))
+      : defaults.limit
+  return { intervalMinutes: interval, limit }
+}
+
+/** Query settings for history-aware board writes. */
+export function historySettings() {
+  const history = getPreferences().history
+  return {
+    intervalSeconds:
+      history.intervalMinutes > 0 ? history.intervalMinutes * 60 : 0,
+    limit: Math.min(HISTORY_MAX_LIMIT, Math.max(1, Math.round(history.limit))),
+  }
 }
 
 /**

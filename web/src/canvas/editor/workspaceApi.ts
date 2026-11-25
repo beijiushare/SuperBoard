@@ -3,6 +3,7 @@ import i18n from '../../i18n'
 import { translateServerError } from '../../i18n/errors'
 import type { CanvasDocument } from '../model'
 import type { CanvasListItem } from './appUtils'
+import { historySettings } from './preferences'
 
 export interface WorkspaceFolders {
   path: string
@@ -91,8 +92,11 @@ export async function writeBoard(
   canvas: CanvasDocument,
   force = false,
 ) {
+  const history = historySettings()
   return json<{ ok: true }>(
-    `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}`,
+    `/__canvases/${encodeURIComponent(item.slug)}?scope=${item.scope}` +
+      `&historyInterval=${history.intervalSeconds}` +
+      `&historyLimit=${history.limit}`,
     {
       method: 'PUT',
       headers: {
@@ -102,6 +106,45 @@ export async function writeBoard(
       body: JSON.stringify(canvas),
     },
   )
+}
+
+export interface BoardHistoryEntry {
+  id: string
+  createdAt: string
+  size: number
+}
+
+export async function listBoardHistory(item: CanvasListItem) {
+  return json<{ entries: BoardHistoryEntry[]; totalSize: number }>(
+    `/__canvases/${encodeURIComponent(item.slug)}/history?scope=${item.scope}`,
+  )
+}
+
+export async function restoreBoardHistory(
+  item: CanvasListItem,
+  entryId: string,
+) {
+  const history = historySettings()
+  return json<{ ok: true; canvas: CanvasDocument }>(
+    `/__canvases/${encodeURIComponent(item.slug)}/history/${entryId}/restore` +
+      `?scope=${item.scope}&historyLimit=${history.limit}`,
+    { method: 'POST' },
+  )
+}
+
+export async function clearBoardHistory(item: CanvasListItem) {
+  return json<{ ok: true }>(
+    `/__canvases/${encodeURIComponent(item.slug)}/history?scope=${item.scope}`,
+    { method: 'DELETE' },
+  )
+}
+
+export async function historyStats() {
+  return json<{ totalSize: number; count: number }>('/__history')
+}
+
+export async function clearAllHistory() {
+  return json<{ ok: true }>('/__history', { method: 'DELETE' })
 }
 
 export async function createBoard(values: {

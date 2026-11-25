@@ -115,6 +115,7 @@ func (s *WorkspaceService) DeleteFolder(folderPath string, scope string) Result 
 	if err != nil {
 		return fail(400, err.Error())
 	}
+	s.removeFolderHistory(scope, dir)
 	if err := os.RemoveAll(dir); err != nil {
 		return fail(500, err.Error())
 	}

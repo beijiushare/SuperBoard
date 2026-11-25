@@ -15,6 +15,14 @@ import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wails
 // @ts-ignore: Unused imports
 import * as $models from "./models.js";
 
+export function ClearAllHistory(): $CancellablePromise<$models.Result> {
+    return $Call.ByID(4065292652);
+}
+
+export function ClearBoardHistory(slug: string, scope: string): $CancellablePromise<$models.Result> {
+    return $Call.ByID(2733870061, slug, scope);
+}
+
 export function CreateBoard(title: string, slug: string, folder: string, scope: string): $CancellablePromise<$models.Result> {
     return $Call.ByID(3301961580, title, slug, folder, scope);
 }
@@ -47,12 +55,20 @@ export function GetLanguage(): $CancellablePromise<$models.Result> {
     return $Call.ByID(3097622470);
 }
 
+export function HistoryStats(): $CancellablePromise<$models.Result> {
+    return $Call.ByID(2949405755);
+}
+
 /**
  * ImportFile stores a version of the browser file input flow. The frontend
  * sends base64 so the desktop app reuses the same insertion UI.
  */
 export function ImportFile(name: string, dataBase64: string, scope: string): $CancellablePromise<$models.Result> {
     return $Call.ByID(2001572859, name, dataBase64, scope);
+}
+
+export function ListBoardHistory(slug: string, scope: string): $CancellablePromise<$models.Result> {
+    return $Call.ByID(2343557104, slug, scope);
 }
 
 export function ListBoards(): $CancellablePromise<$models.Result> {
@@ -106,6 +122,10 @@ export function ResolveFile(relative: string): $CancellablePromise<string> {
     return $Call.ByID(2062974298, relative);
 }
 
+export function RestoreBoardHistory(slug: string, id: string, scope: string, limit: number): $CancellablePromise<$models.Result> {
+    return $Call.ByID(3159870466, slug, id, scope, limit);
+}
+
 /**
  * RestoreWorkspace reopens the last workspace if it still exists.
  */
@@ -137,6 +157,6 @@ export function WorkspacePath(): $CancellablePromise<string> {
     return $Call.ByID(2374970878);
 }
 
-export function WriteBoard(slug: string, scope: string, data: string, force: boolean): $CancellablePromise<$models.Result> {
-    return $Call.ByID(1102043693, slug, scope, data, force);
+export function WriteBoard(slug: string, scope: string, data: string, force: boolean, historyInterval: number, historyLimit: number): $CancellablePromise<$models.Result> {
+    return $Call.ByID(1102043693, slug, scope, data, force, historyInterval, historyLimit);
 }
