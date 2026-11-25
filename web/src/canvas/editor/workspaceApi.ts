@@ -120,6 +120,16 @@ export async function listBoardHistory(item: CanvasListItem) {
   )
 }
 
+export async function getBoardHistoryEntry(
+  item: CanvasListItem,
+  entryId: string,
+) {
+  return json<CanvasDocument>(
+    `/__canvases/${encodeURIComponent(item.slug)}/history/${entryId}` +
+      `?scope=${item.scope}`,
+  )
+}
+
 export async function restoreBoardHistory(
   item: CanvasListItem,
   entryId: string,

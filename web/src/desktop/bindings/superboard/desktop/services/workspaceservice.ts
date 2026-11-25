@@ -110,6 +110,10 @@ export function ReadBoard(slug: string, scope: string): $CancellablePromise<$mod
     return $Call.ByID(2743485756, slug, scope);
 }
 
+export function ReadBoardHistory(slug: string, id: string, scope: string): $CancellablePromise<$models.Result> {
+    return $Call.ByID(1580880396, slug, id, scope);
+}
+
 export function RecentWorkspaces(): $CancellablePromise<$models.Result> {
     return $Call.ByID(1000628777);
 }

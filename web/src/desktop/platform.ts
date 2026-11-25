@@ -267,6 +267,19 @@ async function handleCanvases(url: URL, init?: RequestInit) {
     }
     return notFound()
   }
+  const entryMatch = url.pathname.match(
+    /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history\/([0-9]{13}-[a-f0-9]{10})$/,
+  )
+  if (entryMatch) {
+    if (method !== 'GET') return notFound()
+    const entrySlug = entryMatch[1]
+    const entryId = entryMatch[2]
+    const entryScope =
+      url.searchParams.get('scope') === 'private' ? 'private' : 'public'
+    return guarded(() =>
+      Workspace.ReadBoardHistory(entrySlug, entryId, entryScope),
+    )
+  }
   const restoreMatch = url.pathname.match(
     /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history\/([0-9]{13}-[a-f0-9]{10})\/restore$/,
   )

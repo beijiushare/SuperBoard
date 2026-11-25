@@ -147,6 +147,36 @@ export async function handleCanvasFsRequest(
       return
     }
 
+    const entryMatch = url.pathname.match(
+      /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history\/([0-9]{13}-[a-f0-9]{10})$/,
+    )
+    if (entryMatch) {
+      if (req.method !== 'GET') {
+        sendJson(res, 405, { error: 'method not allowed' })
+        return
+      }
+      const entrySlug = entryMatch[1]
+      const entryId = entryMatch[2]
+      const entryScope = normalizeScope(url.searchParams.get('scope'))
+      try {
+        const raw = await readDevHistoryEntry(
+          root,
+          entryScope,
+          entrySlug,
+          entryId,
+        )
+        const canvas = validateCanvas(JSON.parse(raw))
+        if (requireMeta(canvas).slug !== entrySlug) {
+          throw new HttpError(400, 'History version belongs to another board')
+        }
+        sendJson(res, 200, canvas)
+      } catch (error) {
+        if (error instanceof HttpError) throw error
+        sendJson(res, 404, { error: 'History version not found' })
+      }
+      return
+    }
+
     const restoreMatch = url.pathname.match(
       /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history\/([0-9]{13}-[a-f0-9]{10})\/restore$/,
     )

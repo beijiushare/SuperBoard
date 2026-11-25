@@ -242,6 +242,34 @@ func (s *WorkspaceService) ListBoardHistory(slug string, scope string) Result {
 	return ok(map[string]any{"entries": entries, "totalSize": total})
 }
 
+func (s *WorkspaceService) ReadBoardHistory(
+	slug string,
+	id string,
+	scope string,
+) Result {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !slugPattern.MatchString(slug) || !isScope(scope) ||
+		!historyEntryPattern.MatchString(id) {
+		return fail(400, "workspace.badParams")
+	}
+	raw, err := os.ReadFile(
+		filepath.Join(s.historyDir(scope, slug), id+".canvas"),
+	)
+	if err != nil {
+		return fail(404, "workspace.historyMissing")
+	}
+	var doc map[string]any
+	if err := json.Unmarshal(raw, &doc); err != nil {
+		return fail(400, "workspace.invalidJson")
+	}
+	meta := metaOf(doc)
+	if meta == nil || stringValue(meta["slug"]) != slug {
+		return fail(400, "workspace.historyMismatch")
+	}
+	return ok(doc)
+}
+
 func (s *WorkspaceService) RestoreBoardHistory(
 	slug string,
 	id string,

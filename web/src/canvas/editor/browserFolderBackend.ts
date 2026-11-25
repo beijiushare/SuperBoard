@@ -430,6 +430,37 @@ async function handleCanvases(url: URL, init?: RequestInit) {
     return response({ error: 'method not allowed' }, 405)
   }
 
+  const entryMatch = url.pathname.match(
+    /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history\/([0-9]{13}-[a-f0-9]{10})$/,
+  )
+  if (entryMatch) {
+    if (method !== 'GET') {
+      return response({ error: 'method not allowed' }, 405)
+    }
+    if (!root) {
+      return response({ error: i18n.t('errors:workspace.noWorkspace') }, 500)
+    }
+    const entrySlug = entryMatch[1]
+    const entryId = entryMatch[2]
+    const entryScope = normalizeScope(url.searchParams.get('scope'))
+    let raw = ''
+    try {
+      raw = await readBrowserHistoryEntry(
+        root,
+        entryScope,
+        entrySlug,
+        entryId,
+      )
+    } catch {
+      return response({ error: i18n.t('errors:workspace.historyMissing') }, 404)
+    }
+    const canvas = parseCanvas(raw)
+    if (canvas['x-superboard']?.meta.slug !== entrySlug) {
+      return response({ error: i18n.t('errors:workspace.historyMismatch') }, 400)
+    }
+    return response(canvas)
+  }
+
   const restoreMatch = url.pathname.match(
     /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history\/([0-9]{13}-[a-f0-9]{10})\/restore$/,
   )
