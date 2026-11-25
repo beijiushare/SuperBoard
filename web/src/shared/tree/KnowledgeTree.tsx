@@ -378,11 +378,23 @@ export function KnowledgeTree({
             </g>
           ))}
         </svg>
-        {nodes.map((node) => (
-          <TreeCard
-            key={node.id}
-            node={node}
-            hasChildren={childrenOf(node.id)}
+        {nodes.map((node) => {
+          // Exporting unwraps every collapsed section so the snapshot has the
+          // full text instead of "…".
+          const cardNode = expandAll
+            ? {
+                ...node,
+                branchCollapsed: false,
+                bodyCollapsed: false,
+                quoteCollapsed: false,
+                questionCollapsed: false,
+              }
+            : node
+          return (
+            <TreeCard
+              key={node.id}
+              node={cardNode}
+              hasChildren={childrenOf(node.id)}
             canDelete={node.id !== data.rootId}
             exiting={exiting.has(node.id)}
             position={layout.positions[node.id] ?? { x: 0, y: 0 }}
@@ -402,7 +414,8 @@ export function KnowledgeTree({
             onToggleQuote={(kind) => toggleQuote(node.id, kind)}
             contextFor={(question) => contextFor(node.id, question)}
           />
-        ))}
+          )
+        })}
         {expandAll
           ? null
           : nodes
