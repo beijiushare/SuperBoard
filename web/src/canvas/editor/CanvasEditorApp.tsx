@@ -6,6 +6,7 @@ import {
   type MouseEvent as ReactMouseEvent,
 } from 'react'
 import { useTranslation } from 'react-i18next'
+import { getAppLanguage } from '../../i18n'
 import { internal } from '../../vendor/json-canvas-viewer/src/index.ts'
 import type { BoardContextTarget } from '../../editor/BoardContextMenu'
 import { DirectorHud } from '../../shared/director/DirectorHud'
@@ -408,7 +409,7 @@ export function CanvasEditorApp() {
         try {
           const summary = await aiChat(
             settings,
-            buildCompactionMessages(source, target.parentId),
+            buildCompactionMessages(source, target.parentId, getAppLanguage()),
           )
           patchTree(blockId, (tree) =>
             updateTreeNode(tree, nodeId, {
@@ -441,7 +442,7 @@ export function CanvasEditorApp() {
             'x-superboard'
           ]?.tree
         if (!tree) return
-        const messages = buildTreeMessages(tree, nodeId)
+        const messages = buildTreeMessages(tree, nodeId, getAppLanguage())
         if (!messages.length) throw new Error('empty prompt')
         const slug =
           canvasRef.current?.['x-superboard']?.meta.slug ?? 'board'
@@ -483,7 +484,12 @@ export function CanvasEditorApp() {
             try {
               const summary = await aiChat(
                 { ...settings, session: `${slug}:${blockId}` },
-                buildCompactionUpdateMessages(tree, summaryId, summaryParent),
+                buildCompactionUpdateMessages(
+                  tree,
+                  summaryId,
+                  summaryParent,
+                  getAppLanguage(),
+                ),
               )
               if (summary.trim()) {
                 workingTree = updateTreeNode(tree, summaryId, {
@@ -543,7 +549,11 @@ export function CanvasEditorApp() {
             try {
               const summary = await aiChat(
                 { ...settings, session: `${slug}:${blockId}` },
-                buildCompactionMessages(tree, summaryParent),
+                buildCompactionMessages(
+                  tree,
+                  summaryParent,
+                  getAppLanguage(),
+                ),
               )
               if (summary.trim()) {
                 workingTree = updateTreeNode(withPlaceholder, summaryId, {
@@ -574,7 +584,7 @@ export function CanvasEditorApp() {
 
         const content = await aiChat(
           { ...settings, session: `${slug}:${blockId}` },
-          buildTreeMessages(workingTree, nodeId),
+          buildTreeMessages(workingTree, nodeId, getAppLanguage()),
         )
         const { title, body } = splitAnswerTitle(content)
         // Models occasionally forget the heading. Falling back to the question

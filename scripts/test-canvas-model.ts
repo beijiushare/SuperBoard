@@ -368,6 +368,23 @@ assert.ok(incremental.some((message) => message.content === 'why'))
 assert.ok(incremental.at(-1)?.content.includes('合并'))
 assert.equal(nearestSummaryNode(withSummary, 'a1')?.id, 'sum-1')
 
+// Prompts follow the interface language, including quoted text.
+const twMessages = buildTreeMessages(asked, 'a1', 'zh-TW')
+assert.ok(twMessages[0].content.includes('繁體中文'))
+assert.ok(
+  buildTreeMessages(quoted, 'a1', 'zh-TW').at(-1)?.content.includes('引用自'),
+)
+const enMessages = buildTreeMessages(asked, 'a1', 'en-US')
+assert.ok(enMessages[0].content.includes('Answer in English'))
+assert.ok(
+  buildTreeMessages(quoted, 'a1', 'en-US').at(-1)?.content.includes('Quoted from'),
+)
+assert.ok(
+  buildCompactionUpdateMessages(withSummary, 'sum-1', 'a1', 'en-US')
+    .at(-1)
+    ?.content.includes('Merge'),
+)
+
 // Summary cards are derived context, so the fold count skips them.
 assert.equal(treeCountedDescendantIds(withSummary, 'a').size, 1)
 

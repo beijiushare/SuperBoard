@@ -1,0 +1,14 @@
+{
+  "language.zh-CN": "簡體中文",
+  "language.zh-TW": "繁體中文",
+  "language.en-US": "English",
+  "actions.close": "關閉",
+  "actions.cancel": "取消",
+  "actions.open": "開啟",
+  "actions.delete": "刪除",
+  "actions.confirm": "確定",
+  "actions.selectPlaceholder": "請選擇",
+  "markdown.empty": "暫無內容",
+  "markdown.unsupportedEmbed": "不支援的嵌入內容",
+  "status.rendering": "渲染中…"
+}

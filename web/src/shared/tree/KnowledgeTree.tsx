@@ -20,6 +20,7 @@ import {
   type SuperBoardTreeData,
 } from '../../canvas/model'
 import { usePreferences } from '../../canvas/editor/preferences'
+import { getAppLanguage } from '../../i18n'
 import { buildTreeMessages, estimateTokens } from '../../canvas/tree/treePrompt'
 import { cachedCardHeight, nodeHeightSignature, rememberCardHeight } from './measureCache'
 import { TreeCard } from './TreeCard'
@@ -213,7 +214,7 @@ export function KnowledgeTree({
     }
     return {
       path: titles,
-      tokens: estimateTokens(buildTreeMessages(preview, nodeId)),
+      tokens: estimateTokens(buildTreeMessages(preview, nodeId, getAppLanguage())),
     }
   }
 

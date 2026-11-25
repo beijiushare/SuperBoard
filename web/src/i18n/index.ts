@@ -6,6 +6,12 @@ import zhSettings from './locales/zh-CN/settings.json'
 import zhEditor from './locales/zh-CN/editor.json'
 import zhViewer from './locales/zh-CN/viewer.json'
 import zhErrors from './locales/zh-CN/errors.json'
+import zhTWCommon from './locales/zh-TW/common.json'
+import zhTWStart from './locales/zh-TW/start.json'
+import zhTWSettings from './locales/zh-TW/settings.json'
+import zhTWEditor from './locales/zh-TW/editor.json'
+import zhTWViewer from './locales/zh-TW/viewer.json'
+import zhTWErrors from './locales/zh-TW/errors.json'
 import enCommon from './locales/en-US/common.json'
 import enStart from './locales/en-US/start.json'
 import enSettings from './locales/en-US/settings.json'
@@ -13,7 +19,7 @@ import enEditor from './locales/en-US/editor.json'
 import enViewer from './locales/en-US/viewer.json'
 import enErrors from './locales/en-US/errors.json'
 
-export const SUPPORTED_LANGUAGES = ['zh-CN', 'en-US'] as const
+export const SUPPORTED_LANGUAGES = ['zh-CN', 'zh-TW', 'en-US'] as const
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 export const LANGUAGE_STORAGE_KEY = 'superboard.language'
 
@@ -25,6 +31,14 @@ const resources = {
     editor: zhEditor,
     viewer: zhViewer,
     errors: zhErrors,
+  },
+  'zh-TW': {
+    common: zhTWCommon,
+    start: zhTWStart,
+    settings: zhTWSettings,
+    editor: zhTWEditor,
+    viewer: zhTWViewer,
+    errors: zhTWErrors,
   },
   'en-US': {
     common: enCommon,
@@ -39,7 +53,17 @@ const resources = {
 let initialized = false
 
 export function detectLanguage(value?: string | null): AppLanguage {
-  return value?.toLowerCase().startsWith('en') ? 'en-US' : 'zh-CN'
+  const tag = value?.toLowerCase().replaceAll('_', '-') ?? ''
+  if (tag.startsWith('en')) return 'en-US'
+  if (
+    tag.startsWith('zh-tw') ||
+    tag.startsWith('zh-hk') ||
+    tag.startsWith('zh-mo') ||
+    tag.startsWith('zh-hant')
+  ) {
+    return 'zh-TW'
+  }
+  return 'zh-CN'
 }
 
 export function getAppLanguage(): AppLanguage {

@@ -1,0 +1,8 @@
+{
+  "missingData.title": "沒有找到白板資料",
+  "missingData.body": "這個頁面需要由 SuperBoard 建置腳本產生。",
+  "loadFailed": "載入白板失敗（{{status}}）",
+  "loadErrorTitle": "無法載入白板",
+  "loading": "正在載入白板…",
+  "empty": "還沒有白板"
+}

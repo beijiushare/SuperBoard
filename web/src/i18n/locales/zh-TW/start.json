@@ -1,0 +1,23 @@
+{
+  "brand.alt": "SuperBoard",
+  "page.aria": "開始",
+  "meta.version": "版本 {{version}}",
+  "meta.website": "網站",
+  "open.title": "開啟資料夾",
+  "open.description": "開啟指定資料夾作為工作區。",
+  "open.action": "開啟",
+  "open.busy": "正在…",
+  "recent.title": "最近開啟",
+  "recent.description": "最近存取的工作區。",
+  "recent.placeholder": "選擇",
+  "recent.aria": "最近工作區",
+  "recent.missing": "目錄不存在",
+  "recent.permission": "需要授權",
+  "language.title": "語言",
+  "language.description": "介面顯示語言。",
+  "language.aria": "語言",
+  "unsupported": "目前瀏覽器不支援 File System Access API，請使用 Edge / Chrome，或改用 SuperBoard 桌面版。",
+  "loading": "正在開啟工作區…",
+  "loading.desktop": "桌面版",
+  "loading.browser": "瀏覽器版"
+}
