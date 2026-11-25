@@ -105,7 +105,7 @@ func (a *App) DeleteFolder(path string) error
 2. 调用 Go `WriteBoard`
 3. Go 写 `.tmp`
 4. 校验 JSON
-5. 保留 `.bak`
+5. 按间隔写 `.superboard/history/` 快照（内容相同则跳过）
 6. rename 覆盖目标文件
 
 不要每次按键都写盘。  
