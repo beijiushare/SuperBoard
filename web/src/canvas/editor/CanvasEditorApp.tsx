@@ -18,6 +18,7 @@ import type {
 } from '../model'
 import {
   questionsToAnswer,
+  removeTreeNode,
   updateTreeNode,
 } from '../model'
 import { CanvasEditorStage } from './CanvasEditorStage'
@@ -405,30 +406,52 @@ export function CanvasEditorApp() {
           !hasSummary &&
           estimateTokens(messages) > preferences.ai.compactionThreshold
         ) {
-          const summary = await aiChat(
-            { ...settings, session: `${slug}:${blockId}` },
-            buildCompactionMessages(tree, nodeId),
-          )
-          if (summary.trim()) {
-            // The summary is a real card: it participates in layout and edges,
-            // but carries no question and cannot be deleted.
-            workingTree = {
-              ...tree,
-              nodes: [
-                ...tree.nodes,
-                {
-                  id: newTreeNodeId(),
-                  parentId: summaryParent,
-                  title: '',
-                  question: '',
-                  answer: summary.trim(),
-                  status: 'done',
-                  createdAt: new Date().toISOString(),
-                  role: 'summary',
-                },
-              ],
+          // Show the summary card immediately with a "compacting" hint, so the
+          // extra request is visible instead of a silent pause.
+          const summaryId = newTreeNodeId()
+          const withPlaceholder: SuperBoardTreeData = {
+            ...tree,
+            nodes: [
+              ...tree.nodes,
+              {
+                id: summaryId,
+                parentId: summaryParent,
+                title: '',
+                question: '',
+                answer: '',
+                status: 'generating',
+                createdAt: new Date().toISOString(),
+                role: 'summary',
+              },
+            ],
+          }
+          patchTree(blockId, () => withPlaceholder)
+          try {
+            const summary = await aiChat(
+              { ...settings, session: `${slug}:${blockId}` },
+              buildCompactionMessages(tree, nodeId),
+            )
+            if (summary.trim()) {
+              workingTree = updateTreeNode(withPlaceholder, summaryId, {
+                answer: summary.trim(),
+                status: 'done',
+              })
+            } else {
+              workingTree = removeTreeNode(withPlaceholder, summaryId, 'branch')
             }
             patchTree(blockId, () => workingTree)
+          } catch (summaryError) {
+            const message =
+              summaryError instanceof Error
+                ? summaryError.message
+                : String(summaryError)
+            patchTree(blockId, (current) =>
+              updateTreeNode(current, summaryId, {
+                status: 'error',
+                error: message,
+              }),
+            )
+            workingTree = tree
           }
         }
 

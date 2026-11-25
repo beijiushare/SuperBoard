@@ -57,16 +57,18 @@ function CardBody({
     return (
       <div className="sb-kt-card-error">
         <span>{node.error || t('editor:tree.failed')}</span>
-        <button
-          type="button"
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => {
-            event.stopPropagation()
-            onRetry()
-          }}
-        >
-          {t('editor:tree.retry')}
-        </button>
+        {node.role === 'summary' ? null : (
+          <button
+            type="button"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation()
+              onRetry()
+            }}
+          >
+            {t('editor:tree.retry')}
+          </button>
+        )}
       </div>
     )
   }
@@ -76,7 +78,9 @@ function CardBody({
         {node.status === 'draft'
           ? t('editor:tree.draftHint')
           : node.status === 'generating'
-            ? t('editor:tree.generating')
+            ? node.role === 'summary'
+              ? t('editor:tree.compacting')
+              : t('editor:tree.generating')
             : t('editor:tree.noAnswer')}
       </div>
     )
