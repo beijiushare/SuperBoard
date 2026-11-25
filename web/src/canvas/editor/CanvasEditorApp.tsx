@@ -577,11 +577,18 @@ export function CanvasEditorApp() {
           buildTreeMessages(workingTree, nodeId),
         )
         const { title, body } = splitAnswerTitle(content)
+        // Models occasionally forget the heading. Falling back to the question
+        // keeps the card scannable instead of showing "未命名".
+        const asked =
+          workingTree.nodes.find((item) => item.id === nodeId)?.question ?? ''
+        const fallbackTitle =
+          title ||
+          asked.replace(/\s+/g, ' ').trim().slice(0, 14)
         patchTree(blockId, (current) =>
           updateTreeNode(current, nodeId, {
             status: 'done',
             answer: body,
-            ...(title ? { title } : {}),
+            ...(fallbackTitle ? { title: fallbackTitle } : {}),
             error: undefined,
           }),
         )
