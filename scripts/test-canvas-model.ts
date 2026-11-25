@@ -25,7 +25,9 @@ import {
 } from '../web/src/canvas/model'
 import {
   buildCompactionMessages,
+  buildCompactionUpdateMessages,
   buildTreeMessages,
+  nearestSummaryNode,
   estimateTokens,
 } from '../web/src/canvas/tree/treePrompt'
 
@@ -346,5 +348,13 @@ assert.ok(compactionMessages.length >= 4)
 assert.ok(
   compactionMessages.at(-1)?.content.includes('前情提要'),
 )
+
+// Later compactions fold only the turns added since the existing summary.
+const incremental = buildCompactionUpdateMessages(withSummary, 'sum-1', 'a1')
+assert.equal(incremental[0].role, 'system')
+assert.ok(incremental[1].content.includes('前情摘要文本'))
+assert.ok(incremental.some((message) => message.content === 'why'))
+assert.ok(incremental.at(-1)?.content.includes('合并'))
+assert.equal(nearestSummaryNode(withSummary, 'a1')?.id, 'sum-1')
 
 console.log('canvas model tests passed')

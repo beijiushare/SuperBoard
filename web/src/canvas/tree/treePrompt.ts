@@ -74,6 +74,63 @@ export function buildCompactionMessages(
   return messages
 }
 
+const COMPACTION_UPDATE_PROMPT = [
+  '你在更新一条思考路径的「前情提要」。',
+  '输入包括已有的前情提要和此后新增的问题与回答。',
+  '把新增内容合并进已有提要，保留仍然有效的结论、关键事实与数据、悬而未决的问题。',
+  '不要重复已有结论，不要复述过程，不要评价，不要提问。',
+  '输出不超过 300 字，纯文本段落。',
+].join('\n')
+
+/** The nearest summary card above a node, regardless of which ancestor it hangs from. */
+export function nearestSummaryNode(
+  data: SuperBoardTreeData,
+  nodeId: string,
+  includeFailed = false,
+): SuperBoardTreeNode | null {
+  const path = treePath(data, nodeId)
+  for (let index = path.length - 1; index >= 0; index -= 1) {
+    const parentId = path[index].id
+    const summary = data.nodes.find(
+      (item) =>
+        item.parentId === parentId &&
+        item.role === 'summary' &&
+        (includeFailed ||
+          (item.status === 'done' && item.answer.trim())),
+    )
+    if (summary) return summary
+  }
+  return null
+}
+
+/** Messages used to fold the turns added since a summary into that summary. */
+export function buildCompactionUpdateMessages(
+  data: SuperBoardTreeData,
+  summaryId: string,
+  upToNodeId: string,
+): AIChatMessage[] {
+  const summary = data.nodes.find((item) => item.id === summaryId)
+  if (!summary || summary.role !== 'summary' || !summary.parentId) return []
+  const path = treePath(data, upToNodeId)
+  const covered = path.findIndex((item) => item.id === summary.parentId)
+  if (covered < 0) return []
+  const messages: AIChatMessage[] = [
+    { role: 'system', content: COMPACTION_UPDATE_PROMPT },
+    { role: 'user', content: `已有前情提要：\n${summary.answer.trim()}` },
+  ]
+  for (const node of path.slice(covered + 1)) {
+    if (node.role === 'summary') continue
+    if (node.question.trim()) {
+      messages.push({ role: 'user', content: questionWithQuote(node) })
+    }
+    if (node.answer.trim()) {
+      messages.push({ role: 'assistant', content: node.answer })
+    }
+  }
+  messages.push({ role: 'user', content: '请把前情提要和新增对话合并成新的前情提要。' })
+  return messages
+}
+
 /**
  * Context is the root -> node path only. Sibling branches never enter the
  * prompt. Once a card carries a compaction, everything it covers is replaced by
@@ -90,18 +147,13 @@ export function buildTreeMessages(
 
   let startIndex = 0
   let summary = ''
-  for (let index = path.length - 1; index >= 0; index -= 1) {
-    const summaryNode = data.nodes.find(
-      (item) =>
-        item.parentId === path[index].id &&
-        item.role === 'summary' &&
-        item.status === 'done' &&
-        item.answer.trim(),
-    )
-    if (!summaryNode) continue
-    summary = summaryNode.answer.trim()
-    startIndex = index + 1
-    break
+  const nearest = nearestSummaryNode(data, nodeId)
+  if (nearest?.parentId) {
+    const covered = path.findIndex((item) => item.id === nearest.parentId)
+    if (covered >= 0) {
+      summary = nearest.answer.trim()
+      startIndex = covered + 1
+    }
   }
 
   const messages: AIChatMessage[] = [{ role: 'system', content: SYSTEM_PROMPT }]

@@ -23,7 +23,14 @@ import {
 } from '../model'
 import { CanvasEditorStage } from './CanvasEditorStage'
 import { aiChat } from '../../desktop/ai'
-import { buildTreeMessages, buildCompactionMessages, estimateTokens, splitAnswerTitle } from '../tree/treePrompt'
+import {
+  buildTreeMessages,
+  buildCompactionMessages,
+  buildCompactionUpdateMessages,
+  estimateTokens,
+  nearestSummaryNode,
+  splitAnswerTitle,
+} from '../tree/treePrompt'
 import { newTreeNodeId } from '../model'
 import { activeAISettings, getPreferences } from './preferences'
 import {
@@ -427,78 +434,128 @@ export function CanvasEditorApp() {
           canvasRef.current?.['x-superboard']?.meta.slug ?? 'board'
 
         // Long paths are summarised first: the summary replaces everything down
-        // to the parent, so the next request stays inside the context window.
+        // to the ancestor it hangs from, so the next request stays inside the
+        // context window.
         let workingTree = tree
         const node = tree.nodes.find((item) => item.id === nodeId)
         // The summary hangs under the deepest ancestor: it covers that ancestor
         // and everything above it, so both this question and the ancestor's own
         // later questions start from the summary.
         const summaryParent = node?.parentId ?? null
-        const existingSummary =
-          summaryParent === null
-            ? undefined
-            : tree.nodes.find(
-                (item) =>
-                  item.parentId === summaryParent && item.role === 'summary',
-              )
-        // A failed summary is retried automatically the next time a question
-        // needs the context: the card is reused instead of stacking a new one.
-        if (
-          summaryParent &&
-          (!existingSummary || existingSummary.status === 'error') &&
+        const existing = summaryParent
+          ? nearestSummaryNode(tree, nodeId, true)
+          : null
+        const needsCompaction =
+          summaryParent !== null &&
           estimateTokens(messages) > preferences.ai.compactionThreshold
-        ) {
-          // Show the summary card immediately with a "compacting" hint, so the
-          // extra request is visible instead of a silent pause.
-          const summaryId = existingSummary?.id ?? newTreeNodeId()
-          const withPlaceholder: SuperBoardTreeData = existingSummary
-            ? updateTreeNode(tree, summaryId, {
-                status: 'generating',
-                error: undefined,
-              })
-            : {
-                ...tree,
-                nodes: [
-                  ...tree.nodes,
-                  {
-                    id: summaryId,
-                    parentId: summaryParent,
-                    title: '',
-                    question: '',
-                    answer: '',
-                    status: 'generating',
-                    createdAt: new Date().toISOString(),
-                    role: 'summary',
-                  },
-                ],
-              }
-          patchTree(blockId, () => withPlaceholder)
-          try {
-            const summary = await aiChat(
-              { ...settings, session: `${slug}:${blockId}` },
-              buildCompactionMessages(tree, summaryParent),
-            )
-            if (summary.trim()) {
-              workingTree = updateTreeNode(withPlaceholder, summaryId, {
-                answer: summary.trim(),
-                status: 'done',
-              })
-            } else {
-              workingTree = removeTreeNode(withPlaceholder, summaryId, 'branch')
-            }
-            patchTree(blockId, () => workingTree)
-          } catch (summaryError) {
-            const message =
-              summaryError instanceof Error
-                ? summaryError.message
-                : String(summaryError)
+
+        if (needsCompaction && summaryParent) {
+          if (
+            existing &&
+            existing.status === 'done' &&
+            existing.parentId === summaryParent
+          ) {
+            // The summary already sits under this question's parent, so it
+            // covers the whole history; there is nothing new to fold.
+          } else if (existing && existing.status === 'done') {
+            // Fold only the turns added since that summary, then move the same
+            // card under the deepest ancestor. One path keeps one summary.
+            const summaryId = existing.id
             patchTree(blockId, (current) =>
               updateTreeNode(current, summaryId, {
-                status: 'error',
-                error: message,
+                status: 'generating',
+                error: undefined,
               }),
             )
-            workingTree = tree
+            try {
+              const summary = await aiChat(
+                { ...settings, session: `${slug}:${blockId}` },
+                buildCompactionUpdateMessages(tree, summaryId, summaryParent),
+              )
+              if (summary.trim()) {
+                workingTree = updateTreeNode(tree, summaryId, {
+                  parentId: summaryParent,
+                  answer: summary.trim(),
+                  status: 'done',
+                  error: undefined,
+                })
+              } else {
+                // Keep the previous summary when the model returns nothing.
+                workingTree = updateTreeNode(tree, summaryId, {
+                  status: 'done',
+                  error: undefined,
+                })
+              }
+              patchTree(blockId, () => workingTree)
+            } catch (summaryError) {
+              const message =
+                summaryError instanceof Error
+                  ? summaryError.message
+                  : String(summaryError)
+              patchTree(blockId, (current) =>
+                updateTreeNode(current, summaryId, {
+                  status: 'error',
+                  error: message,
+                }),
+              )
+              workingTree = tree
+            }
+          } else {
+            // No summary yet, or the last attempt failed: reuse that card when
+            // it exists instead of stacking a second one.
+            const summaryId = existing?.id ?? newTreeNodeId()
+            const withPlaceholder: SuperBoardTreeData = existing
+              ? updateTreeNode(tree, summaryId, {
+                  parentId: summaryParent,
+                  status: 'generating',
+                  error: undefined,
+                })
+              : {
+                  ...tree,
+                  nodes: [
+                    ...tree.nodes,
+                    {
+                      id: summaryId,
+                      parentId: summaryParent,
+                      title: '',
+                      question: '',
+                      answer: '',
+                      status: 'generating',
+                      createdAt: new Date().toISOString(),
+                      role: 'summary',
+                    },
+                  ],
+                }
+            patchTree(blockId, () => withPlaceholder)
+            try {
+              const summary = await aiChat(
+                { ...settings, session: `${slug}:${blockId}` },
+                buildCompactionMessages(tree, summaryParent),
+              )
+              if (summary.trim()) {
+                workingTree = updateTreeNode(withPlaceholder, summaryId, {
+                  parentId: summaryParent,
+                  answer: summary.trim(),
+                  status: 'done',
+                  error: undefined,
+                })
+              } else {
+                workingTree = removeTreeNode(withPlaceholder, summaryId, 'branch')
+              }
+              patchTree(blockId, () => workingTree)
+            } catch (summaryError) {
+              const message =
+                summaryError instanceof Error
+                  ? summaryError.message
+                  : String(summaryError)
+              patchTree(blockId, (current) =>
+                updateTreeNode(current, summaryId, {
+                  status: 'error',
+                  error: message,
+                }),
+              )
+              workingTree = tree
+            }
           }
         }
 
