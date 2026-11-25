@@ -57,18 +57,18 @@ function CardBody({
     return (
       <div className="sb-kt-card-error">
         <span>{node.error || t('editor:tree.failed')}</span>
-        {node.role === 'summary' ? null : (
-          <button
-            type="button"
-            onPointerDown={(event) => event.stopPropagation()}
-            onClick={(event) => {
-              event.stopPropagation()
-              onRetry()
-            }}
-          >
-            {t('editor:tree.retry')}
-          </button>
-        )}
+        <button
+          type="button"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation()
+            onRetry()
+          }}
+        >
+          {node.role === 'summary'
+            ? t('editor:tree.retryCompaction')
+            : t('editor:tree.retry')}
+        </button>
       </div>
     )
   }

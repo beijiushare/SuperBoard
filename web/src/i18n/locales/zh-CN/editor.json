@@ -28,6 +28,7 @@
   "tree.draftHint": "等待提问",
   "tree.generating": "正在回答中",
   "tree.compacting": "正在压缩中",
+  "tree.retryCompaction": "重试压缩",
   "tree.noAnswer": "暂无回答",
   "tree.failed": "生成失败",
   "tree.retry": "重试",

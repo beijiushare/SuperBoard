@@ -28,6 +28,7 @@
   "tree.draftHint": "Waiting for a question",
   "tree.generating": "Answering…",
   "tree.compacting": "Compacting context…",
+  "tree.retryCompaction": "Retry compaction",
   "tree.noAnswer": "No answer yet",
   "tree.failed": "Generation failed",
   "tree.retry": "Retry",

@@ -368,6 +368,42 @@ export function CanvasEditorApp() {
     async (blockId: string, nodeId: string, snapshot?: SuperBoardTreeData) => {
       const preferences = getPreferences()
       const settings = activeAISettings(preferences.ai)
+      const source =
+        snapshot ??
+        canvasRef.current?.nodes.find((item) => item.id === blockId)?.[
+          'x-superboard'
+        ]?.tree
+      // Retrying a summary card regenerates the summary, not an answer.
+      const target = source?.nodes.find((item) => item.id === nodeId)
+      if (target?.role === 'summary') {
+        if (!target.parentId || !source) return
+        patchTree(blockId, (tree) =>
+          updateTreeNode(tree, nodeId, {
+            status: 'generating',
+            error: undefined,
+          }),
+        )
+        try {
+          const summary = await aiChat(
+            settings,
+            buildCompactionMessages(source, target.parentId),
+          )
+          patchTree(blockId, (tree) =>
+            updateTreeNode(tree, nodeId, {
+              answer: summary.trim(),
+              status: 'done',
+              error: undefined,
+            }),
+          )
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error)
+          patchTree(blockId, (tree) =>
+            updateTreeNode(tree, nodeId, { status: 'error', error: message }),
+          )
+        }
+        markDirty()
+        return
+      }
       patchTree(blockId, (tree) =>
         updateTreeNode(tree, nodeId, {
           status: 'generating',
@@ -429,7 +465,7 @@ export function CanvasEditorApp() {
           try {
             const summary = await aiChat(
               { ...settings, session: `${slug}:${blockId}` },
-              buildCompactionMessages(tree, nodeId),
+              buildCompactionMessages(tree, summaryParent),
             )
             if (summary.trim()) {
               workingTree = updateTreeNode(withPlaceholder, summaryId, {
@@ -440,13 +476,16 @@ export function CanvasEditorApp() {
               workingTree = removeTreeNode(withPlaceholder, summaryId, 'branch')
             }
             patchTree(blockId, () => workingTree)
-          } catch {
-            // A failed summary is not worth keeping: it has no retry and no
-            // delete, and the answer can still use the full path. Drop the
-            // placeholder so the tree stays clean; the next long question will
-            // try again.
+          } catch (summaryError) {
+            const message =
+              summaryError instanceof Error
+                ? summaryError.message
+                : String(summaryError)
             patchTree(blockId, (current) =>
-              removeTreeNode(current, summaryId, 'branch'),
+              updateTreeNode(current, summaryId, {
+                status: 'error',
+                error: message,
+              }),
             )
             workingTree = tree
           }

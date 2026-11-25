@@ -58,16 +58,16 @@ export function buildCompactionMessages(
   nodeId: string,
 ): AIChatMessage[] {
   const path = treePath(data, nodeId)
-  if (path.length < 2) return []
+  if (!path.length) return []
   const messages: AIChatMessage[] = [
     { role: 'system', content: COMPACTION_PROMPT },
   ]
-  for (const ancestor of path.slice(0, -1)) {
-    if (ancestor.question.trim()) {
-      messages.push({ role: 'user', content: questionWithQuote(ancestor) })
+  for (const node of path) {
+    if (node.question.trim()) {
+      messages.push({ role: 'user', content: questionWithQuote(node) })
     }
-    if (ancestor.answer.trim()) {
-      messages.push({ role: 'assistant', content: ancestor.answer })
+    if (node.answer.trim()) {
+      messages.push({ role: 'assistant', content: node.answer })
     }
   }
   messages.push({ role: 'user', content: '请把以上对话压缩成前情提要。' })
