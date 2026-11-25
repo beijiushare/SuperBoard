@@ -214,7 +214,9 @@ export function CanvasBlockMenu({
           </button>
         </>
       ) : null}
-      {!menu.quick && (selectedIds.length === 0 || hasLocked) ? (
+      {!menu.quick &&
+      (node || menu.edgeId) &&
+      (selectedIds.length === 0 || hasLocked) ? (
         <div className="sb-canvas-menu-sep" />
       ) : null}
       {!node ? (
