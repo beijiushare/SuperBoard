@@ -140,6 +140,12 @@
   background: #faf9f5;
 }
 
+/* Keep the snapshot clean: the viewer controls belong to editing, not history. */
+.sb-history-preview .JCV-controls,
+.sb-history-preview .JCV-minimap-container {
+  display: none;
+}
+
 .sb-history-preview-badge {
   position: absolute;
   z-index: 2;
