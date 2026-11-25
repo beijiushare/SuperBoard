@@ -12,6 +12,8 @@
   "workspace.badParams": "Invalid parameters",
   "workspace.slugExists": "Slug already exists: {{value}}",
   "workspace.slugMismatch": "Slug mismatch",
+  "workspace.historyMissing": "That history version does not exist",
+  "workspace.historyMismatch": "That history version belongs to another board",
   "workspace.conflictOtherTab": "Another tab has modified this board. Confirm whether to overwrite it.",
   "workspace.badFolderName": "Invalid folder name",
   "workspace.moveIntoSelf": "Cannot move a folder into itself or its subfolder",

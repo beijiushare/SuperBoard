@@ -14,6 +14,7 @@ import type {
   DeleteFolderBody,
   RenameFolderBody,
 } from './types'
+import { removeDevFolderHistory } from '../canvasFs/history'
 
 export async function removeEmptyParents(
   root: string,
@@ -145,6 +146,7 @@ export async function deleteFolder(root: string, body: DeleteFolderBody) {
   }
   if (!stat.isDirectory()) throw new HttpError(404, 'Folder not found')
 
+  await removeDevFolderHistory(root, scope, dir)
   await fs.rm(dir, { recursive: true })
   return { path: folder }
 }

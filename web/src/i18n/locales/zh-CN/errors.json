@@ -12,6 +12,8 @@
   "workspace.badParams": "参数不正确",
   "workspace.slugExists": "slug 已存在：{{value}}",
   "workspace.slugMismatch": "slug 不一致",
+  "workspace.historyMissing": "历史版本不存在",
+  "workspace.historyMismatch": "历史版本不属于该白板",
   "workspace.conflictOtherTab": "检测到其他标签页已修改该白板，请先确认是否覆盖",
   "workspace.badFolderName": "文件夹名不合法",
   "workspace.moveIntoSelf": "不能移动到自身或子目录",

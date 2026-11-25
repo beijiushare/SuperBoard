@@ -3,6 +3,18 @@ import { parseCanvas, serializeCanvas, type CanvasDocument } from '../model'
 import type { BoardScope } from '../../shared/board/types'
 import { configureWorkspaceFetcher } from './workspaceApi'
 import {
+  appendBrowserHistory,
+  browserHistoryStats,
+  clearAllBrowserHistory,
+  historyContentHash,
+  listBrowserHistory,
+  moveBrowserHistory,
+  readBrowserHistoryEntry,
+  removeBrowserFolderHistory,
+  removeBrowserHistory,
+  snapshotBrowserHistory,
+} from './browserHistory'
+import {
   beginFolderMove,
   finishFolderMove,
   isFolderMoveCancelled,
@@ -399,6 +411,88 @@ async function handleCanvases(url: URL, init?: RequestInit) {
     return response({ ok: true, canvas, path: folder, scope }, 201)
   }
 
+  const historyMatch = url.pathname.match(
+    /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history$/,
+  )
+  if (historyMatch) {
+    const historySlug = historyMatch[1]
+    const historyScope = normalizeScope(url.searchParams.get('scope'))
+    if (!root) {
+      return response({ error: i18n.t('errors:workspace.noWorkspace') }, 500)
+    }
+    if (method === 'GET') {
+      return response(await listBrowserHistory(root, historyScope, historySlug))
+    }
+    if (method === 'DELETE') {
+      await removeBrowserHistory(root, historyScope, historySlug)
+      return response({ ok: true })
+    }
+    return response({ error: 'method not allowed' }, 405)
+  }
+
+  const restoreMatch = url.pathname.match(
+    /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history\/([0-9]{13}-[a-f0-9]{10})\/restore$/,
+  )
+  if (restoreMatch) {
+    if (method !== 'POST') {
+      return response({ error: 'method not allowed' }, 405)
+    }
+    const restoreSlug = restoreMatch[1]
+    const entryId = restoreMatch[2]
+    const restoreScope = normalizeScope(url.searchParams.get('scope'))
+    if (!root) {
+      return response({ error: i18n.t('errors:workspace.noWorkspace') }, 500)
+    }
+    const location = await boardLocation(restoreScope, restoreSlug)
+    if (!location) {
+      return response({ error: i18n.t('errors:workspace.boardMissing') }, 404)
+    }
+    let raw = ''
+    try {
+      raw = await readBrowserHistoryEntry(
+        root,
+        restoreScope,
+        restoreSlug,
+        entryId,
+      )
+    } catch {
+      return response({ error: i18n.t('errors:workspace.historyMissing') }, 404)
+    }
+    const restored = parseCanvas(raw)
+    const restoredMeta = restored['x-superboard']?.meta
+    if (!restoredMeta || restoredMeta.slug !== restoreSlug) {
+      return response({ error: i18n.t('errors:workspace.historyMismatch') }, 400)
+    }
+    const currentText = await (await location.file.getFile()).text()
+    const limit = Number(url.searchParams.get('historyLimit') ?? '50')
+    const effectiveLimit =
+      Number.isFinite(limit) && limit > 0 ? Math.round(limit) : 50
+    try {
+      const { entries } = await listBrowserHistory(
+        root,
+        restoreScope,
+        restoreSlug,
+      )
+      if (
+        entries.length === 0 ||
+        !entries[0].id.endsWith(historyContentHash(currentText))
+      ) {
+        await appendBrowserHistory(
+          root,
+          restoreScope,
+          restoreSlug,
+          currentText,
+          effectiveLimit,
+        )
+      }
+    } catch {
+      // Keep restoring even if the replaced version cannot be stored.
+    }
+    restoredMeta.updatedAt = new Date().toISOString()
+    await writeFile(restoreScope, location.path, restoreSlug, restored)
+    return response({ ok: true, canvas: restored })
+  }
+
   const match = url.pathname.match(/^\/__canvases\/([a-z0-9][a-z0-9-]*)$/)
   if (!match) return response({ error: 'not found' }, 404)
   const slug = match[1]
@@ -429,7 +523,23 @@ async function handleCanvases(url: URL, init?: RequestInit) {
       )
     }
     meta.updatedAt = new Date().toISOString()
-    await writeFile(scope, location.path, slug, next)
+    const written = await writeFile(scope, location.path, slug, next)
+    const interval = Number(url.searchParams.get('historyInterval') ?? '0')
+    const limit = Number(url.searchParams.get('historyLimit') ?? '0')
+    if (root) {
+      try {
+        await snapshotBrowserHistory(
+          root,
+          scope,
+          slug,
+          written,
+          Number.isFinite(interval) ? interval : 0,
+          Number.isFinite(limit) ? limit : 0,
+        )
+      } catch {
+        // History is best effort; the save itself already succeeded.
+      }
+    }
     return response({ ok: true, meta, path: location.path, scope })
   }
   if (method === 'PATCH') {
@@ -476,6 +586,9 @@ async function handleCanvases(url: URL, init?: RequestInit) {
       },
     }
     await writeFile(scope, nextFolder, nextSlug, nextCanvas)
+    if (root && nextSlug !== slug) {
+      await moveBrowserHistory(root, scope, slug, nextSlug)
+    }
     if (nextSlug !== slug) versions.delete(key)
     if (nextFolder !== location.path || nextSlug !== slug) {
       const oldDir = await folderDirectory(scope, location.path)
@@ -486,6 +599,7 @@ async function handleCanvases(url: URL, init?: RequestInit) {
   if (method === 'DELETE') {
     const dir = await folderDirectory(scope, location.path)
     await dir.removeEntry(`${slug}.canvas`)
+    if (root) await removeBrowserHistory(root, scope, slug)
     versions.delete(key)
     invalidateBoardCache()
     return response({ ok: true })
@@ -637,6 +751,10 @@ async function handleFolders(url: URL, init?: RequestInit) {
     const path = normalizeFolder(url.searchParams.get('path'))
     if (!path) return response({ error: i18n.t('errors:workspace.deleteRoot') }, 400)
     const parent = await folderDirectory(scope, path.split('/').slice(0, -1).join('/'))
+    if (root) {
+      const target = await folderDirectory(scope, path)
+      await removeBrowserFolderHistory(root, scope, target)
+    }
     await parent.removeEntry(path.split('/').pop()!, { recursive: true })
     invalidateBoardCache()
     return response({ ok: true })
@@ -811,6 +929,24 @@ export async function browserRequest(
   const url = new URL(rawUrl, window.location.href)
   if (url.pathname.startsWith('/__canvases')) return handleCanvases(url, init)
   if (url.pathname.startsWith('/__folders')) return handleFolders(url, init)
+  if (url.pathname === '/__history') {
+    if (!root) {
+      return new Response(
+        JSON.stringify({ error: i18n.t('errors:workspace.noWorkspace') }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        },
+      )
+    }
+    const method = init?.method ?? 'GET'
+    if (method === 'GET') return response(await browserHistoryStats(root))
+    if (method === 'DELETE') {
+      await clearAllBrowserHistory(root)
+      return response({ ok: true })
+    }
+    return response({ error: 'method not allowed' }, 405)
+  }
   return new Response(JSON.stringify({ error: 'not found' }), {
     status: 404,
     headers: { 'Content-Type': 'application/json; charset=utf-8' },

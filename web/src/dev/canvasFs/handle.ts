@@ -14,6 +14,17 @@ import {
   listCanvases,
   writeCanvasFile,
 } from './files'
+import {
+  appendDevHistory,
+  clearAllDevHistory,
+  devHistoryContentHash,
+  devHistoryStats,
+  listDevHistory,
+  moveDevHistory,
+  readDevHistoryEntry,
+  removeDevHistory,
+  snapshotDevHistory,
+} from './history'
 
 interface CreateCanvasBody {
   title?: string
@@ -52,12 +63,28 @@ export async function handleCanvasFsRequest(
   next: () => void,
 ) {
   const url = new URL(req.url || '/', 'http://superboard.local')
-  if (!url.pathname.startsWith('/__canvases')) {
+  if (
+    !url.pathname.startsWith('/__canvases') &&
+    url.pathname !== '/__history'
+  ) {
     next()
     return
   }
 
   try {
+    if (url.pathname === '/__history') {
+      if (req.method === 'GET') {
+        sendJson(res, 200, await devHistoryStats(root))
+        return
+      }
+      if (req.method === 'DELETE') {
+        await clearAllDevHistory(root)
+        sendJson(res, 200, { ok: true })
+        return
+      }
+      sendJson(res, 405, { error: 'method not allowed' })
+      return
+    }
     if (url.pathname === '/__canvases' && req.method === 'GET') {
       sendJson(res, 200, { canvases: await listCanvases(root) })
       return
@@ -101,6 +128,95 @@ export async function handleCanvasFsRequest(
       return
     }
 
+    const historyMatch = url.pathname.match(
+      /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history$/,
+    )
+    if (historyMatch) {
+      const historySlug = historyMatch[1]
+      const historyScope = normalizeScope(url.searchParams.get('scope'))
+      if (req.method === 'GET') {
+        sendJson(res, 200, await listDevHistory(root, historyScope, historySlug))
+        return
+      }
+      if (req.method === 'DELETE') {
+        await removeDevHistory(root, historyScope, historySlug)
+        sendJson(res, 200, { ok: true })
+        return
+      }
+      sendJson(res, 405, { error: 'method not allowed' })
+      return
+    }
+
+    const restoreMatch = url.pathname.match(
+      /^\/__canvases\/([a-z0-9][a-z0-9-]*)\/history\/([0-9]{13}-[a-f0-9]{10})\/restore$/,
+    )
+    if (restoreMatch) {
+      if (req.method !== 'POST') {
+        sendJson(res, 405, { error: 'method not allowed' })
+        return
+      }
+      const restoreSlug = restoreMatch[1]
+      const entryId = restoreMatch[2]
+      const restoreScope = normalizeScope(url.searchParams.get('scope'))
+      let restored
+      try {
+        const raw = await readDevHistoryEntry(
+          root,
+          restoreScope,
+          restoreSlug,
+          entryId,
+        )
+        restored = validateCanvas(JSON.parse(raw))
+      } catch {
+        sendJson(res, 404, { error: 'History version not found' })
+        return
+      }
+      const restoredMeta = requireMeta(restored)
+      if (restoredMeta.slug !== restoreSlug) {
+        throw new HttpError(400, 'History version belongs to another board')
+      }
+      const foundBoard = await findCanvasFile(root, restoreScope, restoreSlug)
+      if (!foundBoard) {
+        sendJson(res, 404, { error: 'Board not found' })
+        return
+      }
+      const limitRaw = Number(url.searchParams.get('historyLimit') ?? '50')
+      const limit =
+        Number.isFinite(limitRaw) && limitRaw > 0 ? Math.round(limitRaw) : 50
+      try {
+        const current = await fs.readFile(foundBoard.file, 'utf8')
+        const { entries } = await listDevHistory(
+          root,
+          restoreScope,
+          restoreSlug,
+        )
+        if (
+          entries.length === 0 ||
+          !entries[0].id.endsWith(devHistoryContentHash(current))
+        ) {
+          await appendDevHistory(
+            root,
+            restoreScope,
+            restoreSlug,
+            current,
+            limit,
+          )
+        }
+      } catch {
+        // Keep restoring even if the replaced version cannot be stored.
+      }
+      restoredMeta.updatedAt = new Date().toISOString()
+      const nextHash = canvasContentHash(restored)
+      await writeCanvasFile(
+        foundBoard.file,
+        restored,
+        foundBoard.folder,
+        nextHash,
+      )
+      sendJson(res, 200, { ok: true, canvas: restored })
+      return
+    }
+
     const match = url.pathname.match(/^\/__canvases\/([a-z0-9][a-z0-9-]*)$/)
     if (!match) {
       sendJson(res, 404, { error: 'not found' })
@@ -133,6 +249,21 @@ export async function handleCanvasFsRequest(
       }
 
       await writeCanvasFile(found.file, payload, found.folder, nextHash)
+      const interval = Number(url.searchParams.get('historyInterval') ?? '0')
+      const limit = Number(url.searchParams.get('historyLimit') ?? '0')
+      try {
+        const text = await fs.readFile(found.file, 'utf8')
+        await snapshotDevHistory(
+          root,
+          scope,
+          slug,
+          text,
+          Number.isFinite(interval) ? interval : 0,
+          Number.isFinite(limit) ? limit : 0,
+        )
+      } catch {
+        // History is best effort; the save already succeeded.
+      }
       sendJson(res, 200, {
         ok: true,
         hash: nextHash,
@@ -186,6 +317,9 @@ export async function handleCanvasFsRequest(
       }
 
       await writeCanvasFile(nextFile, nextCanvas, nextFolder, found.hash)
+      if (nextSlug !== slug) {
+        await moveDevHistory(root, scope, slug, nextSlug)
+      }
       if (nextFile !== found.file) {
         await fs.unlink(found.file)
         forgetCanvasFile(found.file)
@@ -204,6 +338,7 @@ export async function handleCanvasFsRequest(
     if (req.method === 'DELETE') {
       await fs.unlink(found.file)
       forgetCanvasFile(found.file)
+      await removeDevHistory(root, scope, slug)
       await removeEmptyParents(root, scope, found.file)
       sendJson(res, 200, { ok: true })
       return
