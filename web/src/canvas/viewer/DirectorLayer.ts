@@ -16,6 +16,20 @@ type Controller = {
   onRefresh: { subscribe: (callback: () => void) => () => void }
 }
 
+interface Transform {
+  x: number
+  y: number
+  scale: number
+}
+
+const IDENTITY: Transform = { x: 0, y: 0, scale: 1 }
+
+/**
+ * Presentation framing lives outside the canvas camera: the container gets a
+ * CSS transform while the editor camera stays exactly where it was. Exiting
+ * playback only removes that transform, so there is nothing to restore and no
+ * "board drifted left" after the rails come back.
+ */
 export class DirectorLayer extends BaseModule {
   private readonly dm: DataManager
   private readonly controller: Controller
@@ -23,8 +37,11 @@ export class DirectorLayer extends BaseModule {
   private readonly ctx: CanvasRenderingContext2D
   private visible = false
   private animation = 0
+  private animating = false
+  private currentFrame: CanvasFrame | null = null
+  private applied: Transform = { ...IDENTITY }
   private readonly unsubscribe: () => void
-  private cameraBeforePlayback: { offsetX: number; offsetY: number; scale: number } | null = null
+  private readonly observer: ResizeObserver | null
 
   constructor(...args: BaseArgs) {
     super(...args)
@@ -49,11 +66,13 @@ export class DirectorLayer extends BaseModule {
       setDirectorVisible: this.setVisible,
       playDirectorFrame: this.playFrame,
       restoreDirectorCamera: this.restoreCamera,
-      captureDirectorCamera: this.captureCamera,
-      getDirectorCamera: this.getCamera,
-      setDirectorCamera: this.setCamera,
     })
     this.unsubscribe = this.controller.onRefresh.subscribe(this.draw)
+    this.observer =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(this.handleResize)
+    this.observer?.observe(this.dm.data.container)
     this.onStart(this.start)
     this.onRestart(this.start)
     this.onDispose(this.dispose)
@@ -84,105 +103,107 @@ export class DirectorLayer extends BaseModule {
   private readonly draw = () => {
     this.resize()
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    if (!this.visible) return
+    // Keep the framed view stable if the camera or the container changes while
+    // a frame is on screen.
+    if (this.currentFrame && !this.animating) {
+      this.snapTo(this.currentFrame)
+    }
     // Frames are drawn by the DOM overlay (dashed border, handles, label).
     // Painting them here as well produced a second solid outline behind every
     // frame, which read as a stray line.
+    if (!this.visible) return
+  }
+
+  private readonly handleResize = () => {
+    if (this.currentFrame && !this.animating) {
+      this.snapTo(this.currentFrame)
+    }
+  }
+
+  private targetFor(frame: CanvasFrame): Transform {
+    const { container, offsetX, offsetY, scale } = this.dm.data
+    const width = Math.max(1, container.clientWidth)
+    const height = Math.max(1, container.clientHeight)
+    // The frame is already laid out by the editor camera; fit that on-screen
+    // rectangle into the container, then translate it to the centre.
+    const framedWidth = Math.max(1, frame.width * scale)
+    const framedHeight = Math.max(1, frame.height * scale)
+    const outer = Math.min(width / framedWidth, height / framedHeight)
+    return {
+      x: (width - framedWidth * outer) / 2 - (offsetX + frame.x * scale) * outer,
+      y: (height - framedHeight * outer) / 2 - (offsetY + frame.y * scale) * outer,
+      scale: outer,
+    }
+  }
+
+  private applyTransform(next: Transform) {
+    this.applied = next
+    const style = this.dm.data.container.style
+    style.transformOrigin = '0 0'
+    style.transform = `translate(${next.x}px, ${next.y}px) scale(${next.scale})`
+  }
+
+  private snapTo(frame: CanvasFrame) {
+    this.applyTransform(this.targetFor(frame))
   }
 
   private readonly playFrame = (frame: CanvasFrame, animate = true) => {
     cancelAnimationFrame(this.animation)
-    const { container } = this.dm.data
-    const scale = Math.min(container.clientWidth / frame.width, container.clientHeight / frame.height)
-    const target = {
-      offsetX: container.clientWidth / 2 - (frame.x + frame.width / 2) * scale,
-      offsetY: container.clientHeight / 2 - (frame.y + frame.height / 2) * scale,
-      scale,
-    }
-    if (!this.cameraBeforePlayback) {
-      this.cameraBeforePlayback = {
-        offsetX: this.dm.data.offsetX,
-        offsetY: this.dm.data.offsetY,
-        scale: this.dm.data.scale,
-      }
-    }
+    this.animating = false
+    this.currentFrame = frame
+    this.dm.data.container.classList.add('JCV-director-playing')
+    const target = this.targetFor(frame)
     if (!animate) {
-      this.dm.data.offsetX = target.offsetX
-      this.dm.data.offsetY = target.offsetY
-      this.dm.data.scale = target.scale
-      this.controller.refresh()
-      this.draw()
+      this.applyTransform(target)
       return Promise.resolve()
     }
 
-    const start = {
-      offsetX: this.dm.data.offsetX,
-      offsetY: this.dm.data.offsetY,
-      scale: this.dm.data.scale,
-    }
+    const start = this.applied
     const duration = 420
     const started = performance.now()
     const startLog = Math.log(start.scale)
     const targetLog = Math.log(target.scale)
+    this.animating = true
     return new Promise<void>((resolve) => {
       const tick = (now: number) => {
         const progress = Math.min(1, (now - started) / duration)
-        const eased = progress < 0.5 ? 4 * progress ** 3 : 1 - (-2 * progress + 2) ** 3 / 2
-        this.dm.data.offsetX = start.offsetX + (target.offsetX - start.offsetX) * eased
-        this.dm.data.offsetY = start.offsetY + (target.offsetY - start.offsetY) * eased
-        this.dm.data.scale = Math.exp(startLog + (targetLog - startLog) * eased)
-        this.controller.refresh()
-        this.draw()
-        if (progress < 1) this.animation = requestAnimationFrame(tick)
-        else resolve()
+        const eased =
+          progress < 0.5
+            ? 4 * progress ** 3
+            : 1 - (-2 * progress + 2) ** 3 / 2
+        this.applyTransform({
+          x: start.x + (target.x - start.x) * eased,
+          y: start.y + (target.y - start.y) * eased,
+          scale: Math.exp(startLog + (targetLog - startLog) * eased),
+        })
+        if (progress < 1) {
+          this.animation = requestAnimationFrame(tick)
+        } else {
+          this.animating = false
+          this.applyTransform(target)
+          resolve()
+        }
       }
       this.animation = requestAnimationFrame(tick)
     })
   }
 
-  private readonly captureCamera = () => {
-    this.cameraBeforePlayback = {
-      offsetX: this.dm.data.offsetX,
-      offsetY: this.dm.data.offsetY,
-      scale: this.dm.data.scale,
-    }
-  }
-
-  // The camera is stored as the world point under the container centre, not as
-  // raw pixel offsets: the container changes width when the rails hide during
-  // presentation, and raw offsets would then land the board off-centre.
-  private readonly getCamera = () => {
-    const { container, offsetX, offsetY, scale } = this.dm.data
-    return {
-      x: (container.clientWidth / 2 - offsetX) / scale,
-      y: (container.clientHeight / 2 - offsetY) / scale,
-      scale,
-    }
-  }
-
-  private readonly setCamera = (camera: { x: number; y: number; scale: number }) => {
-    cancelAnimationFrame(this.animation)
-    const { container } = this.dm.data
-    this.dm.data.scale = camera.scale
-    this.dm.data.offsetX = container.clientWidth / 2 - camera.x * camera.scale
-    this.dm.data.offsetY = container.clientHeight / 2 - camera.y * camera.scale
-    this.controller.refresh()
-    this.draw()
-  }
-
+  /** Exiting playback drops the outer transform; the camera was never touched. */
   private readonly restoreCamera = () => {
     cancelAnimationFrame(this.animation)
-    if (!this.cameraBeforePlayback) return
-    this.dm.data.offsetX = this.cameraBeforePlayback.offsetX
-    this.dm.data.offsetY = this.cameraBeforePlayback.offsetY
-    this.dm.data.scale = this.cameraBeforePlayback.scale
-    this.cameraBeforePlayback = null
-    this.controller.refresh()
+    this.animating = false
+    this.currentFrame = null
+    this.applied = { ...IDENTITY }
+    const style = this.dm.data.container.style
+    style.transform = ''
+    style.transformOrigin = ''
+    this.dm.data.container.classList.remove('JCV-director-playing')
     this.draw()
   }
 
   private readonly dispose = () => {
     cancelAnimationFrame(this.animation)
+    this.observer?.disconnect()
     this.unsubscribe()
     this.canvas.remove()
   }

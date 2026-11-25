@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { useEffect, useMemo, useState, type RefObject } from 'react'
 import type { CanvasDocument, CanvasFrame } from '../model'
 import type { CanvasViewerHandle } from '../viewer/CanvasViewer'
 
@@ -6,6 +6,12 @@ interface UseDirectorSessionOptions {
   canvas: CanvasDocument | null
   viewerRef: RefObject<CanvasViewerHandle | null>
   markDirty: () => void
+}
+
+function afterLayout(run: () => void) {
+  // The rails collapse in the same commit that starts the show; measure the
+  // enlarged stage after two frames so the first cut is already correct.
+  requestAnimationFrame(() => requestAnimationFrame(run))
 }
 
 export function useDirectorSession({
@@ -32,10 +38,10 @@ export function useDirectorSession({
   useEffect(() => {
     const viewer = viewerRef.current?.viewer
     viewer?.setDirectorVisible?.(directorMode && !presentation)
-    if (!directorMode) viewer?.restoreDirectorCamera?.()
   }, [directorMode, presentation, canvas, viewerRef])
 
   function resetDirectorSession() {
+    viewerRef.current?.viewer?.restoreDirectorCamera?.()
     setDirectorMode(false)
     setPresentation(false)
     setPresentationMenu(null)
@@ -53,40 +59,20 @@ export function useDirectorSession({
     viewerRef.current?.viewer?.refresh?.()
   }
 
-  const savedCamera = useRef<{
-    x: number
-    y: number
-    scale: number
-  } | null>(null)
-
-  function restoreCamera() {
-    const viewer = viewerRef.current?.viewer
-    if (!savedCamera.current) return
-    const camera = savedCamera.current
-    // Restore a few times: the rail comes back in the same commit, and the
-    // viewer may re-fit the canvas on the resulting resize afterwards.
-    const apply = () => viewer?.setDirectorCamera?.(camera)
-    requestAnimationFrame(() => {
-      requestAnimationFrame(apply)
-    })
-    window.setTimeout(apply, 120)
-    window.setTimeout(apply, 400)
-  }
-
   function startPresentation(startIndex = 0) {
     if (directorFrames.length === 0) return
     const index = Math.max(0, Math.min(startIndex, directorFrames.length - 1))
-    // Keep the very first snapshot: previewing a single frame before starting
-    // the show must not overwrite the editing camera with that frame's view.
-    if (!savedCamera.current) {
-      savedCamera.current = viewerRef.current?.viewer?.getDirectorCamera?.() ?? null
-    }
     setPresentation(true)
     setPresentationMenu(null)
     setFrameIndex(index)
-    // Jump straight to the first frame: easing from an unrelated camera makes
-    // the opening look like a swing rather than a cut.
-    void viewerRef.current?.viewer?.playDirectorFrame?.(directorFrames[index], false)
+    // Jump straight to the first frame: easing from an unrelated view makes the
+    // opening look like a swing rather than a cut.
+    afterLayout(() => {
+      void viewerRef.current?.viewer?.playDirectorFrame?.(
+        directorFrames[index],
+        false,
+      )
+    })
   }
 
   function advancePresentation() {
@@ -94,12 +80,15 @@ export function useDirectorSession({
     const next = frameIndex + 1
     if (next >= directorFrames.length) {
       setPresentation(false)
-      restoreCamera()
-      if (directorMode) viewerRef.current?.viewer?.setDirectorVisible?.(true)
+      setPresentationMenu(null)
+      viewerRef.current?.viewer?.restoreDirectorCamera?.()
       return
     }
     setFrameIndex(next)
-    void viewerRef.current?.viewer?.playDirectorFrame?.(directorFrames[next], true)
+    void viewerRef.current?.viewer?.playDirectorFrame?.(
+      directorFrames[next],
+      true,
+    )
   }
 
   function previousPresentation() {
@@ -107,14 +96,16 @@ export function useDirectorSession({
     const previous = Math.max(0, frameIndex - 1)
     if (previous === frameIndex) return
     setFrameIndex(previous)
-    void viewerRef.current?.viewer?.playDirectorFrame?.(directorFrames[previous], true)
+    void viewerRef.current?.viewer?.playDirectorFrame?.(
+      directorFrames[previous],
+      true,
+    )
   }
 
   function exitPresentation() {
     setPresentation(false)
     setPresentationMenu(null)
-    restoreCamera()
-    if (directorMode) viewerRef.current?.viewer?.setDirectorVisible?.(true)
+    viewerRef.current?.viewer?.restoreDirectorCamera?.()
   }
 
   function toggleDirector() {
@@ -125,22 +116,10 @@ export function useDirectorSession({
       setSelectedFrameId(null)
       setFrameControllerOpen(false)
       viewerRef.current?.viewer?.setDirectorVisible?.(false)
-      restoreCamera()
-      savedCamera.current = null
+      viewerRef.current?.viewer?.restoreDirectorCamera?.()
       return
     }
     setDirectorMode(true)
-    // Snapshot the editing camera when director mode opens, so playback always
-    // returns here instead of to whatever frame was last previewed.
-    savedCamera.current =
-      viewerRef.current?.viewer?.getDirectorCamera?.() ?? null
-    requestAnimationFrame(() => {
-      if (!savedCamera.current) {
-        savedCamera.current =
-          viewerRef.current?.viewer?.getDirectorCamera?.() ?? null
-      }
-      viewerRef.current?.viewer?.captureDirectorCamera?.()
-    })
   }
 
   return {

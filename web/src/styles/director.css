@@ -1,5 +1,17 @@
 /* Director mode, frame controller and presentation overlay. */
 
+/* Third-party viewer controls: hide them while a director frame plays so the
+   framed board is the only thing on screen. The transform itself is applied by
+   DirectorLayer. */
+.JSON-Canvas-Viewer.JCV-director-playing {
+  cursor: default;
+}
+
+.JSON-Canvas-Viewer.JCV-director-playing .JCV-controls,
+.JSON-Canvas-Viewer.JCV-director-playing .JCV-minimap-container {
+  display: none;
+}
+
 .sb-director-hud {
   position: fixed;
   z-index: 700;
