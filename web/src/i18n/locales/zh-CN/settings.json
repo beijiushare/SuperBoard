@@ -21,7 +21,7 @@
   "workspace.removeAria": "移除 {{name}}",
   "workspace.prefsSaved": "偏好保存在本机。",
   "workspace.autoOpen.title": "自动进入最近工作区",
-  "workspace.autoOpen.description": "启动时直接打开最近使用且可用的工作区；关闭后每次都显示选择页。",
+  "workspace.autoOpen.description": "启动时直接打开最近使用且可用的工作区，并回到上次打开的白板；关闭后每次都显示选择页。",
   "reset.title": "恢复默认",
   "reset.description": "恢复默认块与文本样式，不会修改已有块。",
   "reset.action": "恢复默认设置",

@@ -17,6 +17,7 @@ import {
   type CanvasListItem,
 } from './appUtils'
 import { loadWorkspace, readBoard, WORKSPACE_VERSION_KEY } from './workspaceApi'
+import { readLastBoard, writeLastBoard } from './lastBoard'
 import { useCanvasSave } from './useCanvasSave'
 import { useCanvasViewport } from './useCanvasViewport'
 import { useCanvasHistory } from './useCanvasHistory'
@@ -223,10 +224,23 @@ export function useCanvasEditorSession({
         setScope(initialScope)
         setTreeMode(initialTree)
         const scoped = list.filter((item) => item.scope === initialScope)
+        // An explicit `board` parameter (deep link, file association) wins.
+        // Otherwise reopen the board from the previous session; the stored
+        // record may belong to another workspace, so it must still exist here.
         const requested = params.get('board')
-        const first =
-          scoped.find((item) => item.slug === requested) ?? scoped[0]
+        const remembered = requested ? null : readLastBoard()
+        let first = requested
+          ? scoped.find((item) => item.slug === requested)
+          : remembered
+            ? list.find(
+                (item) =>
+                  item.slug === remembered.slug &&
+                  item.scope === remembered.scope,
+              )
+            : undefined
+        first ??= scoped[0]
         if (!first) {
+          writeLastBoard(null)
           setLoading(false)
           return
         }
@@ -245,6 +259,7 @@ export function useCanvasEditorSession({
         setSaveState('saved')
         expandPath(first.path)
         updateEditorUrl(first.slug, first.scope, initialTree)
+        writeLastBoard({ slug: first.slug, scope: first.scope })
         setLoading(false)
       } catch (loadError) {
         if (!cancelled) {

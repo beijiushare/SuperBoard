@@ -17,6 +17,7 @@ import {
   updateBoard,
   updateFolder,
 } from './workspaceApi'
+import { writeLastBoard } from './lastBoard'
 
 interface UseBoardFilesOptions {
   items: CanvasListItem[]
@@ -111,9 +112,11 @@ export function useBoardFiles({
     await refreshItems()
     expandPath(data.path)
     if (isCurrent) {
+      const nextSlug = data.canvas['x-superboard']!.meta.slug
       setCanvas(data.canvas)
-      setSelectedSlug(data.canvas['x-superboard']!.meta.slug)
-      updateEditorUrl(data.canvas['x-superboard']!.meta.slug, scope, treeMode)
+      setSelectedSlug(nextSlug)
+      updateEditorUrl(nextSlug, scope, treeMode)
+      writeLastBoard({ slug: nextSlug, scope })
     }
   }
 
@@ -143,6 +146,7 @@ export function useBoardFiles({
       setSelectedSlug('')
       setSaveState('saved')
       updateEditorUrl(null, scope, treeMode)
+      writeLastBoard(null)
     }
   }
 
@@ -201,6 +205,7 @@ export function useBoardFiles({
       setSelectedSlug('')
       setSaveState('saved')
       updateEditorUrl(null, scope, treeMode)
+      writeLastBoard(null)
     }
   }
 

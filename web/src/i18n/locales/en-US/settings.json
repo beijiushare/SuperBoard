@@ -21,7 +21,7 @@
   "workspace.removeAria": "Remove {{name}}",
   "workspace.prefsSaved": "Preferences are stored locally.",
   "workspace.autoOpen.title": "Open the last workspace automatically",
-  "workspace.autoOpen.description": "Open the most recent available workspace on launch. Turn off to always show the picker.",
+  "workspace.autoOpen.description": "Open the most recent available workspace on launch and return to the last board you had open. Turn off to always show the picker.",
   "reset.title": "Reset defaults",
   "reset.description": "Reset block and text styles. Existing blocks are unchanged.",
   "reset.action": "Reset to defaults",

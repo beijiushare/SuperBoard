@@ -9,6 +9,7 @@ import {
   type SaveState,
 } from './appUtils'
 import { loadWorkspace, readBoard } from './workspaceApi'
+import { writeLastBoard } from './lastBoard'
 import { updateUiState } from './uiState'
 import type { EditorTool } from './tools'
 
@@ -101,6 +102,7 @@ export function useBoardWorkspace({
     setSaveState('saved')
     expandPath(item.path)
     updateEditorUrl(item.slug, item.scope, treeMode)
+    writeLastBoard({ slug: item.slug, scope: item.scope })
   }
 
   async function openBoard(
@@ -179,6 +181,7 @@ export function useBoardWorkspace({
       setSaveState('saved')
       resetDirectorSession()
       updateEditorUrl(null, nextScope, treeMode)
+      writeLastBoard(null)
       return
     }
     await openBoard(target.slug, nextScope, true)
