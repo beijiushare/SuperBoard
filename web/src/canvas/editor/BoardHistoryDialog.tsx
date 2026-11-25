@@ -413,11 +413,10 @@ export function BoardHistoryDialog({
               </button>
               <button
                 type="button"
-                className="is-danger"
                 disabled={busy}
                 onClick={clearHistory}
               >
-                {t('editor:history.clearBoard')}
+                {t('common:actions.confirm')}
               </button>
             </div>
           </div>

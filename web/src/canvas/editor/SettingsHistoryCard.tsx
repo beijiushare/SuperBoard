@@ -173,11 +173,10 @@ export function SettingsHistoryCard({
               </button>
               <button
                 type="button"
-                className="is-danger"
                 disabled={busy}
                 onClick={clearAll}
               >
-                {t('settings:history.clear')}
+                {t('common:actions.confirm')}
               </button>
             </div>
           </div>
