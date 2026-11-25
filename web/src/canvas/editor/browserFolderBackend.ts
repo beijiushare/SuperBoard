@@ -352,7 +352,6 @@ async function writeFile(
   try {
     const current = await dir.getFileHandle(`${slug}.canvas`)
     backup = await (await current.getFile()).text()
-    await writeTextFile(dir, `${slug}.canvas.bak`, backup)
   } catch {
     backup = null
   }

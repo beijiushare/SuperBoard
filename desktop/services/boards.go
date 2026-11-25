@@ -154,10 +154,12 @@ func (s *WorkspaceService) writeBoard(scope string, folder string, slug string, 
 		return err
 	}
 	target := filepath.Join(dir, slug+".canvas")
+	// Keep the old bytes in memory so a failed in-place fallback can restore
+	// them; writing a sibling .bak was removed in favour of timestamped
+	// history snapshots.
 	var backup []byte
 	if current, readErr := os.ReadFile(target); readErr == nil {
 		backup = current
-		_ = os.WriteFile(target+".bak", current, 0o644)
 	}
 	temp := filepath.Join(dir, "."+slug+".canvas.tmp")
 	if err := os.WriteFile(temp, []byte(text), 0o644); err != nil {
