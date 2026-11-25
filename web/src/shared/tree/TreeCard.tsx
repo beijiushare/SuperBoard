@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   TREE_CARD_MAX_HEIGHT,
@@ -10,6 +16,9 @@ import type { BlockStyleDefaults } from '../../canvas/editor/preferences'
 import { MarkdownVditorPreview } from '../markdown/MarkdownVditorPreview'
 import { nodeHeightSignature } from './measureCache'
 import { TreeQuote } from './TreeQuote'
+
+/** Grows with the question, then scrolls instead of pushing the whole tree. */
+const DRAFT_MAX_HEIGHT = 220
 
 export interface TreeContextPreview {
   /** Ancestor titles, root first. */
@@ -157,6 +166,17 @@ export function TreeCard({
     element.focus({ preventScroll: true })
     element.select()
   }, [editingTitle])
+
+  useLayoutEffect(() => {
+    if (!draft) return
+    const element = textareaRef.current
+    if (!element) return
+    element.style.height = 'auto'
+    const height = Math.min(element.scrollHeight, DRAFT_MAX_HEIGHT)
+    element.style.height = `${height}px`
+    element.style.overflowY =
+      element.scrollHeight > DRAFT_MAX_HEIGHT ? 'auto' : 'hidden'
+  }, [draft, draftText])
 
   const commitTitle = () => {
     setEditingTitle(false)
