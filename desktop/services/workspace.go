@@ -188,7 +188,7 @@ func (s *WorkspaceService) OpenWorkspace() Result {
 		return fail(500, "app.notReady")
 	}
 	dir, err := app.Dialog.OpenFile().
-		SetTitle(uiText("选择 SuperBoard 工作区", "Select SuperBoard workspace")).
+		SetTitle(uiText("workspace.select")).
 		CanChooseDirectories(true).
 		CanChooseFiles(false).
 		CanCreateDirectories(true).
@@ -269,7 +269,7 @@ func (s *WorkspaceService) GetLanguage() Result {
 }
 
 func (s *WorkspaceService) SetLanguage(language string) Result {
-	if language != "zh-CN" && language != "en-US" {
+	if language != "zh-CN" && language != "zh-TW" && language != "en-US" {
 		return fail(400, "workspace.unsupportedLanguage")
 	}
 	config := loadConfig()

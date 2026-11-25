@@ -25,13 +25,56 @@ func samePath(a string, b string) bool {
 	return strings.EqualFold(filepath.Clean(a), filepath.Clean(b))
 }
 
-// uiText returns the localized UI string for native dialogs based on the
-// persisted language preference.
-func uiText(zh string, en string) string {
-	if loadConfig().Language == "en-US" {
-		return en
+// nativeTexts holds the titles used by OS dialogs. One entry per key and
+// language; adding a language here does not require touching call sites.
+var nativeTexts = map[string]map[string]string{
+	"workspace.select": {
+		"zh-CN": "选择 SuperBoard 工作区",
+		"zh-TW": "選擇 SuperBoard 工作區",
+		"en-US": "Select SuperBoard workspace",
+	},
+	"export.html": {
+		"zh-CN": "导出 HTML",
+		"zh-TW": "匯出 HTML",
+		"en-US": "Export HTML",
+	},
+	"export.folder": {
+		"zh-CN": "选择导出目录",
+		"zh-TW": "選擇匯出目錄",
+		"en-US": "Choose export folder",
+	},
+	"files.insert": {
+		"zh-CN": "选择要插入的文件",
+		"zh-TW": "選擇要插入的檔案",
+		"en-US": "Choose files to insert",
+	},
+}
+
+// uiText returns the native dialog string for the persisted language. Unknown
+// locales fall back to their base language before zh-CN.
+func uiText(key string) string {
+	values, ok := nativeTexts[key]
+	if !ok {
+		return key
 	}
-	return zh
+	lang := loadConfig().Language
+	if text, found := values[lang]; found {
+		return text
+	}
+	switch {
+	case strings.HasPrefix(lang, "zh"):
+		if text, found := values["zh-CN"]; found {
+			return text
+		}
+	case strings.HasPrefix(lang, "en"):
+		if text, found := values["en-US"]; found {
+			return text
+		}
+	}
+	if text, found := values["zh-CN"]; found {
+		return text
+	}
+	return key
 }
 
 func rememberWorkspace(config *Config, root string) {

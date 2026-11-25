@@ -42,7 +42,7 @@ func (s *ExportService) ExportHtml(html string, suggestedName string) Result {
 		suggestedName = "superboard.html"
 	}
 	target, err := app.Dialog.SaveFile().
-		SetMessage(uiText("导出 HTML", "Export HTML")).
+		SetMessage(uiText("export.html")).
 		SetFilename(suggestedName).
 		AddFilter("HTML", "*.html").
 		CanCreateDirectories(true).
@@ -74,7 +74,7 @@ func (s *ExportService) ExportFolder(html string, attachmentsJSON string) Result
 		}
 	}
 	dir, err := app.Dialog.OpenFile().
-		SetTitle(uiText("选择导出目录", "Choose export folder")).
+		SetTitle(uiText("export.folder")).
 		CanChooseDirectories(true).
 		CanChooseFiles(false).
 		CanCreateDirectories(true).

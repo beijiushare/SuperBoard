@@ -81,7 +81,7 @@ func (s *WorkspaceService) PickFiles(scope string) Result {
 		return fail(500, "app.notReady")
 	}
 	paths, err := app.Dialog.OpenFile().
-		SetTitle(uiText("选择要插入的文件", "Choose files to insert")).
+		SetTitle(uiText("files.insert")).
 		CanChooseFiles(true).
 		CanChooseDirectories(false).
 		PromptForMultipleSelection()
