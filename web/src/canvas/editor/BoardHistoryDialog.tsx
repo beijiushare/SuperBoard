@@ -98,7 +98,10 @@ export function BoardHistoryDialog({
     return () => {
       cancelled = true
     }
-  }, [board, selectedId])
+    // Only the selected entry and board identity matter; the parent passes a
+    // fresh object every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, board.slug, board.scope])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
