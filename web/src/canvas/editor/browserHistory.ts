@@ -209,9 +209,13 @@ export async function removeBrowserHistory(
   scope: BoardScope,
   slug: string,
 ) {
-  const base = await historyRoot(root, true).catch(() => null)
+  const base = await root
+    .getDirectoryHandle('.superboard', { create: false })
+    .catch(() => null)
   if (!base) return
-  const scoped = await base.getDirectoryHandle(scope, { create: false }).catch(() => null)
+  const scoped = await base
+    .getDirectoryHandle(scope, { create: false })
+    .catch(() => null)
   if (!scoped) return
   await scoped.removeEntry(slug, { recursive: true }).catch(() => {})
 }
@@ -235,7 +239,11 @@ export async function removeBrowserFolderHistory(
 }
 
 export async function clearAllBrowserHistory(root: DirHandle) {
-  await root.removeEntry('.superboard', { recursive: true }).catch(() => {})
+  const base = await root
+    .getDirectoryHandle('.superboard', { create: false })
+    .catch(() => null)
+  if (!base) return
+  await base.removeEntry('history', { recursive: true }).catch(() => {})
 }
 
 export async function browserHistoryStats(root: DirHandle) {
