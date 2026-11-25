@@ -55,6 +55,7 @@ interface EditorBoardDialogsProps {
   onContextHistory: (board: BoardTreeFile) => void
   onCloseHistory: () => void
   onHistoryRestored: () => void
+  onBeforeHistoryRestore?: () => Promise<boolean>
 }
 
 export function EditorBoardDialogs({
@@ -88,6 +89,7 @@ export function EditorBoardDialogs({
   onContextHistory,
   onCloseHistory,
   onHistoryRestored,
+  onBeforeHistoryRestore,
 }: EditorBoardDialogsProps) {
   const { t } = useTranslation(['editor'])
   return (
@@ -181,6 +183,7 @@ export function EditorBoardDialogs({
           board={{ ...historyBoard, scope: historyBoard.scope ?? scope }}
           onClose={onCloseHistory}
           onRestored={onHistoryRestored}
+          beforeRestore={onBeforeHistoryRestore}
         />
       ) : null}
     </>

@@ -1088,9 +1088,12 @@ export function CanvasEditorApp() {
           if (target.slug === selectedSlug && targetScope === scope) {
             void reloadBoard()
           } else {
-            void openBoard(target.slug, targetScope, true)
+            void openBoard(target.slug, targetScope)
           }
         }}
+        onBeforeHistoryRestore={async () =>
+          saveState === 'saved' ? true : save()
+        }
       />
     </div>
   )

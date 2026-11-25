@@ -16,6 +16,8 @@ interface BoardHistoryDialogProps {
   board: CanvasListItem
   onClose: () => void
   onRestored: () => void
+  /** Flush pending edits before the server snapshots the current version. */
+  beforeRestore?: () => Promise<boolean>
 }
 
 function formatSize(bytes: number) {
@@ -40,6 +42,7 @@ export function BoardHistoryDialog({
   board,
   onClose,
   onRestored,
+  beforeRestore,
 }: BoardHistoryDialogProps) {
   const { t } = useTranslation(['editor', 'common'])
   const [entries, setEntries] = useState<BoardHistoryEntry[]>([])
@@ -111,11 +114,16 @@ export function BoardHistoryDialog({
   function restore(entry: BoardHistoryEntry) {
     setBusy(true)
     setError('')
-    void restoreBoardHistory(board, entry.id)
-      .then(() => {
-        onRestored()
-        onClose()
-      })
+    void (async () => {
+      if (beforeRestore && !(await beforeRestore())) {
+        setError(t('editor:history.saveFailed'))
+        setBusy(false)
+        return
+      }
+      await restoreBoardHistory(board, entry.id)
+      onRestored()
+      onClose()
+    })()
       .catch((reason: unknown) => {
         setError(reason instanceof Error ? reason.message : String(reason))
       })

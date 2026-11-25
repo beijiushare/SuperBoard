@@ -96,6 +96,7 @@
   "history.clearBoard": "Clear this board's history",
   "history.clearConfirmTitle": "Clear this board's history versions?",
   "history.clearConfirmBody": "Only the saved snapshots are deleted. The board itself is unchanged.",
+  "history.saveFailed": "The current changes could not be saved, so the restore was cancelled.",
   "context.newBoardIn": "New board in {{folder}}",
   "context.newBoardRoot": "New board in root",
   "context.newBoardHere": "New board here…",
