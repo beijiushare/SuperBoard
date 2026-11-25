@@ -93,7 +93,10 @@ export function buildTreeMessages(
   for (let index = path.length - 1; index >= 0; index -= 1) {
     const summaryNode = data.nodes.find(
       (item) =>
-        item.parentId === path[index].id && item.role === 'summary',
+        item.parentId === path[index].id &&
+        item.role === 'summary' &&
+        item.status === 'done' &&
+        item.answer.trim(),
     )
     if (!summaryNode) continue
     summary = summaryNode.answer.trim()

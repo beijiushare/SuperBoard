@@ -432,35 +432,44 @@ export function CanvasEditorApp() {
         // and everything above it, so both this question and the ancestor's own
         // later questions start from the summary.
         const summaryParent = node?.parentId ?? null
-        const hasSummary =
-          summaryParent !== null &&
-          tree.nodes.some(
-            (item) => item.parentId === summaryParent && item.role === 'summary',
-          )
+        const existingSummary =
+          summaryParent === null
+            ? undefined
+            : tree.nodes.find(
+                (item) =>
+                  item.parentId === summaryParent && item.role === 'summary',
+              )
+        // A failed summary is retried automatically the next time a question
+        // needs the context: the card is reused instead of stacking a new one.
         if (
           summaryParent &&
-          !hasSummary &&
+          (!existingSummary || existingSummary.status === 'error') &&
           estimateTokens(messages) > preferences.ai.compactionThreshold
         ) {
           // Show the summary card immediately with a "compacting" hint, so the
           // extra request is visible instead of a silent pause.
-          const summaryId = newTreeNodeId()
-          const withPlaceholder: SuperBoardTreeData = {
-            ...tree,
-            nodes: [
-              ...tree.nodes,
-              {
-                id: summaryId,
-                parentId: summaryParent,
-                title: '',
-                question: '',
-                answer: '',
+          const summaryId = existingSummary?.id ?? newTreeNodeId()
+          const withPlaceholder: SuperBoardTreeData = existingSummary
+            ? updateTreeNode(tree, summaryId, {
                 status: 'generating',
-                createdAt: new Date().toISOString(),
-                role: 'summary',
-              },
-            ],
-          }
+                error: undefined,
+              })
+            : {
+                ...tree,
+                nodes: [
+                  ...tree.nodes,
+                  {
+                    id: summaryId,
+                    parentId: summaryParent,
+                    title: '',
+                    question: '',
+                    answer: '',
+                    status: 'generating',
+                    createdAt: new Date().toISOString(),
+                    role: 'summary',
+                  },
+                ],
+              }
           patchTree(blockId, () => withPlaceholder)
           try {
             const summary = await aiChat(
