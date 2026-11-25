@@ -86,6 +86,23 @@ export function treeDescendantIds(
   return result
 }
 
+/**
+ * Descendants shown in the fold toggle. Summary cards are derived context, not
+ * turns, so they never inflate the count.
+ */
+export function treeCountedDescendantIds(
+  data: SuperBoardTreeData,
+  id: string,
+): Set<string> {
+  const result = new Set<string>()
+  for (const childId of treeDescendantIds(data, id)) {
+    if (treeNodeById(data, childId)?.role !== 'summary') {
+      result.add(childId)
+    }
+  }
+  return result
+}
+
 /** Nodes reachable from the root, skipping collapsed branches. */
 export function visibleTreeNodes(data: SuperBoardTreeData): SuperBoardTreeNode[] {
   const root = treeNodeById(data, data.rootId)

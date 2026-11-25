@@ -10,6 +10,7 @@ import {
   removeTreeNode,
   resolveCardHeight,
   treeBlockSize,
+  treeCountedDescendantIds,
   treeDescendantIds,
   treeEdges,
   treeNodeById,
@@ -406,7 +407,7 @@ export function KnowledgeTree({
             const height = resolveCardHeight(heights, node)
             const collapsed = node.branchCollapsed === true
             const hiddenCount = collapsed
-              ? treeDescendantIds(data, node.id).size
+              ? treeCountedDescendantIds(data, node.id).size
               : 0
             return (
               <button

@@ -12,6 +12,7 @@ import {
   removeTreeNode,
   serializeCanvas,
   treeBlockSize,
+  treeCountedDescendantIds,
   treeDescendantIds,
   treeNodeById,
   treeEdges,
@@ -356,5 +357,8 @@ assert.ok(incremental[1].content.includes('前情摘要文本'))
 assert.ok(incremental.some((message) => message.content === 'why'))
 assert.ok(incremental.at(-1)?.content.includes('合并'))
 assert.equal(nearestSummaryNode(withSummary, 'a1')?.id, 'sum-1')
+
+// Summary cards are derived context, so the fold count skips them.
+assert.equal(treeCountedDescendantIds(withSummary, 'a').size, 1)
 
 console.log('canvas model tests passed')
