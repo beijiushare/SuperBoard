@@ -377,6 +377,7 @@
 
 .sb-preferences-dialog .sb-button-danger {
   border-color: color-mix(in srgb, var(--sb-danger) 40%, transparent);
+  background: transparent;
   color: var(--sb-danger);
 }
 
