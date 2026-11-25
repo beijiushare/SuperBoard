@@ -440,16 +440,13 @@ export function CanvasEditorApp() {
               workingTree = removeTreeNode(withPlaceholder, summaryId, 'branch')
             }
             patchTree(blockId, () => workingTree)
-          } catch (summaryError) {
-            const message =
-              summaryError instanceof Error
-                ? summaryError.message
-                : String(summaryError)
+          } catch {
+            // A failed summary is not worth keeping: it has no retry and no
+            // delete, and the answer can still use the full path. Drop the
+            // placeholder so the tree stays clean; the next long question will
+            // try again.
             patchTree(blockId, (current) =>
-              updateTreeNode(current, summaryId, {
-                status: 'error',
-                error: message,
-              }),
+              removeTreeNode(current, summaryId, 'branch'),
             )
             workingTree = tree
           }
