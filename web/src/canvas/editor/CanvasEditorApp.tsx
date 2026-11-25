@@ -102,6 +102,8 @@ export function CanvasEditorApp() {
     setExportDialogOpen,
     preferencesOpen,
     setPreferencesOpen,
+    historyBoard,
+    setHistoryBoard,
     contextMenu,
     setContextMenu,
   } = useEditorDialogState()
@@ -978,6 +980,7 @@ export function CanvasEditorApp() {
         newFolderParent={newFolderParent}
         pendingDelete={pendingDelete}
         pendingDeleteFolder={pendingDeleteFolder}
+        historyBoard={historyBoard}
         contextMenu={contextMenu}
         folderPaths={folderPaths}
         scope={scope}
@@ -999,6 +1002,19 @@ export function CanvasEditorApp() {
         onContextRenameFolder={(folder) => setFolderDialog(folder)}
         onContextDelete={(node) => setPendingDelete(node)}
         onContextDeleteFolder={(folder) => setPendingDeleteFolder(folder)}
+        onContextHistory={(node) => setHistoryBoard(node)}
+        onCloseHistory={() => setHistoryBoard(null)}
+        onHistoryRestored={() => {
+          const target = historyBoard
+          setHistoryBoard(null)
+          if (!target) return
+          const targetScope = target.scope ?? scope
+          if (target.slug === selectedSlug && targetScope === scope) {
+            void reloadBoard()
+          } else {
+            void openBoard(target.slug, targetScope, true)
+          }
+        }}
       />
     </div>
   )

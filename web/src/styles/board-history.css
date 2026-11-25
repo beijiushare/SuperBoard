@@ -1,0 +1,114 @@
+/* Board history dialog: BoardHistoryDialog. */
+
+.sb-history-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(980px, calc(100vw - 56px));
+  height: min(680px, calc(100dvh - 56px));
+  max-height: calc(100dvh - 56px);
+  padding: 0;
+  overflow: hidden;
+}
+
+.sb-history-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid #ece9e1;
+}
+
+.sb-history-head h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.sb-history-head p {
+  margin: 4px 0 0;
+  color: #8b877d;
+  font-size: 12px;
+}
+
+.sb-history-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+}
+
+.sb-history-list {
+  overflow: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-right: 1px solid #ece9e1;
+}
+
+.sb-history-entry {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #3f3c35;
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sb-history-entry:hover {
+  background: #f6f4ee;
+}
+
+.sb-history-entry.is-selected {
+  background: #f1eee6;
+}
+
+.sb-history-entry-size {
+  color: #8b877d;
+}
+
+.sb-history-preview {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background: #faf9f5;
+}
+
+.sb-history-empty {
+  margin: 0;
+  padding: 16px;
+  color: #8b877d;
+  font-size: 12px;
+}
+
+.sb-history-preview > .sb-history-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sb-history-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  border-top: 1px solid #ece9e1;
+}
+
+.sb-history-actions-right {
+  display: flex;
+  gap: 8px;
+}
+
+.sb-history-dialog .sb-dialog-error {
+  margin: 0 18px 8px;
+}

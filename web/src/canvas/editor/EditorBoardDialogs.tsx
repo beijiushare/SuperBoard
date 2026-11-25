@@ -14,9 +14,11 @@ import { InputDialog } from '../../shared/ui/InputDialog'
 import type {
   BoardListItem,
   BoardScope,
+  BoardTreeFile,
   BoardTreeFolder,
 } from '../../shared/board/types'
 import type { BoardDialogState } from './appUtils'
+import { BoardHistoryDialog } from './BoardHistoryDialog'
 
 interface EditorBoardDialogsProps {
   boardDialog: BoardDialogState | null
@@ -24,6 +26,7 @@ interface EditorBoardDialogsProps {
   newFolderParent: string | null
   pendingDelete: BoardListItem | null
   pendingDeleteFolder: BoardTreeFolder | null
+  historyBoard: BoardTreeFile | null
   contextMenu: {
     x: number
     y: number
@@ -49,6 +52,9 @@ interface EditorBoardDialogsProps {
   onContextRenameFolder: (folder: BoardTreeFolder) => void
   onContextDelete: (board: BoardListItem) => void
   onContextDeleteFolder: (folder: BoardTreeFolder) => void
+  onContextHistory: (board: BoardTreeFile) => void
+  onCloseHistory: () => void
+  onHistoryRestored: () => void
 }
 
 export function EditorBoardDialogs({
@@ -57,6 +63,7 @@ export function EditorBoardDialogs({
   newFolderParent,
   pendingDelete,
   pendingDeleteFolder,
+  historyBoard,
   contextMenu,
   folderPaths,
   scope,
@@ -78,6 +85,9 @@ export function EditorBoardDialogs({
   onContextRenameFolder,
   onContextDelete,
   onContextDeleteFolder,
+  onContextHistory,
+  onCloseHistory,
+  onHistoryRestored,
 }: EditorBoardDialogsProps) {
   const { t } = useTranslation(['editor'])
   return (
@@ -94,6 +104,7 @@ export function EditorBoardDialogs({
           onRenameFolder={onContextRenameFolder}
           onDelete={onContextDelete}
           onDeleteFolder={onContextDeleteFolder}
+          onHistory={onContextHistory}
         />
       ) : null}
 
@@ -162,6 +173,14 @@ export function EditorBoardDialogs({
           scope={scope}
           onClose={onCloseDeleteFolder}
           onConfirm={onDeleteFolder}
+        />
+      ) : null}
+
+      {historyBoard ? (
+        <BoardHistoryDialog
+          board={{ ...historyBoard, scope: historyBoard.scope ?? scope }}
+          onClose={onCloseHistory}
+          onRestored={onHistoryRestored}
         />
       ) : null}
     </>

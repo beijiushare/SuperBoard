@@ -3,6 +3,7 @@ import type { BoardDialogState } from './appUtils'
 import type { BoardContextTarget } from '../../editor/BoardContextMenu'
 import type {
   BoardListItem,
+  BoardTreeFile,
   BoardTreeFolder,
 } from '../../shared/board/types'
 
@@ -15,6 +16,7 @@ export function useEditorDialogState() {
     useState<BoardTreeFolder | null>(null)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [preferencesOpen, setPreferencesOpen] = useState(false)
+  const [historyBoard, setHistoryBoard] = useState<BoardTreeFile | null>(null)
   const [contextMenu, setContextMenu] = useState<{
     x: number
     y: number
@@ -36,6 +38,8 @@ export function useEditorDialogState() {
     setExportDialogOpen,
     preferencesOpen,
     setPreferencesOpen,
+    historyBoard,
+    setHistoryBoard,
     contextMenu,
     setContextMenu,
   }

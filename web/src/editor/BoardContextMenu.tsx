@@ -16,6 +16,7 @@ interface BoardContextMenuProps {
   onRenameFolder: (folder: BoardTreeFolder) => void
   onDelete: (board: BoardTreeFile) => void
   onDeleteFolder: (folder: BoardTreeFolder) => void
+  onHistory: (board: BoardTreeFile) => void
 }
 
 export function BoardContextMenu({
@@ -29,6 +30,7 @@ export function BoardContextMenu({
   onRenameFolder,
   onDelete,
   onDeleteFolder,
+  onHistory,
 }: BoardContextMenuProps) {
   const { t } = useTranslation(['editor'])
   const menuRef = useRef<HTMLDivElement>(null)
@@ -115,6 +117,16 @@ export function BoardContextMenu({
       {target.type === 'file' ? (
         <>
           <div className="sb-context-menu-group">
+            <button
+              className="sb-context-menu-item"
+              type="button"
+              role="menuitem"
+              onClick={() => run(() => onHistory(target.node))}
+            >
+              <span className="sb-context-menu-label">
+                {t('editor:context.history')}
+              </span>
+            </button>
             <button
               className="sb-context-menu-item"
               type="button"
