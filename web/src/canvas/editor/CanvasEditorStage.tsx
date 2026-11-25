@@ -99,6 +99,8 @@ interface CanvasEditorStageProps {
   onTreeSize?: (id: string, size: { width: number; height: number }) => void
   onTreeChange?: (id: string, data: SuperBoardTreeData) => void
   onTreeGenerate?: (id: string, nodeId: string) => void
+  /** Expand knowledge trees completely; used while exporting. */
+  expandTrees?: boolean
   selection: StageSelection
   tools: StageTools
   markdown: StageMarkdown
@@ -120,6 +122,7 @@ export function CanvasEditorStage({
   onTreeSize,
   onTreeChange,
   onTreeGenerate,
+  expandTrees = false,
   selection,
   tools,
   markdown,
@@ -149,6 +152,7 @@ export function CanvasEditorStage({
                   onTreeSize={onTreeSize}
                   onTreeChange={onTreeChange}
                   onTreeGenerate={onTreeGenerate}
+                  treeExpandAll={expandTrees}
                   style={{ width: '100%', height: '100%' }}
                 />
               </div>

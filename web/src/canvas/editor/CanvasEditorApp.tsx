@@ -67,6 +67,18 @@ import {
   nodeMapOf,
 } from './hierarchy'
 
+function waitFrames(count: number) {
+  return new Promise<void>((resolve) => {
+    let remaining = count
+    const step = () => {
+      remaining -= 1
+      if (remaining <= 0) resolve()
+      else requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+  })
+}
+
 export function CanvasEditorApp() {
   const { t } = useTranslation(['editor'])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -91,6 +103,7 @@ export function CanvasEditorApp() {
     null,
   )
   const [canvasMenu, setCanvasMenu] = useState<CanvasMenuState | null>(null)
+  const [exportExpanded, setExportExpanded] = useState(false)
   const uiState = useUiState()
   const stylePanelOpen = uiState.stylePanelOpen
   const menuPanelOpen = uiState.toolPaletteOpen
@@ -881,6 +894,7 @@ export function CanvasEditorApp() {
           onTreeSize={updateTreeSize}
           onTreeChange={updateTreeChange}
           onTreeGenerate={runTreeAnswer}
+          expandTrees={exportExpanded}
           selection={{
             selectedIds,
             onSelect: setSelectedIds,
@@ -1027,6 +1041,11 @@ export function CanvasEditorApp() {
         <ExportDialog
           canvas={canvas}
           viewerRef={viewerRef}
+          onPrepare={async () => {
+            setExportExpanded(true)
+            await waitFrames(12)
+          }}
+          onFinish={() => setExportExpanded(false)}
           onClose={() => setExportDialogOpen(false)}
         />
       ) : null}

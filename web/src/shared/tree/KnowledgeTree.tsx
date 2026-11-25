@@ -44,6 +44,8 @@ interface KnowledgeTreeProps {
   onActivate?: () => void
   /** Ask again for one card, e.g. after a failed request. */
   onGenerate?: (nodeId: string) => void
+  /** Render every branch, used when the board is exported. */
+  expandAll?: boolean
 }
 
 /**
@@ -119,12 +121,13 @@ export function KnowledgeTree({
   onChange,
   onActivate,
   onGenerate,
+  expandAll = false,
 }: KnowledgeTreeProps) {
   const { heights, register, seed } = useCardHeights()
   const { t } = useTranslation(['editor'])
   const blockDefaults = usePreferences().block
-  const layout = layoutTree(data, heights)
-  const edges = treeEdges(data, layout.positions, heights)
+  const layout = layoutTree(data, heights, expandAll)
+  const edges = treeEdges(data, layout.positions, heights, expandAll)
   const size = treeBlockSize(layout)
   const onSizeRef = useRef(onSize)
   onSizeRef.current = onSize
@@ -168,7 +171,7 @@ export function KnowledgeTree({
     [],
   )
 
-  const nodes = visibleTreeNodes(data)
+  const nodes = visibleTreeNodes(data, expandAll)
 
   // Seed from the last measurement so a reload does not start from the default
   // card height and re-flow when Markdown finishes rendering.
@@ -400,9 +403,11 @@ export function KnowledgeTree({
             contextFor={(question) => contextFor(node.id, question)}
           />
         ))}
-        {nodes
-          .filter((node) => childrenOf(node.id))
-          .map((node) => {
+        {expandAll
+          ? null
+          : nodes
+              .filter((node) => childrenOf(node.id))
+              .map((node) => {
             const position = layout.positions[node.id] ?? { x: 0, y: 0 }
             const height = resolveCardHeight(heights, node)
             const collapsed = node.branchCollapsed === true

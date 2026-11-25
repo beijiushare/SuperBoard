@@ -20,6 +20,9 @@ import { Select } from '../../components/ui/select'
 interface ExportDialogProps {
   canvas: CanvasDocument
   viewerRef: React.RefObject<CanvasViewerHandle | null>
+  /** Expand derived content (knowledge trees) before the DOM snapshot. */
+  onPrepare?: () => Promise<void>
+  onFinish?: () => void
   onClose: () => void
 }
 
@@ -35,6 +38,8 @@ function formatSize(bytes: number) {
 export function ExportDialog({
   canvas,
   viewerRef,
+  onPrepare,
+  onFinish,
   onClose,
 }: ExportDialogProps) {
   const { t } = useTranslation(['editor', 'common'])
@@ -84,6 +89,7 @@ export function ExportDialog({
     setBusy(true)
     setError('')
     try {
+      await onPrepare?.()
       if (desktopMode()) {
         const payload = await buildExportPayload(
           canvas,
@@ -112,6 +118,7 @@ export function ExportDialog({
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason))
     } finally {
+      onFinish?.()
       setBusy(false)
     }
   }

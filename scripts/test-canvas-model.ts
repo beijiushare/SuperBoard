@@ -235,6 +235,16 @@ assert.equal(rootToA.parentId, 'r')
   assert.ok(rootToA.path.endsWith('L 409 50'))
   assert.equal(rootToA.arrow, 'M 416 50 L 409 46 L 409 54 Z')
 assert.equal(treeEdges(collapsed, layout.positions).length, 2)
+// Exporting expands every branch, including the collapsed one.
+assert.equal(visibleTreeNodes(collapsed).length, 3)
+assert.equal(visibleTreeNodes(collapsed, true).length, 4)
+const expandedLayout = layoutTree(collapsed, {}, true)
+assert.ok(expandedLayout.positions.a1)
+assert.ok(
+  treeEdges(collapsed, expandedLayout.positions, {}, true).some(
+    (edge) => edge.childId === 'a1',
+  ),
+)
 
 // Tree data survives a document round trip untouched.
 const withTree = parseCanvas(

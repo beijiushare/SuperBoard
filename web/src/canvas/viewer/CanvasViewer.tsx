@@ -62,6 +62,8 @@ interface CanvasViewerProps {
   onTreeSize?: (id: string, size: { width: number; height: number }) => void
   onTreeChange?: (id: string, data: SuperBoardTreeData) => void
   onTreeGenerate?: (id: string, nodeId: string) => void
+  /** Expand every knowledge-tree branch; used while exporting. */
+  treeExpandAll?: boolean
 }
 
 export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
@@ -75,6 +77,7 @@ export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
     onTreeSize,
     onTreeChange,
     onTreeGenerate,
+    treeExpandAll = false,
   }, ref) {
     const onNodeSelectRef = useRef(onNodeSelect)
     const onScheduleEventsChangeRef = useRef(onScheduleEventsChange)
@@ -112,9 +115,10 @@ export const CanvasViewer = forwardRef<CanvasViewerHandle, CanvasViewerProps>(
           onTreeGenerate={(nodeId) =>
             onTreeGenerateRef.current?.(node.id, nodeId)
           }
+          treeExpandAll={treeExpandAll}
         />
       ),
-      [],
+      [treeExpandAll],
     )
     const renderLink = useCallback(
       ({ node, onActive }: { node: JSONCanvasLinkNode; onActive: Hook }) => (

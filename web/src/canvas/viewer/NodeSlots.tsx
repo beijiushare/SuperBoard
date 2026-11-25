@@ -145,6 +145,7 @@ export function TextSlot({
   onTreeSize,
   onTreeChange,
   onTreeGenerate,
+  treeExpandAll,
 }: {
   node: JSONCanvasTextNode
   onActive?: Hook
@@ -153,6 +154,7 @@ export function TextSlot({
   onTreeSize?: (size: { width: number; height: number }) => void
   onTreeChange?: (data: SuperBoardTreeData) => void
   onTreeGenerate?: (nodeId: string) => void
+  treeExpandAll?: boolean
 }) {
   const { t } = useTranslation(['common'])
   useNodeSelection(node.id, onActive, onSelect)
@@ -185,6 +187,7 @@ export function TextSlot({
         onChange={onTreeChange}
         onActivate={() => onSelect?.(node.id)}
         onGenerate={(nodeId) => onTreeGenerate?.(nodeId)}
+        expandAll={treeExpandAll}
       />
     ) : (
       <div

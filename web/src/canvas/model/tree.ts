@@ -104,13 +104,16 @@ export function treeCountedDescendantIds(
 }
 
 /** Nodes reachable from the root, skipping collapsed branches. */
-export function visibleTreeNodes(data: SuperBoardTreeData): SuperBoardTreeNode[] {
+export function visibleTreeNodes(
+  data: SuperBoardTreeData,
+  expandAll = false,
+): SuperBoardTreeNode[] {
   const root = treeNodeById(data, data.rootId)
   if (!root) return []
   const result: SuperBoardTreeNode[] = []
   const walk = (node: SuperBoardTreeNode) => {
     result.push(node)
-    if (node.branchCollapsed) return
+    if (!expandAll && node.branchCollapsed) return
     for (const child of treeChildren(data, node.id)) walk(child)
   }
   walk(root)
@@ -157,8 +160,9 @@ export function resolveCardHeight(
 export function layoutTree(
   data: SuperBoardTreeData,
   heights: Record<string, number> = {},
+  expandAll = false,
 ): TreeLayout {
-  const visible = visibleTreeNodes(data)
+  const visible = visibleTreeNodes(data, expandAll)
   if (!visible.length) return { positions: {}, width: 0, height: 0 }
   const visibleIds = new Set(visible.map((node) => node.id))
 
@@ -167,9 +171,10 @@ export function layoutTree(
     const cached = spans.get(node.id)
     if (cached !== undefined) return cached
     const own = resolveHeights(heights, node)
-    const children = node.branchCollapsed
-      ? []
-      : treeChildren(data, node.id).filter((child) => visibleIds.has(child.id))
+    const children =
+      !expandAll && node.branchCollapsed
+        ? []
+        : treeChildren(data, node.id).filter((child) => visibleIds.has(child.id))
     const childrenHeight = children.reduce(
       (total, child, index) =>
         total + subtreeHeight(child) + (index > 0 ? TREE_ROW_GAP : 0),
@@ -187,7 +192,7 @@ export function layoutTree(
     const span = subtreeHeight(node)
     positions[node.id] = { x, y: top + (span - own) / 2 }
     maxX = Math.max(maxX, x + TREE_CARD_WIDTH)
-    if (node.branchCollapsed) return
+    if (!expandAll && node.branchCollapsed) return
     const children = treeChildren(data, node.id).filter((child) =>
       visibleIds.has(child.id),
     )
@@ -272,9 +277,12 @@ export function treeEdges(
   data: SuperBoardTreeData,
   positions: Record<string, { x: number; y: number }>,
   heights: Record<string, number> = {},
+  expandAll = false,
 ): TreeEdge[] {
   const edges: TreeEdge[] = []
-  const visible = new Set(visibleTreeNodes(data).map((node) => node.id))
+  const visible = new Set(
+    visibleTreeNodes(data, expandAll).map((node) => node.id),
+  )
   for (const node of data.nodes) {
     if (!node.parentId || !visible.has(node.id)) continue
     const parent = treeNodeById(data, node.parentId)
