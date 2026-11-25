@@ -378,11 +378,10 @@ export function BoardHistoryDialog({
               </button>
               <button
                 type="button"
-                className="is-danger"
                 disabled={busy}
                 onClick={() => restore(confirmRestore)}
               >
-                {t('editor:history.restore')}
+                {t('common:actions.confirm')}
               </button>
             </div>
           </div>

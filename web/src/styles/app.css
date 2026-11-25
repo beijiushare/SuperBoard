@@ -451,13 +451,45 @@
   accent-color: #28924f;
 }
 
-.sb-style-input,
 .sb-style-value {
   width: 26px;
   color: #8b877d;
   font-size: 10px;
   font-style: normal;
   text-align: right;
+}
+
+/* Edge rows: keep the trigger the same height as a switch row, not a form. */
+.sb-style-panel .sb-select-compact {
+  width: 104px;
+  height: 28px;
+  padding: 0 26px 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  box-shadow: none;
+}
+
+.sb-style-panel .sb-select-compact .sb-select-chevron {
+  right: 8px;
+}
+
+.sb-style-text-field {
+  width: 104px;
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  border: 1px solid #d8d4c9;
+  border-radius: 6px;
+  background: #fff;
+  color: #1f1e1c;
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+}
+
+.sb-style-text-field:focus {
+  border-color: #b9b5a9;
+  box-shadow: 0 0 0 3px rgb(34 33 31 / 8%);
 }
 
 .sb-canvas-context-menu {
@@ -727,11 +759,14 @@
   border: 1px solid #dedbd2;
   border-radius: 7px;
   background: #fff;
+  color: #1f1e1c;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
   cursor: pointer;
 }
 
 .canvas-editor-dialog-actions button.is-danger {
-  margin-right: auto;
   border-color: #e0c9c4;
   background: #fff;
   color: #b4483c;

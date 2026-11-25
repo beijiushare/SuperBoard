@@ -202,8 +202,6 @@
   "style.sideLeft": "Left",
   "style.label": "Label",
   "style.edgeLabelPlaceholder": "Edge label",
-  "style.direction": "Direction",
-  "style.reverse": "Reverse",
   "style.align": "Arrange",
   "style.alignLeft": "Align left",
   "style.alignRight": "Align right",

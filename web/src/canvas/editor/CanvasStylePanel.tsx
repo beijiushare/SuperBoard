@@ -525,7 +525,7 @@ export function CanvasStylePanel({
             <span>{t('editor:style.label')}</span>
             <input
               key={`edge-label:${edge.id}:${edge.label ?? ''}`}
-              className="sb-style-input"
+              className="sb-style-text-field"
               defaultValue={edge.label ?? ''}
               placeholder={t('editor:style.edgeLabelPlaceholder')}
               onKeyDown={(event) => {
@@ -543,26 +543,6 @@ export function CanvasStylePanel({
                 }
               }}
             />
-          </div>
-          <div className="sb-style-row">
-            <span>{t('editor:style.direction')}</span>
-            <div className="sb-style-buttons">
-              <button
-                type="button"
-                onClick={() =>
-                  updateEdge({
-                    fromNode: edge.toNode,
-                    toNode: edge.fromNode,
-                    fromSide: edge.toSide,
-                    toSide: edge.fromSide,
-                    fromEnd: edge.toEnd,
-                    toEnd: edge.fromEnd,
-                  })
-                }
-              >
-                {t('editor:style.reverse')}
-              </button>
-            </div>
           </div>
         </section>
       ) : null}

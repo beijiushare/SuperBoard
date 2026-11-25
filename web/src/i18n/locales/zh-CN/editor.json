@@ -202,8 +202,6 @@
   "style.sideLeft": "左",
   "style.label": "标签",
   "style.edgeLabelPlaceholder": "连线标签",
-  "style.direction": "方向",
-  "style.reverse": "反转方向",
   "style.align": "排列",
   "style.alignLeft": "左对齐",
   "style.alignRight": "右对齐",
