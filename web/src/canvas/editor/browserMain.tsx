@@ -28,6 +28,10 @@ import {
 import { initI18n } from '../../i18n'
 import { WelcomeLoading, WorkspaceWelcome } from './WorkspaceWelcome'
 import { getPreferences } from './preferences'
+import {
+  installSampleWorkspace,
+  sampleRecentItem,
+} from './sampleWorkspace'
 
 const LOCK_NAME = 'superboard-editor'
 
@@ -69,7 +73,7 @@ function useSingleEditorLock(): LockState {
 }
 
 function EditorGate({ desktop }: { desktop: boolean }) {
-  const { t } = useTranslation(['editor'])
+  const { t } = useTranslation(['editor', 'start'])
   const lockState = useSingleEditorLock()
   const [ready, setReady] = useState(false)
   const [error, setError] = useState('')
@@ -81,11 +85,14 @@ function EditorGate({ desktop }: { desktop: boolean }) {
     (typeof window !== 'undefined' && 'showDirectoryPicker' in window)
   const startRequested =
     new URLSearchParams(window.location.search).get('start') === '1'
+  const sampleRequested =
+    new URLSearchParams(window.location.search).get('sample') === '1'
 
   const clearStartRequest = () => {
     const params = new URLSearchParams(window.location.search)
-    if (!params.has('start')) return
+    if (!params.has('start') && !params.has('sample')) return
     params.delete('start')
+    params.delete('sample')
     const query = params.toString()
     window.history.replaceState(
       null,
@@ -107,6 +114,12 @@ function EditorGate({ desktop }: { desktop: boolean }) {
 
   useEffect(() => {
     if (lockState !== 'ready') return
+    if (sampleRequested) {
+      installSampleWorkspace()
+      setReady(true)
+      setInitializing(false)
+      return
+    }
     if (!supported) {
       setInitializing(false)
       return
@@ -151,7 +164,7 @@ function EditorGate({ desktop }: { desktop: boolean }) {
         setInitializing(false)
       }
     })()
-  }, [desktop, startRequested, supported, lockState])
+  }, [desktop, startRequested, sampleRequested, supported, lockState])
 
   const handleOpenFolder = () => {
     setBusy(true)
@@ -168,7 +181,27 @@ function EditorGate({ desktop }: { desktop: boolean }) {
       .finally(() => setBusy(false))
   }
 
+  const handleOpenSample = () => {
+    installSampleWorkspace()
+    const params = new URLSearchParams(window.location.search)
+    params.delete('start')
+    params.delete('board')
+    params.delete('scope')
+    params.set('sample', '1')
+    const query = params.toString()
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${query ? `?${query}` : ''}`,
+    )
+    setReady(true)
+  }
+
   const handleOpenRecent = (item: WorkspaceRecentItem) => {
+    if (item.kind === 'sample') {
+      handleOpenSample()
+      return
+    }
     setBusy(true)
     setError('')
     void openRecentWorkspace(item)
@@ -212,7 +245,7 @@ function EditorGate({ desktop }: { desktop: boolean }) {
       busy={busy}
       error={error}
       supported={supported}
-      recent={recent}
+      recent={[sampleRecentItem(), ...recent]}
       onOpenFolder={handleOpenFolder}
       onOpenRecent={handleOpenRecent}
     />

@@ -26,6 +26,8 @@
   "workspace.emptyPath": "ワークスペースのパスが空です",
   "workspace.notWorkspace": "SuperBoard のワークスペースではありません",
   "workspace.unsupportedLanguage": "対応していない言語です",
+  "workspace.readOnly": "サンプルワークスペースは読み取り専用です",
+  "workspace.copySampleFailed": "サンプルのコピーに失敗しました",
   "workspace.moveCancelled": "移動をキャンセルしました",
   "workspace.noFolderSupport": "このブラウザーはローカルフォルダーに対応していません",
   "workspace.recentMissing": "ワークスペースの記録がありません",

@@ -22,6 +22,8 @@
   "workspace.prefsSaved": "設定はこの端末に保存されます。",
   "workspace.autoOpen.title": "最近のワークスペースを自動で開く",
   "workspace.autoOpen.description": "起動時に最近使った利用可能なワークスペースを開き、前回開いていたボードに戻ります。オフにすると毎回選択画面を表示します。",
+  "workspace.sampleName": "サンプルワークスペース",
+  "workspace.sampleHint": "読み取り専用のサンプル",
   "history.title": "バージョン履歴",
   "history.description": "ボードの保存時に一定間隔でスナップショットを残し、ボード一覧の「バージョン履歴」から復元できます。",
   "history.interval": "スナップショット間隔",

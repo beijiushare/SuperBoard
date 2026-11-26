@@ -363,5 +363,10 @@
   "workspace.loadFailed": "불러오기 실패({{status}})",
   "desktop.bridgeTimeout": "데스크톱 브리지 시간 초과",
   "desktop.importFailed": "파일 가져오기 실패",
-  "desktop.noDirectorCanvas": "디렉터 모드 캔버스를 만들 수 없습니다"
+  "desktop.noDirectorCanvas": "디렉터 모드 캔버스를 만들 수 없습니다",
+  "sample.banner": "샘플 작업 공간 · 읽기 전용",
+  "sample.readOnly": "샘플 작업 공간은 읽기 전용입니다",
+  "sample.copy": "내 작업 공간으로 복사",
+  "sample.copying": "복사 중…",
+  "sample.copyFailed": "복사 실패: {{message}}"
 }

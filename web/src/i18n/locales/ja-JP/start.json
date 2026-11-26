@@ -19,5 +19,7 @@
   "unsupported": "このブラウザーは File System Access API に対応していません。Edge / Chrome を使うか、SuperBoard デスクトップ版をご利用ください。",
   "loading": "ワークスペースを開いています…",
   "loading.desktop": "デスクトップ版",
-  "loading.browser": "ブラウザー版"
+  "loading.browser": "ブラウザー版",
+  "sample.name": "サンプルワークスペース",
+  "sample.hint": "読み取り専用のサンプル"
 }

@@ -11,6 +11,7 @@ import {
   type ViewerInternals,
   type Viewport,
 } from './appUtils'
+import { isSampleWorkspace } from './sampleWorkspace'
 
 interface UseCanvasViewportOptions {
   canvas: CanvasDocument | null
@@ -28,13 +29,17 @@ export function useCanvasViewport({
   const pendingViewportRef = useRef<Viewport | null>(null)
   const viewportSaveTimerRef = useRef<number | null>(null)
 
+  const workspace = isSampleWorkspace() ? 'sample' : 'folder'
+
   const applyCanvasUiSettings = useCallback(
     (next: CanvasDocument, slug: string, targetScope: BoardScope) => {
       const settings = next['x-superboard']?.settings
       pendingViewportRef.current =
-        readStoredViewport(slug, targetScope) ?? settings?.viewport ?? null
+        readStoredViewport(slug, targetScope, workspace) ??
+        settings?.viewport ??
+        null
     },
-    [],
+    [workspace],
   )
 
   const captureViewport = useCallback(() => {
@@ -47,9 +52,9 @@ export function useCanvasViewport({
     pendingViewportRef.current = null
     writeViewport(viewerRef.current, viewport)
     if (selectedSlug) {
-      writeStoredViewport(selectedSlug, scope, viewport)
+      writeStoredViewport(selectedSlug, scope, viewport, workspace)
     }
-  }, [canvas, scope, selectedSlug, viewerRef])
+  }, [canvas, scope, selectedSlug, viewerRef, workspace])
 
   useEffect(() => {
     if (!selectedSlug) return
@@ -74,7 +79,7 @@ export function useCanvasViewport({
       viewportSaveTimerRef.current = window.setTimeout(() => {
         viewportSaveTimerRef.current = null
         if (latestViewport) {
-          writeStoredViewport(selectedSlug, scope, latestViewport)
+          writeStoredViewport(selectedSlug, scope, latestViewport, workspace)
         }
       }, 500)
     }
@@ -86,10 +91,10 @@ export function useCanvasViewport({
         viewportSaveTimerRef.current = null
       }
       if (latestViewport) {
-        writeStoredViewport(selectedSlug, scope, latestViewport)
+        writeStoredViewport(selectedSlug, scope, latestViewport, workspace)
       }
     }
-  }, [scope, selectedSlug, viewerRef])
+  }, [scope, selectedSlug, viewerRef, workspace])
 
   return { applyCanvasUiSettings, captureViewport }
 }

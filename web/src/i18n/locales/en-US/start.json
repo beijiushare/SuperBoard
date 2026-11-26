@@ -19,5 +19,7 @@
   "unsupported": "This browser does not support the File System Access API. Use Edge or Chrome, or the SuperBoard desktop app.",
   "loading": "Opening workspace…",
   "loading.desktop": "Desktop",
-  "loading.browser": "Browser"
+  "loading.browser": "Browser",
+  "sample.name": "Sample workspace",
+  "sample.hint": "Read-only sample"
 }

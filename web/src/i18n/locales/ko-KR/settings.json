@@ -22,6 +22,8 @@
   "workspace.prefsSaved": "설정은 이 기기에 저장됩니다.",
   "workspace.autoOpen.title": "최근 작업 공간 자동 열기",
   "workspace.autoOpen.description": "시작할 때 최근 사용한 사용 가능한 작업 공간을 열고 마지막으로 열었던 보드로 돌아갑니다. 끄면 매번 선택 화면을 표시합니다.",
+  "workspace.sampleName": "샘플 작업 공간",
+  "workspace.sampleHint": "읽기 전용 샘플",
   "history.title": "버전 기록",
   "history.description": "보드를 저장할 때 일정 간격으로 스냅샷을 남기며, 보드 목록의 '버전 기록'에서 복원할 수 있습니다.",
   "history.interval": "스냅샷 간격",

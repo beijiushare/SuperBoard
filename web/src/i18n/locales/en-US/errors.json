@@ -26,6 +26,8 @@
   "workspace.emptyPath": "The workspace path is empty",
   "workspace.notWorkspace": "This is not a SuperBoard workspace",
   "workspace.unsupportedLanguage": "Unsupported language",
+  "workspace.readOnly": "The sample workspace is read-only",
+  "workspace.copySampleFailed": "Failed to copy the sample",
   "workspace.moveCancelled": "Move cancelled",
   "workspace.noFolderSupport": "This browser does not support local folders",
   "workspace.recentMissing": "The workspace record does not exist",

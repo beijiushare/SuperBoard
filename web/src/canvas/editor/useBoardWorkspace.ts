@@ -10,6 +10,7 @@ import {
 } from './appUtils'
 import { loadWorkspace, readBoard } from './workspaceApi'
 import { writeLastBoard } from './lastBoard'
+import { isSampleWorkspace } from './sampleWorkspace'
 import { updateUiState } from './uiState'
 import type { EditorTool } from './tools'
 
@@ -102,7 +103,11 @@ export function useBoardWorkspace({
     setSaveState('saved')
     expandPath(item.path)
     updateEditorUrl(item.slug, item.scope, treeMode)
-    writeLastBoard({ slug: item.slug, scope: item.scope })
+    writeLastBoard({
+      slug: item.slug,
+      scope: item.scope,
+      workspace: isSampleWorkspace() ? 'sample' : 'folder',
+    })
   }
 
   async function openBoard(

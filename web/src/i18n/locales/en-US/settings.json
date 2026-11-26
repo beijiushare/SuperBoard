@@ -22,6 +22,8 @@
   "workspace.prefsSaved": "Preferences are stored locally.",
   "workspace.autoOpen.title": "Open the last workspace automatically",
   "workspace.autoOpen.description": "Open the most recent available workspace on launch and return to the last board you had open. Turn off to always show the picker.",
+  "workspace.sampleName": "Sample workspace",
+  "workspace.sampleHint": "Read-only sample",
   "history.title": "History versions",
   "history.description": "Save snapshots while you work and restore them from a board's History dialog.",
   "history.interval": "Snapshot interval",

@@ -363,5 +363,10 @@
   "workspace.loadFailed": "加载失败（{{status}}）",
   "desktop.bridgeTimeout": "桌面桥接超时",
   "desktop.importFailed": "导入文件失败",
-  "desktop.noDirectorCanvas": "无法创建导演幕布画布"
+  "desktop.noDirectorCanvas": "无法创建导演幕布画布",
+  "sample.banner": "示例工作区 · 只读",
+  "sample.readOnly": "示例工作区为只读",
+  "sample.copy": "复制为我的工作区",
+  "sample.copying": "正在复制…",
+  "sample.copyFailed": "复制失败：{{message}}"
 }

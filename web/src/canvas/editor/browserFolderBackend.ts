@@ -804,6 +804,16 @@ export async function openBrowserWorkspace() {
   return handle
 }
 
+export async function adoptBrowserWorkspace(handle: DirHandle) {
+  root = handle
+  await scopeDirectory('public', true)
+  await scopeDirectory('private', true)
+  await storeHandle(handle)
+  await rememberHandle(handle)
+  invalidateBoardCache()
+  return handle.name
+}
+
 export async function restoreBrowserWorkspace() {
   const handle = await readStoredHandle()
   if (!handle) return null

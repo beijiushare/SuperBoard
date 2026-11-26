@@ -82,8 +82,12 @@ export function writeViewport(handle: CanvasViewerHandle | null, viewport: Viewp
 
 const VIEWPORT_STORAGE_PREFIX = 'superboard:viewport:'
 
-function viewportStorageKey(slug: string, scope: BoardScope) {
-  return `${VIEWPORT_STORAGE_PREFIX}${scope}:${slug}`
+function viewportStorageKey(
+  slug: string,
+  scope: BoardScope,
+  workspace: 'sample' | 'folder',
+) {
+  return `${VIEWPORT_STORAGE_PREFIX}${workspace}:${scope}:${slug}`
 }
 
 function isViewport(value: unknown): value is Viewport {
@@ -96,10 +100,21 @@ function isViewport(value: unknown): value is Viewport {
   )
 }
 
-export function readStoredViewport(slug: string, scope: BoardScope): Viewport | null {
+export function readStoredViewport(
+  slug: string,
+  scope: BoardScope,
+  workspace: 'sample' | 'folder' = 'folder',
+): Viewport | null {
   if (!slug) return null
   try {
-    const raw = window.localStorage.getItem(viewportStorageKey(slug, scope))
+    const raw =
+      window.localStorage.getItem(viewportStorageKey(slug, scope, workspace)) ??
+      // Older builds did not separate the sample from local folders.
+      (workspace === 'folder'
+        ? window.localStorage.getItem(
+            `${VIEWPORT_STORAGE_PREFIX}${scope}:${slug}`,
+          )
+        : null)
     if (!raw) return null
     const value: unknown = JSON.parse(raw)
     return isViewport(value) ? value : null
@@ -112,11 +127,12 @@ export function writeStoredViewport(
   slug: string,
   scope: BoardScope,
   viewport: Viewport,
+  workspace: 'sample' | 'folder' = 'folder',
 ) {
   if (!slug) return
   try {
     window.localStorage.setItem(
-      viewportStorageKey(slug, scope),
+      viewportStorageKey(slug, scope, workspace),
       JSON.stringify(viewport),
     )
   } catch {

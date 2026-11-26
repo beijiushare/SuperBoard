@@ -5,6 +5,8 @@ const STORAGE_KEY = 'superboard.lastBoard.v1'
 export interface LastBoardRecord {
   slug: string
   scope: BoardScope
+  /** Distinguishes the read-only sample from local folders. */
+  workspace?: 'sample' | 'folder'
 }
 
 /**
@@ -23,6 +25,9 @@ export function readLastBoard(): LastBoardRecord | null {
     return {
       slug: value.slug,
       scope: value.scope === 'private' ? 'private' : 'public',
+      ...(value.workspace === 'sample' || value.workspace === 'folder'
+        ? { workspace: value.workspace }
+        : {}),
     }
   } catch {
     return null

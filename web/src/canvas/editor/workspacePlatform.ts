@@ -96,6 +96,10 @@ export interface WorkspaceRecentItem {
   lastOpened?: string
   available: boolean
   permission?: string
+  /** `sample` is the built-in read-only workspace. */
+  kind?: 'folder' | 'sample'
+  /** Pinned entries cannot be removed. */
+  pinned?: boolean
 }
 
 export async function listRecentWorkspaces(): Promise<WorkspaceRecentItem[]> {

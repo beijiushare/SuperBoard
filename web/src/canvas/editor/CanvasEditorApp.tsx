@@ -34,6 +34,8 @@ import {
 } from '../tree/treePrompt'
 import { newTreeNodeId } from '../model'
 import { activeAISettings, getPreferences } from './preferences'
+import { isSampleWorkspace } from './sampleWorkspace'
+import { copySampleToWorkspace } from './sampleWorkspace'
 import {
   type CanvasMenuState,
   type DataManagerLike,
@@ -105,6 +107,7 @@ export function CanvasEditorApp() {
   )
   const [canvasMenu, setCanvasMenu] = useState<CanvasMenuState | null>(null)
   const [exportExpanded, setExportExpanded] = useState(false)
+  const [copyingSample, setCopyingSample] = useState(false)
   const uiState = useUiState()
   const stylePanelOpen = uiState.stylePanelOpen
   const menuPanelOpen = uiState.toolPaletteOpen
@@ -824,15 +827,17 @@ export function CanvasEditorApp() {
       const node = nodeMap.get(id)
       return Boolean(node?.['x-superboard']?.locked)
     })
-  const railSaveLabel = conflict
-    ? t('editor:save.conflictClick')
-    : saveState === 'error'
-      ? t('editor:save.failed')
-      : saveState === 'dirty'
-        ? t('editor:save.click')
-        : saveState === 'saving'
-          ? t('editor:save.saving')
-          : t('editor:save.saved')
+  const railSaveLabel = isSampleWorkspace()
+    ? t('editor:sample.readOnly')
+    : conflict
+      ? t('editor:save.conflictClick')
+      : saveState === 'error'
+        ? t('editor:save.failed')
+        : saveState === 'dirty'
+          ? t('editor:save.click')
+          : saveState === 'saving'
+            ? t('editor:save.saving')
+            : t('editor:save.saved')
   const treeConfig = treeMode
     ? {
         nodes: treeNodes,
@@ -857,6 +862,37 @@ export function CanvasEditorApp() {
     <div
       className={`sb-app sb-app-editor${directorMode ? ' is-director-mode' : ''}${presentation ? ' is-presenting' : ''}`}
     >
+      {isSampleWorkspace() ? (
+        <div className="sb-sample-banner">
+          <span>{t('editor:sample.banner')}</span>
+          <button
+            type="button"
+            disabled={copyingSample}
+            onClick={() => {
+              setCopyingSample(true)
+              void copySampleToWorkspace()
+                .catch((reason: unknown) => {
+                  if (
+                    reason instanceof DOMException &&
+                    reason.name === 'AbortError'
+                  ) {
+                    return
+                  }
+                  const message =
+                    reason instanceof Error ? reason.message : String(reason)
+                  window.alert(
+                    t('editor:sample.copyFailed', { message }),
+                  )
+                })
+                .finally(() => setCopyingSample(false))
+            }}
+          >
+            {copyingSample
+              ? t('editor:sample.copying')
+              : t('editor:sample.copy')}
+          </button>
+        </div>
+      ) : null}
       <SaveConflictBanner
         conflict={conflict}
         saveState={saveState}
@@ -880,7 +916,9 @@ export function CanvasEditorApp() {
         }
         saveLabel={railSaveLabel}
         saveState={saveState}
-        canSave={Boolean(canvas) && saveState !== 'saving'}
+        canSave={
+          Boolean(canvas) && saveState !== 'saving' && !isSampleWorkspace()
+        }
         onSave={() => void (conflict ? resolveConflict() : save())}
         stylePanelOpen={stylePanelOpen}
         onToggleStylePanel={() =>

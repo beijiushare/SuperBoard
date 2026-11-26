@@ -18,6 +18,7 @@ import {
 } from './appUtils'
 import { loadWorkspace, readBoard, WORKSPACE_VERSION_KEY } from './workspaceApi'
 import { readLastBoard, writeLastBoard } from './lastBoard'
+import { isSampleWorkspace } from './sampleWorkspace'
 import { useCanvasSave } from './useCanvasSave'
 import { useCanvasViewport } from './useCanvasViewport'
 import { useCanvasHistory } from './useCanvasHistory'
@@ -229,9 +230,14 @@ export function useCanvasEditorSession({
         // record may belong to another workspace, so it must still exist here.
         const requested = params.get('board')
         const remembered = requested ? null : readLastBoard()
+        const rememberedMatches =
+          remembered &&
+          (isSampleWorkspace()
+            ? remembered.workspace === 'sample'
+            : remembered.workspace !== 'sample')
         let first = requested
           ? scoped.find((item) => item.slug === requested)
-          : remembered
+          : rememberedMatches
             ? list.find(
                 (item) =>
                   item.slug === remembered.slug &&
@@ -259,7 +265,11 @@ export function useCanvasEditorSession({
         setSaveState('saved')
         expandPath(first.path)
         updateEditorUrl(first.slug, first.scope, initialTree)
-        writeLastBoard({ slug: first.slug, scope: first.scope })
+        writeLastBoard({
+          slug: first.slug,
+          scope: first.scope,
+          workspace: isSampleWorkspace() ? 'sample' : 'folder',
+        })
         setLoading(false)
       } catch (loadError) {
         if (!cancelled) {

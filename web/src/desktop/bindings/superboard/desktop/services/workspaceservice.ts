@@ -23,6 +23,15 @@ export function ClearBoardHistory(slug: string, scope: string): $CancellableProm
     return $Call.ByID(2733870061, slug, scope);
 }
 
+/**
+ * CopySample writes the read-only sample workspace into a folder the user
+ * chooses. The frontend fetches the sample from its bundled assets and passes
+ * base64 payloads, so the Go side never needs to know where the sample lives.
+ */
+export function CopySample(payload: string): $CancellablePromise<$models.Result> {
+    return $Call.ByID(5121823, payload);
+}
+
 export function CreateBoard(title: string, slug: string, folder: string, scope: string): $CancellablePromise<$models.Result> {
     return $Call.ByID(3301961580, title, slug, folder, scope);
 }

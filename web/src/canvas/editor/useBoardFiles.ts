@@ -18,6 +18,7 @@ import {
   updateFolder,
 } from './workspaceApi'
 import { writeLastBoard } from './lastBoard'
+import { isSampleWorkspace } from './sampleWorkspace'
 
 interface UseBoardFilesOptions {
   items: CanvasListItem[]
@@ -116,7 +117,11 @@ export function useBoardFiles({
       setCanvas(data.canvas)
       setSelectedSlug(nextSlug)
       updateEditorUrl(nextSlug, scope, treeMode)
-      writeLastBoard({ slug: nextSlug, scope })
+      writeLastBoard({
+        slug: nextSlug,
+        scope,
+        workspace: isSampleWorkspace() ? 'sample' : 'folder',
+      })
     }
   }
 

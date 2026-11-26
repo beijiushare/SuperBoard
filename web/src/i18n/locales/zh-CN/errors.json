@@ -26,6 +26,8 @@
   "workspace.emptyPath": "工作区路径为空",
   "workspace.notWorkspace": "不是 SuperBoard 工作区",
   "workspace.unsupportedLanguage": "不支持的语言",
+  "workspace.readOnly": "示例工作区是只读的",
+  "workspace.copySampleFailed": "复制示例失败",
   "workspace.moveCancelled": "移动已取消",
   "workspace.noFolderSupport": "当前浏览器不支持本地文件夹",
   "workspace.recentMissing": "工作区记录不存在",

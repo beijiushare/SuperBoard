@@ -19,5 +19,7 @@
   "unsupported": "이 브라우저는 File System Access API를 지원하지 않습니다. Edge / Chrome을 사용하거나 SuperBoard 데스크톱 버전을 이용하세요.",
   "loading": "작업 공간을 여는 중…",
   "loading.desktop": "데스크톱 버전",
-  "loading.browser": "브라우저 버전"
+  "loading.browser": "브라우저 버전",
+  "sample.name": "샘플 작업 공간",
+  "sample.hint": "읽기 전용 샘플"
 }

@@ -9,6 +9,7 @@ import {
 } from './appUtils'
 import { WorkspaceError, writeBoard } from './workspaceApi'
 import { isFolderMoveActive } from './folderMove'
+import { isSampleWorkspace } from './sampleWorkspace'
 
 const RETRY_DELAYS = [250, 800]
 const CHANNEL_NAME = 'superboard-board'
@@ -56,6 +57,7 @@ export function useCanvasSave({
   saveStateRef.current = saveState
 
   function markDirty() {
+    if (isSampleWorkspace()) return
     revisionRef.current += 1
     setSaveState('dirty')
   }
@@ -91,6 +93,10 @@ export function useCanvasSave({
   }
 
   async function save(): Promise<boolean> {
+    if (isSampleWorkspace()) {
+      if (saveState !== 'saved') setSaveState('saved')
+      return true
+    }
     if (isFolderMoveActive()) return false
     if (!canvas || savingRef.current) return false
     if (saveState === 'saved') return true
@@ -119,6 +125,7 @@ export function useCanvasSave({
   }
 
   async function resolveConflict(confirmFirst = true): Promise<boolean> {
+    if (isSampleWorkspace()) return false
     if (!canvas || savingRef.current) return false
     const item = currentItem()
     if (!item) return false

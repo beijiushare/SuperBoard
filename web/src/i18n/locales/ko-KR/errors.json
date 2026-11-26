@@ -26,6 +26,8 @@
   "workspace.emptyPath": "작업 공간 경로가 비어 있습니다",
   "workspace.notWorkspace": "SuperBoard 작업 공간이 아닙니다",
   "workspace.unsupportedLanguage": "지원하지 않는 언어입니다",
+  "workspace.readOnly": "샘플 작업 공간은 읽기 전용입니다",
+  "workspace.copySampleFailed": "샘플 복사에 실패했습니다",
   "workspace.moveCancelled": "이동을 취소했습니다",
   "workspace.noFolderSupport": "이 브라우저는 로컬 폴더를 지원하지 않습니다",
   "workspace.recentMissing": "작업 공간 기록이 없습니다",

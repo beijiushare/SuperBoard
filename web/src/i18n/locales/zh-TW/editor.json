@@ -363,5 +363,10 @@
   "workspace.loadFailed": "載入失敗（{{status}}）",
   "desktop.bridgeTimeout": "桌面橋接逾時",
   "desktop.importFailed": "匯入檔案失敗",
-  "desktop.noDirectorCanvas": "無法建立導演模式畫布"
+  "desktop.noDirectorCanvas": "無法建立導演模式畫布",
+  "sample.banner": "範例工作區 · 唯讀",
+  "sample.readOnly": "範例工作區為唯讀",
+  "sample.copy": "複製為我的工作區",
+  "sample.copying": "複製中…",
+  "sample.copyFailed": "複製失敗：{{message}}"
 }

@@ -3,6 +3,7 @@ dist/
 dist-*/
 public/mathjax/
 public/__vditor/
+public/sample/
 whiteboards/
 .preview/
 .env

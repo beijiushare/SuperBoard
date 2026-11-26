@@ -8,6 +8,7 @@ import {
   workspaceName,
   type WorkspaceRecentItem,
 } from './workspacePlatform'
+import { sampleRecentItem } from './sampleWorkspace'
 
 /** Workspace list, switching and removal used by the general settings tab. */
 export function usePreferencesWorkspace() {
@@ -19,8 +20,8 @@ export function usePreferencesWorkspace() {
 
   const refreshRecent = () => {
     void listRecentWorkspaces()
-      .then(setRecent)
-      .catch(() => setRecent([]))
+      .then((items) => setRecent([sampleRecentItem(), ...items]))
+      .catch(() => setRecent([sampleRecentItem()]))
   }
 
   useEffect(() => {
@@ -55,6 +56,10 @@ export function usePreferencesWorkspace() {
 
   function switchToRecent(item: WorkspaceRecentItem) {
     if (!item.available || switching) return
+    if (item.kind === 'sample') {
+      window.location.href = `${window.location.pathname}?sample=1`
+      return
+    }
     setSwitching(true)
     void openRecentWorkspace(item)
       .then(() => window.location.reload())
@@ -62,6 +67,7 @@ export function usePreferencesWorkspace() {
   }
 
   function removeRecent(item: WorkspaceRecentItem) {
+    if (item.pinned) return
     if (isCurrentWorkspace(item)) {
       setProtectedWorkspace(item)
       return
@@ -74,6 +80,7 @@ export function usePreferencesWorkspace() {
     params.set('start', '1')
     params.delete('board')
     params.delete('scope')
+    params.delete('sample')
     window.location.href = `${window.location.pathname}?${params.toString()}`
   }
 

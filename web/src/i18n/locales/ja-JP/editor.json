@@ -363,5 +363,10 @@
   "workspace.loadFailed": "読み込みに失敗しました（{{status}}）",
   "desktop.bridgeTimeout": "デスクトップブリッジがタイムアウトしました",
   "desktop.importFailed": "ファイルのインポートに失敗しました",
-  "desktop.noDirectorCanvas": "ディレクターモードのキャンバスを作成できません"
+  "desktop.noDirectorCanvas": "ディレクターモードのキャンバスを作成できません",
+  "sample.banner": "サンプルワークスペース · 読み取り専用",
+  "sample.readOnly": "サンプルワークスペースは読み取り専用です",
+  "sample.copy": "ワークスペースにコピー",
+  "sample.copying": "コピー中…",
+  "sample.copyFailed": "コピーに失敗しました：{{message}}"
 }

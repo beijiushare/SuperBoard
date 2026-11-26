@@ -363,5 +363,10 @@
   "workspace.loadFailed": "Failed to load ({{status}})",
   "desktop.bridgeTimeout": "Desktop bridge timed out",
   "desktop.importFailed": "Failed to import file",
-  "desktop.noDirectorCanvas": "Unable to create the director overlay canvas"
+  "desktop.noDirectorCanvas": "Unable to create the director overlay canvas",
+  "sample.banner": "Sample workspace · Read-only",
+  "sample.readOnly": "The sample workspace is read-only",
+  "sample.copy": "Copy to my workspace",
+  "sample.copying": "Copying…",
+  "sample.copyFailed": "Copy failed: {{message}}"
 }

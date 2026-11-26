@@ -71,12 +71,15 @@ export function SettingsGeneralTab({
           {workspace.recent.length > 0 ? (
             <div className="sb-workspace-recent">
               {workspace.recent.map((item) => {
-                const current = workspace.isCurrentWorkspace(item)
-                const detail = !item.available
-                  ? t('settings:workspace.missing')
-                  : item.permission === 'prompt'
-                    ? t('settings:workspace.permission')
-                    : item.path || item.name
+                const sample = item.kind === 'sample'
+                const current = !sample && workspace.isCurrentWorkspace(item)
+                const detail = sample
+                  ? t('settings:workspace.sampleHint')
+                  : !item.available
+                    ? t('settings:workspace.missing')
+                    : item.permission === 'prompt'
+                      ? t('settings:workspace.permission')
+                      : item.path || item.name
                 return (
                   <div
                     key={item.id}
@@ -91,7 +94,9 @@ export function SettingsGeneralTab({
                       onClick={() => workspace.switchToRecent(item)}
                     >
                       <span className="sb-workspace-recent-name">
-                        {item.name}
+                        {sample
+                          ? t('settings:workspace.sampleName')
+                          : item.name}
                         {current ? (
                           <small>{t('settings:workspace.currentBadge')}</small>
                         ) : null}
@@ -100,17 +105,19 @@ export function SettingsGeneralTab({
                         {detail}
                       </span>
                     </button>
-                    <button
-                      type="button"
-                      className="sb-workspace-recent-remove"
-                      aria-label={t('settings:workspace.removeAria', {
-                        name: item.name,
-                      })}
-                      title={t('settings:workspace.remove')}
-                      onClick={() => workspace.removeRecent(item)}
-                    >
-                      ×
-                    </button>
+                    {item.pinned ? null : (
+                      <button
+                        type="button"
+                        className="sb-workspace-recent-remove"
+                        aria-label={t('settings:workspace.removeAria', {
+                          name: item.name,
+                        })}
+                        title={t('settings:workspace.remove')}
+                        onClick={() => workspace.removeRecent(item)}
+                      >
+                        ×
+                      </button>
+                    )}
                   </div>
                 )
               })}

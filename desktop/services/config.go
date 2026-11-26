@@ -56,6 +56,13 @@ var nativeTexts = map[string]map[string]string{
 		"ja-JP": "挿入するファイルを選択",
 		"ko-KR": "삽입할 파일 선택",
 	},
+	"sample.copy": {
+		"zh-CN": "选择示例复制位置",
+		"zh-TW": "選擇範例複製位置",
+		"en-US": "Choose where to copy the sample",
+		"ja-JP": "サンプルのコピー先を選択",
+		"ko-KR": "샘플을 복사할 위치 선택",
+	},
 }
 
 // uiText returns the native dialog string for the persisted language. Unknown

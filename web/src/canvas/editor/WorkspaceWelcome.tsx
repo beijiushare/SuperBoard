@@ -149,14 +149,20 @@ export function WorkspaceWelcome({
               }}
               options={recent.map((item) => ({
                 value: item.id,
-                label: item.name,
+                label: item.kind === 'sample' ? t('start:sample.name') : item.name,
                 disabled: !item.available,
-                title: item.path ?? item.name,
-                hint: !item.available
-                  ? t('start:recent.missing')
-                  : item.permission === 'prompt'
-                    ? t('start:recent.permission')
-                    : undefined,
+                title:
+                  item.kind === 'sample'
+                    ? t('start:sample.hint')
+                    : item.path ?? item.name,
+                hint:
+                  item.kind === 'sample'
+                    ? t('start:sample.hint')
+                    : !item.available
+                      ? t('start:recent.missing')
+                      : item.permission === 'prompt'
+                        ? t('start:recent.permission')
+                        : undefined,
               }))}
             />
           </div>

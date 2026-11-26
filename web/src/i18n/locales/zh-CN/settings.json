@@ -22,6 +22,8 @@
   "workspace.prefsSaved": "偏好保存在本机。",
   "workspace.autoOpen.title": "自动进入最近工作区",
   "workspace.autoOpen.description": "启动时直接打开最近使用且可用的工作区，并回到上次打开的白板；关闭后每次都显示选择页。",
+  "workspace.sampleName": "示例仓库",
+  "workspace.sampleHint": "只读示例",
   "history.title": "历史版本",
   "history.description": "保存白板时按间隔留下快照，可从白板列表的「历史版本」恢复。",
   "history.interval": "快照间隔",
