@@ -29,10 +29,10 @@
 
 | 使用方式 | 获取方式 |
 | --- | --- |
-| 桌面端 | [GitHub Releases](https://github.com/beijiushare/SuperBoard/releases/latest) 下载 `SuperBoard-<version>-windows-amd64.exe` |
-| 浏览器 | `npm run build:editor` 后用 Edge / Chrome 打开 `dist/index.html`（必须通过 HTTP 访问） |
+| 桌面端 | [GitHub Releases](https://github.com/beijiushare/SuperBoard/releases/latest) |
+| 浏览器 | [查看示例](https://beijiu.top/SuperBoard/) · [在线编辑器](https://beijiu.top/SuperBoard) |
 
-桌面版是绿色版，请放在可写目录（用户目录、桌面、自定义文件夹）。不要放在 `C:\Program Files`、`C:\Windows` 或系统盘根目录，否则自动更新无法替换文件。
+桌面版是绿色版，建议放在可写目录（用户目录、桌面、自定义文件夹）。放在 `C:\Program Files`、`C:\Windows` 或系统盘根目录时，替换新版本需要管理员权限，配置文件也会回退到 `%APPDATA%\SuperBoard`。
 
 ## 快速开始
 
@@ -81,7 +81,9 @@ npm run dev
     history/
 ```
 
-旧版 `whiteboards/public|private` 仍可读取。附件按作用域存放在 `public/assets/files` 或 `private/assets/files`，白板里只保存相对路径。
+新白板放在 `public/` 或 `private/` 下；旧版 `whiteboards/public|private` 仍会读取，用来兼容已有工作区。
+
+导入的图片、视频和附件会复制到 `<scope>/assets/files/`，白板文件只记录相对路径（如 `public/assets/files/foo.png`），不内嵌二进制。这样 `.canvas` 保持小、可读、适合 Git；`public` 与 `private` 的附件分开存放，导出公开站点时不会把私有附件带出去。
 
 历史快照按 `<scope>/<slug>` 存放，生命周期与清理规则见 [`docs/HISTORY.md`](docs/HISTORY.md)。
 

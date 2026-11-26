@@ -14,7 +14,7 @@ npm run build:info
 
 输出到 `dist-info/`；本地默认 base 为 `/`，GitHub Actions 会通过 `BASE_PATH` 设置为仓库名。
 
-GitHub Actions 工作流：`.github/workflows/pages.yml`。
+GitHub Actions 工作流：`.github/workflows/deploy.yml`。它构建 `info/public` 并为自定义域名生成 `CNAME`；仓库只保留这一个 Pages 工作流。
 
 ## 个人站点
 
