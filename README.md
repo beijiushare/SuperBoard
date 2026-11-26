@@ -30,7 +30,7 @@
 | 使用方式 | 获取方式 |
 | --- | --- |
 | 桌面端 | [GitHub Releases](https://github.com/beijiushare/SuperBoard/releases/latest) |
-| 浏览器 | [查看示例](https://beijiu.top/SuperBoard/) · [在线编辑器](https://beijiu.top/SuperBoard) |
+| 浏览器 | [查看示例](https://beijiu.top/SuperBoard/?sample=1) · [在线编辑器](https://beijiu.top/SuperBoard) |
 
 桌面版是绿色版，建议放在可写目录（用户目录、桌面、自定义文件夹）。放在 `C:\Program Files`、`C:\Windows` 或系统盘根目录时，替换新版本需要管理员权限，配置文件也会回退到 `%APPDATA%\SuperBoard`。
 

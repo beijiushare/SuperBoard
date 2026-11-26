@@ -36,11 +36,11 @@ jobs:
       - name: Check i18n keys
         run: npm run check:i18n
 
-      - name: Build static site
+      - name: Build editor site
         env:
           BASE_PATH: /SuperBoard/
           SUPERBOARD_CNAME: ${{ vars.SUPERBOARD_CNAME }}
-        run: npm run build:site
+        run: npm run build:editor
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -48,7 +48,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist-info
+          path: dist
 
   deploy:
     environment:

@@ -71,6 +71,7 @@ npm run desktop:test     # Go 服务测试
 
 - 布局：`<workspace>/public`、`<workspace>/private`，兼容 `whiteboards/public|private`。
 - 附件：`<scope>/assets/files`，通过 `/__files/` 只读暴露。
+- 内置示例由前端静态资源提供，只读；「复制为我的工作区」通过 `Workspace.CopySample` 写入选定目录，再切换到该工作区。
 - 保存：临时文件 + rename；冲突返回 409，前端提供覆盖或重新加载。
 - 历史：`.superboard/history/<scope>/<slug>/`，规则见 `HISTORY.md`。
 - 路径校验拒绝 `..` 与越界路径；符号链接场景由 Wails 资产层与应用路径检查共同限制。

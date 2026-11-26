@@ -36,6 +36,13 @@ SuperBoard 是文件驱动的白板应用：所有数据都在用户选择的工
 - `web/src/dev/canvasFs` 与 `web/src/dev/boardFs` 用 Node `fs` 实现同一组接口。
 - 开发模式下附件路由由 Vite 提供，桌面端附件预览要用构建后的 exe 验证。
 
+### 只读示例
+
+- `info/` 是示例工作区的源数据；`npm run prepare:sample` 把已提交的文件复制到 `public/sample/` 并生成 `sample.json`。
+- `web/src/canvas/editor/sampleWorkspace.ts` 安装一个静态工作区后端：列表、读白板、文件夹和附件都走 HTTP；任何写请求返回只读错误。
+- 示例在桌面端和浏览器端共用，区别只是 `BASE_URL`。开始页的示例是固定项，不写入 `config.json` 或最近句柄。
+- 「复制为我的工作区」把示例文件写入用户选择的文件夹，然后切换到普通文件夹模式。
+
 ## 目录与模块
 
 ```text
@@ -113,6 +120,7 @@ docs/             本项目文档
 | AI | `desktop/ai.ts` + `desktop/services/ai.go` | 请求、凭据、错误映射 |
 | 历史 | `HISTORY.md` | 快照、采样、恢复 |
 | 导出 | `canvas/editor/export.ts` | 单 HTML 快照、附件策略 |
+| 示例 | `canvas/editor/sampleWorkspace.ts` | 静态只读工作区、复制为本地 |
 | 桌面端 | `DESKTOP.md` | 窗口、配置、更新、原生对话框 |
 
 ## 约束与已知限制
@@ -124,3 +132,4 @@ docs/             本项目文档
 - 没有外部文件监听；在工作区外修改 `.canvas` 后需要重新打开白板或刷新页面。
 - 不支持多标签页；启动时恢复上次工作区与上次打开的白板。
 - 浏览器端受 File System Access API 限制，只支持 Chromium 系浏览器。
+- 示例工作区只读；编辑后只能导出，或先复制为本地工作区。

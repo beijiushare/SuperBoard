@@ -1,68 +1,62 @@
-# 部署说明
+# 部署
 
 ## 数据来源
 
-- 编辑器只在运行时读取用户选择的本地文件夹，不再依赖仓库内 `whiteboards/`。
+- 编辑器在运行时读取用户选择的本地文件夹，或内置的只读示例。
 - 新工作区使用 `public/` 与 `private/`；旧 `whiteboards/public|private` 仍兼容。
-- `info/public` 仅作为公开演示数据。
+- `info/public` 是示例工作区的源数据，构建时复制到 `public/sample/`。
 
-## 演示站（GitHub Pages）
+## GitHub Pages
 
-```bash
-npm run build:info
+部署的是**编辑器本身**，不是静态查看器：
+
+- 根路径 `/SuperBoard/` 打开开始页，可选择示例或本地文件夹。
+- 示例工作区在 `/SuperBoard/sample/`，由 `info/` 生成。
+- 不再生成 `tree.html` / `boards/*.html` 只读站点。
+
+工作流：`.github/workflows/deploy.yml`，监听 `main` / `master` 和手动触发。
+
+```text
+npm ci
+npm run typecheck
+npm run check:i18n
+BASE_PATH=/SuperBoard/ npm run build:editor   # 内含 prepare:sample
+上传 dist/ 到 GitHub Pages
 ```
 
-输出到 `dist-info/`；本地默认 base 为 `/`，GitHub Actions 会通过 `BASE_PATH` 设置为仓库名。
+`SUPERBOARD_CNAME` 仓库变量用于写入 `CNAME`；当前自定义域名为 `beijiu.top`。
 
-GitHub Actions 工作流：`.github/workflows/deploy.yml`。它构建 `info/public` 并为自定义域名生成 `CNAME`；仓库只保留这一个 Pages 工作流。
+## 示例工作区
+
+`npm run prepare:sample` 会把 `info/` 复制到 `public/sample/` 并生成 `sample.json`（白板、文件夹、文件清单、版本）。`public/sample/` 是生成目录，已加入 `.gitignore`。
+
+- 示例是只读的；写请求在 sample 后端直接拒绝。
+- 示例里的附件通过 `/sample/public/assets/files/...` 提供。
+- 要更新示例，只改 `info/`，重新构建即可。
+
+## 本地预览
+
+不要用 `file://` 直接打开，ES Module 和资源路径会失败。
+
+```bash
+npm run build:editor
+uv run python -m http.server 4174 --directory dist
+# http://localhost:4174/
+```
+
+示例路径为 `http://localhost:4174/sample/`。
 
 ## 个人站点
 
-从任意工作区导出多文件站点：
+如果需要把工作区导出为多文件只读站点，仍可使用：
 
 ```bash
 npm run export:site -- --data "D:/notes/superboard/public" --out "./dist-site" --base /
 ```
 
-也可以把 `--out` 指向部署工具目录。导出完成后由用户自己部署，例如：
-
-```bash
-cd dist-site
-vercel --prod
-```
-
-或：
-
-```bash
-netlify deploy --prod --dir dist-site
-```
-
-> 导出后由用户自行部署；不提供一键部署命令。
-
-## 编辑器构建
-
-```bash
-npm run build:editor
-```
-
-输出 `dist/index.html`，默认 base 为 `/`。浏览器需要用 Edge/Chrome 桌面版打开并通过 File System Access API 选择文件夹。
-
-## 本地预览
-
-```bash
-uv run python -m http.server 4173 --directory dist-info
-# http://localhost:4173/
-```
-
-```bash
-uv run python -m http.server 4174 --directory dist
-# http://localhost:4174/
-```
-
-不要用 `file://` 直接打开，ES Module 和资源路径会失败。
+导出后自行部署，例如 Vercel / Netlify。该产物与 GitHub Pages 的编辑器部署是两件事。
 
 ## 注意
 
-- `dist/`、`dist-*` 不提交到 Git。
-- 导出前确认 `private/` 不会进入站点产物。
-- 站点导出先生成完整结果再写入目标目录。
+- `dist/`、`dist-*`、`public/sample/` 不提交到 Git。
+- 导出公开站点前确认 `private/` 不会进入产物。
