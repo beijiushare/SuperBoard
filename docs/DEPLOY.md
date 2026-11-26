@@ -37,7 +37,7 @@ vercel --prod
 netlify deploy --prod --dir dist-site
 ```
 
-> 一键部署命令执行器尚未实现，后续只计划在桌面端提供。
+> 导出后由用户自行部署；不提供一键部署命令。
 
 ## 编辑器构建
 
@@ -65,4 +65,4 @@ uv run python -m http.server 4174 --directory dist
 
 - `dist/`、`dist-*` 不提交到 Git。
 - 导出前确认 `private/` 不会进入站点产物。
-- 站点导出先生成临时结果；后续桌面端会加入清单与原子替换。
+- 站点导出先生成完整结果再写入目标目录。

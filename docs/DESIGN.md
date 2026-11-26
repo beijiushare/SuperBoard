@@ -161,10 +161,9 @@
 - 媒体尺寸来源：在线 URL 由浏览器解码；本地文件优先用桌面端 `PickFiles`/`ImportFile` 返回的 `width/height`（Go 只读文件头：png/jpeg/gif/webp/bmp/svg/avif、mp4/mov/m4v），拿不到才让浏览器测量，最后退回默认 480×320。
 - Pele 块永远锁定比例（浮动条不提供解锁）：拖拽和样式面板的宽/高输入都按比例联动。Pele 的「窄屏模式」把 `maxWidth` 交给 Pele 的窄屏布局（`autoDirection`），并把块改为该布局的自然比例；切换时保持块面积，避免突然变得极高或极窄。
 - 内容内边距写入 `style.padding`，由 `.sb-block-scale` 的 padding 实现，背景/边框仍由 Surface 覆盖全部区域；分组复用同一字段。
-- 所有自绘 SVG 图层（绘图、形状、箭头）必须为每个图形元素显式设置 `fill` 和 `stroke`（可以是 `none`），不依赖父级继承：viewer 根节点带 `stroke: var(--text)`，漏写会出现多余描边。开发模式由 `warnUnpaintedGraphics` 提示，`npm run test:editor` 会检查导出 SVG 的每个图形元素。
+- 所有自绘 SVG 图层（绘图、形状、箭头）必须为每个图形元素显式设置 `fill` 和 `stroke`（可以是 `none`），不依赖父级继承：viewer 根节点带 `stroke: var(--text)`，漏写会出现多余描边。开发模式由 `warnUnpaintedGraphics` 提示，`npm run test:editor` 覆盖部分几何与绘制断言。
 - 弹窗必须使用 `.sb-modal-backdrop` 或 `.canvas-editor-dialog-backdrop`；画布手势（框选、平移、右键、点空白清空选择）统一用 `isCanvasChromeTarget()` / `CANVAS_CHROME_SELECTOR` 排除（其中包含上面两个弹窗类），否则点击 UI 会穿透到白板。
 - 日程（FullCalendar v7）使用哈希类名，不能用 `.fc` 选择器；外框通过 `[data-color-scheme]`、`[role="table"]` 去除。
-- 详细排查过程见 `memory/superboard-refactor.md` 的「踩坑记录」。
 
 ## 样式组织
 
