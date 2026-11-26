@@ -1,0 +1,8 @@
+{
+  "missingData.title": "보드 데이터를 찾을 수 없습니다",
+  "missingData.body": "이 페이지는 SuperBoard 빌드 스크립트로 생성해야 합니다.",
+  "loadFailed": "보드를 불러오지 못했습니다({{status}})",
+  "loadErrorTitle": "보드를 불러올 수 없습니다",
+  "loading": "보드를 불러오는 중…",
+  "empty": "아직 보드가 없습니다"
+}

@@ -1,0 +1,23 @@
+{
+  "brand.alt": "SuperBoard",
+  "page.aria": "시작",
+  "meta.version": "버전 {{version}}",
+  "meta.website": "웹사이트",
+  "open.title": "폴더 열기",
+  "open.description": "지정한 폴더를 작업 공간으로 엽니다.",
+  "open.action": "열기",
+  "open.busy": "처리 중…",
+  "recent.title": "최근 연 항목",
+  "recent.description": "최근에 사용한 작업 공간입니다.",
+  "recent.placeholder": "선택",
+  "recent.aria": "최근 작업 공간",
+  "recent.missing": "폴더가 없습니다",
+  "recent.permission": "권한이 필요합니다",
+  "language.title": "언어",
+  "language.description": "화면에 표시할 언어입니다.",
+  "language.aria": "언어",
+  "unsupported": "이 브라우저는 File System Access API를 지원하지 않습니다. Edge / Chrome을 사용하거나 SuperBoard 데스크톱 버전을 이용하세요.",
+  "loading": "작업 공간을 여는 중…",
+  "loading.desktop": "데스크톱 버전",
+  "loading.browser": "브라우저 버전"
+}

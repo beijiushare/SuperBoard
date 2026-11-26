@@ -2,6 +2,8 @@
   "language.zh-CN": "簡體中文",
   "language.zh-TW": "繁體中文",
   "language.en-US": "English",
+  "language.ja-JP": "日本語",
+  "language.ko-KR": "한국어",
   "actions.close": "關閉",
   "actions.cancel": "取消",
   "actions.open": "開啟",

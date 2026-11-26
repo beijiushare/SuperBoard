@@ -37,6 +37,17 @@
   box-sizing: border-box;
 }
 
+/* Prefer native CJK fonts for the two scripts that have their own glyph forms. */
+html[lang='ja-JP'] {
+  font-family: 'Yu Gothic UI', 'Yu Gothic', 'Hiragino Sans', 'Meiryo', system-ui,
+    sans-serif;
+}
+
+html[lang='ko-KR'] {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui,
+    sans-serif;
+}
+
 html,
 body,
 #root {

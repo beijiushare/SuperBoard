@@ -1,0 +1,16 @@
+{
+  "language.zh-CN": "중국어 간체",
+  "language.zh-TW": "중국어 번체",
+  "language.en-US": "English",
+  "language.ja-JP": "日本語",
+  "language.ko-KR": "한국어",
+  "actions.close": "닫기",
+  "actions.cancel": "취소",
+  "actions.open": "열기",
+  "actions.delete": "삭제",
+  "actions.confirm": "확인",
+  "actions.selectPlaceholder": "선택하세요",
+  "markdown.empty": "내용이 없습니다",
+  "markdown.unsupportedEmbed": "지원하지 않는 삽입 내용입니다",
+  "status.rendering": "렌더링 중…"
+}

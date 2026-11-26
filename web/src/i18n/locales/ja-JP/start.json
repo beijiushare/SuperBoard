@@ -1,0 +1,23 @@
+{
+  "brand.alt": "SuperBoard",
+  "page.aria": "開始",
+  "meta.version": "バージョン {{version}}",
+  "meta.website": "ウェブサイト",
+  "open.title": "フォルダーを開く",
+  "open.description": "指定したフォルダーをワークスペースとして開きます。",
+  "open.action": "開く",
+  "open.busy": "処理中…",
+  "recent.title": "最近開いたもの",
+  "recent.description": "最近アクセスしたワークスペース。",
+  "recent.placeholder": "選択",
+  "recent.aria": "最近のワークスペース",
+  "recent.missing": "フォルダーがありません",
+  "recent.permission": "権限が必要です",
+  "language.title": "言語",
+  "language.description": "画面に表示する言語。",
+  "language.aria": "言語",
+  "unsupported": "このブラウザーは File System Access API に対応していません。Edge / Chrome を使うか、SuperBoard デスクトップ版をご利用ください。",
+  "loading": "ワークスペースを開いています…",
+  "loading.desktop": "デスクトップ版",
+  "loading.browser": "ブラウザー版"
+}

@@ -377,6 +377,12 @@ assert.ok(
 const enMessages = buildTreeMessages(asked, 'a1', 'en-US')
 assert.ok(enMessages[0].content.includes('Answer in English'))
 assert.ok(
+  buildTreeMessages(asked, 'a1', 'ja-JP')[0].content.includes('日本語'),
+)
+assert.ok(
+  buildTreeMessages(asked, 'a1', 'ko-KR')[0].content.includes('한국어'),
+)
+assert.ok(
   buildTreeMessages(quoted, 'a1', 'en-US').at(-1)?.content.includes('Quoted from'),
 )
 assert.ok(

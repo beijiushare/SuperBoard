@@ -1,0 +1,8 @@
+{
+  "missingData.title": "ボードのデータが見つかりません",
+  "missingData.body": "このページは SuperBoard のビルドスクリプトで生成する必要があります。",
+  "loadFailed": "ボードを読み込めませんでした（{{status}}）",
+  "loadErrorTitle": "ボードを読み込めません",
+  "loading": "ボードを読み込んでいます…",
+  "empty": "ボードがまだありません"
+}

@@ -18,8 +18,26 @@ import enSettings from './locales/en-US/settings.json'
 import enEditor from './locales/en-US/editor.json'
 import enViewer from './locales/en-US/viewer.json'
 import enErrors from './locales/en-US/errors.json'
+import jaCommon from './locales/ja-JP/common.json'
+import jaStart from './locales/ja-JP/start.json'
+import jaSettings from './locales/ja-JP/settings.json'
+import jaEditor from './locales/ja-JP/editor.json'
+import jaViewer from './locales/ja-JP/viewer.json'
+import jaErrors from './locales/ja-JP/errors.json'
+import koCommon from './locales/ko-KR/common.json'
+import koStart from './locales/ko-KR/start.json'
+import koSettings from './locales/ko-KR/settings.json'
+import koEditor from './locales/ko-KR/editor.json'
+import koViewer from './locales/ko-KR/viewer.json'
+import koErrors from './locales/ko-KR/errors.json'
 
-export const SUPPORTED_LANGUAGES = ['zh-CN', 'zh-TW', 'en-US'] as const
+export const SUPPORTED_LANGUAGES = [
+  'zh-CN',
+  'zh-TW',
+  'en-US',
+  'ja-JP',
+  'ko-KR',
+] as const
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 export const LANGUAGE_STORAGE_KEY = 'superboard.language'
 
@@ -48,6 +66,22 @@ const resources = {
     viewer: enViewer,
     errors: enErrors,
   },
+  'ja-JP': {
+    common: jaCommon,
+    start: jaStart,
+    settings: jaSettings,
+    editor: jaEditor,
+    viewer: jaViewer,
+    errors: jaErrors,
+  },
+  'ko-KR': {
+    common: koCommon,
+    start: koStart,
+    settings: koSettings,
+    editor: koEditor,
+    viewer: koViewer,
+    errors: koErrors,
+  },
 }
 
 let initialized = false
@@ -55,6 +89,8 @@ let initialized = false
 export function detectLanguage(value?: string | null): AppLanguage {
   const tag = value?.toLowerCase().replaceAll('_', '-') ?? ''
   if (tag.startsWith('en')) return 'en-US'
+  if (tag.startsWith('ja')) return 'ja-JP'
+  if (tag.startsWith('ko')) return 'ko-KR'
   if (
     tag.startsWith('zh-tw') ||
     tag.startsWith('zh-hk') ||

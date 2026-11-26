@@ -269,7 +269,8 @@ func (s *WorkspaceService) GetLanguage() Result {
 }
 
 func (s *WorkspaceService) SetLanguage(language string) Result {
-	if language != "zh-CN" && language != "zh-TW" && language != "en-US" {
+	if language != "zh-CN" && language != "zh-TW" &&
+		language != "en-US" && language != "ja-JP" && language != "ko-KR" {
 		return fail(400, "workspace.unsupportedLanguage")
 	}
 	config := loadConfig()

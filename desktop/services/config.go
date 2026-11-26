@@ -32,21 +32,29 @@ var nativeTexts = map[string]map[string]string{
 		"zh-CN": "选择 SuperBoard 工作区",
 		"zh-TW": "選擇 SuperBoard 工作區",
 		"en-US": "Select SuperBoard workspace",
+		"ja-JP": "SuperBoard ワークスペースを選択",
+		"ko-KR": "SuperBoard 작업 공간 선택",
 	},
 	"export.html": {
 		"zh-CN": "导出 HTML",
 		"zh-TW": "匯出 HTML",
 		"en-US": "Export HTML",
+		"ja-JP": "HTML をエクスポート",
+		"ko-KR": "HTML 내보내기",
 	},
 	"export.folder": {
 		"zh-CN": "选择导出目录",
 		"zh-TW": "選擇匯出目錄",
 		"en-US": "Choose export folder",
+		"ja-JP": "エクスポート先フォルダーを選択",
+		"ko-KR": "내보낼 폴더 선택",
 	},
 	"files.insert": {
 		"zh-CN": "选择要插入的文件",
 		"zh-TW": "選擇要插入的檔案",
 		"en-US": "Choose files to insert",
+		"ja-JP": "挿入するファイルを選択",
+		"ko-KR": "삽입할 파일 선택",
 	},
 }
 
@@ -68,6 +76,14 @@ func uiText(key string) string {
 		}
 	case strings.HasPrefix(lang, "en"):
 		if text, found := values["en-US"]; found {
+			return text
+		}
+	case strings.HasPrefix(lang, "ja"):
+		if text, found := values["ja-JP"]; found {
+			return text
+		}
+	case strings.HasPrefix(lang, "ko"):
+		if text, found := values["ko-KR"]; found {
 			return text
 		}
 	}

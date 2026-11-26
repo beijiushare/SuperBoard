@@ -1,0 +1,16 @@
+{
+  "language.zh-CN": "簡体字中国語",
+  "language.zh-TW": "繁体字中国語",
+  "language.en-US": "English",
+  "language.ja-JP": "日本語",
+  "language.ko-KR": "한국어",
+  "actions.close": "閉じる",
+  "actions.cancel": "キャンセル",
+  "actions.open": "開く",
+  "actions.delete": "削除",
+  "actions.confirm": "OK",
+  "actions.selectPlaceholder": "選択してください",
+  "markdown.empty": "内容がありません",
+  "markdown.unsupportedEmbed": "未対応の埋め込みです",
+  "status.rendering": "レンダリング中…"
+}
