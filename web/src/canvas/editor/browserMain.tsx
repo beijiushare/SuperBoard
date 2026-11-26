@@ -72,6 +72,13 @@ function useSingleEditorLock(): LockState {
   return state
 }
 
+function withTimeout<T>(promise: Promise<T>, fallback: T, ms = 2500): Promise<T> {
+  return Promise.race([
+    promise.catch(() => fallback),
+    new Promise<T>((resolve) => window.setTimeout(() => resolve(fallback), ms)),
+  ])
+}
+
 function EditorGate({ desktop }: { desktop: boolean }) {
   const { t } = useTranslation(['editor', 'start'])
   const lockState = useSingleEditorLock()
@@ -107,8 +114,8 @@ function EditorGate({ desktop }: { desktop: boolean }) {
   }
 
   const refreshRecent = () => {
-    void listRecentWorkspaces()
-      .then(setRecent)
+    void withTimeout(listRecentWorkspaces(), [])
+      .then((items) => setRecent(items))
       .catch(() => setRecent([]))
   }
 
@@ -125,14 +132,14 @@ function EditorGate({ desktop }: { desktop: boolean }) {
       return
     }
     if (startRequested) {
-      void listRecentWorkspaces()
+      void withTimeout(listRecentWorkspaces(), [])
         .then(setRecent)
         .catch(() => setRecent([]))
         .finally(() => setInitializing(false))
       return
     }
     if (!getPreferences().autoOpenRecentWorkspace) {
-      void listRecentWorkspaces()
+      void withTimeout(listRecentWorkspaces(), [])
         .then(setRecent)
         .catch(() => setRecent([]))
         .finally(() => setInitializing(false))
@@ -140,20 +147,23 @@ function EditorGate({ desktop }: { desktop: boolean }) {
     }
     void (async () => {
       try {
-        const restored = await (desktop
-          ? restoreDesktopWorkspace()
-          : restoreBrowserWorkspace())
+        const restored = await withTimeout(
+          (desktop ? restoreDesktopWorkspace() : restoreBrowserWorkspace()).then(
+            (value) => Boolean(value),
+          ),
+          false,
+        )
         if (restored) {
           setReady(true)
           return
         }
         // The saved workspace is gone; fall back to the most recent one that
         // needs no permission prompt. Browsers require a gesture for that.
-        const items = await listRecentWorkspaces()
+        const items = await withTimeout(listRecentWorkspaces(), [])
         const next = items.find(
           (item) => item.available && item.permission !== 'prompt',
         )
-        if (next && (await openRecentWorkspace(next))) {
+        if (next && (await withTimeout(openRecentWorkspace(next), null))) {
           setReady(true)
           return
         }
@@ -252,8 +262,7 @@ function EditorGate({ desktop }: { desktop: boolean }) {
   )
 }
 
-async function boot() {
-  const desktop = await detectDesktop()
+async function boot() {  const desktop = await detectDesktop()
   let language: string | null = null
   if (desktop) {
     try {
