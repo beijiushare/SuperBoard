@@ -255,7 +255,7 @@ function EditorGate({ desktop }: { desktop: boolean }) {
       busy={busy}
       error={error}
       supported={supported}
-      recent={[sampleRecentItem(), ...recent]}
+      recent={[...recent, sampleRecentItem()]}
       onOpenFolder={handleOpenFolder}
       onOpenRecent={handleOpenRecent}
     />

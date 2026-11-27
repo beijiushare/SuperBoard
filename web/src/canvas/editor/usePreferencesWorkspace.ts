@@ -8,7 +8,7 @@ import {
   workspaceName,
   type WorkspaceRecentItem,
 } from './workspacePlatform'
-import { sampleRecentItem } from './sampleWorkspace'
+import { isSampleWorkspace, sampleRecentItem } from './sampleWorkspace'
 
 /** Workspace list, switching and removal used by the general settings tab. */
 export function usePreferencesWorkspace() {
@@ -20,7 +20,7 @@ export function usePreferencesWorkspace() {
 
   const refreshRecent = () => {
     void listRecentWorkspaces()
-      .then((items) => setRecent([sampleRecentItem(), ...items]))
+      .then((items) => setRecent([...items, sampleRecentItem()]))
       .catch(() => setRecent([sampleRecentItem()]))
   }
 
@@ -39,7 +39,9 @@ export function usePreferencesWorkspace() {
     }
   }, [])
 
-  const currentWorkspace = workspacePath || workspaceName()
+  const currentWorkspace = isSampleWorkspace()
+    ? 'sample'
+    : workspacePath || workspaceName()
 
   function isCurrentWorkspace(item: WorkspaceRecentItem) {
     return item.path
@@ -47,10 +49,21 @@ export function usePreferencesWorkspace() {
       : item.name === currentWorkspace
   }
 
+  /** A clean reload must drop sample mode, otherwise the old URL wins. */
+  function reloadWithoutSample() {
+    const params = new URLSearchParams(window.location.search)
+    params.delete('sample')
+    params.delete('start')
+    params.delete('board')
+    params.delete('scope')
+    const query = params.toString()
+    window.location.href = `${window.location.pathname}${query ? `?${query}` : ''}`
+  }
+
   function openFolder() {
     setSwitching(true)
     void openWorkspace()
-      .then(() => window.location.reload())
+      .then(() => reloadWithoutSample())
       .catch(() => setSwitching(false))
   }
 
@@ -62,7 +75,7 @@ export function usePreferencesWorkspace() {
     }
     setSwitching(true)
     void openRecentWorkspace(item)
-      .then(() => window.location.reload())
+      .then(() => reloadWithoutSample())
       .catch(() => setSwitching(false))
   }
 
